@@ -76,14 +76,7 @@ return new class extends Migration
             "is_admin" => true
         ]);
 
-        User::create([
-            "name" => "kinkeu demessong frank",
-            "password" => Hash::make("kinkeu"),
-            "phone_number" => "+237697555511",
-            "phone_verified" => true,
-            "email" => "kinkeufrank@gmail.com",
-            "is_admin" => true
-        ]);
+
     }
 
     /**
