@@ -927,6 +927,12 @@ export default function Ad(): React.ReactElement {
       <ShareModal
         isOpen={showShareModal}
         onClose={() => setShowShareModal(false)}
+        url={window.location.href}
+        title={`${adInfo?.category?.name || 'Annonce'} • ${adInfo?.city || 'Localisation'}`}
+        price={`${adInfo?.price?.toLocaleString()} ${adInfo?.devise || 'FCFA'}`}
+        location={adInfo?.city || adInfo?.address}
+        image={adInfo?.medias?.[0]?.file ? `http://localhost:8000${adInfo.medias[0].file}` : undefined}
+        type={adInfo?.ad_type === 'location' ? 'Location' : 'Vente'}
       />
 
       <UnlockDialog

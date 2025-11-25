@@ -234,7 +234,11 @@ export default function ProductCard(props: Ad): React.ReactElement {
         isOpen={showShareModal}
         onClose={() => setShowShareModal(false)}
         url={`${window.location.origin}/houses/${id}`}
-        title={`Découvrez cette annonce sur Domilix`}
+        title={category?.name || 'Annonce'}
+        price={`${price?.toLocaleString()} ${devise || 'FCFA'}`}
+        location={props.city || props.address}
+        image={medias?.[0]?.file ? `http://localhost:8000${medias[0].file}` : undefined}
+        type={ad_type === 'location' ? 'Location' : 'Vente'}
       />
     </>
   );
