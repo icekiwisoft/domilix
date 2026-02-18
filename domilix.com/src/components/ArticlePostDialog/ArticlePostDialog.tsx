@@ -1139,13 +1139,13 @@ export default function ArticlePostDialog({
 
   return (
     <div className='fixed z-50 inset-0 overflow-y-auto'>
-      <div className='flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0'>
+      <div className='flex items-center justify-center min-h-screen p-4 text-center'>
         <div className='fixed inset-0 transition-opacity' aria-hidden='true'>
           <div className='absolute inset-0 bg-gray-500 opacity-75'></div>
         </div>
 
-        <div className='inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-5xl sm:w-full'>
-          <div className='bg-white px-8 pt-6 pb-8'>
+        <div className='relative w-full max-w-4xl h-[80vh] bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all'>
+          <div className='bg-white h-full px-8 pt-6 pb-8 flex flex-col'>
             <div className='flex justify-between items-center mb-2'>
               <div>
                 <h3 className='text-2xl font-semibold text-gray-900'>
@@ -1175,14 +1175,17 @@ export default function ArticlePostDialog({
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className='mt-4'>
-              <div className='flex gap-8'>
+            <form
+              onSubmit={handleSubmit}
+              className='mt-4 flex flex-1 flex-col min-h-0'
+            >
+              <div className='flex flex-1 min-h-0 gap-8'>
                 {/* Stepper vertical à gauche */}
                 <div className='w-64 flex-shrink-0'>{renderSteppers()}</div>
 
                 {/* Contenu principal à droite */}
                 <div className='flex-1'>
-                  <div className='max-h-[65vh] overflow-y-auto px-1'>
+                  <div className='h-full overflow-y-auto px-1'>
                     <div className='space-y-6'>{renderStepContent()}</div>
                   </div>
                 </div>

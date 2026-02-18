@@ -1,8 +1,11 @@
 import BlockInputs from '@components/OTP/BlockInputs';
 import { signinDialogActions } from '@stores/defineStore';
 import { useAuth } from '../../hooks/useAuth';
+import { RegisterData } from '../../services/authApi';
 import { useState } from 'react';
 import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
+
+type RegistrationType = 'email' | 'phone';
 
 export default function SigninDialog() {
   const {
@@ -16,12 +19,12 @@ export default function SigninDialog() {
 
   const [isRegistering, setIsRegistering] = useState(false);
   const [isVerifyingPhone, setIsVerifyingPhone] = useState(false);
-  const [email, setEmail] = useState('');
+  const [registrationType, setRegistrationType] =
+    useState<RegistrationType>('phone');
+  const [identifier, setIdentifier] = useState(''); // Email ou téléphone
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-
-  const [phone_number, setPhone] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
@@ -60,27 +63,43 @@ export default function SigninDialog() {
     }
   };
 
+  // Déterminer si l'identifiant est un email ou un téléphone
+  const isEmail = (value: string) => {
+    return value.includes('@');
+  };
+
   // Gérer l'inscription
   const handleRegister = async (event: React.FormEvent) => {
     event.preventDefault();
     setError('');
     setSuccess('');
 
+    if (!identifier) {
+      setError(
+        registrationType === 'email'
+          ? 'Veuillez saisir un email'
+          : 'Veuillez saisir un numéro de téléphone'
+      );
+      return;
+    }
+
     if (!passwordsMatch) {
       setError('Les mots de passe ne correspondent pas');
       return;
     }
 
-    const result = await register({
+    const registerData: RegisterData = {
       name: username,
-      email: email || undefined,
-      phone_number,
       password,
-    });
+      phone_number: registrationType === 'phone' ? identifier : '',
+      ...(registrationType === 'email' && { email: identifier }),
+    };
+
+    const result = await register(registerData);
 
     if (result.success) {
       setSuccess('Inscription réussie !');
-      // Check if phone verification is needed
+      // Check if verification is needed
       if (user && !user.phone_verified) {
         setIsVerifyingPhone(true);
       } else {
@@ -97,14 +116,17 @@ export default function SigninDialog() {
     setError('');
     setSuccess('');
 
-    if (!email && !phone_number) {
+    if (!identifier) {
       setError('Veuillez saisir un email ou un numéro de téléphone');
       return;
     }
 
-    const credentials = email
-      ? { email, password }
-      : { phone_number, password };
+    const credentials = {
+      password,
+      ...(isEmail(identifier)
+        ? { email: identifier }
+        : { phone_number: identifier }),
+    };
 
     const result = await login(credentials);
 
@@ -136,6 +158,11 @@ export default function SigninDialog() {
   const EncodedPhone: React.FC<{ phone: string }> = ({ phone }) => (
     <span className='font-semibold text-orange-500'>{encodePhone(phone)}</span>
   );
+
+  // Obtenir le numéro de téléphone pour la vérification
+  const getPhoneForVerification = () => {
+    return user?.phone_number || (!isEmail(identifier) ? identifier : '');
+  };
 
   return (
     <div
@@ -173,7 +200,7 @@ export default function SigninDialog() {
               </h2>
               <p className='text-sm text-gray-600'>
                 Un code de vérification a été envoyé au{' '}
-                <EncodedPhone phone={user?.phone_number || phone_number} />
+                <EncodedPhone phone={getPhoneForVerification()} />
               </p>
             </div>
             <form onSubmit={handleVerifyCode} className='space-y-6'>
@@ -236,44 +263,80 @@ export default function SigninDialog() {
               className='space-y-4'
             >
               {isRegistering && (
-                <div className='relative'>
-                  <label className='text-sm font-medium text-gray-700 mb-1 block'>
-                    Nom d'utilisateur
-                  </label>
-                  <input
-                    type='text'
-                    value={username}
-                    onChange={e => setUsername(e.target.value)}
-                    className='w-full p-2.5 rounded-lg bg-white/50 border border-gray-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-200 transition-all duration-200 outline-none text-gray-700 text-sm'
-                    placeholder="Nom d'utilisateur"
-                  />
-                </div>
+                <>
+                  <div className='relative'>
+                    <label className='text-sm font-medium text-gray-700 mb-1 block'>
+                      Nom d'utilisateur
+                    </label>
+                    <input
+                      type='text'
+                      value={username}
+                      onChange={e => setUsername(e.target.value)}
+                      required
+                      className='w-full p-2.5 rounded-lg bg-white/50 border border-gray-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-200 transition-all duration-200 outline-none text-gray-700 text-sm'
+                      placeholder="Nom d'utilisateur"
+                    />
+                  </div>
+
+                  {/* Onglets pour choisir le type d'inscription */}
+                  <div className='flex gap-2 p-1 bg-gray-100 rounded-lg'>
+                    <button
+                      type='button'
+                      onClick={() => {
+                        setRegistrationType('phone');
+                        setIdentifier('');
+                      }}
+                      className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
+                        registrationType === 'phone'
+                          ? 'bg-white text-orange-600 shadow-sm'
+                          : 'text-gray-600 hover:text-gray-900'
+                      }`}
+                    >
+                      Téléphone
+                    </button>
+                    <button
+                      type='button'
+                      onClick={() => {
+                        setRegistrationType('email');
+                        setIdentifier('');
+                      }}
+                      className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
+                        registrationType === 'email'
+                          ? 'bg-white text-orange-600 shadow-sm'
+                          : 'text-gray-600 hover:text-gray-900'
+                      }`}
+                    >
+                      Email
+                    </button>
+                  </div>
+                </>
               )}
 
               <div className='relative'>
                 <label className='text-sm font-medium text-gray-700 mb-1 block'>
-                  Email {!isRegistering && '(optionnel)'}
+                  {isRegistering
+                    ? registrationType === 'email'
+                      ? 'Email'
+                      : 'Numéro de téléphone'
+                    : 'Email ou numéro de téléphone'}
                 </label>
                 <input
-                  type='email'
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
+                  type={
+                    isRegistering && registrationType === 'email'
+                      ? 'email'
+                      : 'text'
+                  }
+                  value={identifier}
+                  onChange={e => setIdentifier(e.target.value)}
+                  required
                   className='w-full p-2.5 rounded-lg bg-white/50 border border-gray-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-200 transition-all duration-200 outline-none text-gray-700 text-sm'
-                  placeholder='john.doe@example.com'
-                />
-              </div>
-
-              <div className='relative'>
-                <label className='text-sm font-medium text-gray-700 mb-1 block'>
-                  Téléphone {isRegistering ? '*' : "(si pas d'email)"}
-                </label>
-                <input
-                  type='tel'
-                  value={phone_number}
-                  onChange={e => setPhone(e.target.value)}
-                  required={isRegistering || !email}
-                  className='w-full p-2.5 rounded-lg bg-white/50 border border-gray-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-200 transition-all duration-200 outline-none text-gray-700 text-sm'
-                  placeholder='+33 6 12 34 56 78'
+                  placeholder={
+                    isRegistering
+                      ? registrationType === 'email'
+                        ? 'john@example.com'
+                        : '0612345678'
+                      : 'john@example.com ou 0612345678'
+                  }
                 />
               </div>
 

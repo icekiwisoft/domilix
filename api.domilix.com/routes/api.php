@@ -17,6 +17,7 @@ use App\Http\Controllers\passwordResetRequestController;
 use App\Http\Controllers\StatController;
 use App\Http\Controllers\SubscriptionsController;
 use App\Http\Controllers\WebhooksController;
+use App\Http\Controllers\NotificationController;
 
 // Define API resource routes
 Route::apiResources([
@@ -70,6 +71,7 @@ Route::prefix('auth')->group(function () {
         Route::get('me', [AuthController::class, 'profile']);
         Route::put('me', [AuthController::class, 'updateProfile']);
         Route::put('announcer-profile', [AuthController::class, 'updateAnnouncerProfile']);
+        Route::post('announcer-profile', [AuthController::class, 'updateAnnouncerProfile']); // Support POST avec _method=PUT
     });
 
     Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
@@ -81,4 +83,14 @@ Route::prefix('auth')->group(function () {
     Route::post('resetPassword/', [passwordResetRequestController::class, 'resetPassword']);
 
     Route::post('changePassword/', [passwordResetRequestController::class, 'changePassword']);
+});
+
+// Notifications routes
+Route::middleware('auth:api')->prefix('notifications')->group(function () {
+    Route::get('/', [NotificationController::class, 'index']);
+    Route::get('/unread-count', [NotificationController::class, 'unreadCount']);
+    Route::post('/{id}/read', [NotificationController::class, 'markAsRead']);
+    Route::post('/mark-all-read', [NotificationController::class, 'markAllAsRead']);
+    Route::delete('/{id}', [NotificationController::class, 'destroy']);
+    Route::delete('/read/all', [NotificationController::class, 'deleteAllRead']);
 });

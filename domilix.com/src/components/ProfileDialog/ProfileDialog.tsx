@@ -1,5 +1,10 @@
 import { useState, useEffect } from 'react';
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import {
+  XMarkIcon,
+  BuildingOfficeIcon,
+  DocumentTextIcon,
+} from '@heroicons/react/24/outline';
+import { HiCamera } from 'react-icons/hi2';
 import { useAuth } from '../../hooks/useAuth';
 import { profileApi } from '../../services/profileApi';
 import {
@@ -36,23 +41,18 @@ export default function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
     company_name: '',
     bio: '',
     professional_phone: '',
+    avatar: null as File | null,
   });
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
   // Subscriptions state
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [subscriptionsLoading, setSubscriptionsLoading] = useState(false);
-  const [usageStats, setUsageStats] = useState({
-    total_credits: 0,
-    used_credits: 0,
-    remaining_credits: 0,
-    active_subscriptions: 0,
-  });
 
   // Load subscriptions when tab is active
   useEffect(() => {
     if (activeTab === 'subscriptions' && isOpen) {
       loadSubscriptions();
-      loadUsageStats();
     }
   }, [activeTab, isOpen]);
 
@@ -69,12 +69,15 @@ export default function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
     }
   };
 
-  const loadUsageStats = async () => {
-    try {
-      const stats = await subscriptionApi.getUsageStats();
-      setUsageStats(stats);
-    } catch (error) {
-      console.error('Erreur lors du chargement des statistiques:', error);
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setAnnouncerForm({ ...announcerForm, avatar: file });
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatarPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -153,10 +156,24 @@ export default function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
   const handleUpdateAnnouncerProfile = async () => {
     setLoading(true);
     try {
-      await profileApi.updateAnnouncerProfile(announcerForm);
+      const formData = new FormData();
+      
+      // Ajouter _method pour Laravel
+      formData.append('_method', 'PUT');
+      
+      if (announcerForm.company_name)
+        formData.append('company_name', announcerForm.company_name);
+      if (announcerForm.bio) formData.append('bio', announcerForm.bio);
+      if (announcerForm.professional_phone)
+        formData.append('professional_phone', announcerForm.professional_phone);
+      if (announcerForm.avatar) formData.append('avatar', announcerForm.avatar);
+
+      await profileApi.updateAnnouncerProfile(formData);
       await refreshProfile();
       alert('Profil annonceur mis à jour avec succès');
+      setAvatarPreview(null);
     } catch (error) {
+      console.error('Erreur mise à jour profil annonceur:', error);
       alert('Erreur lors de la mise à jour');
     } finally {
       setLoading(false);
@@ -186,7 +203,7 @@ export default function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
                   onChange={e =>
                     setProfileForm({ ...profileForm, name: e.target.value })
                   }
-                  className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                  className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500'
                 />
               </div>
 
@@ -200,7 +217,7 @@ export default function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
                   onChange={e =>
                     setProfileForm({ ...profileForm, email: e.target.value })
                   }
-                  className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                  className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500'
                 />
               </div>
 
@@ -217,7 +234,7 @@ export default function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
                       phone_number: e.target.value,
                     })
                   }
-                  className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                  className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500'
                 />
               </div>
             </div>
@@ -225,7 +242,7 @@ export default function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
             <button
               onClick={handleUpdateProfile}
               disabled={loading}
-              className='w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-medium py-2 px-4 rounded-lg transition-colors'
+              className='w-full bg-orange-600 hover:bg-orange-700 disabled:bg-orange-300 text-white font-medium py-2 px-4 rounded-lg transition-colors'
             >
               {loading ? 'Mise à jour...' : 'Mettre à jour le profil'}
             </button>
@@ -271,7 +288,7 @@ export default function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
                       current_password: e.target.value,
                     })
                   }
-                  className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                  className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500'
                 />
               </div>
 
@@ -288,7 +305,7 @@ export default function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
                       new_password: e.target.value,
                     })
                   }
-                  className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                  className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500'
                 />
               </div>
 
@@ -305,14 +322,14 @@ export default function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
                       new_password_confirmation: e.target.value,
                     })
                   }
-                  className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                  className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500'
                 />
               </div>
 
               <button
                 onClick={handleChangePassword}
                 disabled={loading}
-                className='w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-medium py-2 px-4 rounded-lg transition-colors'
+                className='w-full bg-orange-600 hover:bg-orange-700 disabled:bg-orange-300 text-white font-medium py-2 px-4 rounded-lg transition-colors'
               >
                 {loading ? 'Changement...' : 'Changer le mot de passe'}
               </button>
@@ -325,8 +342,8 @@ export default function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
           <div className='space-y-6'>
             {!user?.announcer ? (
               <div className='text-center py-8'>
-                <div className='w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4'>
-                  <span className='text-2xl'>🏢</span>
+                <div className='w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4'>
+                  <BuildingOfficeIcon className='w-8 h-8 text-orange-600' />
                 </div>
                 <h4 className='text-lg font-medium text-gray-900 mb-2'>
                   Devenir Annonceur
@@ -338,7 +355,7 @@ export default function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
                 <button
                   onClick={handleBecomeAnnouncer}
                   disabled={loading}
-                  className='bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-medium py-3 px-6 rounded-lg transition-colors'
+                  className='bg-orange-600 hover:bg-orange-700 disabled:bg-orange-300 text-white font-medium py-3 px-6 rounded-lg transition-colors'
                 >
                   {loading
                     ? 'Demande en cours...'
@@ -360,6 +377,41 @@ export default function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
                   </p>
                 </div>
 
+                {/* Avatar Upload */}
+                <div className='flex flex-col items-center gap-4 p-4 bg-gray-50 rounded-lg'>
+                  <div className='relative'>
+                    <div className='w-24 h-24 rounded-full bg-gray-200 overflow-hidden'>
+                      {avatarPreview ? (
+                        <img
+                          src={avatarPreview}
+                          alt='Avatar'
+                          className='w-full h-full object-cover'
+                        />
+                      ) : (
+                        <div className='w-full h-full flex items-center justify-center'>
+                          <BuildingOfficeIcon className='w-12 h-12 text-gray-400' />
+                        </div>
+                      )}
+                    </div>
+                    <label
+                      htmlFor='avatar-upload'
+                      className='absolute bottom-0 right-0 bg-orange-600 hover:bg-orange-700 text-white p-2 rounded-full cursor-pointer shadow-lg transition-colors'
+                    >
+                      <HiCamera className='w-4 h-4' />
+                      <input
+                        id='avatar-upload'
+                        type='file'
+                        accept='image/*'
+                        onChange={handleAvatarChange}
+                        className='hidden'
+                      />
+                    </label>
+                  </div>
+                  <p className='text-xs text-gray-500 text-center'>
+                    Cliquez sur l'icône pour changer votre avatar
+                  </p>
+                </div>
+
                 <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                   <div className='md:col-span-2'>
                     <label className='block text-sm font-medium text-gray-700 mb-2'>
@@ -375,7 +427,7 @@ export default function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
                         })
                       }
                       placeholder='Nom de votre entreprise'
-                      className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                      className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500'
                     />
                   </div>
 
@@ -384,7 +436,7 @@ export default function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
                       Biographie
                     </label>
                     <textarea
-                      rows={4}
+                      rows={3}
                       value={announcerForm.bio}
                       onChange={e =>
                         setAnnouncerForm({
@@ -393,7 +445,7 @@ export default function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
                         })
                       }
                       placeholder='Décrivez votre activité...'
-                      className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                      className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500'
                     />
                   </div>
 
@@ -411,7 +463,7 @@ export default function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
                         })
                       }
                       placeholder='Numéro de téléphone professionnel'
-                      className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                      className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500'
                     />
                   </div>
                 </div>
@@ -419,7 +471,7 @@ export default function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
                 <button
                   onClick={handleUpdateAnnouncerProfile}
                   disabled={loading}
-                  className='w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-medium py-2 px-4 rounded-lg transition-colors'
+                  className='w-full bg-orange-600 hover:bg-orange-700 disabled:bg-orange-300 text-white font-medium py-2 px-4 rounded-lg transition-colors'
                 >
                   {loading
                     ? 'Mise à jour...'
@@ -433,36 +485,6 @@ export default function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
       case 'subscriptions':
         return (
           <div className='space-y-6'>
-            {/* Usage Stats */}
-            <div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
-              <div className='bg-blue-50 p-4 rounded-lg'>
-                <div className='text-2xl font-bold text-blue-600'>
-                  {usageStats.total_credits}
-                </div>
-                <div className='text-sm text-blue-700'>Crédits totaux</div>
-              </div>
-              <div className='bg-green-50 p-4 rounded-lg'>
-                <div className='text-2xl font-bold text-green-600'>
-                  {usageStats.remaining_credits}
-                </div>
-                <div className='text-sm text-green-700'>Crédits restants</div>
-              </div>
-              <div className='bg-orange-50 p-4 rounded-lg'>
-                <div className='text-2xl font-bold text-orange-600'>
-                  {usageStats.used_credits}
-                </div>
-                <div className='text-sm text-orange-700'>Crédits utilisés</div>
-              </div>
-              <div className='bg-purple-50 p-4 rounded-lg'>
-                <div className='text-2xl font-bold text-purple-600'>
-                  {usageStats.active_subscriptions}
-                </div>
-                <div className='text-sm text-purple-700'>
-                  Abonnements actifs
-                </div>
-              </div>
-            </div>
-
             {/* Subscriptions List */}
             <div>
               <div className='flex items-center justify-between mb-4'>
@@ -472,7 +494,7 @@ export default function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
                 <button
                   onClick={loadSubscriptions}
                   disabled={subscriptionsLoading}
-                  className='text-sm text-blue-600 hover:text-blue-700 disabled:text-gray-400'
+                  className='text-sm text-orange-600 hover:text-orange-700 disabled:text-gray-400'
                 >
                   {subscriptionsLoading ? 'Chargement...' : 'Actualiser'}
                 </button>
@@ -480,7 +502,7 @@ export default function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
 
               {subscriptionsLoading ? (
                 <div className='text-center py-8'>
-                  <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto'></div>
+                  <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600 mx-auto'></div>
                   <p className='text-gray-600 mt-2'>
                     Chargement des abonnements...
                   </p>
@@ -488,7 +510,7 @@ export default function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
               ) : subscriptions.length === 0 ? (
                 <div className='text-center py-8'>
                   <div className='w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4'>
-                    <span className='text-2xl'>📋</span>
+                    <DocumentTextIcon className='w-8 h-8 text-gray-400' />
                   </div>
                   <h4 className='text-lg font-medium text-gray-900 mb-2'>
                     Aucun abonnement
@@ -498,7 +520,7 @@ export default function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
                   </p>
                   <button
                     onClick={onClose}
-                    className='bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors'
+                    className='bg-orange-600 hover:bg-orange-700 text-white font-medium py-2 px-4 rounded-lg transition-colors'
                   >
                     Voir les offres
                   </button>
@@ -591,7 +613,7 @@ export default function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
                               onClick={() =>
                                 handleRenewSubscription(subscription.id)
                               }
-                              className='text-sm text-blue-600 hover:text-blue-700 px-3 py-1 border border-blue-200 rounded hover:bg-blue-50 transition-colors'
+                              className='text-sm text-orange-600 hover:text-orange-700 px-3 py-1 border border-orange-200 rounded hover:bg-orange-50 transition-colors'
                             >
                               Renouveler
                             </button>
@@ -619,11 +641,11 @@ export default function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
           onClick={onClose}
         ></div>
 
-        <div className='relative bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden'>
+        <div className='relative bg-white rounded-xl shadow-xl w-full max-w-xl h-[600px] flex flex-col overflow-hidden'>
           {/* Header */}
-          <div className='flex items-center justify-between p-6 border-b border-gray-200'>
+          <div className='flex items-center justify-between p-6 border-b border-gray-200 flex-shrink-0'>
             <div className='flex items-center gap-3'>
-              <div className='w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-semibold'>
+              <div className='w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white font-semibold'>
                 {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
               </div>
               <div>
@@ -642,7 +664,7 @@ export default function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
           </div>
 
           {/* Horizontal Tabs */}
-          <div className='border-b border-gray-200'>
+          <div className='border-b border-gray-200 flex-shrink-0'>
             <nav className='flex space-x-8 px-6'>
               {tabs.map(tab => (
                 <button
@@ -650,7 +672,7 @@ export default function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
                   onClick={() => setActiveTab(tab.id)}
                   className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                     activeTab === tab.id
-                      ? 'border-blue-500 text-blue-600'
+                      ? 'border-orange-500 text-orange-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
                 >
@@ -661,7 +683,7 @@ export default function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
           </div>
 
           {/* Content */}
-          <div className='p-6 overflow-y-auto max-h-[calc(90vh-140px)]'>
+          <div className='p-6 overflow-y-auto flex-1'>
             {renderTabContent()}
           </div>
         </div>

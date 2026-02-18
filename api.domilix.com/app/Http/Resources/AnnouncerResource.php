@@ -19,12 +19,14 @@ class AnnouncerResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'user' => new UserResource($this->user),
-            'avatar' => $this->avatar ?   Storage::url($this->avatar) : null,
+            'avatar' => $this->avatar, // L'URL est déjà complète depuis le contrôleur
+            'contact' => $this->contact,
+            'email' => $this->user->email ?? null,
             'creation_date' => $this->created_at,
             'bio' => $this->bio,
             'verified' => (bool) $this->verified,
-            'realestates' => $this->ads()->where('item_type', 'App\Models\RealEstate')->count(),
+            'houses' => $this->ads()->where('item_type', 'App\Models\RealEstate')->count(),
             'furnitures' => $this->ads()->where('item_type', 'App\Models\Furniture')->count(),
-                ];
+        ];
     }
 }

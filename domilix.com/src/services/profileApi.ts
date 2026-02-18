@@ -38,8 +38,14 @@ export const profileApi = {
   },
 
   // Update announcer profile
-  updateAnnouncerProfile: async (data: BecomeAnnouncerData) => {
-    const response = await api.put('/auth/announcer-profile', data);
+  updateAnnouncerProfile: async (data: BecomeAnnouncerData | FormData) => {
+    // Utiliser POST avec _method=PUT pour FormData (Laravel ne parse pas PUT multipart/form-data)
+    const response = await api.post('/auth/announcer-profile', data, {
+      headers:
+        data instanceof FormData
+          ? { 'Content-Type': 'multipart/form-data' }
+          : undefined,
+    });
     return response.data;
   },
 };

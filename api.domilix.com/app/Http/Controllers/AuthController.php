@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use App\Services\TwilioService;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\UserDetailedResource;
@@ -28,7 +29,7 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'nullable|email|unique:users',
-            'phone_number' => 'required|numeric|unique:users',
+            'phone_number' => 'nullable|numeric|unique:users',
             'password' => 'required|string|min:8',
         ]);
 
@@ -38,6 +39,14 @@ class AuthController extends Controller
                 'status' => 'error',
                 'message' => 'Validation failed',
                 'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // Vérifier qu'au moins un identifiant (email ou téléphone) est fourni
+        if (!$request->email && !$request->phone_number) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Email ou numéro de téléphone requis.'
             ], 422);
         }
 
@@ -51,13 +60,22 @@ class AuthController extends Controller
             'phone_number' => $request->phone_number,
             'password' => Hash::make($request->password),
             'phone_verified' => false,
+            'email_verified' => false,
         ]);
 
         // Stocker le code de vérification dans le cache avec une expiration de 10 minutes
         Cache::put('verification_code_' . $user->id, $verificationCode, now()->addMinutes(10));
 
-        // Envoyer le SMS de vérification
-        $this->twilioService->sendSms($request->phone_number, "Votre code de vérification est {$verificationCode}");
+        // Envoyer le code de vérification selon le type d'inscription
+        if ($request->phone_number) {
+            // Envoyer le SMS de vérification
+            $this->twilioService->sendSms($request->phone_number, "Votre code de vérification Domilix est {$verificationCode}");
+            $message = 'Un SMS de vérification a été envoyé.';
+        } else {
+            // TODO: Envoyer l'email de vérification
+            // Pour l'instant, on retourne juste le code (à supprimer en production)
+            $message = 'Un email de vérification a été envoyé.';
+        }
 
         // Générer un token d'authentification
         $token = Auth::guard('api')->login($user);
@@ -65,7 +83,7 @@ class AuthController extends Controller
         // Réponse JSON
         return response()->json([
             'status' => 'success',
-            'message' => 'Un SMS de vérification a été envoyé.',
+            'message' => $message,
             'user' => new UserDetailedResource($user),
             'authorisation' => [
                 'token' => $token,
@@ -160,9 +178,13 @@ class AuthController extends Controller
             return response()->json(['message' => 'Les informations de connexion sont incorrectes.'], 401);
         }
 
-        // Vérification du numéro de téléphone
-        if (!$user->phone_verified) {
+        // Vérification selon le type de connexion
+        if ($request->has('phone_number') && !$user->phone_verified) {
             return response()->json(['message' => 'Le numéro de téléphone n\'est pas vérifié.'], 403);
+        }
+        
+        if ($request->has('email') && !$user->email_verified && !$user->phone_verified) {
+            return response()->json(['message' => 'Votre compte n\'est pas vérifié.'], 403);
         }
 
         // Tentative de connexion
@@ -275,6 +297,13 @@ class AuthController extends Controller
         }
 
         $user = Auth::guard('api')->user();
+        
+        // Log pour debug
+        \Log::info('Update Announcer Profile Request', [
+            'all_data' => $request->all(),
+            'has_file' => $request->hasFile('avatar'),
+            'content_type' => $request->header('Content-Type')
+        ]);
 
         // Vérifier si l'utilisateur est un annonceur
         if (!$user->announcer) {
@@ -289,6 +318,7 @@ class AuthController extends Controller
             'company_name' => 'sometimes|nullable|string|max:255',
             'bio' => 'sometimes|nullable|string|max:1000',
             'professional_phone' => 'sometimes|nullable|string|max:20',
+            'avatar' => 'sometimes|nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
         if ($validator->fails()) {
@@ -301,11 +331,38 @@ class AuthController extends Controller
 
         // Mise à jour du profil annonceur
         $announcer = $user->announcer;
-        $announcer->update([
-            'name' => $request->company_name ?? $announcer->name,
-            'bio' => $request->bio ?? $announcer->bio,
-            'contact' => $request->professional_phone ?? $announcer->contact,
-        ]);
+        
+        $updateData = [];
+        
+        if ($request->has('company_name')) {
+            $updateData['name'] = $request->company_name;
+        }
+        
+        if ($request->has('bio')) {
+            $updateData['bio'] = $request->bio;
+        }
+        
+        if ($request->has('professional_phone')) {
+            $updateData['contact'] = $request->professional_phone;
+        }
+
+        // Gérer l'upload de l'avatar
+        if ($request->hasFile('avatar')) {
+            // Supprimer l'ancien avatar s'il existe
+            if ($announcer->avatar) {
+                \Storage::delete(str_replace('/storage/', 'public/', $announcer->avatar));
+            }
+
+            // Sauvegarder le nouvel avatar
+            $filename = $announcer->id . '_' . time() . '.' . $request->file('avatar')->guessExtension();
+            $savedFile = $request->file('avatar')->storeAs('public/announcers', $filename);
+            $updateData['avatar'] = \Storage::url($savedFile);
+        }
+
+        // Mettre à jour uniquement les champs fournis
+        if (!empty($updateData)) {
+            $announcer->update($updateData);
+        }
 
         return response()->json([
             'status' => 'success',

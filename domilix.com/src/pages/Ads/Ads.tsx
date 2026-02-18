@@ -1,21 +1,23 @@
 import Nav2 from '@components/Nav2/Nav2';
-import Footer2 from '@components/Footer2/Footer2';
+import FooterMinimal from '@components/FooterMinimal/FooterMinimal';
 import ProductCard from '@components/ProductCard/ProductCard';
 import AddressAutocomplete from '@components/AddressAutocomplete/AddressAutocomplete';
+import { Checkbox, RadioGroup } from '@headlessui/react';
 import { getAds, getCategories } from '@services/announceApi';
 import { Ad } from '@utils/types';
 import React, { useCallback, useEffect, useState } from 'react';
-import { HiAdjustmentsHorizontal } from 'react-icons/hi2';
 import { MdSearch } from 'react-icons/md';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 
 export default function Ads(): React.ReactElement {
   const [ads, setAds] = useState<Ad[]>([]);
   const [nextPage, setNextPage] = useState<string | null>('ads');
-  const [isFilterSidebarOpen, setIsFilterSidebarOpen] = useState(false); // State for filter sidebar
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [searchLocation, setSearchLocation] = useState('');
   const [categories, setCategories] = useState<any[]>([]);
+  const [openFilterPopup, setOpenFilterPopup] = useState<
+    null | 'budget' | 'type' | 'standing' | 'amenities'
+  >(null);
   const [filters, setFilters] = useState({
     budget_min: '',
     budget_max: '',
@@ -31,7 +33,7 @@ export default function Ads(): React.ReactElement {
 
   // Compter les filtres actifs
   const activeFiltersCount = Object.entries(filters).reduce(
-    (count, [key, value]) => {
+    (count, [, value]) => {
       if (Array.isArray(value)) {
         return count + value.length;
       }
@@ -40,8 +42,245 @@ export default function Ads(): React.ReactElement {
     0
   );
 
-  const handleFilterButtonClick = () => {
-    setIsFilterSidebarOpen(!isFilterSidebarOpen); // Toggle filter sidebar visibility
+  const budgetSummary =
+    filters.budget_min || filters.budget_max
+      ? `${filters.budget_min || '0'} - ${filters.budget_max || '...'} FCFA`
+      : 'Definir un budget';
+
+  const adTypeSummary =
+    filters.ad_type === 'location'
+      ? 'Location'
+      : filters.ad_type === 'sale'
+        ? 'Vente'
+        : 'Tous types';
+
+  const filterSummary =
+    filters.category_id.length > 0
+      ? `${filters.category_id.length} categorie${filters.category_id.length > 1 ? 's' : ''}`
+      : 'Aucune categorie';
+
+  const standingSummary =
+    filters.standing === 'standard'
+      ? 'Standard'
+      : filters.standing === 'confort'
+        ? 'Confort'
+        : filters.standing === 'haut_standing'
+          ? 'Haut Standing'
+          : 'Tous niveaux';
+
+  const amenitiesSummary =
+    filters.amenities.length > 0
+      ? `${filters.amenities.length} equipement${filters.amenities.length > 1 ? 's' : ''}`
+      : 'Aucun equipement';
+
+  const renderFilterPopupContent = (
+    popup: 'budget' | 'type' | 'standing' | 'amenities'
+  ) => {
+    return (
+      <>
+        {popup === 'budget' && (
+          <div className='space-y-3'>
+            <h3 className='text-sm font-semibold tracking-tight text-gray-900'>
+              Budget
+            </h3>
+            <p className='text-xs text-gray-500'>Definissez votre fourchette</p>
+            <div className='space-y-2'>
+              <input
+                type='number'
+                placeholder='Prix minimum'
+                value={filters.budget_min}
+                onChange={e => handleFilterChange('budget_min', e.target.value)}
+                className='h-10 w-full rounded-xl border border-gray-200 bg-gray-50 px-3 text-sm text-gray-900 outline-none placeholder:text-gray-400 transition-colors focus:border-orange-300 focus:bg-white focus:ring-2 focus:ring-orange-100'
+              />
+              <input
+                type='number'
+                placeholder='Prix maximum'
+                value={filters.budget_max}
+                onChange={e => handleFilterChange('budget_max', e.target.value)}
+                className='h-10 w-full rounded-xl border border-gray-200 bg-gray-50 px-3 text-sm text-gray-900 outline-none placeholder:text-gray-400 transition-colors focus:border-orange-300 focus:bg-white focus:ring-2 focus:ring-orange-100'
+              />
+            </div>
+          </div>
+        )}
+
+        {popup === 'type' && (
+          <div className='space-y-3'>
+            <h3 className='text-sm font-semibold tracking-tight text-gray-900'>
+              Type et categories
+            </h3>
+            <RadioGroup
+              value={filters.ad_type}
+              onChange={(value: string) => handleFilterChange('ad_type', value)}
+              className='space-y-2'
+            >
+              {[
+                { key: '', name: 'Tous' },
+                { key: 'location', name: 'Location' },
+                { key: 'sale', name: 'Vente' },
+              ].map(type => (
+                <RadioGroup.Option
+                  key={type.key}
+                  value={type.key}
+                  className='flex cursor-pointer items-center gap-2 rounded-md px-1 py-1'
+                >
+                  {({ checked }) => (
+                    <>
+                      <span
+                        className={`flex h-4 w-4 items-center justify-center rounded-full border ${
+                          checked ? 'border-orange-500' : 'border-gray-300'
+                        }`}
+                      >
+                        <span
+                          className={`h-2 w-2 rounded-full ${
+                            checked ? 'bg-orange-500' : 'bg-transparent'
+                          }`}
+                        />
+                      </span>
+                      <span className='text-sm text-gray-700'>{type.name}</span>
+                    </>
+                  )}
+                </RadioGroup.Option>
+              ))}
+            </RadioGroup>
+            <div className='max-h-40 space-y-2 overflow-y-auto rounded-xl border border-gray-100 bg-gray-50/70 p-2.5'>
+              {categories.map(category => (
+                <Checkbox
+                  key={category.id}
+                  checked={filters.category_id.includes(category.id)}
+                  onChange={(checked: boolean) =>
+                    handleCategoryChange(category.id, checked)
+                  }
+                  className='group flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-white'
+                >
+                  <span className='flex h-4 w-4 items-center justify-center rounded border border-gray-300 bg-white group-data-[checked]:border-orange-500'>
+                    <svg
+                      viewBox='0 0 16 16'
+                      fill='none'
+                      className='hidden h-3 w-3 text-orange-500 group-data-[checked]:block'
+                    >
+                      <path
+                        d='M3 8.5L6.2 11.2L13 4.5'
+                        stroke='currentColor'
+                        strokeWidth='2'
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                      />
+                    </svg>
+                  </span>
+                  <span className='text-sm text-gray-700'>{category.name}</span>
+                </Checkbox>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {popup === 'standing' && (
+          <div className='space-y-3'>
+            <h3 className='text-sm font-semibold tracking-tight text-gray-900'>
+              Standing
+            </h3>
+            <RadioGroup
+              value={filters.standing}
+              onChange={(value: string) =>
+                handleFilterChange('standing', value)
+              }
+              className='space-y-2'
+            >
+              {[
+                { key: '', name: 'Tous' },
+                { key: 'standard', name: 'Standard' },
+                { key: 'confort', name: 'Confort' },
+                { key: 'haut_standing', name: 'Haut Standing' },
+              ].map(standing => (
+                <RadioGroup.Option
+                  key={standing.key}
+                  value={standing.key}
+                  className='flex cursor-pointer items-center gap-2 rounded-md px-1 py-1'
+                >
+                  {({ checked }) => (
+                    <>
+                      <span
+                        className={`flex h-4 w-4 items-center justify-center rounded-full border ${
+                          checked ? 'border-orange-500' : 'border-gray-300'
+                        }`}
+                      >
+                        <span
+                          className={`h-2 w-2 rounded-full ${
+                            checked ? 'bg-orange-500' : 'bg-transparent'
+                          }`}
+                        />
+                      </span>
+                      <span className='text-sm text-gray-700'>
+                        {standing.name}
+                      </span>
+                    </>
+                  )}
+                </RadioGroup.Option>
+              ))}
+            </RadioGroup>
+          </div>
+        )}
+
+        {popup === 'amenities' && (
+          <div className='space-y-3'>
+            <h3 className='text-sm font-semibold tracking-tight text-gray-900'>
+              Equipements
+            </h3>
+            <div className='grid grid-cols-1 gap-2'>
+              {[
+                { key: 'gate', name: 'Portail' },
+                { key: 'pool', name: 'Piscine' },
+                { key: 'garage', name: 'Garage' },
+                { key: 'furnitured', name: 'Meuble' },
+              ].map(amenity => (
+                <Checkbox
+                  key={amenity.key}
+                  checked={filters.amenities.includes(amenity.key)}
+                  onChange={(checked: boolean) =>
+                    handleAmenityChange(amenity.key, checked)
+                  }
+                  className='group flex cursor-pointer items-center gap-2 rounded-md px-1 py-1'
+                >
+                  <span className='flex h-4 w-4 items-center justify-center rounded border border-gray-300 bg-white group-data-[checked]:border-orange-500'>
+                    <svg
+                      viewBox='0 0 16 16'
+                      fill='none'
+                      className='hidden h-3 w-3 text-orange-500 group-data-[checked]:block'
+                    >
+                      <path
+                        d='M3 8.5L6.2 11.2L13 4.5'
+                        stroke='currentColor'
+                        strokeWidth='2'
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                      />
+                    </svg>
+                  </span>
+                  <span className='text-sm text-gray-700'>{amenity.name}</span>
+                </Checkbox>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className='mt-4 flex items-center justify-end gap-2 border-t border-gray-100 pt-3'>
+          <button
+            type='button'
+            onClick={resetFilters}
+            className='rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors hover:border-gray-300 hover:text-gray-800'
+          >
+            Reinitialiser
+          </button>
+          <button
+            type='button'
+            onClick={applyFilters}
+            className='rounded-lg bg-gradient-to-r from-orange-500 to-amber-500 px-3 py-1.5 text-sm font-medium text-white shadow-sm transition-all hover:from-orange-600 hover:to-amber-600'
+          >
+            Appliquer
+          </button>
+        </div>
+      </>
+    );
   };
 
   // Charger les catégories
@@ -101,15 +340,6 @@ export default function Ads(): React.ReactElement {
     setSearchLocation(value);
   };
 
-  // Gérer la soumission de recherche (Enter ou clic)
-  const handleSearchSubmit = () => {
-    if (searchLocation.trim()) {
-      const newSearchParams = new URLSearchParams(UrlSearchParam);
-      newSearchParams.set('search', searchLocation.trim());
-      navigate(`?${newSearchParams.toString()}`, { replace: true });
-    }
-  };
-
   // Gérer les changements de filtres
   const handleFilterChange = (filterName: string, value: any) => {
     setFilters(prev => ({
@@ -142,6 +372,23 @@ export default function Ads(): React.ReactElement {
   const applyFilters = () => {
     const newSearchParams = new URLSearchParams(UrlSearchParam);
 
+    if (searchLocation.trim()) {
+      newSearchParams.set('search', searchLocation.trim());
+    } else {
+      newSearchParams.delete('search');
+    }
+
+    [
+      'budget_min',
+      'budget_max',
+      'standing',
+      'bedroom_min',
+      'bedroom_max',
+      'ad_type',
+      'category_id',
+      'amenities',
+    ].forEach(param => newSearchParams.delete(param));
+
     // Ajouter les filtres non vides aux paramètres URL
     Object.entries(filters).forEach(([key, value]) => {
       if (Array.isArray(value)) {
@@ -154,7 +401,7 @@ export default function Ads(): React.ReactElement {
     });
 
     navigate(`?${newSearchParams.toString()}`, { replace: true });
-    setIsFilterSidebarOpen(false);
+    setOpenFilterPopup(null);
   };
 
   // Réinitialiser les filtres
@@ -196,7 +443,7 @@ export default function Ads(): React.ReactElement {
     });
 
     getAds(params)
-      .then(response => {
+      .then((response: any) => {
         // Vérifier la structure de la réponse
         const responseData = Array.isArray(response)
           ? response
@@ -249,412 +496,198 @@ export default function Ads(): React.ReactElement {
   return (
     <>
       <Nav2 />
-      {isFilterSidebarOpen && (
-        <>
-          {/* Overlay for mobile */}
-          <div
-            className='fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden'
-            onClick={() => setIsFilterSidebarOpen(false)}
-          />
+      <div className='fixed top-16 z-20 w-screen border-b border-gray-200/70 bg-gradient-to-r from-white to-gray-300/90 px-4 py-3 backdrop-blur-sm sm:px-6 lg:px-8'>
+        <div className='mx-auto w-full max-w-6xl'>
+          <div className='relative'>
+            <div className='flex items-center rounded-full border border-gray-200 bg-white px-3 py-1 shadow-sm'>
+              <div className='flex h-[52px] min-w-0 flex-1 flex-col justify-center rounded-full bg-white px-7'>
+                <span className='block text-xs font-semibold text-gray-800'>
+                  Localisation
+                </span>
+                <AddressAutocomplete
+                  value={searchLocation}
+                  onChange={handleSearchChange}
+                  onLocationSelect={handleLocationSelect}
+                  placeholder='Rechercher une localisation'
+                  className='h-5 w-full border-0 bg-transparent p-0 text-sm leading-5 text-gray-600 outline-none placeholder:text-gray-400 focus:border-0 focus:ring-0'
+                />
+              </div>
 
-          {/* Filter Sidebar */}
-          <div className='fixed z-30 border-r border-r-gray-100 shadow-xl left-0 w-full sm:w-[340px] bg-gray-200 rounded-lg h-[calc(100%-180px)] top-44 text-sm overflow-y-auto transition-transform duration-300 ease-in-out'>
-            <div className='p-6'>
-              {/* Header */}
-              <div className='flex items-center justify-between mb-8'>
-                <h1 className='text-lg font-semibold text-gray-800'>Filtres</h1>
+              <div className='hidden h-10 w-px bg-gray-200 md:block' />
+
+              <div className='relative hidden min-w-0 flex-1 md:block'>
                 <button
-                  onClick={() => setIsFilterSidebarOpen(false)}
-                  className='p-2 hover:bg-gray-100 rounded-full transition-colors lg:hidden'
+                  type='button'
+                  onClick={() =>
+                    setOpenFilterPopup(current =>
+                      current === 'budget' ? null : 'budget'
+                    )
+                  }
+                  className='h-[52px] w-full rounded-full px-7 py-1.5 text-left transition-colors hover:bg-gray-50'
+                >
+                  <span className='block text-xs font-semibold text-gray-800'>
+                    Budget
+                  </span>
+                  <span className='block truncate text-sm text-gray-500'>
+                    {budgetSummary}
+                  </span>
+                </button>
+                {openFilterPopup === 'budget' && (
+                  <div className='absolute left-0 top-[calc(100%+8px)] z-40 w-72 max-w-[90vw] rounded-2xl border border-gray-200/80 bg-white p-3.5 shadow-[0_18px_45px_-24px_rgba(15,23,42,0.55)] ring-1 ring-black/5'>
+                    {renderFilterPopupContent('budget')}
+                  </div>
+                )}
+              </div>
+
+              <div className='hidden h-10 w-px bg-gray-200 md:block' />
+
+              <div className='relative hidden min-w-0 flex-1 md:block'>
+                <button
+                  type='button'
+                  onClick={() =>
+                    setOpenFilterPopup(current =>
+                      current === 'type' ? null : 'type'
+                    )
+                  }
+                  className='h-[52px] w-full rounded-full px-7 py-1.5 text-left transition-colors hover:bg-gray-50'
+                >
+                  <span className='block text-xs font-semibold text-gray-800'>
+                    Type et categories
+                  </span>
+                  <span className='block truncate text-sm text-gray-500'>
+                    {adTypeSummary} . {filterSummary}
+                  </span>
+                </button>
+                {openFilterPopup === 'type' && (
+                  <div className='absolute left-0 top-[calc(100%+8px)] z-40 w-80 max-w-[90vw] rounded-2xl border border-gray-200/80 bg-white p-3.5 shadow-[0_18px_45px_-24px_rgba(15,23,42,0.55)] ring-1 ring-black/5'>
+                    {renderFilterPopupContent('type')}
+                  </div>
+                )}
+              </div>
+
+              <div className='hidden h-10 w-px bg-gray-200 lg:block' />
+
+              <div className='relative hidden min-w-0 flex-1 lg:block'>
+                <button
+                  type='button'
+                  onClick={() =>
+                    setOpenFilterPopup(current =>
+                      current === 'standing' ? null : 'standing'
+                    )
+                  }
+                  className='h-[52px] w-full rounded-full px-7 py-1.5 text-left transition-colors hover:bg-gray-50'
+                >
+                  <span className='block text-xs font-semibold text-gray-800'>
+                    Standing
+                  </span>
+                  <span className='block truncate text-sm text-gray-500'>
+                    {standingSummary}
+                  </span>
+                </button>
+                {openFilterPopup === 'standing' && (
+                  <div className='absolute left-0 top-[calc(100%+8px)] z-40 w-72 max-w-[90vw] rounded-2xl border border-gray-200/80 bg-white p-3.5 shadow-[0_18px_45px_-24px_rgba(15,23,42,0.55)] ring-1 ring-black/5'>
+                    {renderFilterPopupContent('standing')}
+                  </div>
+                )}
+              </div>
+
+              <div className='hidden h-10 w-px bg-gray-200 lg:block' />
+
+              <div className='relative hidden min-w-0 flex-1 lg:block'>
+                <button
+                  type='button'
+                  onClick={() =>
+                    setOpenFilterPopup(current =>
+                      current === 'amenities' ? null : 'amenities'
+                    )
+                  }
+                  className='h-[52px] w-full rounded-full px-7 py-1.5 text-left transition-colors hover:bg-gray-50'
+                >
+                  <span className='block text-xs font-semibold text-gray-800'>
+                    Equipements
+                  </span>
+                  <span className='block truncate text-sm text-gray-500'>
+                    {amenitiesSummary}
+                  </span>
+                </button>
+                {openFilterPopup === 'amenities' && (
+                  <div className='absolute right-0 top-[calc(100%+8px)] z-40 w-72 max-w-[90vw] rounded-2xl border border-gray-200/80 bg-white p-3.5 shadow-[0_18px_45px_-24px_rgba(15,23,42,0.55)] ring-1 ring-black/5'>
+                    {renderFilterPopupContent('amenities')}
+                  </div>
+                )}
+              </div>
+
+              <div className='relative md:hidden'>
+                <button
+                  type='button'
+                  onClick={() =>
+                    setOpenFilterPopup(current =>
+                      current === 'budget' ? null : 'budget'
+                    )
+                  }
+                  className='mx-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 transition-colors hover:bg-gray-100'
+                  title='Ouvrir les filtres'
                 >
                   <svg
-                    className='w-5 h-5'
+                    className='h-5 w-5'
                     fill='none'
-                    stroke='currentColor'
                     viewBox='0 0 24 24'
+                    stroke='currentColor'
                   >
                     <path
                       strokeLinecap='round'
                       strokeLinejoin='round'
                       strokeWidth={2}
-                      d='M6 18L18 6M6 6l12 12'
+                      d='M4 6h16M7 12h10M10 18h4'
                     />
                   </svg>
                 </button>
-              </div>
-
-              {/* Budget Section */}
-              <div className='mb-8'>
-                <h2 className='font-medium text-gray-800 mb-4'>Budget</h2>
-                <div className='space-y-3'>
-                  <div className='relative'>
-                    <input
-                      type='number'
-                      placeholder='Prix minimum'
-                      value={filters.budget_min}
-                      onChange={e =>
-                        handleFilterChange('budget_min', e.target.value)
-                      }
-                      className='w-full pl-12 pr-16 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all duration-200'
-                    />
-                    <span className='absolute left-4 top-1/2 -translate-y-1/2 text-gray-400'>
-                      Min
-                    </span>
-                    <span className='absolute right-4 top-1/2 -translate-y-1/2 text-gray-400'>
-                      FCFA
-                    </span>
+                {openFilterPopup === 'budget' && (
+                  <div className='absolute right-0 top-[calc(100%+8px)] z-40 w-[86vw] max-w-xs rounded-2xl border border-gray-200/80 bg-white p-3.5 shadow-[0_18px_45px_-24px_rgba(15,23,42,0.55)] ring-1 ring-black/5'>
+                    {renderFilterPopupContent('budget')}
                   </div>
-                  <div className='relative'>
-                    <input
-                      type='number'
-                      placeholder='Prix maximum'
-                      value={filters.budget_max}
-                      onChange={e =>
-                        handleFilterChange('budget_max', e.target.value)
-                      }
-                      className='w-full pl-12 pr-16 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all duration-200'
-                    />
-                    <span className='absolute left-4 top-1/2 -translate-y-1/2 text-gray-400'>
-                      Max
-                    </span>
-                    <span className='absolute right-4 top-1/2 -translate-y-1/2 text-gray-400'>
-                      FCFA
-                    </span>
-                  </div>
-                </div>
+                )}
               </div>
 
-              {/* Categories Section */}
-              <div className='mb-8'>
-                <h2 className='font-medium text-gray-800 mb-4'>Catégories</h2>
-                <div className='grid grid-cols-1 sm:grid-cols-2 gap-2'>
-                  {categories.map(category => (
-                    <label
-                      key={category.id}
-                      className='relative flex items-center p-3 rounded-xl border border-gray-200 cursor-pointer hover:border-orange-200 hover:bg-orange-50 transition-all duration-200'
-                    >
-                      <input
-                        type='checkbox'
-                        className='peer hidden'
-                        checked={filters.category_id.includes(category.id)}
-                        onChange={e =>
-                          handleCategoryChange(category.id, e.target.checked)
-                        }
-                      />
-                      <div className='flex-shrink-0 w-5 h-5 border-2 border-gray-300 rounded-md flex items-center justify-center mr-3 peer-checked:bg-orange-500 peer-checked:border-orange-500 transition-colors duration-200'>
-                        <svg
-                          className='w-3 h-3 text-white hidden peer-checked:block'
-                          fill='currentColor'
-                          viewBox='0 0 20 20'
-                        >
-                          <path
-                            fillRule='evenodd'
-                            d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'
-                            clipRule='evenodd'
-                          />
-                        </svg>
-                      </div>
-                      <span className='text-gray-700 peer-checked:text-orange-500 truncate'>
-                        {category.name}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Standing Section */}
-              <div className='mb-8'>
-                <h2 className='font-medium text-gray-800 mb-4'>Standing</h2>
-                <div className='grid grid-cols-1 gap-2'>
-                  {[
-                    { key: 'standard', name: 'Standard' },
-                    { key: 'confort', name: 'Confort' },
-                    { key: 'haut_standing', name: 'Haut Standing' },
-                  ].map(standing => (
-                    <label
-                      key={standing.key}
-                      className='relative flex items-center p-3 rounded-xl border border-gray-200 cursor-pointer hover:border-orange-200 hover:bg-orange-50 transition-all duration-200'
-                    >
-                      <input
-                        type='radio'
-                        name='standing'
-                        value={standing.key}
-                        checked={filters.standing === standing.key}
-                        onChange={e =>
-                          handleFilterChange('standing', e.target.value)
-                        }
-                        className='peer hidden'
-                      />
-                      <div className='flex-shrink-0 w-5 h-5 border-2 border-gray-300 rounded-full flex items-center justify-center mr-3 peer-checked:border-orange-500'>
-                        <div className='w-2.5 h-2.5 rounded-full bg-orange-500 hidden peer-checked:block'></div>
-                      </div>
-                      <span className='text-gray-700 peer-checked:text-orange-500 truncate'>
-                        {standing.name}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Number of Rooms Section */}
-              <div className='mb-8'>
-                <h2 className='font-medium text-gray-800 mb-4'>
-                  Nombre de Chambres
-                </h2>
-                <div className='grid grid-cols-2 gap-3'>
-                  <div className='relative'>
-                    <input
-                      type='number'
-                      min='0'
-                      placeholder='Min'
-                      value={filters.bedroom_min}
-                      onChange={e =>
-                        handleFilterChange('bedroom_min', e.target.value)
-                      }
-                      className='w-full pl-12 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all duration-200'
-                    />
-                    <span className='absolute left-4 top-1/2 -translate-y-1/2 text-gray-400'>
-                      Min
-                    </span>
-                  </div>
-                  <div className='relative'>
-                    <input
-                      type='number'
-                      min='0'
-                      placeholder='Max'
-                      value={filters.bedroom_max}
-                      onChange={e =>
-                        handleFilterChange('bedroom_max', e.target.value)
-                      }
-                      className='w-full pl-12 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all duration-200'
-                    />
-                    <span className='absolute left-4 top-1/2 -translate-y-1/2 text-gray-400'>
-                      Max
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Type d'annonce Section */}
-              <div className='mb-8'>
-                <h2 className='font-medium text-gray-800 mb-4'>
-                  Type d'annonce
-                </h2>
-                <div className='grid grid-cols-1 gap-2'>
-                  {[
-                    { key: '', name: 'Tous' },
-                    { key: 'location', name: 'Location' },
-                    { key: 'sale', name: 'Vente' },
-                  ].map(type => (
-                    <label
-                      key={type.key}
-                      className='relative flex items-center p-3 rounded-xl border border-gray-200 cursor-pointer hover:border-orange-200 hover:bg-orange-50 transition-all duration-200'
-                    >
-                      <input
-                        type='radio'
-                        name='ad_type'
-                        value={type.key}
-                        checked={filters.ad_type === type.key}
-                        onChange={e =>
-                          handleFilterChange('ad_type', e.target.value)
-                        }
-                        className='peer hidden'
-                      />
-                      <div className='flex-shrink-0 w-5 h-5 border-2 border-gray-300 rounded-full flex items-center justify-center mr-3 peer-checked:border-orange-500'>
-                        <div className='w-2.5 h-2.5 rounded-full bg-orange-500 hidden peer-checked:block'></div>
-                      </div>
-                      <span className='text-gray-700 peer-checked:text-orange-500 truncate'>
-                        {type.name}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Équipements Section */}
-              <div className='mb-20'>
-                <h2 className='font-medium text-gray-800 mb-4'>Équipements</h2>
-                <div className='grid grid-cols-1 gap-2'>
-                  {[
-                    { key: 'gate', name: 'Portail' },
-                    { key: 'pool', name: 'Piscine' },
-                    { key: 'garage', name: 'Garage' },
-                    { key: 'furnitured', name: 'Meublé' },
-                  ].map(amenity => (
-                    <label
-                      key={amenity.key}
-                      className='relative flex items-center p-3 rounded-xl border border-gray-200 cursor-pointer hover:border-orange-200 hover:bg-orange-50 transition-all duration-200'
-                    >
-                      <input
-                        type='checkbox'
-                        className='peer hidden'
-                        checked={filters.amenities.includes(amenity.key)}
-                        onChange={e =>
-                          handleAmenityChange(amenity.key, e.target.checked)
-                        }
-                      />
-                      <div className='flex-shrink-0 w-5 h-5 border-2 border-gray-300 rounded-md flex items-center justify-center mr-3 peer-checked:bg-orange-500 peer-checked:border-orange-500 transition-colors duration-200'>
-                        <svg
-                          className='w-3 h-3 text-white hidden peer-checked:block'
-                          fill='currentColor'
-                          viewBox='0 0 20 20'
-                        >
-                          <path
-                            fillRule='evenodd'
-                            d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'
-                            clipRule='evenodd'
-                          />
-                        </svg>
-                      </div>
-                      <span className='text-gray-700 peer-checked:text-orange-500 truncate'>
-                        {amenity.name}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Apply Filters Button - Fixed at bottom */}
-            <div className='fixed bottom-0 left-0 w-full sm:w-[340px] p-4 bg-white border-t border-gray-100'>
-              <div className='space-y-2'>
-                <button
-                  onClick={applyFilters}
-                  className='w-full py-3 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-xl transition-colors duration-200'
-                >
-                  Appliquer les filtres
-                </button>
-                <button
-                  onClick={resetFilters}
-                  className='w-full py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors duration-200'
-                >
-                  Réinitialiser
-                </button>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
-
-      <div className='bg-gray-50 z-20 fixed top-16 w-screen justify-center flex items-center md:justify-between lg:justify-between px-10  py-5'>
-        <div className='flex'>
-          <span className='hidden lg:block'>Toutes les</span>&nbsp;
-          <span className='capitalize lg:normal-case md:normal hidden xl:block lg:block md:block '>
-            categories
-          </span>
-        </div>
-        &nbsp;
-        <div className='max-w-md w-full relative'>
-          <div className='flex rounded-full px-3 py-2 bg-white border border-gray-300 shadow-lg shadow-gray-300 items-center'>
-            <MdSearch size={28} className='text-gray-800 flex-shrink-0' />
-            <div className='flex-1 px-2'>
-              <AddressAutocomplete
-                value={searchLocation}
-                onChange={handleSearchChange}
-                onLocationSelect={handleLocationSelect}
-                placeholder='Rechercher une localisation...'
-                className='border-0 focus:border-0 focus:ring-0 p-0 py-2 text-[1rem] text-gray-600 font-normal bg-transparent w-full outline-none'
-              />
-            </div>
-            {/* Bouton de géolocalisation */}
-            <button
-              type='button'
-              onClick={() => {
-                if (navigator.geolocation) {
-                  navigator.geolocation.getCurrentPosition(
-                    async position => {
-                      const { longitude, latitude } = position.coords;
-                      try {
-                        const { reverseGeocode } = await import(
-                          '@services/mapboxApi'
-                        );
-                        const result = await reverseGeocode(
-                          longitude,
-                          latitude
-                        );
-                        if (result) {
-                          const searchQuery =
-                            result.context?.find(c => c.id.startsWith('place'))
-                              ?.text || result.text;
-                          setSearchLocation(searchQuery);
-                          const newSearchParams = new URLSearchParams(
-                            UrlSearchParam
-                          );
-                          newSearchParams.set('search', searchQuery);
-                          navigate(`?${newSearchParams.toString()}`, {
-                            replace: true,
-                          });
-                        }
-                      } catch (error) {
-                        console.error('Erreur de géocodage inverse:', error);
-                      }
-                    },
-                    error => {
-                      console.error('Erreur de géolocalisation:', error);
-                      alert("Impossible d'obtenir votre position.");
-                    }
-                  );
-                }
-              }}
-              className='flex items-center px-2 text-gray-400 hover:text-orange-500 transition-colors duration-200'
-              title='Utiliser ma position'
-            >
-              <svg
-                className='w-5 h-5'
-                fill='none'
-                viewBox='0 0 24 24'
-                stroke='currentColor'
+              <button
+                type='button'
+                onClick={applyFilters}
+                className='relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-amber-500 text-white shadow-sm transition-all hover:from-orange-600 hover:to-amber-600'
+                title='Rechercher'
               >
-                <path
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                  strokeWidth={2}
-                  d='M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z'
-                />
-                <path
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                  strokeWidth={2}
-                  d='M15 11a3 3 0 11-6 0 3 3 0 016 0z'
-                />
-              </svg>
-            </button>
+                <MdSearch size={18} />
+                {activeFiltersCount > 0 && (
+                  <span className='absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-gray-900 px-1 text-[10px] leading-none text-white'>
+                    {activeFiltersCount}
+                  </span>
+                )}
+              </button>
+            </div>
           </div>
-        </div>{' '}
-        &nbsp;
-        <button
-          className={
-            (isFilterSidebarOpen && 'bg-gray-200 ') +
-            ' inline-flex py-2 px-4 rounded-lg  items-center gap-2 text-gray-800 relative'
-          }
-          onClick={handleFilterButtonClick}
-        >
-          <HiAdjustmentsHorizontal size={24} />
-          <span className=' hidden lg:block md:block '>filtre avancé</span>
-          {activeFiltersCount > 0 && (
-            <span className='absolute -top-2 -right-2 bg-orange-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center'>
-              {activeFiltersCount}
-            </span>
-          )}
-        </button>
+        </div>
       </div>
 
       <div className=' min-h-screen'>
-        <section
-          className={`grid gap-y-6 gap-x-2 sm:gap-x-6 lg:gap-x-4 mt-40 py-4 px-4 sm:px-6 lg:px-8 
-          ${
-            isFilterSidebarOpen
-              ? 'lg:ml-[340px] lg:w-[calc(100%-340px)] 2xl:!grid-cols-3  xl:!grid-cols-2 '
-              : 'w-full'
-          }
-          grid-cols-1   sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5`}
-        >
+        <div className='mt-40 px-5 sm:px-8 lg:px-12'>
+          <div className='flex min-h-[44px] items-center justify-between gap-3'>
+            <h2 className='mb-0 text-xl font-semibold leading-tight text-gray-900 sm:text-2xl'>
+              Annonces qui pourraient vous plaire !
+            </h2>
+            <button
+              type='button'
+              className='ml-auto inline-flex h-10 items-center rounded-full border border-orange-200 bg-gradient-to-r from-orange-50 to-amber-50 px-4 text-sm font-semibold text-orange-700 transition-colors hover:from-orange-100 hover:to-amber-100'
+            >
+              Publier la mienne !
+            </button>
+          </div>
+        </div>
+        <section className='mt-6 grid w-full grid-cols-1 gap-x-2 gap-y-6 px-5 py-6 sm:grid-cols-2 sm:gap-x-6 sm:px-8 lg:grid-cols-3 lg:gap-x-4 lg:px-12 xl:grid-cols-4 2xl:grid-cols-6'>
           {ads.map(ad => (
             <ProductCard {...ad} key={ad.id} />
           ))}
         </section>
       </div>
-      <Footer2 />
+      <FooterMinimal />
     </>
   );
 }

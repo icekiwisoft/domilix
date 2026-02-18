@@ -179,19 +179,19 @@ export default function Ad(): React.ReactElement {
             </nav>
 
             {/* Titre principal */}
-            <div className='flex flex-wrap items-start justify-between gap-4'>
-              <div className='space-y-3'>
-                <h1 className='text-3xl font-bold text-gray-900'>
+            <div className='flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4'>
+              <div className='space-y-3 flex-1'>
+                <h1 className='text-2xl sm:text-3xl font-bold text-gray-900'>
                   {adInfo.category?.name} • {adInfo.city || 'Localisation'}
                 </h1>
-                <div className='flex items-center gap-4 text-sm text-gray-600'>
+                <div className='flex flex-wrap items-center gap-2 sm:gap-4 text-sm text-gray-600'>
                   <span className='flex items-center'>
                     <HiHome className='mr-1' />
                     {adInfo.type === 'realestate'
                       ? 'Logement entier'
                       : 'Mobilier'}
                   </span>
-                  <span>•</span>
+                  <span className='hidden sm:inline'>•</span>
                   <span className='flex items-center'>
                     <HiUsers className='mr-1' />
                     {adInfo.bedroom || 1}{' '}
@@ -199,7 +199,7 @@ export default function Ad(): React.ReactElement {
                   </span>
                   {adInfo.toilet && (
                     <>
-                      <span>•</span>
+                      <span className='hidden sm:inline'>•</span>
                       <span>
                         {adInfo.toilet} salle{adInfo.toilet > 1 ? 's' : ''} de
                         bain
@@ -209,38 +209,39 @@ export default function Ad(): React.ReactElement {
                 </div>
 
                 {/* Badges de vérification */}
-                <div className='flex items-center gap-4'>
+                <div className='flex flex-wrap items-center gap-2 sm:gap-4'>
                   {adInfo.announcer?.verified && (
-                    <div className='flex items-center gap-2 px-3 py-1 bg-orange-50 text-orange-700 rounded-full text-sm'>
+                    <div className='flex items-center gap-2 px-3 py-1 bg-orange-50 text-orange-700 rounded-full text-xs sm:text-sm'>
                       <HiCheckCircle className='w-4 h-4' />
                       <span className='font-medium'>Annonceur vérifié</span>
                     </div>
                   )}
 
-                  <div className='flex items-center gap-2 px-3 py-1 bg-green-50 text-green-700 rounded-full text-sm'>
+                  <div className='flex items-center gap-2 px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs sm:text-sm'>
                     <span className='w-2 h-2 bg-green-500 rounded-full'></span>
                     <span className='font-medium'>Annonce active</span>
                   </div>
 
-                  <div className='flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm'>
+                  <div className='flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs sm:text-sm'>
                     <FaMapMarkerAlt className='w-3 h-3' />
-                    <span className='font-medium'>Localisation disponible</span>
+                    <span className='font-medium hidden sm:inline'>Localisation disponible</span>
+                    <span className='font-medium sm:hidden'>Localisation</span>
                   </div>
                 </div>
               </div>
 
-              <div className='flex items-center gap-3'>
+              <div className='flex items-center gap-2 sm:gap-3 flex-shrink-0'>
                 <button
                   onClick={() => setShowShareModal(true)}
-                  className='flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 transition-colors'
+                  className='flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 transition-colors text-sm'
                 >
                   <HiOutlineShare className='w-4 h-4' />
-                  <span className='font-medium'>Partager</span>
+                  <span className='font-medium hidden sm:inline'>Partager</span>
                 </button>
                 <button
                   onClick={handleLike}
                   disabled={isLiking}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
+                  className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg border transition-colors text-sm ${
                     liked
                       ? 'bg-orange-50 border-orange-200 text-orange-600 hover:bg-orange-100'
                       : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
@@ -249,7 +250,7 @@ export default function Ad(): React.ReactElement {
                   <HiOutlineHeart
                     className={`w-4 h-4 ${liked ? 'fill-current' : ''}`}
                   />
-                  <span className='font-medium'>
+                  <span className='font-medium hidden sm:inline'>
                     {liked ? 'Aimé' : 'Aimer'}
                   </span>
                 </button>
@@ -264,9 +265,9 @@ export default function Ad(): React.ReactElement {
             className='relative rounded-2xl overflow-hidden mb-8'
           >
             {adInfo.medias && adInfo.medias.length > 0 ? (
-              <div className='grid h-[480px] grid-cols-4 gap-2'>
+              <div className='grid h-[300px] sm:h-[400px] lg:h-[480px] grid-cols-2 sm:grid-cols-4 gap-2'>
                 {/* Image principale */}
-                <div className='col-span-2 row-span-2 relative rounded-l-2xl overflow-hidden cursor-pointer hover:brightness-95 transition-all'>
+                <div className='col-span-2 row-span-2 relative sm:rounded-l-2xl overflow-hidden cursor-pointer hover:brightness-95 transition-all'>
                   <img
                     src={
                       'http://localhost:8000' + adInfo.medias[0]?.file ||
@@ -335,7 +336,7 @@ export default function Ad(): React.ReactElement {
             {adInfo.medias && adInfo.medias.length > 0 && (
               <button
                 onClick={() => openModalWithImage(0)}
-                className='absolute bottom-6 right-6 flex items-center gap-2 px-4 py-2 bg-white rounded-lg text-sm font-medium shadow-lg hover:shadow-xl transition-all border border-gray-200'
+                className='absolute bottom-4 right-4 sm:bottom-6 sm:right-6 flex items-center gap-2 px-3 sm:px-4 py-2 bg-white rounded-lg text-xs sm:text-sm font-medium shadow-lg hover:shadow-xl transition-all border border-gray-200'
               >
                 <svg
                   className='w-4 h-4'
@@ -350,7 +351,8 @@ export default function Ad(): React.ReactElement {
                     d='M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z'
                   />
                 </svg>
-                Afficher toutes les photos
+                <span className='hidden sm:inline'>Afficher toutes les photos</span>
+                <span className='sm:hidden'>Photos</span>
               </button>
             )}
           </motion.div>
@@ -420,67 +422,68 @@ export default function Ad(): React.ReactElement {
                   {adInfo.type === 'realestate' ? 'logement' : 'produit'}
                 </h3>
 
-                <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                <div className='grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4'>
                   {/* Équipements de base */}
-                  <div className='flex items-center gap-4 py-3'>
-                    <FaUtensils className='w-6 h-6 text-gray-600' />
-                    <span className='text-gray-900'>Cuisine</span>
+                  <div className='flex items-center gap-3 sm:gap-4 py-2 sm:py-3'>
+                    <FaUtensils className='w-5 h-5 sm:w-6 sm:h-6 text-gray-600 flex-shrink-0' />
+                    <span className='text-gray-900 text-sm sm:text-base'>Cuisine</span>
                   </div>
 
-                  <div className='flex items-center gap-4 py-3'>
-                    <FaWifi className='w-6 h-6 text-gray-600' />
-                    <span className='text-gray-900'>Wifi</span>
+                  <div className='flex items-center gap-3 sm:gap-4 py-2 sm:py-3'>
+                    <FaWifi className='w-5 h-5 sm:w-6 sm:h-6 text-gray-600 flex-shrink-0' />
+                    <span className='text-gray-900 text-sm sm:text-base'>Wifi</span>
                   </div>
 
                   {adInfo.type === 'realestate' && (
                     <>
                       {adInfo.furnitured && (
-                        <div className='flex items-center gap-4 py-3'>
-                          <FaCouch className='w-6 h-6 text-gray-600' />
-                          <span className='text-gray-900'>Meublé</span>
+                        <div className='flex items-center gap-3 sm:gap-4 py-2 sm:py-3'>
+                          <FaCouch className='w-5 h-5 sm:w-6 sm:h-6 text-gray-600 flex-shrink-0' />
+                          <span className='text-gray-900 text-sm sm:text-base'>Meublé</span>
                         </div>
                       )}
 
                       {adInfo.pool && (
-                        <div className='flex items-center gap-4 py-3'>
-                          <FaSwimmingPool className='w-6 h-6 text-gray-600' />
-                          <span className='text-gray-900'>Piscine</span>
+                        <div className='flex items-center gap-3 sm:gap-4 py-2 sm:py-3'>
+                          <FaSwimmingPool className='w-5 h-5 sm:w-6 sm:h-6 text-gray-600 flex-shrink-0' />
+                          <span className='text-gray-900 text-sm sm:text-base'>Piscine</span>
                         </div>
                       )}
 
                       {adInfo.garage && (
-                        <div className='flex items-center gap-4 py-3'>
-                          <FaCar className='w-6 h-6 text-gray-600' />
-                          <span className='text-gray-900'>Garage</span>
+                        <div className='flex items-center gap-3 sm:gap-4 py-2 sm:py-3'>
+                          <FaCar className='w-5 h-5 sm:w-6 sm:h-6 text-gray-600 flex-shrink-0' />
+                          <span className='text-gray-900 text-sm sm:text-base'>Garage</span>
                         </div>
                       )}
 
                       {adInfo.gate && (
-                        <div className='flex items-center gap-4 py-3'>
-                          <FaDoorOpen className='w-6 h-6 text-gray-600' />
-                          <span className='text-gray-900'>
+                        <div className='flex items-center gap-3 sm:gap-4 py-2 sm:py-3'>
+                          <FaDoorOpen className='w-5 h-5 sm:w-6 sm:h-6 text-gray-600 flex-shrink-0' />
+                          <span className='text-gray-900 text-sm sm:text-base'>
                             Portail sécurisé
                           </span>
                         </div>
                       )}
 
                       {adInfo.garden && (
-                        <div className='flex items-center gap-4 py-3'>
-                          <FaTree className='w-6 h-6 text-gray-600' />
-                          <span className='text-gray-900'>Jardin</span>
+                        <div className='flex items-center gap-3 sm:gap-4 py-2 sm:py-3'>
+                          <FaTree className='w-5 h-5 sm:w-6 sm:h-6 text-gray-600 flex-shrink-0' />
+                          <span className='text-gray-900 text-sm sm:text-base'>Jardin</span>
                         </div>
                       )}
 
-                      <div className='flex items-center gap-4 py-3'>
-                        <FaBath className='w-6 h-6 text-gray-600' />
-                        <span className='text-gray-900'>
-                          Sèche-linge (Gratuit) dans le logement
+                      <div className='flex items-center gap-3 sm:gap-4 py-2 sm:py-3'>
+                        <FaBath className='w-5 h-5 sm:w-6 sm:h-6 text-gray-600 flex-shrink-0' />
+                        <span className='text-gray-900 text-sm sm:text-base'>
+                          <span className='hidden sm:inline'>Sèche-linge (Gratuit) dans le logement</span>
+                          <span className='sm:hidden'>Sèche-linge</span>
                         </span>
                       </div>
 
-                      <div className='flex items-center gap-4 py-3'>
+                      <div className='flex items-center gap-3 sm:gap-4 py-2 sm:py-3'>
                         <svg
-                          className='w-6 h-6 text-gray-600'
+                          className='w-5 h-5 sm:w-6 sm:h-6 text-gray-600 flex-shrink-0'
                           fill='none'
                           viewBox='0 0 24 24'
                           stroke='currentColor'
@@ -492,14 +495,14 @@ export default function Ad(): React.ReactElement {
                             d='M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'
                           />
                         </svg>
-                        <span className='text-gray-900'>
+                        <span className='text-gray-900 text-sm sm:text-base'>
                           Espace de travail dédié
                         </span>
                       </div>
 
-                      <div className='flex items-center gap-4 py-3'>
+                      <div className='flex items-center gap-3 sm:gap-4 py-2 sm:py-3'>
                         <svg
-                          className='w-6 h-6 text-gray-600'
+                          className='w-5 h-5 sm:w-6 sm:h-6 text-gray-600 flex-shrink-0'
                           fill='none'
                           viewBox='0 0 24 24'
                           stroke='currentColor'
@@ -511,17 +514,18 @@ export default function Ad(): React.ReactElement {
                             d='M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z'
                           />
                         </svg>
-                        <span className='text-gray-900'>
-                          Serrure ou verrou sur la porte de la chambre
+                        <span className='text-gray-900 text-sm sm:text-base'>
+                          <span className='hidden sm:inline'>Serrure ou verrou sur la porte de la chambre</span>
+                          <span className='sm:hidden'>Serrure chambre</span>
                         </span>
                       </div>
                     </>
                   )}
 
                   {/* Équipements barrés (non disponibles) */}
-                  <div className='flex items-center gap-4 py-3 opacity-50'>
+                  <div className='flex items-center gap-3 sm:gap-4 py-2 sm:py-3 opacity-50'>
                     <svg
-                      className='w-6 h-6 text-gray-400'
+                      className='w-5 h-5 sm:w-6 sm:h-6 text-gray-400 flex-shrink-0'
                       fill='none'
                       viewBox='0 0 24 24'
                       stroke='currentColor'
@@ -533,22 +537,24 @@ export default function Ad(): React.ReactElement {
                         d='M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728'
                       />
                     </svg>
-                    <span className='text-gray-400 line-through'>
-                      Détecteur de monoxyde de carbone
+                    <span className='text-gray-400 line-through text-sm sm:text-base'>
+                      <span className='hidden sm:inline'>Détecteur de monoxyde de carbone</span>
+                      <span className='sm:hidden'>Détecteur CO</span>
                     </span>
                   </div>
                 </div>
 
-                <button className='mt-6 px-6 py-3 border border-gray-900 rounded-lg font-medium hover:bg-gray-50 transition-colors'>
-                  Afficher les{' '}
+                <button className='mt-6 px-4 sm:px-6 py-2 sm:py-3 border border-gray-900 rounded-lg font-medium hover:bg-gray-50 transition-colors text-sm sm:text-base w-full sm:w-auto'>
+                  <span className='hidden sm:inline'>Afficher les{' '}
                   {adInfo.type === 'realestate'
                     ? '43 équipements'
-                    : 'caractéristiques'}
+                    : 'caractéristiques'}</span>
+                  <span className='sm:hidden'>Voir tout</span>
                 </button>
               </motion.div>
 
               {adInfo.type === 'realestate' && (
-                <div className='grid grid-cols-3 gap-4 mb-6'>
+                <div className='grid grid-cols-3 gap-2 sm:gap-4 mb-6'>
                   {[
                     {
                       icon: FaBed,
@@ -568,20 +574,20 @@ export default function Ad(): React.ReactElement {
                   ].map((item, index) => (
                     <div
                       key={index}
-                      className='text-center p-4 bg-gray-50 rounded-lg'
+                      className='text-center p-3 sm:p-4 bg-gray-50 rounded-lg'
                     >
-                      <item.icon className='w-5 h-5 mx-auto mb-2 text-orange-500' />
-                      <div className='text-lg font-semibold text-gray-900'>
+                      <item.icon className='w-4 h-4 sm:w-5 sm:h-5 mx-auto mb-1 sm:mb-2 text-orange-500' />
+                      <div className='text-base sm:text-lg font-semibold text-gray-900'>
                         {item.value}
                       </div>
-                      <div className='text-sm text-gray-600'>{item.label}</div>
+                      <div className='text-xs sm:text-sm text-gray-600'>{item.label}</div>
                     </div>
                   ))}
                 </div>
               )}
 
               {adInfo.type === 'furniture' && (
-                <div className='grid grid-cols-3 gap-4 mb-6'>
+                <div className='grid grid-cols-3 gap-2 sm:gap-4 mb-6'>
                   {[
                     {
                       label: 'Hauteur',
@@ -598,12 +604,12 @@ export default function Ad(): React.ReactElement {
                   ].map((item, index) => (
                     <div
                       key={index}
-                      className='text-center p-4 bg-gray-50 rounded-lg'
+                      className='text-center p-3 sm:p-4 bg-gray-50 rounded-lg'
                     >
-                      <div className='text-lg font-semibold text-gray-900'>
+                      <div className='text-base sm:text-lg font-semibold text-gray-900'>
                         {item.value}
                       </div>
-                      <div className='text-sm text-gray-600'>{item.label}</div>
+                      <div className='text-xs sm:text-sm text-gray-600'>{item.label}</div>
                     </div>
                   ))}
                 </div>
@@ -616,12 +622,12 @@ export default function Ad(): React.ReactElement {
                 transition={{ delay: 0.2 }}
                 className='pb-8 border-b border-gray-200'
               >
-                <h3 className='text-2xl font-semibold text-gray-900 mb-4'>
+                <h3 className='text-xl sm:text-2xl font-semibold text-gray-900 mb-4'>
                   À propos de ce{' '}
                   {adInfo.type === 'realestate' ? 'logement' : 'produit'}
                 </h3>
                 <div className='prose prose-gray max-w-none'>
-                  <p className='text-gray-700 leading-relaxed text-lg'>
+                  <p className='text-gray-700 leading-relaxed text-base sm:text-lg'>
                     {adInfo.description ||
                       'Aucune description disponible pour cette annonce.'}
                   </p>
@@ -635,7 +641,7 @@ export default function Ad(): React.ReactElement {
                 transition={{ delay: 0.3 }}
                 className='pb-8 border-b border-gray-200'
               >
-                <h3 className='text-2xl font-semibold text-gray-900 mb-6'>
+                <h3 className='text-xl sm:text-2xl font-semibold text-gray-900 mb-6'>
                   {adInfo.type === 'realestate'
                     ? 'Chambre dans appartement en résidence'
                     : 'Caractéristiques du produit'}
@@ -670,55 +676,55 @@ export default function Ad(): React.ReactElement {
                     </div>
                   </div>
                 ) : (
-                  <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                  <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6'>
                     {adInfo.height && (
                       <div className='flex items-center gap-3'>
-                        <div className='w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center'>
-                          <span className='text-gray-600 font-semibold'>H</span>
+                        <div className='w-10 h-10 sm:w-12 sm:h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0'>
+                          <span className='text-gray-600 font-semibold text-sm sm:text-base'>H</span>
                         </div>
                         <div>
-                          <p className='font-semibold text-gray-900'>Hauteur</p>
-                          <p className='text-gray-600'>{adInfo.height} cm</p>
+                          <p className='font-semibold text-gray-900 text-sm sm:text-base'>Hauteur</p>
+                          <p className='text-gray-600 text-sm'>{adInfo.height} cm</p>
                         </div>
                       </div>
                     )}
 
                     {adInfo.width && (
                       <div className='flex items-center gap-3'>
-                        <div className='w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center'>
-                          <span className='text-gray-600 font-semibold'>L</span>
+                        <div className='w-10 h-10 sm:w-12 sm:h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0'>
+                          <span className='text-gray-600 font-semibold text-sm sm:text-base'>L</span>
                         </div>
                         <div>
-                          <p className='font-semibold text-gray-900'>Largeur</p>
-                          <p className='text-gray-600'>{adInfo.width} cm</p>
+                          <p className='font-semibold text-gray-900 text-sm sm:text-base'>Largeur</p>
+                          <p className='text-gray-600 text-sm'>{adInfo.width} cm</p>
                         </div>
                       </div>
                     )}
 
                     {adInfo.length && (
                       <div className='flex items-center gap-3'>
-                        <div className='w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center'>
-                          <span className='text-gray-600 font-semibold'>P</span>
+                        <div className='w-10 h-10 sm:w-12 sm:h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0'>
+                          <span className='text-gray-600 font-semibold text-sm sm:text-base'>P</span>
                         </div>
                         <div>
-                          <p className='font-semibold text-gray-900'>
+                          <p className='font-semibold text-gray-900 text-sm sm:text-base'>
                             Profondeur
                           </p>
-                          <p className='text-gray-600'>{adInfo.length} cm</p>
+                          <p className='text-gray-600 text-sm'>{adInfo.length} cm</p>
                         </div>
                       </div>
                     )}
 
                     {adInfo.weight && (
                       <div className='flex items-center gap-3'>
-                        <div className='w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center'>
-                          <span className='text-gray-600 font-semibold'>
+                        <div className='w-10 h-10 sm:w-12 sm:h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0'>
+                          <span className='text-gray-600 font-semibold text-sm sm:text-base'>
                             ⚖
                           </span>
                         </div>
                         <div>
-                          <p className='font-semibold text-gray-900'>Poids</p>
-                          <p className='text-gray-600'>{adInfo.weight} kg</p>
+                          <p className='font-semibold text-gray-900 text-sm sm:text-base'>Poids</p>
+                          <p className='text-gray-600 text-sm'>{adInfo.weight} kg</p>
                         </div>
                       </div>
                     )}
@@ -740,13 +746,13 @@ export default function Ad(): React.ReactElement {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className='bg-white rounded-xl p-6 shadow-lg border border-gray-200 sticky top-24'
+                className='bg-white rounded-xl p-4 sm:p-6 shadow-lg border border-gray-200 lg:sticky lg:top-24'
               >
                 {/* Prix principal */}
                 <div className='text-center mb-6'>
-                  <div className='text-3xl font-bold text-gray-900 mb-1'>
+                  <div className='text-2xl sm:text-3xl font-bold text-gray-900 mb-1'>
                     {adInfo.price?.toLocaleString()}{' '}
-                    <span className='text-orange-500 text-2xl'>
+                    <span className='text-orange-500 text-xl sm:text-2xl'>
                       {adInfo.devise || 'FCFA'}
                     </span>
                   </div>

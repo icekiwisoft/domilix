@@ -1,5 +1,6 @@
 import { useAuth } from './hooks/useAuth';
 
+import Error401 from '@pages/errors/401.tsx';
 import Error403 from '@pages/errors/403.tsx';
 import React, { useEffect } from 'react';
 import 'leaflet/dist/leaflet.css';
@@ -20,11 +21,11 @@ import Validation from '@pages/Validation/Validation.tsx';
 import { AuthData } from '@utils/types.ts';
 import usePulsy from 'pulsy';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import Contact from '@pages/Contact/Contact.tsx';
 import About from '@pages/About/About.tsx';
 import CookieConsent from '@components/CookieConsent/CookieConsent.tsx';
 import CookieSettings from '@pages/CookieSettings/CookieSettings.tsx';
 import PrivacyPolicy from '@pages/PrivacyPolicy/PrivacyPolicy.tsx';
+import FloatingPublishButton from '@components/FloatingPublishButton/FloatingPublishButton.tsx';
 
 function App(): React.ReactElement | null {
   const [signinModal] = usePulsy<boolean>('signinModal');
@@ -54,7 +55,6 @@ function App(): React.ReactElement | null {
         <Route path='furnitures' Component={Furnitures} />
         <Route path='/Validation' Component={Validation} />
         <Route path='/favorite' Component={Favorite} />
-        <Route path='/contact' Component={Contact} />
         <Route path='/about' Component={About} />
         <Route path='/cookie-settings' Component={CookieSettings} />
         <Route path='/privacy-policy' Component={PrivacyPolicy} />
@@ -63,6 +63,7 @@ function App(): React.ReactElement | null {
         <Route path='announcers/:id' Component={Announcer} />
 
         <Route path='*' Component={Error404} />
+        <Route path='/401' Component={Error401} />
         <Route path='/403' Component={Error403} />
         <Route path='/500' Component={Error500} />
         <Route path='/404' Component={Error403} />
@@ -70,6 +71,7 @@ function App(): React.ReactElement | null {
 
       {signinModal && <SigninDialog />}
       <CookieConsent />
+      <FloatingPublishButton />
     </BrowserRouter>
   );
 }

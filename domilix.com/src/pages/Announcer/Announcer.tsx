@@ -1,13 +1,11 @@
 import Cover from '@assets/bg_img/cover_annonceur.jpg';
 import Domilix from '@assets/domilix_icon.png';
-import ArticlePostDialog from '@components/ArticlePostDialog/ArticlePostDialog';
 import Footer2 from '@components/Footer2/Footer2';
 import Nav2 from '@components/Nav2/Nav2';
 import ProductCard from '@components/ProductCard/ProductCard';
 import { Listbox, Transition } from '@headlessui/react';
 import { Fragment, useState, useEffect } from 'react';
 import { HiCheck, HiChevronUpDown, HiMagnifyingGlass } from 'react-icons/hi2';
-import { MdOutlineCampaign } from 'react-icons/md';
 import { useSearchParams, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { getAdsByAnnouncer } from '@services/announceApi';
@@ -35,10 +33,7 @@ export default function Announcer() {
     urlSearchParam.get('search') || ''
   );
 
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const toggleDialog = () => {
-    setIsDialogOpen(!isDialogOpen);
-  };
+
 
   // Fetch announcer data
   const fetchAnnouncerData = async (announcerId: string) => {
@@ -85,14 +80,6 @@ export default function Announcer() {
   return (
     <>
       <Nav2 />
-      <button
-        className='bg-orange-500 hover:bg-orange-600 text-white px-3 sm:px-4 py-2 z-50 rounded-l-2xl ml-auto flex gap-2 items-center fixed right-0 top-1/3 shadow-lg transition-colors'
-        onClick={toggleDialog}
-      >
-        <MdOutlineCampaign size={24} className='-rotate-45' />
-        <span className='hidden lg:block text-sm font-medium'>Publier</span>
-      </button>
-
       <div className='bg-gradient-to-br from-slate-50 to-gray-100 min-h-screen'>
         <div className='max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
           {/* Profile Header */}
@@ -122,7 +109,14 @@ export default function Announcer() {
                   transition={{ delay: 0.2 }}
                   className='relative w-20 h-20  sm:w-24 sm:h-24  shadow-sm rounded-full overflow-hidden bg-white  border-white border-4  -mt-16 sm:-mt-20'
                 >
-                  <img src={Domilix} className='object-cover  ' alt='Profile' />
+                  <img
+                    src={"http://localhost:8000"+announcer?.avatar}
+                    className='object-cover w-full h-full'
+                    alt='Profile'
+                    onError={e => {
+                      (e.target as HTMLImageElement).src = Domilix;
+                    }}
+                  />
                 </motion.div>
 
                 {/* Name and Info */}
@@ -466,8 +460,6 @@ export default function Announcer() {
               )}
             </motion.div>
           )}
-
-          {isDialogOpen && <ArticlePostDialog toggleDialog={toggleDialog} />}
         </div>
       </div>
       <Footer2 />

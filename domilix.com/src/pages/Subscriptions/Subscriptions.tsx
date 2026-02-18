@@ -6,6 +6,8 @@ import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { FaCheck, FaPlus } from 'react-icons/fa';
 import { PricingProps } from 'utils/types';
+import { useAuth } from '../../hooks/useAuth';
+import { signinDialogActions } from '@stores/defineStore';
 
 const options = [
   "Voir les informations de base d'une annonce.",
@@ -102,7 +104,17 @@ const PricingCard: React.FC<PricingProps> = ({
 );
 
 export default function Subscriptions() {
-  const [selectedOffer, setSelectedOffer] = useState(null);
+  const [selectedOffer, setSelectedOffer] = useState<any>(null);
+  const { isAuthenticated } = useAuth();
+
+  const handleChooseOffer = (offer: any) => {
+    if (!isAuthenticated) {
+      signinDialogActions.toggle();
+      return;
+    }
+
+    setSelectedOffer(offer);
+  };
 
   return (
     <>
@@ -112,7 +124,7 @@ export default function Subscriptions() {
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className='text-center max-w-3xl mx-auto mb-20'
+            className='text-center max-w-3xl mx-auto mb-12'
           >
             <h1 className='text-4xl md:text-5xl font-bold text-gray-900 mb-6'>
               Le bon plan pour votre recherche
@@ -133,7 +145,7 @@ export default function Subscriptions() {
               features={["Voir les informations de base d'une annonce."]}
               isActive={false}
               onChoose={() =>
-                setSelectedOffer({
+                handleChooseOffer({
                   title: 'Offre Standard',
                   credits: '20 credits',
                   validity: '1 semaine de validité',
@@ -150,7 +162,7 @@ export default function Subscriptions() {
               features={["Voir les informations de base d'une annonce."]}
               isActive={false}
               onChoose={() =>
-                setSelectedOffer({
+                handleChooseOffer({
                   title: 'Offre Avantage',
                   credits: '50 credits',
                   validity: '2 semaines de validité',
@@ -170,7 +182,7 @@ export default function Subscriptions() {
               ]}
               isActive={true}
               onChoose={() =>
-                setSelectedOffer({
+                handleChooseOffer({
                   title: 'Offre Premium',
                   credits: '100 credits',
                   validity: '3 semaines de validité',
@@ -193,7 +205,7 @@ export default function Subscriptions() {
               ]}
               isActive={false}
               onChoose={() =>
-                setSelectedOffer({
+                handleChooseOffer({
                   title: 'Offre Ultime',
                   credits: '150 credits',
                   validity: '4 semaines de validité',

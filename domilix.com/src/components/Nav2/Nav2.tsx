@@ -2,13 +2,16 @@ import Logo from '@assets/domilix.png';
 import { signinDialogActions } from '@stores/defineStore';
 import { useAuth } from '../../hooks/useAuth';
 import ProfileDialog from '../ProfileDialog/ProfileDialog';
+import NotificationPopup from '../NotificationPopup/NotificationPopup';
+import { notificationApi } from '../../services/notificationApi';
 import React, { useState, useEffect, useRef } from 'react';
 import { GoX } from 'react-icons/go';
 import { HiBars3 } from 'react-icons/hi2';
+import { HiOutlineBell } from 'react-icons/hi';
 import { NavLink, useNavigate } from 'react-router-dom';
 
 const links = [
-  { name: 'Abonnements', url: '/subscriptions' },
+  { name: 'Acheter', url: '/subscriptions' },
   { name: 'Immobiliers', url: '/houses' },
   { name: 'Mobiliers', url: '/furnitures' },
 ];
@@ -18,14 +21,36 @@ export default function Nav2(): React.ReactElement {
   const { user, isAuthenticated, logout } = useAuth();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showProfileDialog, setShowProfileDialog] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const profileButtonRef = useRef<HTMLButtonElement>(null);
+  const notificationButtonRef = useRef<HTMLButtonElement>(null);
   const navigate = useNavigate();
 
   console.log('user  is', user);
   const handleClick = () => setClick(!click);
 
   const userCredits = 0; // TODO: Add credits to User interface when available
+
+  // Load unread notifications count
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadUnreadCount();
+      // Poll every 30 seconds
+      const interval = setInterval(loadUnreadCount, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [isAuthenticated]);
+
+  const loadUnreadCount = async () => {
+    try {
+      const count = await notificationApi.getUnreadCount();
+      setUnreadCount(count);
+    } catch (error) {
+      console.error('Error loading unread count:', error);
+    }
+  };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -272,7 +297,7 @@ export default function Nav2(): React.ReactElement {
                 signinDialogActions.toggle();
                 setClick(false);
               }}
-              className='w-full bg-gray-950 hover:bg-gray-800 text-white font-semibold py-4 px-6 rounded-xl transition-colors text-base sm:text-lg'
+              className='w-full rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 px-6 py-4 text-base font-semibold text-white shadow-sm transition-all hover:from-indigo-700 hover:to-indigo-600 sm:text-lg'
             >
               Se connecter
             </button>
@@ -293,7 +318,7 @@ export default function Nav2(): React.ReactElement {
   );
 
   return (
-    <nav className='bg-gray-50 navbar top-0 left-0 fixed w-full px-4 sm:px-6 lg:px-10 z-50 shadow-sm'>
+    <nav className='bg-white navbar top-0 left-0 fixed w-full px-4 sm:px-6 lg:px-10 z-50 shadow-sm'>
       <div className='h-16 flex justify-between items-center text-black max-w-7xl mx-auto'>
         <div className='flex items-center flex-shrink-0'>
           <NavLink className='text-2xl font-bold flex' to='/'>
@@ -323,7 +348,7 @@ export default function Nav2(): React.ReactElement {
           {!isAuthenticated ? (
             <button
               onClick={signinDialogActions.toggle}
-              className='bg-gray-950 hover:bg-gray-800 text-white font-semibold py-2 px-4 xl:px-6 rounded-full transition-colors text-sm xl:text-base whitespace-nowrap'
+              className='whitespace-nowrap rounded-full bg-gradient-to-r from-indigo-600 to-indigo-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:from-indigo-700 hover:to-indigo-600 xl:px-6 xl:text-base'
             >
               Se connecter
             </button>
@@ -347,10 +372,38 @@ export default function Nav2(): React.ReactElement {
                 </span>
               </NavLink>
 
+              {/* Notifications */}
+              <div className='relative'>
+                <button
+                  ref={notificationButtonRef}
+                  onClick={() => {
+                    setShowNotifications(prev => !prev);
+                    setShowProfileMenu(false);
+                  }}
+                  className='relative w-9 h-9 xl:w-10 xl:h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors'
+                >
+                  <HiOutlineBell className='w-5 h-5 xl:w-6 xl:h-6 text-gray-700' />
+                  {unreadCount > 0 && (
+                    <span className='absolute -top-1 -right-1 bg-orange-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center'>
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                </button>
+                {showNotifications && (
+                  <NotificationPopup
+                    isOpen={showNotifications}
+                    onClose={() => setShowNotifications(false)}
+                  />
+                )}
+              </div>
+
               <div className='relative'>
                 <button
                   ref={profileButtonRef}
-                  onClick={() => setShowProfileMenu(prev => !prev)}
+                  onClick={() => {
+                    setShowProfileMenu(prev => !prev);
+                    setShowNotifications(false);
+                  }}
                   className='w-9 h-9 xl:w-10 xl:h-10 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors text-sm xl:text-base font-semibold'
                 >
                   {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
@@ -382,10 +435,38 @@ export default function Nav2(): React.ReactElement {
                 </span>
               </NavLink>
 
+              {/* Notifications Mobile */}
+              <div className='relative'>
+                <button
+                  ref={notificationButtonRef}
+                  onClick={() => {
+                    setShowNotifications(prev => !prev);
+                    setShowProfileMenu(false);
+                  }}
+                  className='relative w-8 h-8 sm:w-10 sm:h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors'
+                >
+                  <HiOutlineBell className='w-5 h-5 sm:w-6 sm:h-6 text-gray-700' />
+                  {unreadCount > 0 && (
+                    <span className='absolute -top-1 -right-1 bg-orange-500 text-white text-xs font-bold rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center'>
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                </button>
+                {showNotifications && (
+                  <NotificationPopup
+                    isOpen={showNotifications}
+                    onClose={() => setShowNotifications(false)}
+                  />
+                )}
+              </div>
+
               <div className='relative'>
                 <button
                   ref={profileButtonRef}
-                  onClick={() => setShowProfileMenu(prev => !prev)}
+                  onClick={() => {
+                    setShowProfileMenu(prev => !prev);
+                    setShowNotifications(false);
+                  }}
                   className='w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors text-sm sm:text-base font-semibold'
                 >
                   {user.name ? user.name.charAt(0).toUpperCase() : 'U'}

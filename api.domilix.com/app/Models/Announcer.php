@@ -21,6 +21,9 @@ class Announcer extends Model
         'name',
         'user_id',
         'verified',
+        'avatar',
+        'bio',
+        'contact',
     ];
 
     use HasFactory, HasUuids;

@@ -30,6 +30,11 @@ export default function ProductCard(props: Ad): React.ReactElement {
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const hasMultipleImages = medias && medias.length > 1;
+  const priceLabel =
+    typeof price === 'number'
+      ? `${price.toLocaleString()} ${devise || 'FCFA'}${ad_type === 'location' ? `/${period || 'mois'}` : ''}`
+      : 'Prix non specifie';
+  const locationLabel = props.city || props.address || 'Adresse non specifiee';
 
   const handleLike = async () => {
     if (isLiking) return;
@@ -104,12 +109,12 @@ export default function ProductCard(props: Ad): React.ReactElement {
 
   return (
     <>
-      <div className='bg-white rounded-xl   overflow-hidden'>
+      <div className='bg-white rounded-xl overflow-hidden'>
         {/* Section Image avec Carrousel */}
         <Link
           to={'/houses/' + id}
           target='_blank'
-          className='block rounded-xl overflow-hidden'
+          className='block overflow-hidden rounded-2xl'
         >
           <div
             className='relative bg-gray-100 overflow-hidden group'
@@ -204,28 +209,18 @@ export default function ProductCard(props: Ad): React.ReactElement {
             </div>
           </div>
         </Link>
-        {/* Description et Catégorie */}
+        {/* Description, categorie et prix */}
         <Link to={'/houses/' + id} target='_blank' className='block'>
-          <h3 className='font-semibold whitespace-nowrap text-ellipsis overflow-hidden text-gray-800 text-sm mb-1 line-clamp-2 hover:text-orange-600 transition-colors'>
-            {description || 'Annonce'}
-          </h3>
-          <p className='text-gray-500  mb-0 text-xs'>
-            {category?.name || 'Non spécifié'}
+          <p className='mt-2 text-sm leading-5 text-gray-800'>
+            <span>{description || 'Annonce'}</span>
+            <span>{' . '}</span>
+            <span>{category?.name || 'Non specifie'}</span>
+            <span>{' . '}</span>
+            <span>{locationLabel}</span>
+            <span>{' . '}</span>
+            <span className='font-semibold text-gray-900'>{priceLabel}</span>
           </p>
         </Link>
-
-        {/* Contenu de la carte */}
-        {/* Prix */}
-        <div className=''>
-          <div className='text-sm font-bold text-gray-900'>
-            {price?.toLocaleString()} {devise || 'FCFA'}
-            {ad_type === 'location' && (
-              <span className='text-sm font-normal text-gray-600'>
-                /{period || 'mois'}
-              </span>
-            )}
-          </div>
-        </div>
 
         {/* Actions */}
       </div>
@@ -237,7 +232,11 @@ export default function ProductCard(props: Ad): React.ReactElement {
         title={category?.name || 'Annonce'}
         price={`${price?.toLocaleString()} ${devise || 'FCFA'}`}
         location={props.city || props.address}
-        image={medias?.[0]?.file ? `http://localhost:8000${medias[0].file}` : undefined}
+        image={
+          medias?.[0]?.file
+            ? `http://localhost:8000${medias[0].file}`
+            : undefined
+        }
         type={ad_type === 'location' ? 'Location' : 'Vente'}
       />
     </>
