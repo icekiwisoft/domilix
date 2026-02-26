@@ -47,21 +47,34 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-          cache-dependency-path: domilix.com/package-lock.json
+          cache: pnpm
+          cache-dependency-path: domilix.com/pnpm-lock.yaml
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Build frontend
-        run: npm run build
+        run: pnpm run build
+
+      - name: Ensure frontend deploy directory exists
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: domilix.com
+          username: root
+          key: ${{ secrets.VPS_SSH }}
+          script: mkdir -p /opt/domilix/domilix.com/dist
 
       - name: Upload static build via rsync
         uses: burnett01/rsync-deployments@7.0.2
         with:
           switches: -avzr --delete
           path: domilix.com/dist/
-          remote_path: ${{ secrets.FRONTEND_DEPLOY_PATH }}
+          remote_path: /opt/domilix/domilix.com/dist/
           remote_host: domilix.com
           remote_user: root
           remote_key: ${{ secrets.VPS_SSH }}
@@ -88,15 +101,33 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Ensure backend deploy directory exists
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: domilix.com
+          username: root
+          key: ${{ secrets.VPS_SSH }}
+          script: mkdir -p /opt/domilix/api.domilix.com
+
       - name: Upload backend source via rsync
         uses: burnett01/rsync-deployments@7.0.2
         with:
           switches: -avzr --delete --exclude=.env --exclude=vendor --exclude=node_modules --exclude=storage/logs
           path: api.domilix.com/
-          remote_path: ${{ secrets.BACKEND_DEPLOY_PATH }}
+          remote_path: /opt/domilix/api.domilix.com/
           remote_host: domilix.com
           remote_user: root
           remote_key: ${{ secrets.VPS_SSH }}
+
+      - name: Ensure backend writable directories exist
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: domilix.com
+          username: root
+          key: ${{ secrets.VPS_SSH }}
+          script: |
+            mkdir -p /opt/domilix/api.domilix.com/storage
+            mkdir -p /opt/domilix/api.domilix.com/bootstrap/cache
 
       - name: Run backend deployment commands
         uses: appleboy/ssh-action@v1.2.0
@@ -106,7 +137,7 @@ jobs:
           key: ${{ secrets.VPS_SSH }}
           script: |
             set -e
-            cd ${{ secrets.BACKEND_DEPLOY_PATH }}
+            cd /opt/domilix/api.domilix.com
             composer install --no-dev --optimize-autoloader --no-interaction
             php artisan migrate --force
             php artisan optimize

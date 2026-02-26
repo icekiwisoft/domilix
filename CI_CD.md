@@ -8,9 +8,9 @@ This repository now includes 2 GitHub Actions workflows:
 ## CI
 
 ### Frontend (`domilix.com`)
-- Install dependencies (`npm ci`)
+- Install dependencies (`pnpm install --frozen-lockfile`)
 - Lint (`eslint`)
-- Build (`npm run build`)
+- Build (`pnpm run build`)
 
 ### Backend (`api.domilix.com`)
 - Validate composer config
@@ -30,8 +30,11 @@ The deployment workflow deploys only the app that changed:
 Set these in repository settings (`Settings > Secrets and variables > Actions`):
 
 - `VPS_SSH`: private SSH key (workflow uses `root@domilix.com`)
-- `FRONTEND_DEPLOY_PATH`: destination path for frontend static files
-- `BACKEND_DEPLOY_PATH`: destination path for Laravel app
+
+Deployment paths are fixed in workflow:
+
+- Frontend static files: `/opt/domilix/domilix.com/dist/`
+- Backend source/app: `/opt/domilix/api.domilix.com/`
 
 Optional:
 
