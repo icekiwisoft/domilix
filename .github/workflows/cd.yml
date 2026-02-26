@@ -72,10 +72,19 @@ jobs:
             set -e
             cd /opt/domilix
 
+            if [ -n "${{ secrets.GHCR_USERNAME }}" ] && [ -n "${{ secrets.GHCR_TOKEN }}" ]; then
+              echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
+            else
+              echo "GHCR credentials not set (GHCR_USERNAME/GHCR_TOKEN)."
+              echo "If images are private, docker pull will fail."
+            fi
+
             if [ ! -f deploy/.env.production ]; then
               cp deploy/.env.production.example deploy/.env.production
               echo "deploy/.env.production created from example. Update it with real values."
             fi
+
+            sed -i "s|ghcr.io/your-org/|ghcr.io/${{ github.repository_owner }}/|g" deploy/.env.production
 
             docker compose --env-file deploy/.env.production -f deploy/docker-compose.prod.yml pull
             docker compose --env-file deploy/.env.production -f deploy/docker-compose.prod.yml up -d --remove-orphans

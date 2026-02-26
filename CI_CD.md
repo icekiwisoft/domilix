@@ -32,6 +32,8 @@ The deployment workflow is Dockerized:
 Set these in repository settings (`Settings > Secrets and variables > Actions`):
 
 - `VPS_SSH`: private SSH key (workflow uses `root@domilix.com`)
+- `GHCR_USERNAME`: GitHub username (or bot user) for GHCR login on VPS
+- `GHCR_TOKEN`: GitHub token/PAT with `read:packages` for GHCR pull
 
 Deployment paths are fixed in workflow:
 
@@ -47,3 +49,4 @@ Optional:
 - `deploy/.env.production` is not overwritten by workflow.
 - If missing, workflow auto-creates it from `deploy/.env.production.example`.
 - Keep production values in `/opt/domilix/deploy/.env.production` on server.
+- Workflow auto-rewrites `ghcr.io/your-org/...` to `ghcr.io/<repo-owner>/...` in `deploy/.env.production`.
