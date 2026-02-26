@@ -23,9 +23,9 @@ This repository now includes 2 GitHub Actions workflows:
 The deployment workflow is Dockerized:
 
 - If `domilix.com/**`, `api.domilix.com/**`, `deploy/**`, or `.github/workflows/cd.yml` changes,
-  it uploads `deploy/` files to `/opt/domilix/deploy/` and runs:
-  - `docker compose --env-file deploy/.env.production -f deploy/docker-compose.domilix.com.yml pull && up`
-  - `docker compose --env-file deploy/.env.production -f deploy/docker-compose.api.domilix.com.yml pull && up`
+  it uploads `deploy/` files to `/opt/domilix/deploy/` and runs independent jobs:
+  - Frontend job: `docker compose -p domilix_frontend --env-file deploy/.env.production -f deploy/docker-compose.domilix.com.yml pull && up`
+  - Backend job: `docker compose -p domilix_backend --env-file deploy/.env.production -f deploy/docker-compose.api.domilix.com.yml pull && up`
 
 ## Required GitHub secrets
 
