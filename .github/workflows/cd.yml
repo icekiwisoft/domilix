@@ -1,6 +1,10 @@
 name: CD
 
 on:
+  push:
+    branches:
+      - main
+      - master
   workflow_run:
     workflows:
       - Docker Publish
@@ -20,7 +24,7 @@ jobs:
   prepare-deploy:
     name: Prepare deploy files
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -49,7 +53,7 @@ jobs:
     name: Deploy Frontend Service
     runs-on: ubuntu-latest
     needs: prepare-deploy
-    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     steps:
       - name: Deploy frontend compose
         uses: appleboy/ssh-action@v1.2.0
@@ -86,7 +90,7 @@ jobs:
     name: Deploy Backend Service
     runs-on: ubuntu-latest
     needs: prepare-deploy
-    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     steps:
       - name: Deploy backend compose
         uses: appleboy/ssh-action@v1.2.0
