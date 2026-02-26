@@ -28,8 +28,12 @@ jobs:
           filters: |
             frontend:
               - 'domilix.com/**'
+              - 'deploy/**'
+              - '.github/workflows/cd.yml'
             backend:
               - 'api.domilix.com/**'
+              - 'deploy/**'
+              - '.github/workflows/cd.yml'
 
   deploy-frontend:
     name: Deploy Frontend
