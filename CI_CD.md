@@ -35,6 +35,8 @@ Set these in repository settings (`Settings > Secrets and variables > Actions`):
 - `GHCR_USERNAME`: GitHub username (or bot user) for GHCR login on VPS
 - `GHCR_TOKEN`: GitHub token/PAT with `read:packages` for GHCR pull
 
+If `GHCR_USERNAME`/`GHCR_TOKEN` are not set, CD falls back to `${GITHUB_TOKEN}` and `${{ github.actor }}`.
+
 Deployment paths are fixed in workflow:
 
 - Deploy stack root: `/opt/domilix/`
