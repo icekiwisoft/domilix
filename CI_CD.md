@@ -8,9 +8,9 @@ This repository now includes 2 GitHub Actions workflows:
 ## CI
 
 ### Frontend (`domilix.com`)
-- Install dependencies (`pnpm install --frozen-lockfile`)
+- Install dependencies (`npm ci`)
 - Lint (`eslint`)
-- Build (`pnpm run build`)
+- Build (`npm run build`)
 
 ### Backend (`api.domilix.com`)
 - Validate composer config
@@ -20,10 +20,12 @@ This repository now includes 2 GitHub Actions workflows:
 
 ## CD
 
-The deployment workflow deploys only the app that changed:
+The deployment workflow is Dockerized:
 
-- If `domilix.com/**` changed -> deploy frontend build (`dist/`) via rsync
-- If `api.domilix.com/**` changed -> deploy backend source via rsync + run Laravel deploy commands
+- If `domilix.com/**`, `api.domilix.com/**`, `deploy/**`, or `.github/workflows/cd.yml` changes,
+  it uploads `deploy/` files to `/opt/domilix/deploy/` and runs:
+  - `docker compose --env-file deploy/.env.production -f deploy/docker-compose.prod.yml pull`
+  - `docker compose --env-file deploy/.env.production -f deploy/docker-compose.prod.yml up -d --remove-orphans`
 
 ## Required GitHub secrets
 
@@ -33,16 +35,15 @@ Set these in repository settings (`Settings > Secrets and variables > Actions`):
 
 Deployment paths are fixed in workflow:
 
-- Frontend static files: `/opt/domilix/domilix.com/dist/`
-- Backend source/app: `/opt/domilix/api.domilix.com/`
+- Deploy stack root: `/opt/domilix/`
+- Compose files path: `/opt/domilix/deploy/`
 
 Optional:
 
-- `FRONTEND_POST_DEPLOY_CMD`: command run on server after frontend upload (example: reload nginx)
-- `BACKEND_POST_DEPLOY_CMD`: command run on server after backend deploy (example: `sudo systemctl reload php8.2-fpm`)
+- `POST_DEPLOY_CMD`: command run after `docker compose up` (example: `docker image prune -f`)
 
 ## Notes
 
-- Backend rsync excludes: `.env`, `vendor`, `node_modules`, `storage/logs`
-- Keep your production `.env` on the server (not in git)
-- Adjust deployment commands in `.github/workflows/cd.yml` if your infra differs (Docker, Forge, etc.)
+- `deploy/.env.production` is not overwritten by workflow.
+- If missing, workflow auto-creates it from `deploy/.env.production.example`.
+- Keep production values in `/opt/domilix/deploy/.env.production` on server.
