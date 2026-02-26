@@ -3,7 +3,7 @@
 This repository now includes 2 GitHub Actions workflows:
 
 - `.github/workflows/ci.yml`: quality checks on pull requests/pushes
-- `.github/workflows/cd.yml`: deployment on push to `main/master`, manual trigger, and after `Docker Publish` succeeds
+- `.github/workflows/cd.yml`: deployment after `Docker Publish` succeeds (or manual trigger)
 
 ## CI
 
@@ -24,8 +24,8 @@ The deployment workflow is Dockerized:
 
 - If `domilix.com/**`, `api.domilix.com/**`, `deploy/**`, or `.github/workflows/cd.yml` changes,
   it uploads `deploy/` files to `/opt/domilix/deploy/` and runs independent jobs:
-  - Frontend job: `docker compose -p domilix_frontend --env-file deploy/.env.production -f deploy/docker-compose.domilix.com.yml pull && up`
-  - Backend job: `docker compose -p domilix_backend --env-file deploy/.env.production -f deploy/docker-compose.api.domilix.com.yml pull && up`
+  - Frontend job: pulls/updates `ghcr.io/<owner>/domilix-frontend:<branch>`
+  - Backend job: pulls/updates `ghcr.io/<owner>/domilix-backend:<branch>`
 
 ## Required GitHub secrets
 

@@ -1,10 +1,6 @@
 name: CD
 
 on:
-  push:
-    branches:
-      - main
-      - master
   workflow_run:
     workflows:
       - Docker Publish
@@ -81,10 +77,13 @@ jobs:
               echo "deploy/.env.production created from example. Update it with real values."
             fi
 
-            sed -i "s|ghcr.io/your-org/|ghcr.io/${{ github.repository_owner }}/|g" deploy/.env.production
+            DEPLOY_TAG="${{ github.event.workflow_run.head_branch || github.ref_name || 'latest' }}"
+            FRONTEND_IMAGE="ghcr.io/${{ github.repository_owner }}/domilix-frontend:${DEPLOY_TAG}"
 
-            docker compose -p domilix_frontend --env-file deploy/.env.production -f deploy/docker-compose.domilix.com.yml pull
-            docker compose -p domilix_frontend --env-file deploy/.env.production -f deploy/docker-compose.domilix.com.yml up -d --remove-orphans
+            echo "Deploying frontend image: ${FRONTEND_IMAGE}"
+
+            FRONTEND_IMAGE="$FRONTEND_IMAGE" docker compose -p domilix_frontend --env-file deploy/.env.production -f deploy/docker-compose.domilix.com.yml pull frontend
+            FRONTEND_IMAGE="$FRONTEND_IMAGE" docker compose -p domilix_frontend --env-file deploy/.env.production -f deploy/docker-compose.domilix.com.yml up -d --remove-orphans frontend
 
   deploy-backend:
     name: Deploy Backend Service
@@ -118,10 +117,13 @@ jobs:
               echo "deploy/.env.production created from example. Update it with real values."
             fi
 
-            sed -i "s|ghcr.io/your-org/|ghcr.io/${{ github.repository_owner }}/|g" deploy/.env.production
+            DEPLOY_TAG="${{ github.event.workflow_run.head_branch || github.ref_name || 'latest' }}"
+            BACKEND_IMAGE="ghcr.io/${{ github.repository_owner }}/domilix-backend:${DEPLOY_TAG}"
 
-            docker compose -p domilix_backend --env-file deploy/.env.production -f deploy/docker-compose.api.domilix.com.yml pull
-            docker compose -p domilix_backend --env-file deploy/.env.production -f deploy/docker-compose.api.domilix.com.yml up -d --remove-orphans
+            echo "Deploying backend image: ${BACKEND_IMAGE}"
+
+            BACKEND_IMAGE="$BACKEND_IMAGE" docker compose -p domilix_backend --env-file deploy/.env.production -f deploy/docker-compose.api.domilix.com.yml pull backend
+            BACKEND_IMAGE="$BACKEND_IMAGE" docker compose -p domilix_backend --env-file deploy/.env.production -f deploy/docker-compose.api.domilix.com.yml up -d --remove-orphans
 
       - name: Optional post-deploy command
         uses: appleboy/ssh-action@v1.2.0

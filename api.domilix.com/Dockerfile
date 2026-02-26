@@ -25,9 +25,11 @@ RUN apk add --no-cache \
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 COPY composer.json composer.lock ./
-RUN composer install --no-interaction --prefer-dist --no-progress
+RUN composer install --no-interaction --prefer-dist --no-progress --no-scripts
 
 COPY . .
+
+RUN composer dump-autoload --optimize && php artisan package:discover --ansi
 
 RUN chown -R www-data:www-data storage bootstrap/cache
 
