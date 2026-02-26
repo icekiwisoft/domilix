@@ -9,7 +9,15 @@ fi
 
 if [ "${DB_CONNECTION:-}" = "mysql" ]; then
   echo "[entrypoint] Waiting for MySQL (${DB_HOST:-db}:${DB_PORT:-3306})..."
+  ATTEMPT=0
+  MAX_ATTEMPTS="${DB_WAIT_MAX_ATTEMPTS:-30}"
+
   until mysqladmin ping -h"${DB_HOST:-db}" -P"${DB_PORT:-3306}" -u"${DB_USERNAME:-root}" -p"${DB_PASSWORD:-}" --silent; do
+    ATTEMPT=$((ATTEMPT + 1))
+    if [ "$ATTEMPT" -ge "$MAX_ATTEMPTS" ]; then
+      echo "[entrypoint] MySQL not reachable after ${MAX_ATTEMPTS} attempts, continuing startup"
+      break
+    fi
     sleep 2
   done
 fi
