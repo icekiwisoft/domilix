@@ -1,6 +1,22 @@
-Domilis.Com
-=============
+# Domilix Frontend (`domilix.com`)
 
-this is thefrontend part of domilis website 
+Frontend app built with React + Vite.
 
-[domilis](https://domilis.com)
+## Local run
+
+```bash
+npm ci
+npm run dev
+```
+
+## Build
+
+```bash
+npm run build
+```
+
+## Preview build
+
+```bash
+npm run preview
+```
