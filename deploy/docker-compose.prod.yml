@@ -1,0 +1,85 @@
+services:
+  frontend:
+    image: ${FRONTEND_IMAGE}
+    container_name: domilix-frontend
+    restart: unless-stopped
+    networks:
+      - traefik
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=${TRAEFIK_NETWORK:-traefik}
+      - traefik.http.routers.domilix-frontend.rule=Host(`${FRONTEND_HOST:-domilix.com}`)
+      - traefik.http.routers.domilix-frontend.entrypoints=${TRAEFIK_ENTRYPOINT:-websecure}
+      - traefik.http.routers.domilix-frontend.tls=true
+      - traefik.http.routers.domilix-frontend.tls.certresolver=${TRAEFIK_CERTRESOLVER:-le}
+      - traefik.http.services.domilix-frontend.loadbalancer.server.port=80
+
+  backend:
+    image: ${BACKEND_IMAGE}
+    container_name: domilix-backend
+    restart: unless-stopped
+    env_file:
+      - ./.env.production
+    environment:
+      APP_ENV: production
+      APP_DEBUG: 'false'
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app
+
+  backend-nginx:
+    image: nginx:1.27-alpine
+    container_name: domilix-backend-nginx
+    restart: unless-stopped
+    depends_on:
+      - backend
+    volumes:
+      - ../api.domilix.com/docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - app
+      - traefik
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=${TRAEFIK_NETWORK:-traefik}
+      - traefik.http.routers.domilix-api.rule=Host(`${BACKEND_HOST:-api.domilix.com}`)
+      - traefik.http.routers.domilix-api.entrypoints=${TRAEFIK_ENTRYPOINT:-websecure}
+      - traefik.http.routers.domilix-api.tls=true
+      - traefik.http.routers.domilix-api.tls.certresolver=${TRAEFIK_CERTRESOLVER:-le}
+      - traefik.http.services.domilix-api.loadbalancer.server.port=80
+
+  db:
+    image: mysql:8.0
+    container_name: domilix-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - domilix_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', '127.0.0.1', '-p${DB_ROOT_PASSWORD}']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - app
+
+networks:
+  traefik:
+    external: true
+    name: ${TRAEFIK_NETWORK:-traefik}
+  app:
+    driver: bridge
+
+volumes:
+  domilix_mysql_data:

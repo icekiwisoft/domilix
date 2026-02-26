@@ -1,0 +1,67 @@
+services:
+  frontend:
+    build:
+      context: ./domilix.com
+      dockerfile: Dockerfile
+    container_name: domilix-frontend
+    ports:
+      - '3000:80'
+    depends_on:
+      - backend-nginx
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./api.domilix.com
+      dockerfile: Dockerfile
+    container_name: domilix-backend
+    working_dir: /var/www/html
+    env_file:
+      - ./api.domilix.com/.env
+    environment:
+      APP_ENV: local
+      APP_DEBUG: 'true'
+      APP_URL: http://localhost:8000
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_CONNECTION: mysql
+      DB_DATABASE: domilis
+      DB_USERNAME: domilix
+      DB_PASSWORD: domilix
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  backend-nginx:
+    image: nginx:1.27-alpine
+    container_name: domilix-backend-nginx
+    depends_on:
+      - backend
+    ports:
+      - '8000:80'
+    volumes:
+      - ./api.domilix.com/docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.0
+    container_name: domilix-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: domilis
+      MYSQL_USER: domilix
+      MYSQL_PASSWORD: domilix
+    ports:
+      - '3307:3306'
+    volumes:
+      - domilix_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', '127.0.0.1', '-proot']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+volumes:
+  domilix_mysql_data:
