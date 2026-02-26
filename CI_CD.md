@@ -3,7 +3,7 @@
 This repository now includes 2 GitHub Actions workflows:
 
 - `.github/workflows/ci.yml`: quality checks on pull requests/pushes
-- `.github/workflows/cd.yml`: deployment on push to `main`/`master`
+- `.github/workflows/cd.yml`: deployment after `Docker Publish` succeeds (or manual trigger)
 
 ## CI
 

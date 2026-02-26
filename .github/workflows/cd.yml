@@ -1,10 +1,12 @@
 name: CD
 
 on:
-  push:
-    branches:
-      - main
-      - master
+  workflow_run:
+    workflows:
+      - Docker Publish
+    types:
+      - completed
+  workflow_dispatch:
 
 concurrency:
   group: cd-${{ github.ref }}
@@ -18,9 +20,12 @@ jobs:
   deploy-docker:
     name: Deploy Docker Stack
     runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       - name: Ensure deploy directory exists
         uses: appleboy/ssh-action@v1.2.0
