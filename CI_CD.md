@@ -24,8 +24,8 @@ The deployment workflow is Dockerized:
 
 - If `domilix.com/**`, `api.domilix.com/**`, `deploy/**`, or `.github/workflows/cd.yml` changes,
   it uploads `deploy/` files to `/opt/domilix/deploy/` and runs:
-  - `docker compose --env-file deploy/.env.production -f deploy/docker-compose.prod.yml pull`
-  - `docker compose --env-file deploy/.env.production -f deploy/docker-compose.prod.yml up -d --remove-orphans`
+  - `docker compose --env-file deploy/.env.production -f deploy/docker-compose.domilix.com.yml pull && up`
+  - `docker compose --env-file deploy/.env.production -f deploy/docker-compose.api.domilix.com.yml pull && up`
 
 ## Required GitHub secrets
 

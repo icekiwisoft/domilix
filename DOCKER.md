@@ -39,7 +39,10 @@ docker compose down
 
 ## Production with external Traefik
 
-Use `deploy/docker-compose.prod.yml`.
+Use split production compose files:
+
+- `deploy/docker-compose.domilix.com.yml` (frontend)
+- `deploy/docker-compose.api.domilix.com.yml` (backend + db)
 
 1. Create production env file:
 
@@ -52,7 +55,8 @@ cp deploy/.env.production.example deploy/.env.production
 3. Start production stack:
 
 ```bash
-docker compose --env-file deploy/.env.production -f deploy/docker-compose.prod.yml up -d
+docker compose --env-file deploy/.env.production -f deploy/docker-compose.domilix.com.yml up -d
+docker compose --env-file deploy/.env.production -f deploy/docker-compose.api.domilix.com.yml up -d
 ```
 
-This compose attaches `frontend` and `backend-nginx` to your external Traefik network and exposes routes via labels (no direct host ports required).
+These compose files attach `frontend` and `backend-nginx` to your external Traefik network and expose routes via labels (no direct host ports required).

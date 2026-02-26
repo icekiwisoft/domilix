@@ -1,19 +1,4 @@
 services:
-  frontend:
-    image: ${FRONTEND_IMAGE}
-    container_name: domilix-frontend
-    restart: unless-stopped
-    networks:
-      - traefik
-    labels:
-      - traefik.enable=true
-      - traefik.docker.network=${TRAEFIK_NETWORK:-traefik}
-      - traefik.http.routers.domilix-frontend.rule=Host(`${FRONTEND_HOST:-domilix.com}`)
-      - traefik.http.routers.domilix-frontend.entrypoints=${TRAEFIK_ENTRYPOINT:-websecure}
-      - traefik.http.routers.domilix-frontend.tls=true
-      - traefik.http.routers.domilix-frontend.tls.certresolver=${TRAEFIK_CERTRESOLVER:-le}
-      - traefik.http.services.domilix-frontend.loadbalancer.server.port=80
-
   backend:
     image: ${BACKEND_IMAGE}
     container_name: domilix-backend
@@ -42,7 +27,7 @@ services:
     depends_on:
       - backend
     volumes:
-      - ./nginx/backend.conf:/etc/nginx/conf.d/default.conf:ro
+      - /opt/domilix/deploy/nginx/backend.conf:/etc/nginx/conf.d/default.conf:ro
     networks:
       - app
       - traefik

@@ -1,0 +1,20 @@
+services:
+  frontend:
+    image: ${FRONTEND_IMAGE}
+    container_name: domilix-frontend
+    restart: unless-stopped
+    networks:
+      - traefik
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=${TRAEFIK_NETWORK:-traefik}
+      - traefik.http.routers.domilix-frontend.rule=Host(`${FRONTEND_HOST:-domilix.com}`)
+      - traefik.http.routers.domilix-frontend.entrypoints=${TRAEFIK_ENTRYPOINT:-websecure}
+      - traefik.http.routers.domilix-frontend.tls=true
+      - traefik.http.routers.domilix-frontend.tls.certresolver=${TRAEFIK_CERTRESOLVER:-le}
+      - traefik.http.services.domilix-frontend.loadbalancer.server.port=80
+
+networks:
+  traefik:
+    external: true
+    name: ${TRAEFIK_NETWORK:-traefik}

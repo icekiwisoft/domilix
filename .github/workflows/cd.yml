@@ -73,8 +73,11 @@ jobs:
 
             sed -i "s|ghcr.io/your-org/|ghcr.io/${{ github.repository_owner }}/|g" deploy/.env.production
 
-            docker compose --env-file deploy/.env.production -f deploy/docker-compose.prod.yml pull
-            docker compose --env-file deploy/.env.production -f deploy/docker-compose.prod.yml up -d --remove-orphans
+            docker compose --env-file deploy/.env.production -f deploy/docker-compose.domilix.com.yml pull
+            docker compose --env-file deploy/.env.production -f deploy/docker-compose.domilix.com.yml up -d --remove-orphans
+
+            docker compose --env-file deploy/.env.production -f deploy/docker-compose.api.domilix.com.yml pull
+            docker compose --env-file deploy/.env.production -f deploy/docker-compose.api.domilix.com.yml up -d --remove-orphans
 
             if [ -n "${{ secrets.POST_DEPLOY_CMD }}" ]; then
               ${{ secrets.POST_DEPLOY_CMD }}
