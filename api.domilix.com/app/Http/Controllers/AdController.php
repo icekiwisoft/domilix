@@ -87,6 +87,12 @@ class AdController extends Controller
             $query->where('city', 'like', '%' . $request->city . '%');
         }
 
+        // Filter by address (supports both 'address' and legacy 'adress')
+        $addressFilter = $request->input('address', $request->input('adress'));
+        if (!empty($addressFilter)) {
+            $query->where('adress', 'like', '%' . $addressFilter . '%');
+        }
+
         // Filter by devise (currency)
         if ($request->filled('devise')) {
             $query->where('devise', $request->devise);
@@ -386,14 +392,28 @@ class AdController extends Controller
             'query' => 'required|string|min:3|max:100',
             'proximity' => 'nullable|array|size:2',
             'proximity.*' => 'numeric',
-            'limit' => 'nullable|integer|min:1|max:10'
+            'limit' => 'nullable|integer|min:1|max:10',
+            'types' => 'nullable|array|min:1',
+            'types.*' => 'string|in:country,region,postcode,district,place,locality,neighborhood,address,poi',
+            'country' => 'nullable|string|size:2',
+            'language' => 'nullable|string|max:10',
+            'bbox' => 'nullable|array|size:4',
+            'bbox.*' => 'numeric',
+            'autocomplete' => 'nullable|boolean'
         ]);
 
         $query = $request->input('query');
         $proximity = $request->input('proximity');
         $limit = $request->input('limit', 5);
+        $filters = [
+            'types' => $request->input('types'),
+            'country' => $request->input('country'),
+            'language' => $request->input('language'),
+            'bbox' => $request->input('bbox'),
+            'autocomplete' => $request->input('autocomplete'),
+        ];
 
-        $results = $mapboxService->searchPlaces($query, $proximity, $limit);
+        $results = $mapboxService->searchPlaces($query, $proximity, $limit, $filters);
 
         return response()->json([
             'success' => true,

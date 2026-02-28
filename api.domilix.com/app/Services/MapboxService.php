@@ -63,9 +63,10 @@ class MapboxService
      * @param string $query
      * @param array|null $proximity [longitude, latitude]
      * @param int $limit
+     * @param array $filters
      * @return array
      */
-    public function searchPlaces(string $query, ?array $proximity = null, int $limit = 5): array
+    public function searchPlaces(string $query, ?array $proximity = null, int $limit = 5, array $filters = []): array
     {
         try {
             $params = [
@@ -74,6 +75,26 @@ class MapboxService
                 'types' => 'place,locality,neighborhood,address,poi',
                 'language' => 'fr',
             ];
+
+            if (!empty($filters['types'])) {
+                $params['types'] = implode(',', $filters['types']);
+            }
+
+            if (!empty($filters['country'])) {
+                $params['country'] = $filters['country'];
+            }
+
+            if (!empty($filters['language'])) {
+                $params['language'] = $filters['language'];
+            }
+
+            if (!empty($filters['bbox']) && count($filters['bbox']) === 4) {
+                $params['bbox'] = implode(',', $filters['bbox']);
+            }
+
+            if (array_key_exists('autocomplete', $filters)) {
+                $params['autocomplete'] = $filters['autocomplete'] ? 'true' : 'false';
+            }
 
             if ($proximity && count($proximity) === 2) {
                 $params['proximity'] = "{$proximity[0]},{$proximity[1]}";

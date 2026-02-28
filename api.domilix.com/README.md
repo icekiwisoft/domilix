@@ -22,3 +22,15 @@ docker compose up --build
 ```
 
 API will be available at `http://localhost:8000`.
+
+## Swagger
+
+Swagger UI is available at:
+
+- `http://localhost:8000/api/documentation`
+
+Regenerate docs after annotations changes:
+
+```bash
+php artisan l5-swagger:generate
+```

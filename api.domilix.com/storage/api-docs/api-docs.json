@@ -1,0 +1,1023 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Domilix API",
+        "description": "API documentation for Domilix backend",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "/",
+            "description": "Default server"
+        }
+    ],
+    "paths": {
+        "/api": {
+            "get": {
+                "tags": [
+                    "System"
+                ],
+                "summary": "API status",
+                "description": "Returns basic API status information",
+                "operationId": "452ffa5f0f23427f5238c316037777b4",
+                "responses": {
+                    "200": {
+                        "description": "API is reachable"
+                    }
+                }
+            }
+        },
+        "/api/auth/login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Login",
+                "operationId": "961daabd832c20e87b5f5a7091969594",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "announcer@domilix.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "domilix2024"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Authenticated"
+                    },
+                    "401": {
+                        "description": "Invalid credentials"
+                    }
+                }
+            }
+        },
+        "/api/auth/register": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Register",
+                "operationId": "dca5bdd60525f15e67774e780d94b18c",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "phone_number"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "John Doe"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "StrongPassword123"
+                                    },
+                                    "phone_number": {
+                                        "type": "string",
+                                        "example": "+237690000000"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Registered"
+                    }
+                }
+            }
+        },
+        "/api/auth/me": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Current user profile",
+                "operationId": "295f790295b33016f83174029d522523",
+                "responses": {
+                    "200": {
+                        "description": "Profile"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/announces": {
+            "get": {
+                "tags": [
+                    "Ads"
+                ],
+                "summary": "List ads",
+                "operationId": "754723e98f2e57766a45d5e305b1b7c7",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "AnnouncerId",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "description": "furniture|realestate",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "orderBy",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "liked",
+                        "in": "query",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "unlocked",
+                        "in": "query",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "category_id",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "budget_min",
+                        "in": "query",
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "budget_max",
+                        "in": "query",
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "ad_type",
+                        "in": "query",
+                        "description": "location|sale",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "city",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "address",
+                        "in": "query",
+                        "description": "Address contains filter (alias: adress)",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "adress",
+                        "in": "query",
+                        "description": "Legacy address contains filter",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "devise",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "period",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "bedroom_min",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "bedroom_max",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "standing",
+                        "in": "query",
+                        "description": "standard|confort|haut_standing",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "amenities[]",
+                        "in": "query",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ads list"
+                    }
+                }
+            }
+        },
+        "/api/announces/{announce}": {
+            "get": {
+                "tags": [
+                    "Ads"
+                ],
+                "summary": "Get ad details",
+                "operationId": "2d41879893bf37efab15bd44ee4c9dea",
+                "parameters": [
+                    {
+                        "name": "announce",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ad details"
+                    }
+                }
+            }
+        },
+        "/api/categories": {
+            "get": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "List categories",
+                "operationId": "8cb6a53c1fbf6eb39065aede4ce7cc0e",
+                "responses": {
+                    "200": {
+                        "description": "Categories list"
+                    }
+                }
+            }
+        },
+        "/api/addresses/search": {
+            "get": {
+                "tags": [
+                    "Addresses"
+                ],
+                "summary": "Search addresses",
+                "operationId": "a621fd59c9f0d43e6e59d4247eeea178",
+                "parameters": [
+                    {
+                        "name": "query",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "proximity[]",
+                        "in": "query",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "number"
+                            }
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "default": 5
+                        }
+                    },
+                    {
+                        "name": "types[]",
+                        "in": "query",
+                        "description": "Mapbox types filter",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "country",
+                                    "region",
+                                    "postcode",
+                                    "district",
+                                    "place",
+                                    "locality",
+                                    "neighborhood",
+                                    "address",
+                                    "poi"
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "name": "country",
+                        "in": "query",
+                        "description": "ISO-3166 country code",
+                        "schema": {
+                            "type": "string",
+                            "example": "cm"
+                        }
+                    },
+                    {
+                        "name": "language",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "example": "fr"
+                        }
+                    },
+                    {
+                        "name": "bbox[]",
+                        "in": "query",
+                        "description": "Bounding box: minLon,minLat,maxLon,maxLat",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "number"
+                            }
+                        }
+                    },
+                    {
+                        "name": "autocomplete",
+                        "in": "query",
+                        "schema": {
+                            "type": "boolean",
+                            "default": true
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Address results"
+                    }
+                }
+            }
+        },
+        "/api/notifications": {
+            "get": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "List user notifications",
+                "operationId": "93e091ab59beef6e1e5813557a254096",
+                "responses": {
+                    "200": {
+                        "description": "Notifications list"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/logout": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Logout",
+                "operationId": "54f0e393c0452584096da838297de41d",
+                "responses": {
+                    "200": {
+                        "description": "Logged out"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/refresh": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Refresh JWT token",
+                "operationId": "90e7a8bd6dc9e66eeabd561972eb33e0",
+                "responses": {
+                    "200": {
+                        "description": "Token refreshed"
+                    }
+                }
+            }
+        },
+        "/api/auth/sendEmail": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Request password reset email",
+                "operationId": "32fe04022c3e4e47eb87292f2a001cb4",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "announcer@domilix.com"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Reset email sent"
+                    }
+                }
+            }
+        },
+        "/api/auth/resetPassword": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Reset password",
+                "operationId": "d3910df890e498e41580dc11e861a404",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "code",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "announcer@domilix.com"
+                                    },
+                                    "code": {
+                                        "type": "integer",
+                                        "example": 123456
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "minLength": 8,
+                                        "example": "NewStrongPassword123"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "minLength": 8,
+                                        "example": "NewStrongPassword123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password reset"
+                    },
+                    "400": {
+                        "description": "Invalid verification code"
+                    },
+                    "404": {
+                        "description": "User not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            }
+        },
+        "/api/addresses/reverse-geocode": {
+            "get": {
+                "tags": [
+                    "Addresses"
+                ],
+                "summary": "Reverse geocode coordinates",
+                "operationId": "2147abd32043eb9ab7d81a83750fadea",
+                "parameters": [
+                    {
+                        "name": "latitude",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "longitude",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "number"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Reverse geocode result"
+                    }
+                }
+            }
+        },
+        "/api/announces/{ad}/like": {
+            "patch": {
+                "tags": [
+                    "Ads"
+                ],
+                "summary": "Toggle ad favorite",
+                "operationId": "6d8410ffa5f308a8ccaaebca80ef6fb1",
+                "parameters": [
+                    {
+                        "name": "ad",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Favorite toggled"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/announces/{ad}/unlock": {
+            "post": {
+                "tags": [
+                    "Ads"
+                ],
+                "summary": "Unlock an ad",
+                "operationId": "273e938dd61eae1579c06cbe6b22f0f1",
+                "parameters": [
+                    {
+                        "name": "ad",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ad unlocked"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/verifyPhone/{user_id}": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Verify phone number",
+                "operationId": "c180110c9eefb9dee268a088a35349e8",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "verification_code"
+                                ],
+                                "properties": {
+                                    "verification_code": {
+                                        "type": "integer",
+                                        "example": 123456
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Phone verified"
+                    }
+                }
+            }
+        },
+        "/api/auth/resendVerificationCode/{user_id}": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Resend phone verification code",
+                "operationId": "1c0a5c05badb6b4d3fab2e7edf021961",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Verification code resent"
+                    }
+                }
+            }
+        },
+        "/api/auth/changePassword": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Change user password",
+                "operationId": "90e3e6853309e68cf6dc5cf9ddbbbf04",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "old_password",
+                                    "new_password",
+                                    "new_password_confirmation"
+                                ],
+                                "properties": {
+                                    "old_password": {
+                                        "type": "string",
+                                        "example": "CurrentPassword123"
+                                    },
+                                    "new_password": {
+                                        "type": "string",
+                                        "minLength": 8,
+                                        "example": "NewStrongPassword123"
+                                    },
+                                    "new_password_confirmation": {
+                                        "type": "string",
+                                        "minLength": 8,
+                                        "example": "NewStrongPassword123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password changed"
+                    },
+                    "401": {
+                        "description": "Invalid old password"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/notifications/unread-count": {
+            "get": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Unread notifications count",
+                "operationId": "00f8f523f3a6cc6ff5b0884b3c2b1430",
+                "responses": {
+                    "200": {
+                        "description": "Unread count"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/notifications/{id}/read": {
+            "post": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Mark notification as read",
+                "operationId": "52010b39f38d546cd8e176e593d33637",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Notification marked as read"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/notifications/mark-all-read": {
+            "post": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Mark all notifications as read",
+                "operationId": "cb03634e4b09822605b58a5121999a35",
+                "responses": {
+                    "200": {
+                        "description": "All notifications marked as read"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/notifications/{id}": {
+            "delete": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Delete one notification",
+                "operationId": "95d2c639c44e9cf8d85a4701231b0e05",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Notification deleted"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/notifications/read/all": {
+            "delete": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Delete all read notifications",
+                "operationId": "d4d5a4ae4971017748257da56798d41b",
+                "responses": {
+                    "200": {
+                        "description": "Read notifications deleted"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/subscriptions": {
+            "get": {
+                "tags": [
+                    "Subscriptions"
+                ],
+                "summary": "List subscriptions",
+                "operationId": "e317d102c8033832f038bbd7a931f378",
+                "responses": {
+                    "200": {
+                        "description": "Subscriptions list"
+                    }
+                }
+            }
+        },
+        "/api/newsletters": {
+            "get": {
+                "tags": [
+                    "Newsletter"
+                ],
+                "summary": "List newsletters",
+                "operationId": "37c4e31f65f4597a96f1e8d092d799f5",
+                "responses": {
+                    "200": {
+                        "description": "Newsletter list"
+                    }
+                }
+            }
+        },
+        "/api/newsletter/{token}": {
+            "get": {
+                "tags": [
+                    "Newsletter"
+                ],
+                "summary": "Verify newsletter token",
+                "operationId": "a68edd222082025934c72dccffd32458",
+                "parameters": [
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Token verified"
+                    }
+                }
+            }
+        },
+        "/api/webhooks/campay": {
+            "get": {
+                "tags": [
+                    "Webhooks"
+                ],
+                "summary": "Campay webhook endpoint",
+                "operationId": "f286975f388672e76b8251ac394c8ba4",
+                "responses": {
+                    "200": {
+                        "description": "Webhook processed"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "System",
+            "description": "System"
+        },
+        {
+            "name": "Auth",
+            "description": "Auth"
+        },
+        {
+            "name": "Ads",
+            "description": "Ads"
+        },
+        {
+            "name": "Categories",
+            "description": "Categories"
+        },
+        {
+            "name": "Addresses",
+            "description": "Addresses"
+        },
+        {
+            "name": "Notifications",
+            "description": "Notifications"
+        },
+        {
+            "name": "Subscriptions",
+            "description": "Subscriptions"
+        },
+        {
+            "name": "Newsletter",
+            "description": "Newsletter"
+        },
+        {
+            "name": "Webhooks",
+            "description": "Webhooks"
+        }
+    ]
+}

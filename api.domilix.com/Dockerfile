@@ -29,7 +29,7 @@ RUN composer install --no-interaction --prefer-dist --no-progress --no-scripts
 
 COPY . .
 
-RUN composer dump-autoload --optimize && php artisan package:discover --ansi
+RUN composer dump-autoload --optimize && php artisan package:discover --ansi && php artisan l5-swagger:generate
 
 RUN chown -R www-data:www-data storage bootstrap/cache
 
