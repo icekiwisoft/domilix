@@ -2,7 +2,7 @@
     "openapi": "3.0.0",
     "info": {
         "title": "Domilix API",
-        "description": "API documentation for Domilix backend",
+        "description": "Complete API documentation for Domilix backend",
         "version": "1.0.0"
     },
     "servers": [
@@ -18,123 +18,21 @@
                     "System"
                 ],
                 "summary": "API status",
-                "description": "Returns basic API status information",
-                "operationId": "452ffa5f0f23427f5238c316037777b4",
+                "description": "Returns global API stats/status payload.",
+                "operationId": "2f2c1cb6e4897087546b8b88e58e34eb",
                 "responses": {
                     "200": {
-                        "description": "API is reachable"
-                    }
-                }
-            }
-        },
-        "/api/auth/login": {
-            "post": {
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Login",
-                "operationId": "961daabd832c20e87b5f5a7091969594",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "email",
-                                    "password"
-                                ],
-                                "properties": {
-                                    "email": {
-                                        "type": "string",
-                                        "format": "email",
-                                        "example": "announcer@domilix.com"
-                                    },
-                                    "password": {
-                                        "type": "string",
-                                        "example": "domilix2024"
-                                    }
-                                },
-                                "type": "object"
+                        "description": "API reachable",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "status": "ok"
+                                }
                             }
                         }
                     }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Authenticated"
-                    },
-                    "401": {
-                        "description": "Invalid credentials"
-                    }
                 }
-            }
-        },
-        "/api/auth/register": {
-            "post": {
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Register",
-                "operationId": "dca5bdd60525f15e67774e780d94b18c",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "name",
-                                    "email",
-                                    "password",
-                                    "phone_number"
-                                ],
-                                "properties": {
-                                    "name": {
-                                        "type": "string",
-                                        "example": "John Doe"
-                                    },
-                                    "email": {
-                                        "type": "string",
-                                        "format": "email",
-                                        "example": "john@example.com"
-                                    },
-                                    "password": {
-                                        "type": "string",
-                                        "example": "StrongPassword123"
-                                    },
-                                    "phone_number": {
-                                        "type": "string",
-                                        "example": "+237690000000"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Registered"
-                    }
-                }
-            }
-        },
-        "/api/auth/me": {
-            "get": {
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Current user profile",
-                "operationId": "295f790295b33016f83174029d522523",
-                "responses": {
-                    "200": {
-                        "description": "Profile"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
             }
         },
         "/api/announces": {
@@ -143,7 +41,8 @@
                     "Ads"
                 ],
                 "summary": "List ads",
-                "operationId": "754723e98f2e57766a45d5e305b1b7c7",
+                "description": "Returns paginated ads with all available search filters.",
+                "operationId": "3968778a25b84f5c6972e7879edcecda",
                 "parameters": [
                     {
                         "name": "search",
@@ -189,13 +88,6 @@
                         }
                     },
                     {
-                        "name": "category_id",
-                        "in": "query",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
                         "name": "budget_min",
                         "in": "query",
                         "schema": {
@@ -207,6 +99,13 @@
                         "in": "query",
                         "schema": {
                             "type": "number"
+                        }
+                    },
+                    {
+                        "name": "category_id",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
                         }
                     },
                     {
@@ -227,15 +126,6 @@
                     {
                         "name": "address",
                         "in": "query",
-                        "description": "Address contains filter (alias: adress)",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "adress",
-                        "in": "query",
-                        "description": "Legacy address contains filter",
                         "schema": {
                             "type": "string"
                         }
@@ -289,9 +179,79 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Ads list"
+                        "description": "Paginated ads",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "data": [],
+                                    "links": [],
+                                    "meta": []
+                                }
+                            }
+                        }
                     }
                 }
+            },
+            "post": {
+                "tags": [
+                    "Ads"
+                ],
+                "summary": "Create ad",
+                "description": "Creates a furniture or real estate ad with medias.",
+                "operationId": "44c1177c6ebbc4ae16afddbf1e85fdcd",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "type",
+                                    "description",
+                                    "price",
+                                    "category_id"
+                                ],
+                                "properties": {
+                                    "type": {
+                                        "type": "string",
+                                        "example": "realestate"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Appartement moderne"
+                                    },
+                                    "price": {
+                                        "type": "number",
+                                        "example": 250000
+                                    },
+                                    "category_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Ad created",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "id": 101
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/api/announces/{announce}": {
@@ -300,7 +260,7 @@
                     "Ads"
                 ],
                 "summary": "Get ad details",
-                "operationId": "2d41879893bf37efab15bd44ee4c9dea",
+                "operationId": "4e2d19789b1a234360c7633fb92bd4ec",
                 "parameters": [
                     {
                         "name": "announce",
@@ -313,9 +273,146 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Ad details"
+                        "description": "Ad details",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "id": 1,
+                                    "description": "..."
+                                }
+                            }
+                        }
                     }
                 }
+            },
+            "put": {
+                "tags": [
+                    "Ads"
+                ],
+                "summary": "Update ad",
+                "operationId": "9a433978186fde13346204a68bde3f8b",
+                "parameters": [
+                    {
+                        "name": "announce",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ad updated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Ads"
+                ],
+                "summary": "Delete ad",
+                "operationId": "299cf90fbbb9f933250c7a90fb05259f",
+                "parameters": [
+                    {
+                        "name": "announce",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Ad deleted"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/announces/{ad}/like": {
+            "patch": {
+                "tags": [
+                    "Ads"
+                ],
+                "summary": "Toggle ad favorite",
+                "operationId": "7fd145c912af3aebc0caceea25e930a9",
+                "parameters": [
+                    {
+                        "name": "ad",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Favorite toggled",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "liked": true
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/announces/{ad}/unlock": {
+            "post": {
+                "tags": [
+                    "Ads"
+                ],
+                "summary": "Unlock ad contacts",
+                "operationId": "add4c9bcfa4cd56c0e33cb6d4580bae7",
+                "parameters": [
+                    {
+                        "name": "ad",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Unlocked",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "remaining_credits": 9
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/api/categories": {
@@ -324,12 +421,624 @@
                     "Categories"
                 ],
                 "summary": "List categories",
-                "operationId": "8cb6a53c1fbf6eb39065aede4ce7cc0e",
+                "operationId": "ed5e6f7811e1e18a5f17ed6bff17638a",
                 "responses": {
                     "200": {
-                        "description": "Categories list"
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "data": []
+                                }
+                            }
+                        }
                     }
                 }
+            },
+            "post": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Create category",
+                "operationId": "362b0b58a4f7e9c2cde4d917b66f5fed",
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/categories/{category}": {
+            "get": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Show category",
+                "operationId": "d976335b208b42d74b78daf9a392ac01",
+                "parameters": [
+                    {
+                        "name": "category",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Update category",
+                "operationId": "97798bd6a3d90c44e748b2008d346b16",
+                "parameters": [
+                    {
+                        "name": "category",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Delete category",
+                "operationId": "e4e0bdeba585e90fa21606c4a4f33a7d",
+                "parameters": [
+                    {
+                        "name": "category",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Deleted"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/announcers": {
+            "get": {
+                "tags": [
+                    "Announcers"
+                ],
+                "summary": "List announcers",
+                "operationId": "d5a5848e91e8a851478d9b2052e119c0",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Announcers"
+                ],
+                "summary": "Create announcer",
+                "operationId": "ab580e48dd0387d6b7ccaa6a4702d693",
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/announcers/{announcer}": {
+            "get": {
+                "tags": [
+                    "Announcers"
+                ],
+                "summary": "Show announcer",
+                "operationId": "906da337558d4c3d1115f1b0f9a3567b",
+                "parameters": [
+                    {
+                        "name": "announcer",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Announcers"
+                ],
+                "summary": "Update announcer",
+                "operationId": "831c7c3cd54c212a259116f4e4b4d935",
+                "parameters": [
+                    {
+                        "name": "announcer",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Announcers"
+                ],
+                "summary": "Delete announcer",
+                "operationId": "d1bb835e337a7b3037e616d9c9042c17",
+                "parameters": [
+                    {
+                        "name": "announcer",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Deleted"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/announcers/{announcer}/medias": {
+            "get": {
+                "tags": [
+                    "Announcers"
+                ],
+                "summary": "List announcer medias",
+                "operationId": "afacf30066920b58f636c3cb6177d6b2",
+                "parameters": [
+                    {
+                        "name": "announcer",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/medias": {
+            "get": {
+                "tags": [
+                    "Medias"
+                ],
+                "summary": "List medias",
+                "operationId": "f7b8a06339e09cd0c29bacbf10a2a49f",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Medias"
+                ],
+                "summary": "Create media",
+                "operationId": "4e3ce12db8b4de73ac998d6ea8a0108a",
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/medias/{media}": {
+            "get": {
+                "tags": [
+                    "Medias"
+                ],
+                "summary": "Show media",
+                "operationId": "2f886581464c6be2635c34fbd13ae1d5",
+                "parameters": [
+                    {
+                        "name": "media",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Medias"
+                ],
+                "summary": "Update media",
+                "operationId": "8eb8c7e835e3aff9be0c01cf7f9c9d4e",
+                "parameters": [
+                    {
+                        "name": "media",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Medias"
+                ],
+                "summary": "Delete media",
+                "operationId": "2fb62d5f7c84083e80d31b9a5cd4fb36",
+                "parameters": [
+                    {
+                        "name": "media",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Deleted"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/users": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "List users",
+                "operationId": "681e0ff9ea1d43cc0f067d6c8ec6619a",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Create user",
+                "operationId": "322ac216197ffc40d0703e579b995313",
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/users/{user}": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Show user",
+                "operationId": "5dea62e4462bd83962dc349c5c3806c6",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Update user",
+                "operationId": "e77e80536624cfab93370eb3e543fbf1",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Delete user",
+                "operationId": "41a1a3715e2d349a96b9701ef114a667",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Deleted"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/users/{user}/become-announcer": {
+            "patch": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Promote user to announcer",
+                "operationId": "df4f4003c2aa79e18c0f40c014eb0cd8",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/announcer-requests": {
+            "get": {
+                "tags": [
+                    "Announcer Requests"
+                ],
+                "summary": "List announcer requests",
+                "operationId": "afd885d39484dcfe7bf954d25cc0d4b9",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Announcer Requests"
+                ],
+                "summary": "Create announcer request",
+                "operationId": "6980a4152090c9ce920ab4cd0a453adb",
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/announcer-requests/{announcer_request}": {
+            "get": {
+                "tags": [
+                    "Announcer Requests"
+                ],
+                "summary": "Show announcer request",
+                "operationId": "2b8b5360beb9a8ae2b654a5405fd9967",
+                "parameters": [
+                    {
+                        "name": "announcer_request",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Announcer Requests"
+                ],
+                "summary": "Update announcer request",
+                "operationId": "aff3882546d3b2dca7cd20b4b21d3f02",
+                "parameters": [
+                    {
+                        "name": "announcer_request",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Announcer Requests"
+                ],
+                "summary": "Delete announcer request",
+                "operationId": "663ed7e035aa0aa5c37843120c7f726e",
+                "parameters": [
+                    {
+                        "name": "announcer_request",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Deleted"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/api/addresses/search": {
@@ -338,7 +1047,8 @@
                     "Addresses"
                 ],
                 "summary": "Search addresses",
-                "operationId": "a621fd59c9f0d43e6e59d4247eeea178",
+                "description": "Mapbox-powered autocomplete with optional geospatial filters.",
+                "operationId": "f5501505893644e792fd808d87af1936",
                 "parameters": [
                     {
                         "name": "query",
@@ -369,29 +1079,16 @@
                     {
                         "name": "types[]",
                         "in": "query",
-                        "description": "Mapbox types filter",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "type": "string",
-                                "enum": [
-                                    "country",
-                                    "region",
-                                    "postcode",
-                                    "district",
-                                    "place",
-                                    "locality",
-                                    "neighborhood",
-                                    "address",
-                                    "poi"
-                                ]
+                                "type": "string"
                             }
                         }
                     },
                     {
                         "name": "country",
                         "in": "query",
-                        "description": "ISO-3166 country code",
                         "schema": {
                             "type": "string",
                             "example": "cm"
@@ -408,7 +1105,6 @@
                     {
                         "name": "bbox[]",
                         "in": "query",
-                        "description": "Bounding box: minLon,minLat,maxLon,maxLat",
                         "schema": {
                             "type": "array",
                             "items": {
@@ -427,28 +1123,292 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Address results"
+                        "description": "Address results",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "data": []
+                                }
+                            }
+                        }
                     }
                 }
             }
         },
-        "/api/notifications": {
+        "/api/addresses/reverse-geocode": {
             "get": {
                 "tags": [
-                    "Notifications"
+                    "Addresses"
                 ],
-                "summary": "List user notifications",
-                "operationId": "93e091ab59beef6e1e5813557a254096",
+                "summary": "Reverse geocode",
+                "operationId": "e126564527fc099d70a17f939aabc009",
+                "parameters": [
+                    {
+                        "name": "longitude",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "latitude",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "number"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "Notifications list"
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "data": []
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/newsletters": {
+            "get": {
+                "tags": [
+                    "Newsletter"
+                ],
+                "summary": "List newsletters",
+                "operationId": "ee71a4c6a7f3fa24e4887cf54a05bda7",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Newsletter"
+                ],
+                "summary": "Create newsletter",
+                "operationId": "83cc5aab0bfb2e8ba674afd20ae7aae9",
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    }
+                }
+            }
+        },
+        "/api/newsletters/{newsletter}": {
+            "get": {
+                "tags": [
+                    "Newsletter"
+                ],
+                "summary": "Show newsletter",
+                "operationId": "9e9b817149a0792b49070105abb40503",
+                "parameters": [
+                    {
+                        "name": "newsletter",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Newsletter"
+                ],
+                "summary": "Update newsletter",
+                "operationId": "e6ac64093d18fd9510b53e9578e13494",
+                "parameters": [
+                    {
+                        "name": "newsletter",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Newsletter"
+                ],
+                "summary": "Delete newsletter",
+                "operationId": "aad3babedb7ca66a18624f052ed1e304",
+                "parameters": [
+                    {
+                        "name": "newsletter",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Deleted"
+                    }
+                }
+            }
+        },
+        "/api/newsletter/{token}": {
+            "get": {
+                "tags": [
+                    "Newsletter"
+                ],
+                "summary": "Verify newsletter token",
+                "operationId": "c9332ec6fbb907aabc9eb1e426fa2220",
+                "parameters": [
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Verified"
+                    }
+                }
+            }
+        },
+        "/api/webhooks/campay": {
+            "get": {
+                "tags": [
+                    "Webhooks"
+                ],
+                "summary": "Campay webhook",
+                "operationId": "f286975f388672e76b8251ac394c8ba4",
+                "responses": {
+                    "200": {
+                        "description": "Processed"
+                    }
+                }
+            }
+        },
+        "/api/auth/register": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Register",
+                "description": "Create an account with email or phone.",
+                "operationId": "7c582b5c8c1ac4b954905521aa17dbe5",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email"
+                                    },
+                                    "phone_number": {
+                                        "type": "string"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "minLength": 8
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
                     }
                 },
-                "security": [
-                    {
-                        "bearerAuth": []
+                "responses": {
+                    "200": {
+                        "description": "Registered",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "status": "success",
+                                    "authorisation": {
+                                        "token": "..."
+                                    }
+                                }
+                            }
+                        }
                     }
-                ]
+                }
+            }
+        },
+        "/api/auth/login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Login",
+                "operationId": "666f458a4c611a0307facc04a121c969",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "email": {
+                                        "type": "string"
+                                    },
+                                    "phone_number": {
+                                        "type": "string"
+                                    },
+                                    "password": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Authenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "authorisation": {
+                                        "token": "..."
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         },
         "/api/auth/logout": {
@@ -457,9 +1417,9 @@
                     "Auth"
                 ],
                 "summary": "Logout",
-                "operationId": "54f0e393c0452584096da838297de41d",
+                "operationId": "083c6f8d599a6d40a84e15d105253b43",
                 "responses": {
-                    "200": {
+                    "203": {
                         "description": "Logged out"
                     }
                 },
@@ -475,11 +1435,169 @@
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Refresh JWT token",
-                "operationId": "90e7a8bd6dc9e66eeabd561972eb33e0",
+                "summary": "Refresh token",
+                "operationId": "f21057268bdbba870ab9c74e9c534a19",
                 "responses": {
                     "200": {
-                        "description": "Token refreshed"
+                        "description": "Refreshed",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "authorisation": {
+                                        "token": "..."
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/me": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Get profile",
+                "operationId": "1fe84a2761f11158c3af44843815e587",
+                "responses": {
+                    "200": {
+                        "description": "Profile",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "status": "success",
+                                    "user": []
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Update profile",
+                "operationId": "1cf152afbcdf65bb910bef82a41eaf53",
+                "responses": {
+                    "200": {
+                        "description": "Updated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/announcer-profile": {
+            "put": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Update announcer profile",
+                "operationId": "00d15a28a3ab673294b20b7fbd078c11",
+                "responses": {
+                    "200": {
+                        "description": "Updated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Update announcer profile (POST)",
+                "operationId": "ac31ff647dcb0032bf6fbd6a1a6f9c5a",
+                "responses": {
+                    "200": {
+                        "description": "Updated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/verifyPhone/{user_id}": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Verify phone",
+                "operationId": "fddf31fc80a30d4514d04e959f6cab05",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "verification_code"
+                                ],
+                                "properties": {
+                                    "verification_code": {
+                                        "type": "integer",
+                                        "example": 123456
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Verified"
+                    }
+                }
+            }
+        },
+        "/api/auth/resendVerificationCode/{user_id}": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Resend verification code",
+                "operationId": "bd8c448a6f7e10b19227a1ed08afae6c",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Code resent"
                     }
                 }
             }
@@ -489,8 +1607,8 @@
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Request password reset email",
-                "operationId": "32fe04022c3e4e47eb87292f2a001cb4",
+                "summary": "Send reset email",
+                "operationId": "bec239154687bc468f0c77efa2153b34",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -524,7 +1642,7 @@
                     "Auth"
                 ],
                 "summary": "Reset password",
-                "operationId": "d3910df890e498e41580dc11e861a404",
+                "operationId": "5c9e494d0a01cabdd080ae7286134b47",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -539,8 +1657,7 @@
                                 "properties": {
                                     "email": {
                                         "type": "string",
-                                        "format": "email",
-                                        "example": "announcer@domilix.com"
+                                        "format": "email"
                                     },
                                     "code": {
                                         "type": "integer",
@@ -548,13 +1665,11 @@
                                     },
                                     "password": {
                                         "type": "string",
-                                        "minLength": 8,
-                                        "example": "NewStrongPassword123"
+                                        "minLength": 8
                                     },
                                     "password_confirmation": {
                                         "type": "string",
-                                        "minLength": 8,
-                                        "example": "NewStrongPassword123"
+                                        "minLength": 8
                                     }
                                 },
                                 "type": "object"
@@ -564,173 +1679,15 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Password reset"
-                    },
-                    "400": {
-                        "description": "Invalid verification code"
-                    },
-                    "404": {
-                        "description": "User not found"
-                    },
-                    "422": {
-                        "description": "Validation error"
-                    }
-                }
-            }
-        },
-        "/api/addresses/reverse-geocode": {
-            "get": {
-                "tags": [
-                    "Addresses"
-                ],
-                "summary": "Reverse geocode coordinates",
-                "operationId": "2147abd32043eb9ab7d81a83750fadea",
-                "parameters": [
-                    {
-                        "name": "latitude",
-                        "in": "query",
-                        "required": true,
-                        "schema": {
-                            "type": "number"
-                        }
-                    },
-                    {
-                        "name": "longitude",
-                        "in": "query",
-                        "required": true,
-                        "schema": {
-                            "type": "number"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Reverse geocode result"
-                    }
-                }
-            }
-        },
-        "/api/announces/{ad}/like": {
-            "patch": {
-                "tags": [
-                    "Ads"
-                ],
-                "summary": "Toggle ad favorite",
-                "operationId": "6d8410ffa5f308a8ccaaebca80ef6fb1",
-                "parameters": [
-                    {
-                        "name": "ad",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Favorite toggled"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/announces/{ad}/unlock": {
-            "post": {
-                "tags": [
-                    "Ads"
-                ],
-                "summary": "Unlock an ad",
-                "operationId": "273e938dd61eae1579c06cbe6b22f0f1",
-                "parameters": [
-                    {
-                        "name": "ad",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Ad unlocked"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/auth/verifyPhone/{user_id}": {
-            "post": {
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Verify phone number",
-                "operationId": "c180110c9eefb9dee268a088a35349e8",
-                "parameters": [
-                    {
-                        "name": "user_id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "verification_code"
-                                ],
-                                "properties": {
-                                    "verification_code": {
-                                        "type": "integer",
-                                        "example": 123456
-                                    }
-                                },
-                                "type": "object"
+                        "description": "Password reset",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Mot de passe reinitialise avec succes."
+                                }
                             }
                         }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Phone verified"
-                    }
-                }
-            }
-        },
-        "/api/auth/resendVerificationCode/{user_id}": {
-            "post": {
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Resend phone verification code",
-                "operationId": "1c0a5c05badb6b4d3fab2e7edf021961",
-                "parameters": [
-                    {
-                        "name": "user_id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Verification code resent"
                     }
                 }
             }
@@ -740,8 +1697,8 @@
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Change user password",
-                "operationId": "90e3e6853309e68cf6dc5cf9ddbbbf04",
+                "summary": "Change password",
+                "operationId": "48a94fb61ee6c3d42f52321d872be883",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -754,18 +1711,15 @@
                                 ],
                                 "properties": {
                                     "old_password": {
-                                        "type": "string",
-                                        "example": "CurrentPassword123"
+                                        "type": "string"
                                     },
                                     "new_password": {
                                         "type": "string",
-                                        "minLength": 8,
-                                        "example": "NewStrongPassword123"
+                                        "minLength": 8
                                     },
                                     "new_password_confirmation": {
                                         "type": "string",
-                                        "minLength": 8,
-                                        "example": "NewStrongPassword123"
+                                        "minLength": 8
                                     }
                                 },
                                 "type": "object"
@@ -775,128 +1729,15 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Password changed"
-                    },
-                    "401": {
-                        "description": "Invalid old password"
-                    },
-                    "422": {
-                        "description": "Validation error"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/notifications/unread-count": {
-            "get": {
-                "tags": [
-                    "Notifications"
-                ],
-                "summary": "Unread notifications count",
-                "operationId": "00f8f523f3a6cc6ff5b0884b3c2b1430",
-                "responses": {
-                    "200": {
-                        "description": "Unread count"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/notifications/{id}/read": {
-            "post": {
-                "tags": [
-                    "Notifications"
-                ],
-                "summary": "Mark notification as read",
-                "operationId": "52010b39f38d546cd8e176e593d33637",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
+                        "description": "Password changed",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Mot de passe modifie avec succes."
+                                }
+                            }
                         }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Notification marked as read"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/notifications/mark-all-read": {
-            "post": {
-                "tags": [
-                    "Notifications"
-                ],
-                "summary": "Mark all notifications as read",
-                "operationId": "cb03634e4b09822605b58a5121999a35",
-                "responses": {
-                    "200": {
-                        "description": "All notifications marked as read"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/notifications/{id}": {
-            "delete": {
-                "tags": [
-                    "Notifications"
-                ],
-                "summary": "Delete one notification",
-                "operationId": "95d2c639c44e9cf8d85a4701231b0e05",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Notification deleted"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/notifications/read/all": {
-            "delete": {
-                "tags": [
-                    "Notifications"
-                ],
-                "summary": "Delete all read notifications",
-                "operationId": "d4d5a4ae4971017748257da56798d41b",
-                "responses": {
-                    "200": {
-                        "description": "Read notifications deleted"
                     }
                 },
                 "security": [
@@ -912,64 +1753,341 @@
                     "Subscriptions"
                 ],
                 "summary": "List subscriptions",
-                "operationId": "e317d102c8033832f038bbd7a931f378",
+                "operationId": "719012665478b1db816476de5bf0de22",
                 "responses": {
                     "200": {
-                        "description": "Subscriptions list"
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "data": []
+                                }
+                            }
+                        }
                     }
-                }
-            }
-        },
-        "/api/newsletters": {
-            "get": {
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
                 "tags": [
-                    "Newsletter"
+                    "Subscriptions"
                 ],
-                "summary": "List newsletters",
-                "operationId": "37c4e31f65f4597a96f1e8d092d799f5",
+                "summary": "Create subscription payment",
+                "operationId": "fb8b4c127f74fd2cf0e80e78d1bc76c0",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "plan_name",
+                                    "method",
+                                    "payment_info"
+                                ],
+                                "properties": {
+                                    "plan_name": {
+                                        "type": "string",
+                                        "example": "Offre Premium"
+                                    },
+                                    "method": {
+                                        "type": "string",
+                                        "example": "campay"
+                                    },
+                                    "payment_info": {
+                                        "type": "string",
+                                        "example": "237690000000"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
-                        "description": "Newsletter list"
+                        "description": "Payment processed",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "status": "success"
+                                }
+                            }
+                        }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/newsletter/{token}": {
+        "/api/subscriptions/{subscription}": {
             "get": {
                 "tags": [
-                    "Newsletter"
+                    "Subscriptions"
                 ],
-                "summary": "Verify newsletter token",
-                "operationId": "a68edd222082025934c72dccffd32458",
+                "summary": "Show subscription",
+                "operationId": "f1edcc7e1b9c051496b6917861a3b871",
                 "parameters": [
                     {
-                        "name": "token",
+                        "name": "subscription",
                         "in": "path",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "type": "integer"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Token verified"
+                        "description": "OK"
                     }
-                }
-            }
-        },
-        "/api/webhooks/campay": {
-            "get": {
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
                 "tags": [
-                    "Webhooks"
+                    "Subscriptions"
                 ],
-                "summary": "Campay webhook endpoint",
-                "operationId": "f286975f388672e76b8251ac394c8ba4",
+                "summary": "Cancel subscription",
+                "operationId": "e8cf0628e220d601478cf4df23d66cff",
+                "parameters": [
+                    {
+                        "name": "subscription",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "Webhook processed"
+                        "description": "Cancelled",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Subscription cancelled successfully"
+                                }
+                            }
+                        }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/notifications": {
+            "get": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "List notifications",
+                "operationId": "ddd305ef8ce125302de96861e1fbd7da",
+                "parameters": [
+                    {
+                        "name": "unread_only",
+                        "in": "query",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "data": []
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/notifications/unread-count": {
+            "get": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Unread count",
+                "operationId": "00f8f523f3a6cc6ff5b0884b3c2b1430",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "count": 5
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/notifications/{id}/read": {
+            "post": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Mark as read",
+                "operationId": "6a0e9a1187e35fbfbfcdd33ef982a929",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Notification marquee comme lue"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/notifications/mark-all-read": {
+            "post": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Mark all as read",
+                "operationId": "33483a0af505a3e2df28fabddb831194",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Toutes les notifications ont ete marquees comme lues"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/notifications/{id}": {
+            "delete": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Delete notification",
+                "operationId": "094c47a9064e38b67fc356d25968b4cf",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Deleted",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Notification supprimee"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/notifications/read/all": {
+            "delete": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Delete all read notifications",
+                "operationId": "61231c9be7b9085e449af6fa976d7585",
+                "responses": {
+                    "200": {
+                        "description": "Deleted",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "message": "Toutes les notifications lues ont ete supprimees"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         }
     },
@@ -988,10 +2106,6 @@
             "description": "System"
         },
         {
-            "name": "Auth",
-            "description": "Auth"
-        },
-        {
             "name": "Ads",
             "description": "Ads"
         },
@@ -1000,16 +2114,24 @@
             "description": "Categories"
         },
         {
+            "name": "Announcers",
+            "description": "Announcers"
+        },
+        {
+            "name": "Medias",
+            "description": "Medias"
+        },
+        {
+            "name": "Users",
+            "description": "Users"
+        },
+        {
+            "name": "Announcer Requests",
+            "description": "Announcer Requests"
+        },
+        {
             "name": "Addresses",
             "description": "Addresses"
-        },
-        {
-            "name": "Notifications",
-            "description": "Notifications"
-        },
-        {
-            "name": "Subscriptions",
-            "description": "Subscriptions"
         },
         {
             "name": "Newsletter",
@@ -1018,6 +2140,18 @@
         {
             "name": "Webhooks",
             "description": "Webhooks"
+        },
+        {
+            "name": "Auth",
+            "description": "Auth"
+        },
+        {
+            "name": "Subscriptions",
+            "description": "Subscriptions"
+        },
+        {
+            "name": "Notifications",
+            "description": "Notifications"
         }
     ]
 }
