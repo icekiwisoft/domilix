@@ -3,6 +3,17 @@ set -eu
 
 cd /var/www/html
 
+# Ensure Laravel writable/cache directories exist at runtime
+mkdir -p storage/framework/cache
+mkdir -p storage/framework/sessions
+mkdir -p storage/framework/views
+mkdir -p storage/logs
+mkdir -p bootstrap/cache
+
+# Keep permissions compatible with php-fpm worker user
+chown -R www-data:www-data storage bootstrap/cache || true
+chmod -R ug+rwX storage bootstrap/cache || true
+
 if [ ! -f .env ] && [ -f .env.example ]; then
   cp .env.example .env
 fi
