@@ -14,6 +14,11 @@ mkdir -p bootstrap/cache
 chown -R www-data:www-data storage bootstrap/cache || true
 chmod -R ug+rwX storage bootstrap/cache || true
 
+# Prevent invalid compiled view cache path in production
+if [ -z "${VIEW_COMPILED_PATH:-}" ]; then
+  export VIEW_COMPILED_PATH="/var/www/html/storage/framework/views"
+fi
+
 if [ ! -f .env ] && [ -f .env.example ]; then
   cp .env.example .env
 fi
@@ -34,12 +39,16 @@ if [ "${DB_CONNECTION:-}" = "mysql" ]; then
 fi
 
 if [ -f artisan ]; then
+  php artisan config:clear || true
+  php artisan view:clear || true
+
   if [ -z "${APP_KEY:-}" ]; then
     php artisan key:generate --force || true
   fi
 
   php artisan migrate --force || true
   php artisan storage:link || true
+  php artisan config:cache || true
 fi
 
 exec "$@"
