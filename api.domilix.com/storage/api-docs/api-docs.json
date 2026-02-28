@@ -35,6 +35,37 @@
                 }
             }
         },
+        "/api/health": {
+            "get": {
+                "tags": [
+                    "System"
+                ],
+                "summary": "Health check",
+                "description": "Returns service health status (used by monitoring and uptime checks).",
+                "operationId": "499b359e4c6d519fa18bc38b13ce4e72",
+                "responses": {
+                    "200": {
+                        "description": "All services healthy",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "status": "ok",
+                                    "services": {
+                                        "database": "up"
+                                    },
+                                    "environment": "production",
+                                    "timestamp": "2026-02-28T20:00:00+00:00"
+                                }
+                            }
+                        }
+                    },
+                    "503": {
+                        "description": "One or more services unavailable"
+                    }
+                }
+            }
+        },
         "/api/announces": {
             "get": {
                 "tags": [

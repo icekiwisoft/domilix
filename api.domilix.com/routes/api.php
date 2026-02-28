@@ -9,6 +9,7 @@ use App\Http\Controllers\AnnouncerRequestsController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\FavoriteController;
+use App\Http\Controllers\HealthController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\UsersController;
 
@@ -39,6 +40,7 @@ Route::apiResource('announcers.medias', AnnouncerMediaController::class)->only('
 
 //some global information  route
 Route::any('/', StatController::class);
+Route::get('health', HealthController::class);
 
 
 // Favorite management

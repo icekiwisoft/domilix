@@ -25,6 +25,7 @@ Local URLs:
 - Frontend: `http://localhost:3000`
 - Backend API: `http://localhost:8000`
 - Swagger UI: `http://localhost:8000/api/documentation`
+- Health check: `http://localhost:8000/api/health`
 - MySQL: `localhost:3307`
 
 Stop services:

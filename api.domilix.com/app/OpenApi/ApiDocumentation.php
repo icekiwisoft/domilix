@@ -44,6 +44,29 @@ class ApiDocumentation
 
     /**
      * @OA\Get(
+     *     path="/api/health",
+     *     tags={"System"},
+     *     summary="Health check",
+     *     description="Returns service health status (used by monitoring and uptime checks).",
+     *     @OA\Response(
+     *         response=200,
+     *         description="All services healthy",
+     *         @OA\JsonContent(
+     *             example={
+     *                 "status": "ok",
+     *                 "services": {"database": "up"},
+     *                 "environment": "production",
+     *                 "timestamp": "2026-02-28T20:00:00+00:00"
+     *             }
+     *         )
+     *     ),
+     *     @OA\Response(response=503, description="One or more services unavailable")
+     * )
+     */
+    public function apiHealth(): void {}
+
+    /**
+     * @OA\Get(
      *     path="/api/announces",
      *     tags={"Ads"},
      *     summary="List ads",
