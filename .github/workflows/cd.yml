@@ -129,6 +129,11 @@ jobs:
             BACKEND_IMAGE="$BACKEND_IMAGE" docker compose -p domilix_backend --env-file deploy/.env.production -f deploy/docker-compose.api.domilix.com.yml pull backend
             BACKEND_IMAGE="$BACKEND_IMAGE" docker compose -p domilix_backend --env-file deploy/.env.production -f deploy/docker-compose.api.domilix.com.yml up -d --remove-orphans
 
+            echo "Regenerating Swagger documentation in backend container"
+            docker compose -p domilix_backend --env-file deploy/.env.production -f deploy/docker-compose.api.domilix.com.yml exec -T backend php artisan config:clear
+            docker compose -p domilix_backend --env-file deploy/.env.production -f deploy/docker-compose.api.domilix.com.yml exec -T backend php artisan l5-swagger:generate
+            docker compose -p domilix_backend --env-file deploy/.env.production -f deploy/docker-compose.api.domilix.com.yml exec -T backend php artisan config:cache
+
       - name: Optional post-deploy command
         uses: appleboy/ssh-action@v1.2.0
         with:
