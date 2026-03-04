@@ -12,14 +12,14 @@
         }
     ],
     "paths": {
-        "/api": {
+        "/": {
             "get": {
                 "tags": [
                     "System"
                 ],
                 "summary": "API status",
                 "description": "Returns global API stats/status payload.",
-                "operationId": "2f2c1cb6e4897087546b8b88e58e34eb",
+                "operationId": "531a3c281e883905402dd6dbe1c35e67",
                 "responses": {
                     "200": {
                         "description": "API reachable",
@@ -35,14 +35,14 @@
                 }
             }
         },
-        "/api/health": {
+        "/health": {
             "get": {
                 "tags": [
                     "System"
                 ],
                 "summary": "Health check",
                 "description": "Returns service health status (used by monitoring and uptime checks).",
-                "operationId": "499b359e4c6d519fa18bc38b13ce4e72",
+                "operationId": "86d943a02e093d58f49dfe28bf13f5e6",
                 "responses": {
                     "200": {
                         "description": "All services healthy",
@@ -66,14 +66,14 @@
                 }
             }
         },
-        "/api/announces": {
+        "/announces": {
             "get": {
                 "tags": [
                     "Ads"
                 ],
                 "summary": "List ads",
                 "description": "Returns paginated ads with all available search filters.",
-                "operationId": "3968778a25b84f5c6972e7879edcecda",
+                "operationId": "77e84fe64c05bb578bea232604fb9b2d",
                 "parameters": [
                     {
                         "name": "search",
@@ -230,7 +230,7 @@
                 ],
                 "summary": "Create ad",
                 "description": "Creates a furniture or real estate ad with medias.",
-                "operationId": "44c1177c6ebbc4ae16afddbf1e85fdcd",
+                "operationId": "dcf857d5012cea198e66b95e542128bf",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -285,13 +285,13 @@
                 ]
             }
         },
-        "/api/announces/{announce}": {
+        "/announces/{announce}": {
             "get": {
                 "tags": [
                     "Ads"
                 ],
                 "summary": "Get ad details",
-                "operationId": "4e2d19789b1a234360c7633fb92bd4ec",
+                "operationId": "c48f2b518cb862af060bdfc3c0b3a43b",
                 "parameters": [
                     {
                         "name": "announce",
@@ -322,7 +322,7 @@
                     "Ads"
                 ],
                 "summary": "Update ad",
-                "operationId": "9a433978186fde13346204a68bde3f8b",
+                "operationId": "3e9b898470c9ab2e9673ad81319829a0",
                 "parameters": [
                     {
                         "name": "announce",
@@ -349,7 +349,7 @@
                     "Ads"
                 ],
                 "summary": "Delete ad",
-                "operationId": "299cf90fbbb9f933250c7a90fb05259f",
+                "operationId": "9889e72678b756eea0f1e9ff20b6dea6",
                 "parameters": [
                     {
                         "name": "announce",
@@ -372,13 +372,13 @@
                 ]
             }
         },
-        "/api/announces/{ad}/like": {
+        "/announces/{ad}/like": {
             "patch": {
                 "tags": [
                     "Ads"
                 ],
                 "summary": "Toggle ad favorite",
-                "operationId": "7fd145c912af3aebc0caceea25e930a9",
+                "operationId": "b95eff53751dea96076c3ab6b1ad932e",
                 "parameters": [
                     {
                         "name": "ad",
@@ -409,13 +409,13 @@
                 ]
             }
         },
-        "/api/announces/{ad}/unlock": {
+        "/announces/{ad}/unlock": {
             "post": {
                 "tags": [
                     "Ads"
                 ],
                 "summary": "Unlock ad contacts",
-                "operationId": "add4c9bcfa4cd56c0e33cb6d4580bae7",
+                "operationId": "1c32f5ee2701b8f0649eaef02ace659a",
                 "parameters": [
                     {
                         "name": "ad",
@@ -446,13 +446,13 @@
                 ]
             }
         },
-        "/api/categories": {
+        "/categories": {
             "get": {
                 "tags": [
                     "Categories"
                 ],
                 "summary": "List categories",
-                "operationId": "ed5e6f7811e1e18a5f17ed6bff17638a",
+                "operationId": "0d324d35aae044060b84b36713ca022b",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -472,7 +472,7 @@
                     "Categories"
                 ],
                 "summary": "Create category",
-                "operationId": "362b0b58a4f7e9c2cde4d917b66f5fed",
+                "operationId": "c265221d1e9807b02f6bf6525e8ee9a1",
                 "responses": {
                     "201": {
                         "description": "Created"
@@ -485,13 +485,13 @@
                 ]
             }
         },
-        "/api/categories/{category}": {
+        "/categories/{category}": {
             "get": {
                 "tags": [
                     "Categories"
                 ],
                 "summary": "Show category",
-                "operationId": "d976335b208b42d74b78daf9a392ac01",
+                "operationId": "a28ba4736c6ee8600d4a539978536ce2",
                 "parameters": [
                     {
                         "name": "category",
@@ -513,7 +513,7 @@
                     "Categories"
                 ],
                 "summary": "Update category",
-                "operationId": "97798bd6a3d90c44e748b2008d346b16",
+                "operationId": "468eec7d4ca4c45788dc26ddc7a0bd77",
                 "parameters": [
                     {
                         "name": "category",
@@ -540,7 +540,7 @@
                     "Categories"
                 ],
                 "summary": "Delete category",
-                "operationId": "e4e0bdeba585e90fa21606c4a4f33a7d",
+                "operationId": "eb4ef1b9d19ff3275137296cc5ade0cc",
                 "parameters": [
                     {
                         "name": "category",
@@ -563,13 +563,13 @@
                 ]
             }
         },
-        "/api/announcers": {
+        "/announcers": {
             "get": {
                 "tags": [
                     "Announcers"
                 ],
                 "summary": "List announcers",
-                "operationId": "d5a5848e91e8a851478d9b2052e119c0",
+                "operationId": "09244c96abcd361330a14bba21d856fc",
                 "responses": {
                     "200": {
                         "description": "OK"
@@ -581,7 +581,7 @@
                     "Announcers"
                 ],
                 "summary": "Create announcer",
-                "operationId": "ab580e48dd0387d6b7ccaa6a4702d693",
+                "operationId": "a73a6ba3f9c90de21c0251a419f7b7a8",
                 "responses": {
                     "201": {
                         "description": "Created"
@@ -594,13 +594,13 @@
                 ]
             }
         },
-        "/api/announcers/{announcer}": {
+        "/announcers/{announcer}": {
             "get": {
                 "tags": [
                     "Announcers"
                 ],
                 "summary": "Show announcer",
-                "operationId": "906da337558d4c3d1115f1b0f9a3567b",
+                "operationId": "d738152df6a23bd41af5c3ca732d476c",
                 "parameters": [
                     {
                         "name": "announcer",
@@ -622,7 +622,7 @@
                     "Announcers"
                 ],
                 "summary": "Update announcer",
-                "operationId": "831c7c3cd54c212a259116f4e4b4d935",
+                "operationId": "0ab2ba882b6f60b57a37b4d7873aecb2",
                 "parameters": [
                     {
                         "name": "announcer",
@@ -649,7 +649,7 @@
                     "Announcers"
                 ],
                 "summary": "Delete announcer",
-                "operationId": "d1bb835e337a7b3037e616d9c9042c17",
+                "operationId": "dd223c8aad5ce670c4c0610c6c8de545",
                 "parameters": [
                     {
                         "name": "announcer",
@@ -672,13 +672,13 @@
                 ]
             }
         },
-        "/api/announcers/{announcer}/medias": {
+        "/announcers/{announcer}/medias": {
             "get": {
                 "tags": [
                     "Announcers"
                 ],
                 "summary": "List announcer medias",
-                "operationId": "afacf30066920b58f636c3cb6177d6b2",
+                "operationId": "2b79c3014bc17c63bc6cca75ff6f5dc5",
                 "parameters": [
                     {
                         "name": "announcer",
@@ -696,13 +696,13 @@
                 }
             }
         },
-        "/api/medias": {
+        "/medias": {
             "get": {
                 "tags": [
                     "Medias"
                 ],
                 "summary": "List medias",
-                "operationId": "f7b8a06339e09cd0c29bacbf10a2a49f",
+                "operationId": "c4e805f8e7f5cd950a80c9cd62283d0b",
                 "responses": {
                     "200": {
                         "description": "OK"
@@ -714,7 +714,7 @@
                     "Medias"
                 ],
                 "summary": "Create media",
-                "operationId": "4e3ce12db8b4de73ac998d6ea8a0108a",
+                "operationId": "ae531b4e57fd97e3ab54953df59be66f",
                 "responses": {
                     "201": {
                         "description": "Created"
@@ -727,13 +727,13 @@
                 ]
             }
         },
-        "/api/medias/{media}": {
+        "/medias/{media}": {
             "get": {
                 "tags": [
                     "Medias"
                 ],
                 "summary": "Show media",
-                "operationId": "2f886581464c6be2635c34fbd13ae1d5",
+                "operationId": "24c0ccae97594d2029cee7db863cb5da",
                 "parameters": [
                     {
                         "name": "media",
@@ -755,7 +755,7 @@
                     "Medias"
                 ],
                 "summary": "Update media",
-                "operationId": "8eb8c7e835e3aff9be0c01cf7f9c9d4e",
+                "operationId": "ecab6153a7f4b4db90e2ae3623b389c5",
                 "parameters": [
                     {
                         "name": "media",
@@ -782,7 +782,7 @@
                     "Medias"
                 ],
                 "summary": "Delete media",
-                "operationId": "2fb62d5f7c84083e80d31b9a5cd4fb36",
+                "operationId": "eb2a9f6b16bd6d9574487a4f66fa88f8",
                 "parameters": [
                     {
                         "name": "media",
@@ -805,13 +805,13 @@
                 ]
             }
         },
-        "/api/users": {
+        "/users": {
             "get": {
                 "tags": [
                     "Users"
                 ],
                 "summary": "List users",
-                "operationId": "681e0ff9ea1d43cc0f067d6c8ec6619a",
+                "operationId": "27b08e854ba9f8bb4736a1d2d52fdd9d",
                 "responses": {
                     "200": {
                         "description": "OK"
@@ -828,7 +828,7 @@
                     "Users"
                 ],
                 "summary": "Create user",
-                "operationId": "322ac216197ffc40d0703e579b995313",
+                "operationId": "f60f1c5b77aa8a79fc26758b039cc9d5",
                 "responses": {
                     "201": {
                         "description": "Created"
@@ -841,13 +841,13 @@
                 ]
             }
         },
-        "/api/users/{user}": {
+        "/users/{user}": {
             "get": {
                 "tags": [
                     "Users"
                 ],
                 "summary": "Show user",
-                "operationId": "5dea62e4462bd83962dc349c5c3806c6",
+                "operationId": "9f1b01cceb251a4616f62279cbc46cf6",
                 "parameters": [
                     {
                         "name": "user",
@@ -874,7 +874,7 @@
                     "Users"
                 ],
                 "summary": "Update user",
-                "operationId": "e77e80536624cfab93370eb3e543fbf1",
+                "operationId": "13daa11aacadd249e2f588311904baa0",
                 "parameters": [
                     {
                         "name": "user",
@@ -901,7 +901,7 @@
                     "Users"
                 ],
                 "summary": "Delete user",
-                "operationId": "41a1a3715e2d349a96b9701ef114a667",
+                "operationId": "386ab43d86b5aebf34a01ac1af09b0ab",
                 "parameters": [
                     {
                         "name": "user",
@@ -924,13 +924,13 @@
                 ]
             }
         },
-        "/api/users/{user}/become-announcer": {
+        "/users/{user}/become-announcer": {
             "patch": {
                 "tags": [
                     "Users"
                 ],
                 "summary": "Promote user to announcer",
-                "operationId": "df4f4003c2aa79e18c0f40c014eb0cd8",
+                "operationId": "88213bd5a48b1918f564b10fed7f6b7f",
                 "parameters": [
                     {
                         "name": "user",
@@ -953,13 +953,13 @@
                 ]
             }
         },
-        "/api/announcer-requests": {
+        "/announcer-requests": {
             "get": {
                 "tags": [
                     "Announcer Requests"
                 ],
                 "summary": "List announcer requests",
-                "operationId": "afd885d39484dcfe7bf954d25cc0d4b9",
+                "operationId": "a8e1c012649536d677070f2883be28e9",
                 "responses": {
                     "200": {
                         "description": "OK"
@@ -976,7 +976,7 @@
                     "Announcer Requests"
                 ],
                 "summary": "Create announcer request",
-                "operationId": "6980a4152090c9ce920ab4cd0a453adb",
+                "operationId": "00fb5e13c147fb066887b89eca139c24",
                 "responses": {
                     "201": {
                         "description": "Created"
@@ -989,13 +989,13 @@
                 ]
             }
         },
-        "/api/announcer-requests/{announcer_request}": {
+        "/announcer-requests/{announcer_request}": {
             "get": {
                 "tags": [
                     "Announcer Requests"
                 ],
                 "summary": "Show announcer request",
-                "operationId": "2b8b5360beb9a8ae2b654a5405fd9967",
+                "operationId": "2f8be700701bb5892c7ac44e34aea795",
                 "parameters": [
                     {
                         "name": "announcer_request",
@@ -1022,7 +1022,7 @@
                     "Announcer Requests"
                 ],
                 "summary": "Update announcer request",
-                "operationId": "aff3882546d3b2dca7cd20b4b21d3f02",
+                "operationId": "a2fa3fe6851655f4bf5da8acfaa53804",
                 "parameters": [
                     {
                         "name": "announcer_request",
@@ -1049,7 +1049,7 @@
                     "Announcer Requests"
                 ],
                 "summary": "Delete announcer request",
-                "operationId": "663ed7e035aa0aa5c37843120c7f726e",
+                "operationId": "f9857f28b0b03d12ef8d600306333835",
                 "parameters": [
                     {
                         "name": "announcer_request",
@@ -1072,14 +1072,14 @@
                 ]
             }
         },
-        "/api/addresses/search": {
+        "/addresses/search": {
             "get": {
                 "tags": [
                     "Addresses"
                 ],
                 "summary": "Search addresses",
                 "description": "Mapbox-powered autocomplete with optional geospatial filters.",
-                "operationId": "f5501505893644e792fd808d87af1936",
+                "operationId": "efe23f626fb8011a0381ad8b0c84815c",
                 "parameters": [
                     {
                         "name": "query",
@@ -1168,13 +1168,13 @@
                 }
             }
         },
-        "/api/addresses/reverse-geocode": {
+        "/addresses/reverse-geocode": {
             "get": {
                 "tags": [
                     "Addresses"
                 ],
                 "summary": "Reverse geocode",
-                "operationId": "e126564527fc099d70a17f939aabc009",
+                "operationId": "4bd560d4b90584f1c01b9ee4ac04fc37",
                 "parameters": [
                     {
                         "name": "longitude",
@@ -1209,13 +1209,13 @@
                 }
             }
         },
-        "/api/newsletters": {
+        "/newsletters": {
             "get": {
                 "tags": [
                     "Newsletter"
                 ],
                 "summary": "List newsletters",
-                "operationId": "ee71a4c6a7f3fa24e4887cf54a05bda7",
+                "operationId": "6b0bca0ac77e8e855757eba0fb7bb6a5",
                 "responses": {
                     "200": {
                         "description": "OK"
@@ -1227,7 +1227,7 @@
                     "Newsletter"
                 ],
                 "summary": "Create newsletter",
-                "operationId": "83cc5aab0bfb2e8ba674afd20ae7aae9",
+                "operationId": "01bca88853ee0cb38d0b87c5d4c9749b",
                 "responses": {
                     "201": {
                         "description": "Created"
@@ -1235,13 +1235,13 @@
                 }
             }
         },
-        "/api/newsletters/{newsletter}": {
+        "/newsletters/{newsletter}": {
             "get": {
                 "tags": [
                     "Newsletter"
                 ],
                 "summary": "Show newsletter",
-                "operationId": "9e9b817149a0792b49070105abb40503",
+                "operationId": "4afe126db47b4d085a1c1804af718a80",
                 "parameters": [
                     {
                         "name": "newsletter",
@@ -1263,7 +1263,7 @@
                     "Newsletter"
                 ],
                 "summary": "Update newsletter",
-                "operationId": "e6ac64093d18fd9510b53e9578e13494",
+                "operationId": "9c60dcc2d1226f34c0c9c77727b0e677",
                 "parameters": [
                     {
                         "name": "newsletter",
@@ -1285,7 +1285,7 @@
                     "Newsletter"
                 ],
                 "summary": "Delete newsletter",
-                "operationId": "aad3babedb7ca66a18624f052ed1e304",
+                "operationId": "1cee74bd25896c86e0e7396e83b1a315",
                 "parameters": [
                     {
                         "name": "newsletter",
@@ -1303,13 +1303,13 @@
                 }
             }
         },
-        "/api/newsletter/{token}": {
+        "/newsletter/{token}": {
             "get": {
                 "tags": [
                     "Newsletter"
                 ],
                 "summary": "Verify newsletter token",
-                "operationId": "c9332ec6fbb907aabc9eb1e426fa2220",
+                "operationId": "bf5da7d168c9c1103df8d2d99ffbdbf8",
                 "parameters": [
                     {
                         "name": "token",
@@ -1327,13 +1327,13 @@
                 }
             }
         },
-        "/api/webhooks/campay": {
+        "/webhooks/campay": {
             "get": {
                 "tags": [
                     "Webhooks"
                 ],
                 "summary": "Campay webhook",
-                "operationId": "f286975f388672e76b8251ac394c8ba4",
+                "operationId": "cefce6a4ba5426884e79142c54a73f5c",
                 "responses": {
                     "200": {
                         "description": "Processed"
@@ -1341,14 +1341,14 @@
                 }
             }
         },
-        "/api/auth/register": {
+        "/auth/register": {
             "post": {
                 "tags": [
                     "Auth"
                 ],
                 "summary": "Register",
                 "description": "Create an account with email or phone.",
-                "operationId": "7c582b5c8c1ac4b954905521aa17dbe5",
+                "operationId": "9eb873c4b5c6f470b85375d1eadba39f",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -1397,13 +1397,13 @@
                 }
             }
         },
-        "/api/auth/login": {
+        "/auth/login": {
             "post": {
                 "tags": [
                     "Auth"
                 ],
                 "summary": "Login",
-                "operationId": "666f458a4c611a0307facc04a121c969",
+                "operationId": "57d28c6791c0b5eb0bb42804b9580180",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -1442,13 +1442,13 @@
                 }
             }
         },
-        "/api/auth/logout": {
+        "/auth/logout": {
             "post": {
                 "tags": [
                     "Auth"
                 ],
                 "summary": "Logout",
-                "operationId": "083c6f8d599a6d40a84e15d105253b43",
+                "operationId": "f06f4d6b039e5ff33949d59ffb8c5881",
                 "responses": {
                     "203": {
                         "description": "Logged out"
@@ -1461,13 +1461,13 @@
                 ]
             }
         },
-        "/api/auth/refresh": {
+        "/auth/refresh": {
             "post": {
                 "tags": [
                     "Auth"
                 ],
                 "summary": "Refresh token",
-                "operationId": "f21057268bdbba870ab9c74e9c534a19",
+                "operationId": "9a3112829f7538dcb1b86afd266ef439",
                 "responses": {
                     "200": {
                         "description": "Refreshed",
@@ -1485,13 +1485,13 @@
                 }
             }
         },
-        "/api/auth/me": {
+        "/auth/me": {
             "get": {
                 "tags": [
                     "Auth"
                 ],
                 "summary": "Get profile",
-                "operationId": "1fe84a2761f11158c3af44843815e587",
+                "operationId": "f6688ad13faedd69f6f81d9ae2c148a2",
                 "responses": {
                     "200": {
                         "description": "Profile",
@@ -1517,7 +1517,7 @@
                     "Auth"
                 ],
                 "summary": "Update profile",
-                "operationId": "1cf152afbcdf65bb910bef82a41eaf53",
+                "operationId": "112223b2cac41d74a3af8b75d7621184",
                 "responses": {
                     "200": {
                         "description": "Updated"
@@ -1530,13 +1530,13 @@
                 ]
             }
         },
-        "/api/auth/announcer-profile": {
+        "/auth/announcer-profile": {
             "put": {
                 "tags": [
                     "Auth"
                 ],
                 "summary": "Update announcer profile",
-                "operationId": "00d15a28a3ab673294b20b7fbd078c11",
+                "operationId": "656a7a961eb058a56eb7c125f6b1217f",
                 "responses": {
                     "200": {
                         "description": "Updated"
@@ -1553,7 +1553,7 @@
                     "Auth"
                 ],
                 "summary": "Update announcer profile (POST)",
-                "operationId": "ac31ff647dcb0032bf6fbd6a1a6f9c5a",
+                "operationId": "835871a846e3d421754a1ef2d92729be",
                 "responses": {
                     "200": {
                         "description": "Updated"
@@ -1566,13 +1566,13 @@
                 ]
             }
         },
-        "/api/auth/verifyPhone/{user_id}": {
+        "/auth/verifyPhone/{user_id}": {
             "post": {
                 "tags": [
                     "Auth"
                 ],
                 "summary": "Verify phone",
-                "operationId": "fddf31fc80a30d4514d04e959f6cab05",
+                "operationId": "851e407a834c5eabd59e04a5eb9b8998",
                 "parameters": [
                     {
                         "name": "user_id",
@@ -1609,13 +1609,13 @@
                 }
             }
         },
-        "/api/auth/resendVerificationCode/{user_id}": {
+        "/auth/resendVerificationCode/{user_id}": {
             "post": {
                 "tags": [
                     "Auth"
                 ],
                 "summary": "Resend verification code",
-                "operationId": "bd8c448a6f7e10b19227a1ed08afae6c",
+                "operationId": "a56b3cb43e8f0175bf1180d59ba79ca7",
                 "parameters": [
                     {
                         "name": "user_id",
@@ -1633,13 +1633,13 @@
                 }
             }
         },
-        "/api/auth/sendEmail": {
+        "/auth/sendEmail": {
             "post": {
                 "tags": [
                     "Auth"
                 ],
                 "summary": "Send reset email",
-                "operationId": "bec239154687bc468f0c77efa2153b34",
+                "operationId": "03991e098a3a0edf22d413aaa02e9385",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -1667,13 +1667,13 @@
                 }
             }
         },
-        "/api/auth/resetPassword": {
+        "/auth/resetPassword": {
             "post": {
                 "tags": [
                     "Auth"
                 ],
                 "summary": "Reset password",
-                "operationId": "5c9e494d0a01cabdd080ae7286134b47",
+                "operationId": "561b76f6f5ae4a2dbf344d3dd43e3c73",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -1723,13 +1723,13 @@
                 }
             }
         },
-        "/api/auth/changePassword": {
+        "/auth/changePassword": {
             "post": {
                 "tags": [
                     "Auth"
                 ],
                 "summary": "Change password",
-                "operationId": "48a94fb61ee6c3d42f52321d872be883",
+                "operationId": "d45b7ab4e2e00c68ef30615b792d4f5a",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -1778,13 +1778,13 @@
                 ]
             }
         },
-        "/api/subscriptions": {
+        "/subscriptions": {
             "get": {
                 "tags": [
                     "Subscriptions"
                 ],
                 "summary": "List subscriptions",
-                "operationId": "719012665478b1db816476de5bf0de22",
+                "operationId": "6dfdb18510d6b55d4d742a542fa465bf",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1809,7 +1809,7 @@
                     "Subscriptions"
                 ],
                 "summary": "Create subscription payment",
-                "operationId": "fb8b4c127f74fd2cf0e80e78d1bc76c0",
+                "operationId": "4d951c712a9a57b9e21a8ed13eb8f1e4",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -1859,13 +1859,13 @@
                 ]
             }
         },
-        "/api/subscriptions/{subscription}": {
+        "/subscriptions/{subscription}": {
             "get": {
                 "tags": [
                     "Subscriptions"
                 ],
                 "summary": "Show subscription",
-                "operationId": "f1edcc7e1b9c051496b6917861a3b871",
+                "operationId": "55bdef53f2797a4fa7107fb8e29b13af",
                 "parameters": [
                     {
                         "name": "subscription",
@@ -1892,7 +1892,7 @@
                     "Subscriptions"
                 ],
                 "summary": "Cancel subscription",
-                "operationId": "e8cf0628e220d601478cf4df23d66cff",
+                "operationId": "5e0dafb5fa050fd48a8b454256faa76d",
                 "parameters": [
                     {
                         "name": "subscription",
@@ -1923,13 +1923,13 @@
                 ]
             }
         },
-        "/api/notifications": {
+        "/notifications": {
             "get": {
                 "tags": [
                     "Notifications"
                 ],
                 "summary": "List notifications",
-                "operationId": "ddd305ef8ce125302de96861e1fbd7da",
+                "operationId": "b9fc06d756a342643eb5b80259453e01",
                 "parameters": [
                     {
                         "name": "unread_only",
@@ -1966,13 +1966,13 @@
                 ]
             }
         },
-        "/api/notifications/unread-count": {
+        "/notifications/unread-count": {
             "get": {
                 "tags": [
                     "Notifications"
                 ],
                 "summary": "Unread count",
-                "operationId": "00f8f523f3a6cc6ff5b0884b3c2b1430",
+                "operationId": "c2b800822a283b2f3b1405eebfef9991",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1993,13 +1993,13 @@
                 ]
             }
         },
-        "/api/notifications/{id}/read": {
+        "/notifications/{id}/read": {
             "post": {
                 "tags": [
                     "Notifications"
                 ],
                 "summary": "Mark as read",
-                "operationId": "6a0e9a1187e35fbfbfcdd33ef982a929",
+                "operationId": "7fda8c8c20bb2cddf9db5b81cc100409",
                 "parameters": [
                     {
                         "name": "id",
@@ -2030,13 +2030,13 @@
                 ]
             }
         },
-        "/api/notifications/mark-all-read": {
+        "/notifications/mark-all-read": {
             "post": {
                 "tags": [
                     "Notifications"
                 ],
                 "summary": "Mark all as read",
-                "operationId": "33483a0af505a3e2df28fabddb831194",
+                "operationId": "a3bcb52af81f241e61ccf29da416c3a8",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -2057,13 +2057,13 @@
                 ]
             }
         },
-        "/api/notifications/{id}": {
+        "/notifications/{id}": {
             "delete": {
                 "tags": [
                     "Notifications"
                 ],
                 "summary": "Delete notification",
-                "operationId": "094c47a9064e38b67fc356d25968b4cf",
+                "operationId": "669b30ac7cca7f23a3587015de65ab1d",
                 "parameters": [
                     {
                         "name": "id",
@@ -2094,13 +2094,13 @@
                 ]
             }
         },
-        "/api/notifications/read/all": {
+        "/notifications/read/all": {
             "delete": {
                 "tags": [
                     "Notifications"
                 ],
                 "summary": "Delete all read notifications",
-                "operationId": "61231c9be7b9085e449af6fa976d7585",
+                "operationId": "a7535481b436d6bce82b02a92d6312ff",
                 "responses": {
                     "200": {
                         "description": "Deleted",

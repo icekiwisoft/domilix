@@ -12,7 +12,10 @@ use Illuminate\Http\Request;
 class SubscriptionsController extends Controller
 {
 
-    public function __construct(protected PaymentService $paymentService) {}
+    public function __construct(protected PaymentService $paymentService)
+    {
+        $this->middleware('auth:api');
+    }
 
     /**
      * List all subscriptions for the authenticated user.
