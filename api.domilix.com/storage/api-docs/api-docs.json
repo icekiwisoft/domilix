@@ -1,8 +1,8 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "Domilix API",
-        "description": "Complete API documentation for Domilix backend",
+        "title": "Domilix API - domilix.com",
+        "description": "Complete API documentation for Domilix backend (domilix.com)",
         "version": "1.0.0"
     },
     "servers": [

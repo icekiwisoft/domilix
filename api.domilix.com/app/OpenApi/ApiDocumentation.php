@@ -6,9 +6,9 @@ use OpenApi\Annotations as OA;
 
 /**
  * @OA\Info(
- *     title="Domilix API",
+ *     title="Domilix API - domilix.com",
  *     version="1.0.0",
- *     description="Complete API documentation for Domilix backend"
+ *     description="Complete API documentation for Domilix backend (domilix.com)"
  * )
  *
  * @OA\Server(
