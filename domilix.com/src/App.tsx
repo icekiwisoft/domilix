@@ -8,6 +8,7 @@ import 'leaflet/dist/leaflet.css';
 import SigninDialog from '@components/SigninDialog/SigninDialog.tsx';
 import Ad from '@pages/Ad/Ad.tsx';
 import Ads from '@pages/Ads/Ads.tsx';
+import Search from '@pages/Search/Search.tsx';
 import Announcer from '@pages/Announcer/Announcer.tsx';
 import Error404 from '@pages/errors/404.tsx';
 import Error500 from '@pages/errors/500.tsx';
@@ -25,7 +26,6 @@ import About from '@pages/About/About.tsx';
 import CookieConsent from '@components/CookieConsent/CookieConsent.tsx';
 import CookieSettings from '@pages/CookieSettings/CookieSettings.tsx';
 import PrivacyPolicy from '@pages/PrivacyPolicy/PrivacyPolicy.tsx';
-import FloatingPublishButton from '@components/FloatingPublishButton/FloatingPublishButton.tsx';
 
 function App(): React.ReactElement | null {
   const [signinModal] = usePulsy<boolean>('signinModal');
@@ -51,6 +51,7 @@ function App(): React.ReactElement | null {
         <Route path='/signup' Component={Signup} />
         <Route path='/Forgot' Component={Forgot} />
         <Route path='houses' Component={Ads} />
+        <Route path='search' Component={Search} />
         <Route path='houses/:id' Component={Ad} />
         <Route path='furnitures' Component={Furnitures} />
         <Route path='/Validation' Component={Validation} />
@@ -71,7 +72,6 @@ function App(): React.ReactElement | null {
 
       {signinModal && <SigninDialog />}
       <CookieConsent />
-      <FloatingPublishButton />
     </BrowserRouter>
   );
 }

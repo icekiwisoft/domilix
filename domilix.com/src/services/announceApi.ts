@@ -1,6 +1,12 @@
 import { Ad } from '../utils/types';
 import api from './api';
 
+export interface CityItem {
+  city: string;
+  country?: string;
+  ads_count?: number;
+}
+
 //get all ads by page and size
 export const getAds = async (params?: Record<string, any>): Promise<Ad[]> => {
   const response = await api.get('announces', {
@@ -44,4 +50,11 @@ export const getCategories = async (type?: string): Promise<any[]> => {
     params: type ? { type } : {},
   });
   return response.data.data || [];
+};
+
+export const getCities = async (
+  params?: Record<string, any>
+): Promise<CityItem[]> => {
+  const response = await api.get('cities', { params });
+  return response.data?.data || [];
 };

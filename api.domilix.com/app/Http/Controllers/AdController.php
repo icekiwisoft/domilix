@@ -20,6 +20,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class AdController extends Controller
 {
@@ -447,5 +448,85 @@ class AdController extends Controller
             'success' => false,
             'message' => 'Impossible de résoudre l\'adresse pour ces coordonnées'
         ], 404);
+    }
+
+    /**
+     * Liste des villes qui ont au moins une annonce.
+     */
+    public function cities(Request $request)
+    {
+        $request->validate([
+            'search' => 'nullable|string|max:100',
+            'country' => 'nullable|string|max:100',
+            'ad_type' => 'nullable|string|in:location,sale',
+            'type' => 'nullable|string|in:realestate,furniture',
+            'category_id' => 'nullable|array',
+            'category_id.*' => 'string',
+            'limit' => 'nullable|integer|min:1|max:50',
+            'order_by' => 'nullable|string|in:name,count',
+            'order' => 'nullable|string|in:asc,desc',
+            'with_count' => 'nullable|in:true,false,1,0',
+        ]);
+
+        $query = Ad::query()
+            ->whereNotNull('city')
+            ->where('city', '<>', '');
+
+        if ($request->filled('search')) {
+            $query->where('city', 'like', '%' . $request->input('search') . '%');
+        }
+
+        if ($request->filled('country')) {
+            $query->where('country', 'like', '%' . $request->input('country') . '%');
+        }
+
+        if ($request->filled('ad_type')) {
+            $query->where('ad_type', $request->input('ad_type'));
+        }
+
+        if ($request->filled('type')) {
+            $query->where('item_type', $request->input('type') === 'furniture' ? Furniture::class : RealEstate::class);
+        }
+
+        if ($request->filled('category_id')) {
+            $query->whereIn('category_id', $request->input('category_id', []));
+        }
+
+        $orderBy = $request->input('order_by', 'count');
+        $order = $request->input('order', 'desc');
+        $limit = (int) $request->input('limit', 8);
+        $withCount = $request->boolean('with_count', true);
+
+        $citiesQuery = $query
+            ->select('city', 'country', DB::raw('COUNT(*) as ads_count'))
+            ->groupBy('city', 'country');
+
+        if ($orderBy === 'name') {
+            $citiesQuery->orderBy('city', $order);
+        } else {
+            $citiesQuery->orderBy('ads_count', $order)->orderBy('city', 'asc');
+        }
+
+        $cities = $citiesQuery
+            ->limit($limit)
+            ->get()
+            ->map(function ($row) use ($withCount) {
+                $payload = [
+                    'city' => $row->city,
+                    'country' => $row->country,
+                ];
+
+                if ($withCount) {
+                    $payload['ads_count'] = (int) $row->ads_count;
+                }
+
+                return $payload;
+            })
+            ->values();
+
+        return response()->json([
+            'success' => true,
+            'data' => $cities,
+        ]);
     }
 }

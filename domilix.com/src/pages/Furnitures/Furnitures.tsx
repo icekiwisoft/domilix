@@ -4,7 +4,7 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 export default function Furnitures(): React.ReactElement {
-  const targetDate = new Date('2026-02-01T23:59:59');
+  const targetDate = new Date('2026-09-01T23:59:59');
   return (
     <>
       <Nav2 />
@@ -20,7 +20,7 @@ export default function Furnitures(): React.ReactElement {
           </p>
 
           <div className='mt-12'>
-            <Timer targetDate={targetDate} />
+            <Timer targetDate={targetDate} dayDigits={3} />
           </div>
         </div>
       </section>

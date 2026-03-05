@@ -52,6 +52,7 @@ Route::middleware('auth:api')->group(function () {
 // Address autocomplete (public route)
 Route::get('addresses/search', [AdController::class, 'searchAddresses']);
 Route::get('addresses/reverse-geocode', [AdController::class, 'reverseGeocode']);
+Route::get('cities', [AdController::class, 'cities']);
 
 
 Route::apiResource('newsletters', NewsletterController::class);

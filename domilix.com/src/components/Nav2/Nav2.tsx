@@ -3,24 +3,35 @@ import { signinDialogActions } from '@stores/defineStore';
 import { useAuth } from '../../hooks/useAuth';
 import ProfileDialog from '../ProfileDialog/ProfileDialog';
 import NotificationPopup from '../NotificationPopup/NotificationPopup';
+import ArticlePostDialog from '@components/ArticlePostDialog/ArticlePostDialog';
 import { notificationApi } from '../../services/notificationApi';
 import React, { useState, useEffect, useRef } from 'react';
 import { GoX } from 'react-icons/go';
 import { HiBars3 } from 'react-icons/hi2';
 import { HiOutlineBell } from 'react-icons/hi';
+import { MdOutlineCampaign } from 'react-icons/md';
 import { NavLink, useNavigate } from 'react-router-dom';
 
-const links = [
+const defaultLinks = [
   { name: 'Acheter', url: '/subscriptions' },
   { name: 'Immobiliers', url: '/houses' },
   { name: 'Mobiliers', url: '/furnitures' },
 ];
 
-export default function Nav2(): React.ReactElement {
+type Nav2Props = {
+  links?: Array<{ name: string; url: string }>;
+  highlightBuyLink?: boolean;
+};
+
+export default function Nav2({
+  links = defaultLinks,
+  highlightBuyLink = false,
+}: Nav2Props): React.ReactElement {
   const [click, setClick] = useState(false);
   const { user, isAuthenticated, logout } = useAuth();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showProfileDialog, setShowProfileDialog] = useState(false);
+  const [showPostDialog, setShowPostDialog] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const profileMenuRef = useRef<HTMLDivElement>(null);
@@ -204,6 +215,16 @@ export default function Nav2(): React.ReactElement {
                 {userCredits} Domicoins
               </span>
             </div>
+
+            <button
+              onClick={() => {
+                setShowPostDialog(true);
+                setClick(false);
+              }}
+              className='mt-4 w-full rounded-xl border border-orange-400 bg-white px-4 py-3 text-sm font-semibold text-orange-600 shadow-sm transition-colors hover:bg-orange-50 sm:text-base'
+            >
+              Publier une annonce
+            </button>
           </div>
         )}
 
@@ -211,14 +232,20 @@ export default function Nav2(): React.ReactElement {
         <ul className='space-y-1 mb-6'>
           {links.map(link => (
             <li key={link.name}>
-              <NavLink
-                to={link.url}
-                className={({ isActive }) =>
-                  `block py-4 px-4 rounded-xl transition-colors text-base sm:text-lg ${
-                    isActive
-                      ? 'bg-gray-100 text-black font-bold border-l-4 border-black'
-                      : 'hover:bg-gray-50 text-gray-700'
-                  }`
+                <NavLink
+                  to={link.url}
+                  className={({ isActive }) =>
+                    highlightBuyLink && link.name === 'Acheter'
+                      ? `block py-4 px-4 rounded-xl border border-pink-500 bg-pink-500 shadow-sm transition-all text-base sm:text-lg font-bold text-white ${
+                        isActive
+                          ? 'ring-2 ring-pink-200'
+                          : 'hover:bg-pink-600 hover:border-pink-600 hover:shadow'
+                      }`
+                    : `block py-4 px-4 rounded-xl transition-colors text-base sm:text-lg ${
+                        isActive
+                          ? 'bg-gray-100 text-black font-bold border-l-4 border-black'
+                          : 'hover:bg-gray-50 text-gray-700'
+                      }`
                 }
                 onClick={() => setClick(false)}
               >
@@ -334,9 +361,15 @@ export default function Nav2(): React.ReactElement {
                 <NavLink
                   to={link.url}
                   className={({ isActive }) =>
-                    isActive
-                      ? 'text-black font-bold underline decoration-2 underline-offset-4 text-sm xl:text-base'
-                      : 'text-gray-700 hover:text-gray-900 transition-colors text-sm xl:text-base whitespace-nowrap'
+                    highlightBuyLink && link.name === 'Acheter'
+                      ? `inline-flex items-center rounded-full border border-pink-500 bg-pink-500 px-3 py-1 font-bold text-white shadow-sm -translate-y-px text-sm xl:text-base whitespace-nowrap transition-all ${
+                          isActive
+                            ? 'ring-2 ring-pink-200'
+                            : 'hover:bg-pink-600 hover:border-pink-600 hover:shadow'
+                        }`
+                      : isActive
+                        ? 'text-black font-bold underline decoration-2 underline-offset-4 text-sm xl:text-base'
+                        : 'text-gray-700 hover:text-gray-900 transition-colors text-sm xl:text-base whitespace-nowrap'
                   }
                 >
                   {link.name}
@@ -354,6 +387,15 @@ export default function Nav2(): React.ReactElement {
             </button>
           ) : (
             <div className='flex items-center space-x-3 xl:space-x-4'>
+              <button
+                onClick={() => setShowPostDialog(true)}
+                className='inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-orange-400 bg-white px-3 py-2 text-sm font-semibold text-orange-600 shadow-sm transition-colors hover:bg-orange-50 xl:px-4'
+                aria-label='Publier une annonce'
+              >
+                <MdOutlineCampaign className='text-base -rotate-12 text-orange-600' />
+                <span className='hidden xl:inline'>Publier</span>
+              </button>
+
               <NavLink
                 to='/subscriptions'
                 className={({ isActive }) =>
@@ -417,6 +459,14 @@ export default function Nav2(): React.ReactElement {
         <div className='flex lg:hidden items-center space-x-2 sm:space-x-3'>
           {isAuthenticated && (
             <>
+              <button
+                onClick={() => setShowPostDialog(true)}
+                className='inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-orange-400 bg-white text-orange-600 shadow-sm transition-colors hover:bg-orange-50'
+                aria-label='Publier une annonce'
+              >
+                <MdOutlineCampaign className='w-4 h-4 sm:w-5 sm:h-5 -rotate-12 text-orange-600' />
+              </button>
+
               <NavLink
                 to='/subscriptions'
                 className={({ isActive }) =>
@@ -495,6 +545,10 @@ export default function Nav2(): React.ReactElement {
         isOpen={showProfileDialog}
         onClose={() => setShowProfileDialog(false)}
       />
+
+      {showPostDialog && (
+        <ArticlePostDialog toggleDialog={() => setShowPostDialog(false)} />
+      )}
     </nav>
   );
 }

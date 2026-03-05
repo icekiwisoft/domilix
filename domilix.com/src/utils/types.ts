@@ -117,6 +117,8 @@ export interface Category {
 
 export interface TimerProps {
   targetDate: Date;
+  displayMonths?: boolean;
+  dayDigits?: number;
 }
 
 export interface OfferDetailsProps {

@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { TimerProps } from 'utils/types';
 
-const Timer: React.FC<TimerProps> = ({ targetDate }) => {
+const Timer: React.FC<TimerProps> = ({
+  targetDate,
+  displayMonths = false,
+  dayDigits = 2,
+}) => {
   const calculateTimeLeft = () => {
     const difference = targetDate.getTime() - new Date().getTime();
     let timeLeft = {
@@ -13,9 +17,12 @@ const Timer: React.FC<TimerProps> = ({ targetDate }) => {
 
     if (difference > 0) {
       timeLeft = {
-        days: Math.floor(difference / (1000 * 60 * 60 * 24))
+        days: (displayMonths
+          ? Math.floor(difference / (1000 * 60 * 60 * 24 * 30))
+          : Math.floor(difference / (1000 * 60 * 60 * 24))
+        )
           .toString()
-          .padStart(2, '0'),
+          .padStart(dayDigits, '0'),
         hours: Math.floor((difference / (1000 * 60 * 60)) % 24)
           .toString()
           .padStart(2, '0'),
@@ -33,56 +40,57 @@ const Timer: React.FC<TimerProps> = ({ targetDate }) => {
 
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
 
+  const renderDigitBlocks = (value: string, digits: number) => {
+    const chars = value.padStart(digits, '0').split('');
+
+    return (
+      <div className='flex items-center justify-center gap-1.5'>
+        {chars.map((char, index) => (
+          <span
+            key={`${char}-${index}`}
+            className='inline-flex h-11 w-8 items-center justify-center rounded-md border border-orange-100 bg-orange-50 text-lg font-semibold text-orange-600 sm:h-12 sm:w-9 sm:text-2xl'
+          >
+            {char}
+          </span>
+        ))}
+      </div>
+    );
+  };
+
   useEffect(() => {
     const timer = setInterval(() => {
       setTimeLeft(calculateTimeLeft());
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [targetDate, displayMonths]);
 
   return (
     <div className='text-center mx-auto w-96 py-4 px-4'>
       <div className='flex items-center justify-center w-full lg:gap-8 sm:gap-5 gap-1 count-down-main'>
         <div className='timer'>
-          <div className="pl-1.5 pr-0 py-1 rounded relative bg-orange-50 w-max before:contents-[''] before:absolute before:h-full before:w-0.5 before:top-0 before:left-1/2 before:-translate-x-1/2 before:bg-white before:z-10">
-            <h3 className='countdown-element hours font-manrope font-semibold lg:text-4xl sm:text-3xl text-lg text-orange-600 tracking-[16px] pl-2 w-full text-center relative z-20'>
-              {timeLeft.days}
-            </h3>
-          </div>
+          {renderDigitBlocks(timeLeft.days, dayDigits)}
           <p className=' lg:text-sm text-xs font-normal text-gray-700 mt-1 text-center w-full'>
-            jours
+            {displayMonths ? 'mois' : 'jours'}
           </p>
         </div>
         <h3 className='font-manrope font-semibold text-xl text-gray-700'>:</h3>
         <div className='timer'>
-          <div className="pl-1.5 pr-0 py-1 rounded relative bg-orange-50 w-max before:contents-[''] before:absolute before:h-full before:w-0.5 before:top-0 before:left-1/2 before:-translate-x-1/2 before:bg-white before:z-10">
-            <h3 className='countdown-element hours font-manrope font-semibold lg:text-4xl sm:text-3xl text-lg text-orange-600 tracking-[16px] pl-2 w-full text-center relative z-20'>
-              {timeLeft.hours}
-            </h3>
-          </div>
+          {renderDigitBlocks(timeLeft.hours, 2)}
           <p className=' lg:text-sm text-xs font-normal text-gray-700 mt-1 text-center w-full'>
             heures
           </p>
         </div>
         <h3 className='font-manrope font-semibold text-xl text-gray-700'>:</h3>
         <div className='timer'>
-          <div className="pl-1.5 pr-0 py-1 rounded relative bg-orange-50 w-max before:contents-[''] before:absolute before:h-full before:w-0.5 before:top-0 before:left-1/2 before:-translate-x-1/2 before:bg-white before:z-10">
-            <h3 className='countdown-element minutes font-manrope font-semibold lg:text-4xl sm:text-3xl text-lg text-orange-600 tracking-[16px] pl-2 w-full text-center relative z-20'>
-              {timeLeft.minutes}
-            </h3>
-          </div>
+          {renderDigitBlocks(timeLeft.minutes, 2)}
           <p className=' lg:text-sm text-xs font-normal text-gray-700 mt-1 text-center w-full'>
             minutes
           </p>
         </div>
         <h3 className='font-manrope font-semibold text-xl text-gray-700'>:</h3>
         <div className='timer'>
-          <div className="pl-1.5 pr-0 py-1 rounded relative bg-orange-50 w-max before:contents-[''] before:absolute before:h-full before:w-0.5 before:top-0 before:left-1/2 before:-translate-x-1/2 before:bg-white before:z-10">
-            <h3 className='countdown-element seconds font-manrope font-semibold lg:text-4xl sm:text-3xl text-lg text-orange-600 tracking-[16px] pl-2 w-full text-center relative z-20'>
-              {timeLeft.seconds}
-            </h3>
-          </div>
+          {renderDigitBlocks(timeLeft.seconds, 2)}
           <p className=' lg:text-sm text-xs font-normal text-gray-700 mt-1 text-center w-full'>
             secondes
           </p>
