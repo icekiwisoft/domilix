@@ -12,8 +12,13 @@ use OpenApi\Annotations as OA;
  * )
  *
  * @OA\Server(
- *     url="/",
- *     description="Default server"
+ *     url="https://api.domilix.com",
+ *     description="Production server"
+ * )
+ *
+ * @OA\Server(
+ *     url="http://localhost:8000",
+ *     description="Local development server"
  * )
  *
  * @OA\SecurityScheme(
