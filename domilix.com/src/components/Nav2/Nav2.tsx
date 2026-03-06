@@ -319,15 +319,15 @@ export default function Nav2({
         {/* Bouton de connexion/déconnexion */}
         <div className='pt-4'>
           {!isAuthenticated ? (
-            <button
-              onClick={() => {
-                signinDialogActions.toggle();
-                setClick(false);
-              }}
-              className='w-full rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 px-6 py-4 text-base font-semibold text-white shadow-sm transition-all hover:from-indigo-700 hover:to-indigo-600 sm:text-lg'
-            >
-              Se connecter
-            </button>
+              <button
+                onClick={() => {
+                  signinDialogActions.toggle();
+                  setClick(false);
+                }}
+                className='w-full rounded-xl border border-orange-400 bg-white px-6 py-4 text-base font-semibold text-orange-600 shadow-sm transition-colors hover:bg-orange-50 sm:text-lg'
+              >
+                Se connecter
+              </button>
           ) : (
             <button
               onClick={() => {
@@ -381,7 +381,7 @@ export default function Nav2({
           {!isAuthenticated ? (
             <button
               onClick={signinDialogActions.toggle}
-              className='whitespace-nowrap rounded-full bg-gradient-to-r from-indigo-600 to-indigo-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:from-indigo-700 hover:to-indigo-600 xl:px-6 xl:text-base'
+              className='whitespace-nowrap rounded-full border border-orange-400 bg-white px-4 py-2 text-sm font-semibold text-orange-600 shadow-sm transition-colors hover:bg-orange-50 xl:px-6 xl:text-base'
             >
               Se connecter
             </button>
