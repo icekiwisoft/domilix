@@ -28,6 +28,7 @@ COPY composer.json composer.lock ./
 RUN composer install --no-interaction --prefer-dist --no-progress --no-scripts
 
 COPY . .
+COPY docker/php/uploads.ini /usr/local/etc/php/conf.d/uploads.ini
 
 RUN composer dump-autoload --optimize && php artisan package:discover --ansi && php artisan l5-swagger:generate
 

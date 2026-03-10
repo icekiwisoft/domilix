@@ -67,7 +67,7 @@ class StoreAdRequest extends FormRequest
 
             // Media constraints
             'medias' => 'nullable|array', // Array for media files
-            'medias.*' => 'image|mimes:jpg,jpeg,png|max:2048', // Each media file must be an image and not exceed 2MB
+            'medias.*' => 'image|mimes:jpg,jpeg,png|max:10240', // Each media file must be an image and not exceed 10MB
             'filesid' => 'nullable|array', // Array for media IDs
             'filesid.*' => 'integer|distinct' // Each ID should be unique if applicable
         ];
