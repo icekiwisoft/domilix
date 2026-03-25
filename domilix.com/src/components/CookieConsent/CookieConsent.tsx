@@ -43,8 +43,7 @@ const CookieConsent: React.FC<CookieConsentProps> = ({ onAccept, onDecline }) =>
   };
 
   const handleCustomize = () => {
-    // Ouvrir une page de paramètres des cookies
-    window.location.href = '/cookie-settings';
+    window.location.href = '/privacy-policy';
   };
 
   if (!isVisible) return null;
@@ -95,7 +94,7 @@ const CookieConsent: React.FC<CookieConsentProps> = ({ onAccept, onDecline }) =>
                   onClick={handleCustomize}
                   className="px-6 py-3 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors duration-200"
                 >
-                  Personnaliser
+                  Voir la politique
                 </button>
                 <button
                   onClick={handleDecline}

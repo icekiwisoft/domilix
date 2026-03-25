@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const MAPBOX_ACCESS_TOKEN =
-  import.meta.env.VITE_MAPBOX_ACCESS_TOKEN || 'your_mapbox_token_here';
+  process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || 'your_mapbox_token_here';
 
 export interface MapboxFeature {
   id: string;

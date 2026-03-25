@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -9,7 +11,7 @@ import {
   HiCheck,
 } from 'react-icons/hi';
 import { notificationApi, type Notification } from '../../services/notificationApi';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@router';
 
 interface NotificationPopupProps {
   isOpen: boolean;

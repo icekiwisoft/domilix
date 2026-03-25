@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link } from '@router';
 
 export default function FooterMinimal() {
   return (
@@ -17,11 +17,15 @@ export default function FooterMinimal() {
             Confidentialite
           </Link>
           <span className='text-gray-300'>|</span>
+          <Link to='/cgu' className='transition-colors hover:text-orange-600'>
+            CGU
+          </Link>
+          <span className='text-gray-300'>|</span>
           <Link
-            to='/cookie-settings'
+            to='/mentions-legales'
             className='transition-colors hover:text-orange-600'
           >
-            Cookies
+            Mentions legales
           </Link>
         </div>
       </div>

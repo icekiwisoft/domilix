@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '@router';
 import { HiHomeModern, HiEnvelope } from 'react-icons/hi2';
 import { FaGithub, FaInstagram, FaLinkedinIn, FaTwitter } from 'react-icons/fa';
 import { motion } from 'framer-motion';

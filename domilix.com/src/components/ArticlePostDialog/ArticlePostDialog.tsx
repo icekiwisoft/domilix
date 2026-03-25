@@ -1,3 +1,5 @@
+'use client';
+
 import { Listbox, Transition } from '@headlessui/react';
 import api from '@services/api';
 import { Category } from '@utils/types';

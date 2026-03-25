@@ -1,16 +1,15 @@
 import Logo from '@assets/Whited.svg';
 import { signinDialogActions } from '@stores/defineStore';
-import { AuthData } from '@utils/types';
-import usePulsy from 'pulsy';
 import React, { useState } from 'react';
 import { GoX } from 'react-icons/go';
 import { HiBars3 } from 'react-icons/hi2';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink } from '@router';
 import Burger from '@assets/img/SVG/Burger.svg';
 // import Logo from '@assets/domilix.png';
 // import logo from '../../../assets/img/logo.png';
 
 export default function Nav(): React.ReactElement {
+  const logoSrc = typeof Logo === 'string' ? Logo : Logo.src;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const toggleMenu = () => {
@@ -32,7 +31,7 @@ export default function Nav(): React.ReactElement {
           <nav className='flex capitalize items-center justify-between h-20'>
             <div className='flex items-center'>
               <NavLink className='text-2xl font-bold flex' to='/'>
-                <img src={Logo} alt='logo' className='h-5' />
+                <img src={logoSrc} alt='logo' className='h-5' />
               </NavLink>
             </div>
 

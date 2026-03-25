@@ -13,7 +13,7 @@ export default defineConfig({
     alias: {
       '@assets': resolve(root, 'assets'),
       '@components': resolve(root, 'components'),
-      '@pages': resolve(root, 'pages'),
+      '@pages': resolve(root, 'views'),
       '@context': resolve(root, 'context'),
       '@utils': resolve(root, 'utils'),
       '@services': resolve(root, 'services'),

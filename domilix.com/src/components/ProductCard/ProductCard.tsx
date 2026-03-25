@@ -1,7 +1,7 @@
 import { HeartIcon, ShareIcon } from '@heroicons/react/24/outline';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '@router';
 
 import { Ad } from '../../utils/types';
 import ShareModal from '@components/ShareModal/ShareModal';
@@ -131,6 +131,8 @@ export default function ProductCard(props: Ad): React.ReactElement {
               }
             />
 
+            <div className='pointer-events-none absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/20' />
+
             {/* Navigation Carrousel */}
             {hasMultipleImages && (
               <>
@@ -162,44 +164,45 @@ export default function ProductCard(props: Ad): React.ReactElement {
                   ))}
                 </div>
 
-                <div className='absolute top-3 right-3 text-white text-xs  rounded-full'>
-                  <div className='flex items-center justify-between'>
-                    <div className='flex gap-2'>
-                      <button
-                        onClick={e => {
-                          e.preventDefault();
-                          setShowShareModal(true);
-                        }}
-                        className='size-6 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors'
-                        title='Partager'
-                      >
-                        <ShareIcon className='size-4' />
-                      </button>
-
-                      <button
-                        onClick={e => {
-                          e.preventDefault();
-                          handleLike();
-                        }}
-                        disabled={isLiking}
-                        className={`size-6 flex items-center justify-center rounded-full transition-colors ${
-                          liked
-                            ? 'bg-orange-100 text-orange-600 hover:bg-orange-200'
-                            : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
-                        } ${isLiking ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        title={
-                          liked ? 'Retirer des favoris' : 'Ajouter aux favoris'
-                        }
-                      >
-                        <HeartIcon
-                          className={`size-4 ${liked ? 'fill-current' : ''}`}
-                        />
-                      </button>
-                    </div>
-                  </div>
-                </div>
               </>
             )}
+
+            <div className='absolute top-3 right-3 text-white text-xs rounded-full'>
+              <div className='flex items-center justify-between'>
+                <div className='flex gap-2'>
+                  <button
+                    onClick={e => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setShowShareModal(true);
+                    }}
+                    className='size-6 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors'
+                    title='Partager'
+                  >
+                    <ShareIcon className='size-4' />
+                  </button>
+
+                  <button
+                    onClick={e => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleLike();
+                    }}
+                    disabled={isLiking}
+                    className={`size-6 flex items-center justify-center rounded-full transition-colors ${
+                      liked
+                        ? 'bg-orange-100 text-orange-600 hover:bg-orange-200'
+                        : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
+                    } ${isLiking ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    title={liked ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+                  >
+                    <HeartIcon
+                      className={`size-4 ${liked ? 'fill-current' : ''}`}
+                    />
+                  </button>
+                </div>
+              </div>
+            </div>
 
             {/* Badge Type */}
             <div className='absolute top-3 left-3'>

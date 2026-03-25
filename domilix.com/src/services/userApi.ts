@@ -1,5 +1,5 @@
 import Cookies from 'js-cookie';
-import { setStoreValue } from 'pulsy';
+import { clearAuthState, setAuthToken, setAuthUser } from '@stores/defineStore';
 
 import api from './api';
 
@@ -11,7 +11,7 @@ export const login = async (
 ) => {
   const response = await api.post('auth/login', { email, password });
   const data = await response.data;
-  setStoreValue('token', data.authorisation.token);
+  setAuthToken(data.authorisation.token);
   return data;
 };
 
@@ -19,7 +19,7 @@ export const login = async (
 export const register = async (phone: string, password: string) => {
   const response = await api.post('auth/register/', { phone, password });
   const data = await response.data;
-  setStoreValue('token', data.authorisation.token);
+  setAuthToken(data.authorisation.token);
 
   return data;
 };
@@ -42,7 +42,7 @@ export const validateEmailCode = async (code: string) => {
   try {
     const response = await api.post(`/verify-email/`, { code });
     if (response.status === 200)
-      setStoreValue('user', user => ({
+      setAuthUser(user => ({
         ...user,
         email_verified: true,
       })); // Update email verification status on success
@@ -53,7 +53,7 @@ export const validateEmailCode = async (code: string) => {
 
 // Logs out the user, clears auth data, and removes cookies/session storage
 export const logoutUser = () => {
-  setStoreValue('token', null);
+  clearAuthState();
 };
 
 export const validatePhoneCode = async (phone_number: string, code: string) => {

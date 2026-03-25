@@ -1,0 +1,367 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+enum AdPeriod {
+  hour
+  day
+  night
+  month
+  year
+}
+
+enum UsersSex {
+  m
+  f
+}
+
+enum UsersDevise {
+  USD
+  EUR
+  GBP
+  XOF
+  XAF
+  NGN
+  KES
+  GHS
+  ZAR
+  JPY
+  CNY
+  INR
+  BRL
+  RUB
+  CAD
+  AUD
+  CHF
+  SGD
+  NZD
+  MXN
+  TRY
+  AED
+  SAR
+}
+
+enum CategoriesType {
+  house
+  furniture
+}
+
+enum AdsCopyrigthStatus {
+  allowed
+  checking
+  fraude
+}
+
+enum AdsDevise {
+  USD
+  EUR
+  GBP
+  XOF
+  XAF
+  NGN
+  KES
+  GHS
+  ZAR
+  JPY
+  CNY
+  INR
+  BRL
+  RUB
+  CAD
+  AUD
+  CHF
+  SGD
+  NZD
+  MXN
+  TRY
+  AED
+  SAR
+}
+
+enum AdsAdType {
+  location
+  sale
+}
+
+enum RealEstatesStanding {
+  standart
+  comfort
+  bigstanding
+}
+
+enum PaymentsPaymentType {
+  subscription
+}
+
+enum PaymentsStatus {
+  pending
+  completed
+  failed
+}
+
+model User {
+  id                BigInt             @id @default(autoincrement()) @db.UnsignedBigInt
+  deletedAt         DateTime?          @map("deleted_at") @db.Timestamp(0)
+  name              String             @db.VarChar(255)
+  email             String             @unique @db.VarChar(255)
+  emailVerifiedAt   DateTime?          @map("email_verified_at") @db.Timestamp(0)
+  password          String             @db.VarChar(255)
+  sex               UsersSex           @default(m)
+  birthday          DateTime?          @db.DateTime(0)
+  phoneNumber       String             @unique @map("phone_number") @db.VarChar(255)
+  phoneVerified     Boolean            @default(false) @map("phone_verified")
+  emailVerified     Boolean            @default(false) @map("email_verified")
+  isAdmin           Boolean            @default(false) @map("is_admin")
+  devise            UsersDevise        @default(XOF)
+  rememberToken     String?            @map("remember_token") @db.VarChar(100)
+  createdAt         DateTime?          @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt         DateTime?          @default(now()) @map("updated_at") @db.Timestamp(0)
+  announcer         Announcer?
+  notifications     Notification[]
+  payments          Payment[]
+  subscriptions     Subscription[]
+  favorites         Favorite[]
+  unlockings        Unlocking[]
+  announcerRequests AnnouncerRequest[]
+
+  @@map("users")
+}
+
+model Announcer {
+  id           String    @id @db.VarChar(255)
+  clientId     String    @unique @map("client_id") @db.VarChar(255)
+  name         String    @db.VarChar(255)
+  banned       String    @default("0") @db.VarChar(255)
+  userId       BigInt    @unique @map("user_id") @db.UnsignedBigInt
+  verified     Boolean   @default(false)
+  presentation String?   @db.VarChar(255)
+  avatar       String?   @db.VarChar(255)
+  bio          String?   @db.Text
+  contact      String?   @db.VarChar(255)
+  createdAt    DateTime? @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt    DateTime? @default(now()) @map("updated_at") @db.Timestamp(0)
+
+  @@index([userId], map: "announcers_user_id_foreign")
+  user         User      @relation(fields: [userId], references: [id])
+  medias       Media[]
+
+  @@map("announcers")
+}
+
+model Category {
+  id        BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  clientId  String   @map("client_id") @db.Char(36)
+  createdAt DateTime? @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt DateTime? @default(now()) @map("updated_at") @db.Timestamp(0)
+  type      CategoriesType   @default(house)
+  name      String   @unique @db.VarChar(255)
+
+  @@map("categories")
+}
+
+model Ad {
+  id              BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  clientId        String    @map("client_id") @db.Char(36)
+  deletedAt       DateTime? @map("deleted_at") @db.Timestamp(0)
+  adress          String    @default("") @db.VarChar(255)
+  city            String    @default("") @db.VarChar(255)
+  country         String    @default("") @db.VarChar(255)
+  state           String    @default("") @db.VarChar(255)
+  zip             String    @default("") @db.VarChar(255)
+  hidden          Boolean   @default(false)
+  copyrigthStatus AdsCopyrigthStatus    @default(allowed) @map("copyrigth_status")
+  devise          AdsDevise    @default(XOF)
+  itemType        String    @map("item_type") @db.VarChar(255)
+  price           Decimal   @default(0) @db.Decimal(15, 6)
+  adType          AdsAdType    @default(location) @map("ad_type")
+  adId            BigInt    @map("ad_id") @db.UnsignedBigInt
+  announcerId     String    @map("announcer_id") @db.VarChar(255)
+  categoryId      String?   @map("category_id") @db.VarChar(255)
+  period          AdPeriod? @default(month)
+  createdAt       DateTime?  @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt       DateTime?  @default(now()) @map("updated_at") @db.Timestamp(0)
+  description     String?   @db.Text
+
+  @@map("ads")
+}
+
+model RealEstate {
+  id        BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  deletedAt DateTime? @map("deleted_at") @db.Timestamp(0)
+  toilet    Int       @default(0) @db.UnsignedInt
+  kitchen   Int       @default(0) @db.UnsignedInt
+  bedroom   Int       @default(0) @db.UnsignedInt
+  mainroom  Int       @default(0) @db.UnsignedInt
+  gate      Boolean   @default(false)
+  furnished Boolean   @default(false)
+  pool      Boolean   @default(false)
+  garden    Boolean   @default(false)
+  garage    Boolean   @default(false)
+  lng       Float?
+  lat       Float?
+  caution   Float?
+  standing  RealEstatesStanding    @default(standart)
+  createdAt DateTime?  @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt DateTime?  @default(now()) @map("updated_at") @db.Timestamp(0)
+
+  @@map("real_estates")
+}
+
+model Furniture {
+  id        BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  clientId  String    @map("client_id") @db.Char(36)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamp(0)
+  height    Int?      @db.UnsignedInt
+  width     Int?      @db.UnsignedInt
+  length    Int?      @db.UnsignedInt
+  weight    Int?      @db.UnsignedInt
+  createdAt DateTime?  @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt DateTime?  @default(now()) @map("updated_at") @db.Timestamp(0)
+
+  @@map("furnitures")
+}
+
+model Media {
+  id          String    @id @db.Char(36)
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamp(0)
+  file        String    @db.VarChar(255)
+  thumbnail   String    @db.VarChar(255)
+  type        String    @default("image") @db.VarChar(255)
+  announcerId String    @map("announcer_id") @db.VarChar(255)
+  createdAt   DateTime?  @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt   DateTime?  @default(now()) @map("updated_at") @db.Timestamp(0)
+  announcer   Announcer @relation(fields: [announcerId], references: [id])
+
+  @@map("media")
+}
+
+model AdMedia {
+  adId           String   @map("ad_id") @db.VarChar(255)
+  mediaId        String   @map("media_id") @db.VarChar(255)
+  isPresentation Boolean  @default(false) @map("is_presentation")
+  id             BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  createdAt      DateTime? @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt      DateTime? @default(now()) @map("updated_at") @db.Timestamp(0)
+
+  @@map("ad_media")
+}
+
+model Favorite {
+  id        BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  userId    BigInt   @map("user_id") @db.UnsignedBigInt
+  adId      String   @map("ad_id") @db.VarChar(255)
+  createdAt DateTime? @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt DateTime? @default(now()) @map("updated_at") @db.Timestamp(0)
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId], map: "favorites_user_id_foreign")
+  @@map("favorites")
+}
+
+model Unlocking {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  adId       String    @map("ad_id") @db.VarChar(255)
+  userId     BigInt    @map("user_id") @db.UnsignedBigInt
+  unlockedAt DateTime? @map("unlocked_at") @db.Date
+  expiresAt  DateTime? @map("expires_at") @db.Date
+  createdAt  DateTime?  @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt  DateTime?  @default(now()) @map("updated_at") @db.Timestamp(0)
+  user       User      @relation(fields: [userId], references: [id])
+
+  @@index([userId], map: "unlockings_user_id_foreign")
+  @@map("unlockings")
+}
+
+model SubscriptionPlan {
+  id        BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  createdAt DateTime? @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt DateTime? @default(now()) @map("updated_at") @db.Timestamp(0)
+  name      String   @db.VarChar(255)
+
+  @@map("subscription_plans")
+}
+
+model Subscription {
+  id                 BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  createdAt          DateTime?  @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt          DateTime?  @default(now()) @map("updated_at") @db.Timestamp(0)
+  userId             BigInt    @map("user_id") @db.UnsignedBigInt
+  subscriptionPlanId String    @map("subscription_plan_id") @db.VarChar(255)
+  price              Decimal   @db.Decimal(10, 2)
+  duration           Int       @default(10)
+  initialCredits     Int       @default(10) @map("initial_credits")
+  credits            Int       @default(10)
+  expireAt           DateTime? @map("expire_at") @db.Timestamp(0)
+  startDate          DateTime? @map("start_date") @db.Date
+  endDate            DateTime? @map("end_date") @db.Date
+  user               User      @relation(fields: [userId], references: [id])
+
+  @@map("subscriptions")
+}
+
+model Payment {
+  id              String   @id @db.VarChar(191)
+  clientId        String   @map("client_id") @db.Char(36)
+  userId          BigInt   @map("user_id") @db.UnsignedBigInt
+  paymentType     PaymentsPaymentType   @default(subscription) @map("payment_type")
+  referenceId     BigInt?  @map("reference_id") @db.UnsignedBigInt
+  paymentMethod   String   @map("payment_method") @db.VarChar(255)
+  paymentInfo     String   @map("payment_info") @db.VarChar(255)
+  paymentTypeInfo String   @map("payment_type_info") @db.VarChar(255)
+  amount          Decimal  @db.Decimal(10, 2)
+  paymentId       String?  @unique @map("payment_id") @db.VarChar(255)
+  status          PaymentsStatus   @default(pending)
+  createdAt       DateTime? @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt       DateTime? @default(now()) @map("updated_at") @db.Timestamp(0)
+  user            User     @relation(fields: [userId], references: [id])
+
+  @@index([userId], map: "payments_user_id_foreign")
+  @@map("payments")
+}
+
+model Notification {
+  id        BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  userId    BigInt    @map("user_id") @db.UnsignedBigInt
+  type      String    @db.VarChar(255)
+  title     String    @db.VarChar(255)
+  message   String    @db.Text
+  link      String?   @db.VarChar(255)
+  read      Boolean   @default(false)
+  readAt    DateTime? @map("read_at") @db.Timestamp(0)
+  createdAt DateTime?  @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt DateTime?  @default(now()) @map("updated_at") @db.Timestamp(0)
+  user      User      @relation(fields: [userId], references: [id])
+
+  @@map("notifications")
+}
+
+model AnnouncerRequest {
+  id        BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  clientId  String   @map("client_id") @db.Char(36)
+  userId    BigInt   @map("user_id") @db.UnsignedBigInt
+  status    String   @default("pending") @db.VarChar(255)
+  createdAt DateTime? @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt DateTime? @default(now()) @map("updated_at") @db.Timestamp(0)
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId], map: "announcer_requests_user_id_foreign")
+  @@map("announcer_requests")
+}
+
+model Newsletter {
+  id                BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  clientId          String    @unique @map("client_id") @db.Char(36)
+  email             String    @db.VarChar(255)
+  verificationToken String?   @map("verification_token") @db.VarChar(255)
+  verified          Boolean   @default(false)
+  createdAt         DateTime? @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt         DateTime? @default(now()) @map("updated_at") @db.Timestamp(0)
+
+  @@map("newsletters")
+}

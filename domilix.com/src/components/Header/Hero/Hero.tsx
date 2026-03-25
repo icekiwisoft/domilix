@@ -8,7 +8,7 @@ import img10 from '../../../assets/bg_img/img10.png';
 import 'swiper/css/bundle';
 import 'swiper/css';
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '@router';
 
 
 export default function Hero(): React.ReactElement {

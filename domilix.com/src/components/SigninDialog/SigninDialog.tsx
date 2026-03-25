@@ -170,7 +170,7 @@ export default function SigninDialog() {
       onClick={() => signinDialogActions.toggle()}
     >
       <div
-        className='bg-white/90 w-full max-w-md mx-4 rounded-xl p-8 shadow-lg relative'
+        className='bg-white w-full max-w-md mx-4 rounded-xl p-8 shadow-lg relative'
         onClick={e => e.stopPropagation()}
       >
         <button

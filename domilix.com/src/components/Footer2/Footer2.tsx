@@ -1,6 +1,6 @@
 import { FaFacebook, FaInstagram } from 'react-icons/fa';
 import { SiTiktok } from 'react-icons/si';
-import { Link } from 'react-router-dom';
+import { Link } from '@router';
 
 export default function Footer2() {
   return (
@@ -62,10 +62,26 @@ export default function Footer2() {
               </li>
               <li>
                 <Link
+                  to='/cgu'
+                  className='text-gray-600 hover:text-orange-600 transition-colors'
+                >
+                  Conditions d'utilisation
+                </Link>
+              </li>
+              <li>
+                <Link
                   to='/privacy-policy'
                   className='text-gray-600 hover:text-orange-600 transition-colors'
                 >
                   Politique de confidentialité
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to='/mentions-legales'
+                  className='text-gray-600 hover:text-orange-600 transition-colors'
+                >
+                  Mentions legales
                 </Link>
               </li>
             </ul>
@@ -114,10 +130,10 @@ export default function Footer2() {
             </p>
             <div className='flex items-center gap-4 text-sm'>
               <Link
-                to='/cookie-settings'
+                to='/cgu'
                 className='text-gray-500 hover:text-orange-600 transition-colors'
               >
-                Paramètres des cookies
+                CGU
               </Link>
               <span className='text-gray-300'>•</span>
               <Link
@@ -125,6 +141,13 @@ export default function Footer2() {
                 className='text-gray-500 hover:text-orange-600 transition-colors'
               >
                 Confidentialité
+              </Link>
+              <span className='text-gray-300'>•</span>
+              <Link
+                to='/mentions-legales'
+                className='text-gray-500 hover:text-orange-600 transition-colors'
+              >
+                Mentions legales
               </Link>
             </div>
           </div>

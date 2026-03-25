@@ -1,56 +1,36 @@
-import { useState, useEffect } from 'react';
-import { getStoreValue, setStoreValue } from 'pulsy';
-import usePulsy from 'pulsy';
+'use client';
+
+import { useCallback, useState } from 'react';
 import {
   authApi,
   LoginCredentials,
   RegisterData,
   User,
 } from '../services/authApi';
+import {
+  clearAuthState,
+  getAuthToken,
+  setAuthChecked,
+  setAuthToken,
+  setAuthUser,
+  useAuthStore,
+} from '@stores/defineStore';
 
 export const useAuth = () => {
-  const [token, setToken] = usePulsy<string | null>('token');
-  const [user, setUser] = usePulsy<User | null>('user');
+  const token = useAuthStore(state => state.token);
+  const user = useAuthStore(state => state.user as User | null);
   const [isLoading, setIsLoading] = useState(false);
 
   const isAuthenticated = !!token && !!user;
 
-  // Initialize auth state on mount
-  useEffect(() => {
-    const initializeAuth = async () => {
-      const storedToken = getStoreValue<string | null>('token');
-      if (storedToken && !user) {
-        try {
-          setIsLoading(true);
-          const response = await authApi.getProfile();
-          setStoreValue('user', response.user);
-        } catch (error) {
-          // Token might be invalid, clear it
-          setStoreValue('token', null);
-          setStoreValue('user', null);
-        } finally {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    initializeAuth();
-  }, []);
-
-  const login = async (credentials: LoginCredentials) => {
+  const login = useCallback(async (credentials: LoginCredentials) => {
     try {
       setIsLoading(true);
       const response = await authApi.login(credentials);
 
-      setToken(response.authorisation.token);
-      setUser(response.user);
-      console.log('Login successful:', response);
-
-      // Sync with existing auth system
-      setStoreValue('authData', {
-        status: 'logged',
-        user: response.user,
-      });
+      setAuthToken(response.authorisation.token);
+      setAuthUser(response.user);
+      setAuthChecked(true);
 
       return { success: true, data: response };
     } catch (error: any) {
@@ -62,21 +42,16 @@ export const useAuth = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const register = async (data: RegisterData) => {
+  const register = useCallback(async (data: RegisterData) => {
     try {
       setIsLoading(true);
       const response = await authApi.register(data);
 
-      setStoreValue('token', response.authorisation.token);
-      setStoreValue('user', response.user);
-
-      // Sync with existing auth system
-      setStoreValue('authData', {
-        status: 'logged',
-        user: response.user,
-      });
+      setAuthToken(response.authorisation.token);
+      setAuthUser(response.user);
+      setAuthChecked(true);
 
       return { success: true, data: response };
     } catch (error: any) {
@@ -87,9 +62,9 @@ export const useAuth = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       setIsLoading(true);
       await authApi.logout();
@@ -97,72 +72,49 @@ export const useAuth = () => {
       // Even if logout fails on server, clear local state
       console.error('Logout error:', error);
     } finally {
-      setStoreValue('token', null);
-      setStoreValue('user', null);
-
-      // Sync with existing auth system
-      setStoreValue('authData', {
-        status: 'guess',
-        user: null,
-      });
+      clearAuthState();
 
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const refreshProfile = async () => {
+  const refreshProfile = useCallback(async () => {
     try {
       const response = await authApi.getProfile();
-      setStoreValue('user', response.user);
+      setAuthUser(response.user);
+      setAuthChecked(true);
       return response.user;
     } catch (error) {
       console.error('Failed to refresh profile:', error);
       throw error;
     }
-  };
+  }, []);
 
-  const authenticate = async () => {
-    const storedToken = getStoreValue<string | null>('token');
+  const authenticate = useCallback(async () => {
+    const storedToken = getAuthToken();
 
     if (!storedToken) {
-      // Sync with existing auth system
-      setStoreValue('authData', {
-        status: 'guess',
-        user: null,
-      });
+      clearAuthState();
       return false;
     }
 
     try {
       setIsLoading(true);
       const response = await authApi.getProfile();
-      setStoreValue('user', response.user);
-
-      // Sync with existing auth system
-      setStoreValue('authData', {
-        status: 'logged',
-        user: response.user,
-      });
+      setAuthUser(response.user);
+      setAuthChecked(true);
 
       return true;
     } catch (error) {
-      // Token is invalid, clear it
-      setStoreValue('token', null);
-      setStoreValue('user', null);
-
-      // Sync with existing auth system
-      setStoreValue('authData', {
-        status: 'guess',
-        user: null,
-      });
+      clearAuthState();
 
       return false;
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const verifyPhone = async (verificationCode: string) => {
+  const verifyPhone = useCallback(async (verificationCode: string) => {
     if (!user) throw new Error('No user found');
 
     try {
@@ -181,9 +133,9 @@ export const useAuth = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [refreshProfile, user]);
 
-  const resendVerificationCode = async () => {
+  const resendVerificationCode = useCallback(async () => {
     if (!user) throw new Error('No user found');
 
     try {
@@ -199,7 +151,7 @@ export const useAuth = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user]);
 
   return {
     user,

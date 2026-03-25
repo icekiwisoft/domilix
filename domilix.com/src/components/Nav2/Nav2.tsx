@@ -1,16 +1,18 @@
+'use client';
+
 import Logo from '@assets/domilix.png';
 import { signinDialogActions } from '@stores/defineStore';
 import { useAuth } from '../../hooks/useAuth';
 import ProfileDialog from '../ProfileDialog/ProfileDialog';
+import ProfilePopup from '../ProfilePopup/ProfilePopup';
 import NotificationPopup from '../NotificationPopup/NotificationPopup';
 import ArticlePostDialog from '@components/ArticlePostDialog/ArticlePostDialog';
 import { notificationApi } from '../../services/notificationApi';
 import React, { useState, useEffect, useRef } from 'react';
-import { GoX } from 'react-icons/go';
 import { HiBars3 } from 'react-icons/hi2';
 import { HiOutlineBell } from 'react-icons/hi';
 import { MdOutlineCampaign } from 'react-icons/md';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from '@router';
 
 const defaultLinks = [
   { name: 'Acheter', url: '/subscriptions' },
@@ -27,6 +29,8 @@ export default function Nav2({
   links = defaultLinks,
   highlightBuyLink = false,
 }: Nav2Props): React.ReactElement {
+  const logoSrc = typeof Logo === 'string' ? Logo : Logo.src;
+
   const [click, setClick] = useState(false);
   const { user, isAuthenticated, logout } = useAuth();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -62,125 +66,6 @@ export default function Nav2({
       console.error('Error loading unread count:', error);
     }
   };
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        profileMenuRef.current &&
-        profileButtonRef.current &&
-        !profileMenuRef.current.contains(event.target as Node) &&
-        !profileButtonRef.current.contains(event.target as Node)
-      ) {
-        setShowProfileMenu(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
-  function ProfilePopup() {
-    return (
-      <div
-        ref={profileMenuRef}
-        className='absolute right-0 mt-2 w-80 max-w-[90vw] bg-white border rounded-xl shadow-xl p-4 z-[60] animate-in slide-in-from-top-2 duration-200'
-        onMouseDown={e => e.stopPropagation()}
-      >
-        <div className='flex justify-between items-start mb-4'>
-          <div className='flex items-center space-x-3 flex-1 min-w-0'>
-            <div className='w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0'>
-              <span className='text-sm font-semibold'>
-                {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
-              </span>
-            </div>
-            <div className='flex-1 min-w-0'>
-              <p className='text-sm font-semibold text-gray-900 truncate'>
-                {user?.name || 'Utilisateur'}
-              </p>
-              <p className='text-xs text-gray-600 truncate'>{user?.email}</p>
-            </div>
-          </div>
-          <button
-            onClick={() => setShowProfileMenu(false)}
-            className='p-1 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0'
-            aria-label='Fermer le menu'
-          >
-            <GoX className='text-lg' />
-          </button>
-        </div>
-
-        <div className='space-y-1 border-t pt-3'>
-          {user?.is_admin && (
-            <button
-              onClick={() => {
-                navigate('/dashboard');
-                setShowProfileMenu(false);
-              }}
-              className='w-full text-left py-3 px-3 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm'
-            >
-              Dashboard
-            </button>
-          )}
-
-          {user?.announcer && (
-            <button
-              onClick={() => {
-                navigate(`/announcers/${user.announcer}`);
-                setShowProfileMenu(false);
-              }}
-              className='w-full text-left py-3 px-3 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm'
-            >
-              Mon Compte Annonceur
-            </button>
-          )}
-
-          <button
-            onClick={() => {
-              navigate('/favorite');
-              setShowProfileMenu(false);
-            }}
-            className='w-full text-left py-3 px-3 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm'
-          >
-            Mes Favoris
-          </button>
-
-          <button
-            onClick={() => {
-              navigate('/subscriptions');
-              setShowProfileMenu(false);
-            }}
-            className='w-full text-left py-3 px-3 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm'
-          >
-            Mes Abonnements
-          </button>
-
-          <button
-            onClick={() => {
-              setShowProfileDialog(true);
-              setShowProfileMenu(false);
-            }}
-            className='w-full text-left py-3 px-3 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm'
-          >
-            Paramètres
-          </button>
-
-          <div className='border-t pt-2 mt-2'>
-            <button
-              onClick={() => {
-                logout();
-                setShowProfileMenu(false);
-              }}
-              className='w-full text-left py-3 px-3 text-red-500 hover:bg-red-50 rounded-lg transition-colors text-sm font-medium'
-            >
-              Se déconnecter
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   const content = (
     <div className='lg:hidden text-black bg-white min-h-screen absolute z-40 top-16 w-full left-0 right-0 transition-all duration-300 ease-in-out shadow-lg'>
@@ -349,7 +234,7 @@ export default function Nav2({
       <div className='h-16 flex justify-between items-center text-black max-w-7xl mx-auto'>
         <div className='flex items-center flex-shrink-0'>
           <NavLink className='text-2xl font-bold flex' to='/'>
-            <img src={Logo} alt='logo' className='h-6 sm:h-7' />
+            <img src={logoSrc} alt='logo' className='h-6 sm:h-7' />
           </NavLink>
         </div>
 
@@ -442,7 +327,8 @@ export default function Nav2({
               <div className='relative'>
                 <button
                   ref={profileButtonRef}
-                  onClick={() => {
+                  onClick={event => {
+                    event.stopPropagation();
                     setShowProfileMenu(prev => !prev);
                     setShowNotifications(false);
                   }}
@@ -450,7 +336,25 @@ export default function Nav2({
                 >
                   {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
                 </button>
-                {showProfileMenu && <ProfilePopup />}
+                {showProfileMenu && (
+                  <ProfilePopup
+                    ref={profileMenuRef}
+                    user={user}
+                    onClose={() => setShowProfileMenu(false)}
+                    dashboardHref='/dashboard'
+                    announcerHref={user?.announcer ? `/announcers/${user.announcer}` : undefined}
+                    favoritesHref='/favorite'
+                    subscriptionsHref='/subscriptions'
+                    onOpenSettings={() => {
+                      setShowProfileDialog(true);
+                      setShowProfileMenu(false);
+                    }}
+                    onLogout={() => {
+                      logout();
+                      setShowProfileMenu(false);
+                    }}
+                  />
+                )}
               </div>
             </div>
           )}
@@ -513,7 +417,8 @@ export default function Nav2({
               <div className='relative'>
                 <button
                   ref={profileButtonRef}
-                  onClick={() => {
+                  onClick={event => {
+                    event.stopPropagation();
                     setShowProfileMenu(prev => !prev);
                     setShowNotifications(false);
                   }}
@@ -521,7 +426,25 @@ export default function Nav2({
                 >
                   {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
                 </button>
-                {showProfileMenu && <ProfilePopup />}
+                {showProfileMenu && (
+                  <ProfilePopup
+                    ref={profileMenuRef}
+                    user={user}
+                    onClose={() => setShowProfileMenu(false)}
+                    dashboardHref='/dashboard'
+                    announcerHref={user?.announcer ? `/announcers/${user.announcer}` : undefined}
+                    favoritesHref='/favorite'
+                    subscriptionsHref='/subscriptions'
+                    onOpenSettings={() => {
+                      setShowProfileDialog(true);
+                      setShowProfileMenu(false);
+                    }}
+                    onLogout={() => {
+                      logout();
+                      setShowProfileMenu(false);
+                    }}
+                  />
+                )}
               </div>
             </>
           )}

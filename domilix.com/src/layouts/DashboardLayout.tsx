@@ -1,5 +1,5 @@
 import React from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet } from '@router';
 
 import Fourniture from '../components/Dashboardcontent/Fourniture';
 

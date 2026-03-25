@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '@router';
 import { motion } from 'framer-motion';
 import { HiHome, HiShoppingBag, HiCreditCard, HiUserGroup, HiShieldCheck, HiBell } from 'react-icons/hi2';
 

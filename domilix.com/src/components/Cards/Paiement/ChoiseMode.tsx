@@ -5,7 +5,6 @@ import Orange_money from '@assets/img/orange-Money.png';
 import Alert from '../Alert/AlertNotifs';
 import { Phone } from '@components/Phone/Phone';
 import { subscriptionApi } from '@services/subscriptionApi';
-import 'react-international-phone/style.css';
 
 const ChoiseMode: React.FC<OfferDetailsProps> = ({
   title,
@@ -15,6 +14,10 @@ const ChoiseMode: React.FC<OfferDetailsProps> = ({
   features,
   onClose,
 }) => {
+  const mtnMoneySrc = typeof MTN_money === 'string' ? MTN_money : MTN_money.src;
+  const orangeMoneySrc =
+    typeof Orange_money === 'string' ? Orange_money : Orange_money.src;
+
   const [selectedPayment, setSelectedPayment] = useState<string | null>(null);
   const [isFetching, setIsFetching] = useState(false);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
@@ -22,13 +25,13 @@ const ChoiseMode: React.FC<OfferDetailsProps> = ({
   const [phone, setPhone] = useState('+237');
 
   const paymentMethods = [
-    { name: 'MTN Mobile Money', image: MTN_money },
-    { name: 'Orange Money', image: Orange_money },
+    { name: 'MTN Mobile Money', image: mtnMoneySrc },
+    { name: 'Orange Money', image: orangeMoneySrc },
   ];
 
   const paymentImages: Record<string, string> = {
-    'MTN Mobile Money': MTN_money,
-    'Orange Money': Orange_money,
+    'MTN Mobile Money': mtnMoneySrc,
+    'Orange Money': orangeMoneySrc,
   };
 
   const handlePurchase = async () => {
