@@ -127,12 +127,12 @@ jobs:
             echo "Deploying backend image: ${BACKEND_IMAGE}"
 
             BACKEND_IMAGE="$BACKEND_IMAGE" docker compose -p domilix_backend --env-file deploy/.env.production -f deploy/docker-compose.api.domilix.com.yml pull backend
-            BACKEND_IMAGE="$BACKEND_IMAGE" docker compose -p domilix_backend --env-file deploy/.env.production -f deploy/docker-compose.api.domilix.com.yml up -d --remove-orphans backend db
+            BACKEND_IMAGE="$BACKEND_IMAGE" docker compose -p domilix_backend --env-file deploy/.env.production -f deploy/docker-compose.api.domilix.com.yml up -d db
 
             echo "Synchronizing Prisma schema on the deployed backend"
-            docker compose -p domilix_backend --env-file deploy/.env.production -f deploy/docker-compose.api.domilix.com.yml exec -T backend pnpm prisma db push
+            BACKEND_IMAGE="$BACKEND_IMAGE" docker compose -p domilix_backend --env-file deploy/.env.production -f deploy/docker-compose.api.domilix.com.yml run --rm backend pnpm prisma db push
 
-            echo "Restarting backend after Prisma sync"
+            echo "Starting backend after Prisma sync"
             BACKEND_IMAGE="$BACKEND_IMAGE" docker compose -p domilix_backend --env-file deploy/.env.production -f deploy/docker-compose.api.domilix.com.yml up -d --remove-orphans backend
 
       - name: Optional post-deploy command
