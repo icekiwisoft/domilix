@@ -127,7 +127,13 @@ jobs:
             echo "Deploying backend image: ${BACKEND_IMAGE}"
 
             BACKEND_IMAGE="$BACKEND_IMAGE" docker compose -p domilix_backend --env-file deploy/.env.production -f deploy/docker-compose.api.domilix.com.yml pull backend
-            BACKEND_IMAGE="$BACKEND_IMAGE" docker compose -p domilix_backend --env-file deploy/.env.production -f deploy/docker-compose.api.domilix.com.yml up -d --remove-orphans
+            BACKEND_IMAGE="$BACKEND_IMAGE" docker compose -p domilix_backend --env-file deploy/.env.production -f deploy/docker-compose.api.domilix.com.yml up -d --remove-orphans backend db
+
+            echo "Synchronizing Prisma schema on the deployed backend"
+            docker compose -p domilix_backend --env-file deploy/.env.production -f deploy/docker-compose.api.domilix.com.yml exec -T backend pnpm prisma db push
+
+            echo "Restarting backend after Prisma sync"
+            BACKEND_IMAGE="$BACKEND_IMAGE" docker compose -p domilix_backend --env-file deploy/.env.production -f deploy/docker-compose.api.domilix.com.yml up -d --remove-orphans backend
 
       - name: Optional post-deploy command
         uses: appleboy/ssh-action@v1.2.0
