@@ -67,7 +67,7 @@ export class AnnouncerRequestsService {
     });
 
     if (dto.status === 'approved') {
-      const existingAnnouncer = await this.prisma.announcer.findUnique({
+      const existingAnnouncer = await this.prisma.announcer.findFirst({
         where: { userId: announcerRequest.userId },
       });
 

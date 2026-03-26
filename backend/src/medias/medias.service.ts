@@ -138,7 +138,7 @@ export class MediasService {
     files: Array<{ filename: string; mimetype: string }> = [],
   ) {
     if (!currentUser) throw new UnauthorizedException('User not authenticated');
-    const announcer = await this.prisma.announcer.findUnique({ where: { userId: currentUser.id } });
+    const announcer = await this.prisma.announcer.findFirst({ where: { userId: currentUser.id } });
     if (!announcer) throw new UnauthorizedException('Announcer not found');
 
     if (payload.AdId) {

@@ -25,7 +25,7 @@ export class AdsService {
   constructor(private readonly prisma: PrismaService) {}
 
   private async ensureAnnouncerUser(userId: bigint) {
-    const announcer = await this.prisma.announcer.findUnique({ where: { userId } });
+    const announcer = await this.prisma.announcer.findFirst({ where: { userId } });
     if (!announcer) {
       throw new ForbiddenException("Vous n'etes pas un annonceur");
     }

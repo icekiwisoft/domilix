@@ -15,7 +15,7 @@ export class UsersService {
   private async serializeUser(user: any) {
     const [liked, announcer] = await Promise.all([
       this.prisma.favorite.count({ where: { userId: user.id } }),
-      this.prisma.announcer.findUnique({ where: { userId: user.id } }),
+      this.prisma.announcer.findFirst({ where: { userId: user.id } }),
     ]);
 
     return {

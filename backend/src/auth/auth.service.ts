@@ -46,7 +46,7 @@ export class AuthService {
       this.prisma.unlocking.count({
         where: { userId: user.id, expiresAt: { gt: new Date() } },
       }),
-      this.prisma.announcer.findUnique({ where: { userId: user.id } }),
+      this.prisma.announcer.findFirst({ where: { userId: user.id } }),
       this.totalCreditsForUser(user.id),
     ]);
 
@@ -256,7 +256,7 @@ export class AuthService {
   }
 
   async updateAnnouncerProfile(user: User, dto: UpdateAnnouncerProfileDto, avatarPath?: string) {
-    const announcer = await this.prisma.announcer.findUnique({ where: { userId: user.id } });
+    const announcer = await this.prisma.announcer.findFirst({ where: { userId: user.id } });
     if (!announcer) {
       throw new ForbiddenException("Vous n'etes pas un annonceur");
     }
