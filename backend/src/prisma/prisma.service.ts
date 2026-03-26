@@ -65,7 +65,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
 
     if (!defaultUser) return;
 
-    const existing = await this.announcer.findFirst({
+    const existing = await this.announcer.findUnique({
       where: { userId: defaultUser.id },
     });
 

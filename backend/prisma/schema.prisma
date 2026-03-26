@@ -122,7 +122,7 @@ model User {
   rememberToken     String?            @map("remember_token") @db.VarChar(100)
   createdAt         DateTime?          @default(now()) @map("created_at") @db.Timestamp(0)
   updatedAt         DateTime?          @default(now()) @map("updated_at") @db.Timestamp(0)
-  announcers        Announcer[]
+  announcer         Announcer?
   notifications     Notification[]
   payments          Payment[]
   subscriptions     Subscription[]
@@ -138,7 +138,7 @@ model Announcer {
   clientId     String    @unique @map("client_id") @db.VarChar(255)
   name         String    @db.VarChar(255)
   banned       String    @default("0") @db.VarChar(255)
-  userId       BigInt    @map("user_id") @db.UnsignedBigInt
+  userId       BigInt    @unique @map("user_id") @db.UnsignedBigInt
   verified     Boolean   @default(false)
   presentation String?   @db.VarChar(255)
   avatar       String?   @db.VarChar(255)
@@ -147,19 +147,11 @@ model Announcer {
   createdAt    DateTime? @default(now()) @map("created_at") @db.Timestamp(0)
   updatedAt    DateTime? @default(now()) @map("updated_at") @db.Timestamp(0)
 
+  @@index([userId], map: "announcers_user_id_foreign")
   user         User      @relation(fields: [userId], references: [id])
   medias       Media[]
 
-  @@index([userId], map: "announcers_user_id_foreign")
   @@map("announcers")
-}
-
-model Migration {
-  id        BigInt  @id @default(autoincrement()) @db.UnsignedBigInt
-  migration String  @db.VarChar(255)
-  batch     Int
-
-  @@map("migrations")
 }
 
 model Category {

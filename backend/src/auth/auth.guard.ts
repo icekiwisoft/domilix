@@ -26,7 +26,7 @@ export class AuthGuard implements CanActivate {
     const payload = this.tokens.verifyAccessToken(token);
     const user = await this.prisma.user.findUnique({
       where: { id: BigInt(payload.sub) },
-      include: { announcers: true },
+      include: { announcer: true },
     });
 
     if (!user) throw new UnauthorizedException('Non authentifie.');
