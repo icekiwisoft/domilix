@@ -121,6 +121,10 @@ jobs:
               echo "deploy/.env.production created from example. Update it with real values."
             fi
 
+            set -a
+            . deploy/.env.production
+            set +a
+
             DEPLOY_TAG="${{ github.event.workflow_run.head_branch || github.ref_name || 'latest' }}"
             BACKEND_IMAGE="ghcr.io/${{ github.repository_owner }}/domilix-backend:${DEPLOY_TAG}"
 
@@ -128,6 +132,10 @@ jobs:
 
             BACKEND_IMAGE="$BACKEND_IMAGE" docker compose -p domilix_backend --env-file deploy/.env.production -f deploy/docker-compose.api.domilix.com.yml pull backend
             BACKEND_IMAGE="$BACKEND_IMAGE" docker compose -p domilix_backend --env-file deploy/.env.production -f deploy/docker-compose.api.domilix.com.yml up -d db
+
+            echo "Forcing MySQL user auth plugin compatibility for Prisma"
+            docker exec domilix-mysql mysql -uroot -p"$DB_ROOT_PASSWORD" -e "ALTER USER '${DB_USERNAME}'@'%' IDENTIFIED WITH mysql_native_password BY '${DB_PASSWORD}'; FLUSH PRIVILEGES;" || true
+            docker exec domilix-mysql mysql -uroot -p"$DB_ROOT_PASSWORD" -e "ALTER USER '${DB_USERNAME}'@'localhost' IDENTIFIED WITH mysql_native_password BY '${DB_PASSWORD}'; FLUSH PRIVILEGES;" || true
 
             echo "Synchronizing Prisma schema on the deployed backend"
             BACKEND_IMAGE="$BACKEND_IMAGE" docker compose -p domilix_backend --env-file deploy/.env.production -f deploy/docker-compose.api.domilix.com.yml run --rm backend pnpm prisma db push
