@@ -10,7 +10,9 @@ import { useAuth } from '../../hooks/useAuth';
 import { signinDialogActions } from '@stores/defineStore';
 
 const backendOrigin =
-  process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+  process.env.NODE_ENV === 'development'
+    ? 'http://localhost:8000'
+    : 'https://api.domilix.com';
 
 const mediaUrl = (file?: string) => {
   if (!file) return undefined;
