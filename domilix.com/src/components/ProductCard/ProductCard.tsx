@@ -9,6 +9,15 @@ import { toggleLike } from '../../services/favoritesApi';
 import { useAuth } from '../../hooks/useAuth';
 import { signinDialogActions } from '@stores/defineStore';
 
+const backendOrigin =
+  process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+
+const mediaUrl = (file?: string) => {
+  if (!file) return undefined;
+  if (file.startsWith('http://') || file.startsWith('https://')) return file;
+  return `${backendOrigin}${file}`;
+};
+
 export default function ProductCard(props: Ad): React.ReactElement {
   const {
     price,
@@ -126,7 +135,7 @@ export default function ProductCard(props: Ad): React.ReactElement {
               className='object-cover aspect-[4/3] w-full transition-transform duration-300 group-hover:scale-105'
               src={
                 medias && medias.length > 0
-                  ? 'http://localhost:8000' + medias[currentImageIndex].file
+                  ? mediaUrl(medias[currentImageIndex].file)
                   : `https://via.placeholder.com/400x300?text=Pas+d'image`
               }
             />
@@ -236,9 +245,7 @@ export default function ProductCard(props: Ad): React.ReactElement {
         price={`${price?.toLocaleString()} ${devise || 'FCFA'}`}
         location={props.city || props.address}
         image={
-          medias?.[0]?.file
-            ? `http://localhost:8000${medias[0].file}`
-            : undefined
+          medias?.[0]?.file ? mediaUrl(medias[0].file) : undefined
         }
         type={ad_type === 'location' ? 'Location' : 'Vente'}
       />
