@@ -50,6 +50,7 @@ DATABASE_URL=mysql://domilix:MyP%40ss%232026@db:3306/domilix
 ```
 
 - The deployment compose uses MySQL 8 with `mysql_native_password` enabled for compatibility.
+- The production Docker compose mounts `/app/storage` on a dedicated persistent volume so uploaded files survive container recreation.
 - If an existing MySQL user was created with another auth plugin, update it manually:
 
 ```sql

@@ -5,6 +5,8 @@ services:
     restart: unless-stopped
     env_file:
       - ./.env.production
+    volumes:
+      - domilix_backend_storage:/app/storage
     environment:
       PORT: 8000
       DATABASE_URL: ${DATABASE_URL}
@@ -55,3 +57,4 @@ networks:
 
 volumes:
   domilix_mysql_data:
+  domilix_backend_storage:
