@@ -365,3 +365,22 @@ model Newsletter {
 
   @@map("newsletters")
 }
+
+model Broadcast {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  title      String    @db.VarChar(255)
+  subtitle   String?   @db.Text
+  badge      String?   @db.VarChar(100)
+  cta        String?   @db.VarChar(255)
+  image      String?   @db.VarChar(255)
+  bg         String?   @db.VarChar(255)
+  actionUrl  String?   @map("action_url") @db.VarChar(255)
+  active     Boolean   @default(true)
+  position   Int       @default(0)
+  startsAt   DateTime? @map("starts_at") @db.Timestamp(0)
+  endsAt     DateTime? @map("ends_at") @db.Timestamp(0)
+  createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt  DateTime? @default(now()) @map("updated_at") @db.Timestamp(0)
+
+  @@map("broadcasts")
+}

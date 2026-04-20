@@ -4,6 +4,7 @@ import { AddressesModule } from './addresses/addresses.module';
 import { AnnouncerRequestsModule } from './announcer-requests/announcer-requests.module';
 import { AnnouncersModule } from './announcers/announcers.module';
 import { AuthModule } from './auth/auth.module';
+import { BroadcastsModule } from './broadcasts/broadcasts.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { CategoriesModule } from './categories/categories.module';
@@ -18,6 +19,7 @@ import { UsersModule } from './users/users.module';
   imports: [
     PrismaModule,
     AuthModule,
+    BroadcastsModule,
     AdsModule,
     AddressesModule,
     UsersModule,

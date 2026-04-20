@@ -50,9 +50,11 @@ import SignalDialog from '@components/SignalDialog/SignalDialog';
 import MapboxMap from '@components/MapboxMap/MapboxMap';
 import { useAuth } from '../../hooks/useAuth';
 import { signinDialogActions } from '@stores/defineStore';
+import { mediaUrl } from '@utils/mediaUrl';
 
 export default function Ad(): React.ReactElement {
   const { id } = useParams();
+  const adId = Array.isArray(id) ? id[0] : id;
   const [adInfo, setAdInfo] = useState<AdType | null>(null);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -112,9 +114,9 @@ export default function Ad(): React.ReactElement {
   };
 
   useEffect(() => {
-    if (id) {
+    if (adId) {
       setLoading(true);
-      getAd(parseInt(id))
+      getAd(parseInt(adId))
         .then(ad => {
           setAdInfo(ad);
           setLiked(ad.liked || false);
@@ -126,7 +128,7 @@ export default function Ad(): React.ReactElement {
           setLoading(false);
         });
     }
-  }, [id]);
+  }, [adId]);
 
   if (loading) {
     return (
@@ -269,7 +271,7 @@ export default function Ad(): React.ReactElement {
                 <div className='col-span-2 row-span-2 relative sm:rounded-l-2xl overflow-hidden cursor-pointer hover:brightness-95 transition-all'>
                   <img
                     src={
-                      'http://localhost:8000' + adInfo.medias[0]?.file ||
+                      mediaUrl(adInfo.medias[0]?.file) ||
                       'https://via.placeholder.com/732x580'
                     }
                     alt='Image principale'
@@ -289,8 +291,7 @@ export default function Ad(): React.ReactElement {
                   >
                     <img
                       src={
-                        'http://localhost:8000' + media.file ||
-                        `https://via.placeholder.com/366x290`
+                        mediaUrl(media.file) || `https://via.placeholder.com/366x290`
                       }
                       alt={`Image ${index + 2}`}
                       className='w-full h-full object-cover'
@@ -936,7 +937,7 @@ export default function Ad(): React.ReactElement {
         title={`${adInfo?.category?.name || 'Annonce'} • ${adInfo?.city || 'Localisation'}`}
         price={`${adInfo?.price?.toLocaleString()} ${adInfo?.devise || 'FCFA'}`}
         location={adInfo?.city || adInfo?.address}
-        image={adInfo?.medias?.[0]?.file ? `http://localhost:8000${adInfo.medias[0].file}` : undefined}
+        image={mediaUrl(adInfo?.medias?.[0]?.file)}
         type={adInfo?.ad_type === 'location' ? 'Location' : 'Vente'}
       />
 

@@ -10,6 +10,7 @@ import { useSearchParams, useParams } from '@router';
 import { motion } from 'framer-motion';
 import { getAdsByAnnouncer } from '@services/announceApi';
 import { getAnnouncer } from '@services/announcerApi';
+import { mediaUrl } from '@utils/mediaUrl';
 import { Ad, type Announcer } from '@utils/types';
 
 const sortOptions = [
@@ -113,7 +114,7 @@ export default function Announcer() {
                   className='relative w-20 h-20  sm:w-24 sm:h-24  shadow-sm rounded-full overflow-hidden bg-white  border-white border-4  -mt-16 sm:-mt-20'
                 >
                   <img
-                    src={"http://localhost:8000"+announcer?.avatar}
+                    src={mediaUrl(announcer?.avatar) || domilixSrc}
                     className='object-cover w-full h-full'
                     alt='Profile'
                     onError={e => {

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Media } from '../../utils/types';
+import { mediaUrl } from '@utils/mediaUrl';
 
 interface MediasDialogProps {
   toggleModal: () => void;
@@ -98,7 +99,7 @@ export default function MediasDialog({
           {/* Main image */}
           <div className='flex-1 relative bg-gray-100 rounded-lg overflow-hidden'>
             <img
-              src={`http://localhost:8000${currentMedia.file}`}
+              src={mediaUrl(currentMedia.file)}
               alt={`Photo ${currentIndex + 1} de ${medias.length}`}
               className='w-full h-full object-contain'
               loading='lazy'
@@ -171,7 +172,7 @@ export default function MediasDialog({
                       aria-label={`Voir l'image ${index + 1}`}
                     >
                       <img
-                        src={`http://localhost:8000${media.file}`}
+                        src={mediaUrl(media.file)}
                         alt={`Miniature ${index + 1}`}
                         className='w-full h-20 object-cover'
                         loading='lazy'

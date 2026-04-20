@@ -8,17 +8,7 @@ import ShareModal from '@components/ShareModal/ShareModal';
 import { toggleLike } from '../../services/favoritesApi';
 import { useAuth } from '../../hooks/useAuth';
 import { signinDialogActions } from '@stores/defineStore';
-
-const backendOrigin =
-  process.env.NODE_ENV === 'development'
-    ? 'http://localhost:8000'
-    : 'https://api.domilix.com';
-
-const mediaUrl = (file?: string) => {
-  if (!file) return undefined;
-  if (file.startsWith('http://') || file.startsWith('https://')) return file;
-  return `${backendOrigin}${file}`;
-};
+import { mediaUrl } from '@utils/mediaUrl';
 
 export default function ProductCard(props: Ad): React.ReactElement {
   const {

@@ -7,6 +7,19 @@ export interface CityItem {
   ads_count?: number;
 }
 
+export interface BroadcastItem {
+  id: number;
+  title: string;
+  subtitle?: string;
+  badge?: string;
+  cta?: string;
+  image?: string;
+  bg?: string;
+  action_url?: string;
+  active: boolean;
+  position: number;
+}
+
 //get all ads by page and size
 export const getAds = async (params?: Record<string, any>): Promise<Ad[]> => {
   const response = await api.get('announces', {
@@ -57,4 +70,9 @@ export const getCities = async (
 ): Promise<CityItem[]> => {
   const response = await api.get('cities', { params });
   return response.data?.data || [];
+};
+
+export const getBroadcasts = async (): Promise<BroadcastItem[]> => {
+  const response = await api.get('broadcasts');
+  return response.data || [];
 };

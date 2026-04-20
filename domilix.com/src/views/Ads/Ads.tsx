@@ -7,7 +7,7 @@ import furnituresPromoImg from '@assets/default-img/furnitures.jpg';
 import coverAnnonceurImg from '@assets/bg_img/cover_annonceur.jpg';
 import homePromoImg from '@assets/img/home.jpg';
 import { Checkbox, RadioGroup } from '@headlessui/react';
-import { getAds, getCategories, getCities, CityItem } from '@services/announceApi';
+import { getAds, getBroadcasts, getCategories, getCities, CityItem, BroadcastItem } from '@services/announceApi';
 import { Ad } from '@utils/types';
 import React, { useCallback, useEffect, useState } from 'react';
 import { MdChevronLeft, MdChevronRight, MdSearch } from 'react-icons/md';
@@ -16,6 +16,17 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { useSearchParams, useNavigate } from '@router';
 import 'swiper/css';
 import 'swiper/css/pagination';
+
+type PromoSlide = {
+  id: string;
+  title: string;
+  subtitle: string;
+  badge: string;
+  cta: string;
+  bg: string;
+  image: string;
+  actionUrl?: string;
+};
 
 export default function Ads(): React.ReactElement {
   const housesPromoSrc =
@@ -31,7 +42,7 @@ export default function Ads(): React.ReactElement {
   const homePromoSrc =
     typeof homePromoImg === 'string' ? homePromoImg : homePromoImg.src;
 
-  const promoSlides = [
+  const defaultPromoSlides: PromoSlide[] = [
     {
       id: 'promo-publier-gratuit',
       title: 'Publiez Votre Bien Gratuitement',
@@ -73,6 +84,7 @@ export default function Ads(): React.ReactElement {
   const [citySections, setCitySections] = useState<
     Array<{ city: string; country?: string; adsCount?: number; ads: Ad[] }>
   >([]);
+  const [promoSlides, setPromoSlides] = useState<PromoSlide[]>(defaultPromoSlides);
   const [promoSwiper, setPromoSwiper] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [searchLocation, setSearchLocation] = useState('');
@@ -347,6 +359,32 @@ export default function Ads(): React.ReactElement {
     };
     loadCategories();
   }, []);
+
+  useEffect(() => {
+    const loadBroadcasts = async () => {
+      try {
+        const items = await getBroadcasts();
+        if (!items.length) return;
+
+        setPromoSlides(
+          items.map((item: BroadcastItem) => ({
+            id: `broadcast-${item.id}`,
+            title: item.title,
+            subtitle: item.subtitle || '',
+            badge: item.badge || 'Promo',
+            cta: item.cta || 'Voir plus',
+            bg: item.bg || 'from-orange-500 to-rose-500',
+            image: item.image || coverAnnonceurSrc,
+            actionUrl: item.action_url || undefined,
+          })),
+        );
+      } catch (error) {
+        console.error('Erreur lors du chargement des broadcasts:', error);
+      }
+    };
+
+    loadBroadcasts();
+  }, [coverAnnonceurSrc]);
 
   // Initialiser la valeur de recherche et les filtres depuis l'URL
   useEffect(() => {
@@ -806,12 +844,21 @@ export default function Ads(): React.ReactElement {
                       {slide.title}
                     </h3>
                     <p className='mt-2 text-sm text-white/90'>{slide.subtitle}</p>
-                    <button
-                      type='button'
-                      className='mt-auto rounded-full bg-white px-4 py-2 text-xs font-semibold uppercase tracking-wide text-gray-900 transition-colors hover:bg-gray-100'
-                    >
-                      {slide.cta}
-                    </button>
+                    {slide.actionUrl ? (
+                      <a
+                        href={slide.actionUrl}
+                        className='mt-auto inline-flex w-fit rounded-full bg-white px-4 py-2 text-xs font-semibold uppercase tracking-wide text-gray-900 transition-colors hover:bg-gray-100'
+                      >
+                        {slide.cta}
+                      </a>
+                    ) : (
+                      <button
+                        type='button'
+                        className='mt-auto rounded-full bg-white px-4 py-2 text-xs font-semibold uppercase tracking-wide text-gray-900 transition-colors hover:bg-gray-100'
+                      >
+                        {slide.cta}
+                      </button>
+                    )}
                   </article>
                 </SwiperSlide>
               ))}
