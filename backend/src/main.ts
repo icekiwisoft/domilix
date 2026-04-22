@@ -28,6 +28,13 @@ async function bootstrap() {
     },
   });
 
+  const expressApp = app.getHttpAdapter().getInstance();
+  expressApp.get('/swagger.json', (_req: express.Request, res: express.Response) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', 'attachment; filename="swagger.json"');
+    res.send(swaggerDocument);
+  });
+
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
