@@ -156,11 +156,10 @@ export default function ProductCard(props: Ad): React.ReactElement {
                     <button
                       key={index}
                       onClick={e => goToImage(index, e)}
-                      className={`w-1.5 h-1.5 rounded-full transition-all duration-200 ${
-                        index === currentImageIndex
-                          ? 'bg-white'
-                          : 'bg-white/50 hover:bg-white/75'
-                      }`}
+                      className={`w-1.5 h-1.5 rounded-full transition-all duration-200 ${index === currentImageIndex
+                        ? 'bg-white'
+                        : 'bg-white/50 hover:bg-white/75'
+                        }`}
                     />
                   ))}
                 </div>
@@ -190,11 +189,10 @@ export default function ProductCard(props: Ad): React.ReactElement {
                       handleLike();
                     }}
                     disabled={isLiking}
-                    className={`size-6 flex items-center justify-center rounded-full transition-colors ${
-                      liked
-                        ? 'bg-orange-100 text-orange-600 hover:bg-orange-200'
-                        : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
-                    } ${isLiking ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`size-6 flex items-center justify-center rounded-full transition-colors ${liked
+                      ? 'bg-orange-100 text-orange-600 hover:bg-orange-200'
+                      : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
+                      } ${isLiking ? 'opacity-50 cursor-not-allowed' : ''}`}
                     title={liked ? 'Retirer des favoris' : 'Ajouter aux favoris'}
                   >
                     <HeartIcon
