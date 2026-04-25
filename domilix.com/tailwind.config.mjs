@@ -9,6 +9,10 @@ export default withMT({
   theme: {
     extend: {
       colors: {
+        primary: '#FF6B00',
+        'primary-light': '#FF8533',
+        dark: '#0F0F0F',
+        'background-light': '#FAFAFA',
         gray: { 950: '#0e0b23' },
         indigo: {
           950: '#181059',
@@ -16,6 +20,9 @@ export default withMT({
       },
       transitionProperty: {
         border: 'border,border-radius,box-shadow,background-color',
+      },
+      backgroundImage: {
+        'primary-gradient': 'linear-gradient(135deg, #FF6B00, #FF8533)',
       },
       boxShadow: {
         stat: '0 0 30px -15px rgba(0, 0, 0, 0.5)',

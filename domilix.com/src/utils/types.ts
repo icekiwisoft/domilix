@@ -72,8 +72,11 @@ export interface Ad {
   kitchen?: number;
   garden?: number;
   gate?: number;
+  garage?: number;
   pool?: number;
+  furnitured?: number;
   caution?: number;
+  standing?: 'standard' | 'confort' | 'haut_standing';
   // Furniture specific properties
   height?: number;
   width?: number;
