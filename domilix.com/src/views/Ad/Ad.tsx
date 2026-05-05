@@ -4,6 +4,8 @@ import { motion } from 'framer-motion';
 import L from 'leaflet';
 import React, { useEffect, useState } from 'react';
 import {
+  FaBath,
+  FaBed,
   FaCar,
   FaCouch,
   FaDoorOpen,
@@ -22,7 +24,7 @@ import {
   HiOutlineHeart,
   HiOutlineShare,
 } from 'react-icons/hi2';
-import { MdAcUnit, MdSecurity, MdTv, MdVerifiedUser, MdWorkspacePremium } from 'react-icons/md';
+import { MdAcUnit, MdSecurity, MdSquareFoot, MdTv, MdVerifiedUser, MdWorkspacePremium } from 'react-icons/md';
 
 import Footer2 from '@components/Footer2/Footer2';
 import MapboxMap from '@components/MapboxMap/MapboxMap';
@@ -381,22 +383,35 @@ export default function Ad(): React.ReactElement {
                 </p>
 
                 {isRealestate && (
-                  <div className='grid grid-cols-3 gap-4 mt-6'>
-                    {[
-                      { label: 'Chambres', value: adInfo.bedroom },
-                      { label: 'Salles de bain', value: adInfo.toilet },
-                      { label: 'Salons', value: adInfo.mainroom },
-                    ]
-                      .filter(item => item.value)
-                      .map(item => (
-                        <div
-                          key={item.label}
-                          className='text-center p-4 bg-white rounded-xl border border-gray-100 shadow-sm'
-                        >
-                          <div className='text-2xl font-black text-gray-900'>{item.value}</div>
-                          <div className='text-sm text-gray-500 font-medium'>{item.label}</div>
-                        </div>
-                      ))}
+                  <div className='grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6'>
+                    {adInfo.bedroom ? (
+                      <div className='flex flex-col items-center gap-2 p-4 bg-orange-50 rounded-xl border border-orange-100'>
+                        <FaBed className='text-primary text-2xl' />
+                        <span className='text-2xl font-black text-gray-900'>{adInfo.bedroom}</span>
+                        <span className='text-xs text-gray-500 font-medium'>Chambre{adInfo.bedroom > 1 ? 's' : ''}</span>
+                      </div>
+                    ) : null}
+                    {adInfo.toilet ? (
+                      <div className='flex flex-col items-center gap-2 p-4 bg-orange-50 rounded-xl border border-orange-100'>
+                        <FaBath className='text-primary text-2xl' />
+                        <span className='text-2xl font-black text-gray-900'>{adInfo.toilet}</span>
+                        <span className='text-xs text-gray-500 font-medium'>Salle{adInfo.toilet > 1 ? 's' : ''} de bain</span>
+                      </div>
+                    ) : null}
+                    {adInfo.mainroom ? (
+                      <div className='flex flex-col items-center gap-2 p-4 bg-orange-50 rounded-xl border border-orange-100'>
+                        <FaCouch className='text-primary text-2xl' />
+                        <span className='text-2xl font-black text-gray-900'>{adInfo.mainroom}</span>
+                        <span className='text-xs text-gray-500 font-medium'>Salon{adInfo.mainroom > 1 ? 's' : ''}</span>
+                      </div>
+                    ) : null}
+                    {adInfo.size ? (
+                      <div className='flex flex-col items-center gap-2 p-4 bg-orange-50 rounded-xl border border-orange-100'>
+                        <MdSquareFoot className='text-primary text-2xl' />
+                        <span className='text-2xl font-black text-gray-900'>{adInfo.size} <span className='text-base font-semibold'>m²</span></span>
+                        <span className='text-xs text-gray-500 font-medium'>Superficie</span>
+                      </div>
+                    ) : null}
                   </div>
                 )}
 
