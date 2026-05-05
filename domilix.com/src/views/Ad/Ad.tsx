@@ -31,7 +31,7 @@ import Nav2 from '@components/Nav2/Nav2';
 import ShareModal from '@components/ShareModal/ShareModal';
 import SignalDialog from '@components/SignalDialog/SignalDialog';
 import UnlockDialog from '@components/UnlockDialog/UnlockDialog';
-import { useParams } from '@router';
+import { useNavigate, useParams } from '@router';
 import { getAd, getAds, unlockAd } from '@services/announceApi';
 import { toggleLike } from '@services/favoritesApi';
 import { signinDialogActions } from '@stores/defineStore';
@@ -53,6 +53,7 @@ L.Icon.Default.mergeOptions({
 
 export default function Ad(): React.ReactElement {
   const { id } = useParams();
+  const navigate = useNavigate();
   const adId = Array.isArray(id) ? id[0] : id;
 
   const [adInfo, setAdInfo] = useState<AdType | null>(null);
@@ -65,7 +66,8 @@ export default function Ad(): React.ReactElement {
   const [modalInitialIndex, setModalInitialIndex] = useState(0);
   const [liked, setLiked] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+  const hasCredits = Number(user?.credits || 0) > 0;
 
   const openModalWithImage = (index: number) => {
     setModalInitialIndex(index);
@@ -74,6 +76,14 @@ export default function Ad(): React.ReactElement {
 
   const handleUnlock = async () => {
     if (!adInfo) return;
+    if (!isAuthenticated) {
+      signinDialogActions.toggle();
+      return;
+    }
+    if (!hasCredits) {
+      navigate('/subscriptions');
+      return;
+    }
     try {
       await unlockAd(adInfo.id);
       const updated = await getAd(adInfo.id);
@@ -592,7 +602,13 @@ export default function Ad(): React.ReactElement {
                 ) : (
                   <>
                     <button
-                      onClick={() => setShowUnlockDialog(true)}
+                      onClick={() => {
+                        if (!isAuthenticated) {
+                          signinDialogActions.toggle();
+                          return;
+                        }
+                        setShowUnlockDialog(true);
+                      }}
                       className='w-full text-white py-5 rounded-2xl font-black text-lg shadow-xl hover:-translate-y-1 active:translate-y-0 transition-all mb-4 uppercase tracking-tight bg-primary-gradient'
                     >
                       Débloquer l'annonce
@@ -744,6 +760,7 @@ export default function Ad(): React.ReactElement {
         onClose={() => setShowUnlockDialog(false)}
         onConfirm={handleUnlock}
         price={1}
+        hasCredits={hasCredits}
       />
 
       <SignalDialog

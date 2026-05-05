@@ -18,6 +18,8 @@ const PricingCard: React.FC<PricingProps> = ({
   credits,
   validity,
   price,
+  benefit,
+  badge,
   features,
   isActive,
   onChoose,
@@ -41,7 +43,7 @@ const PricingCard: React.FC<PricingProps> = ({
           animate={{ opacity: 1, y: 0 }}
           className='absolute -top-5 left-1/2 -translate-x-1/2 rounded-full bg-white px-4 py-2 text-xs font-black uppercase tracking-wider text-indigo-950 shadow-xl ring-1 ring-orange-200'
         >
-          Plus populaire
+          {badge || 'Plus populaire'}
         </motion.div>
         <motion.div
           initial={{ scale: 0, rotate: -8 }}
@@ -56,12 +58,17 @@ const PricingCard: React.FC<PricingProps> = ({
       </>
     )}
 
-    <h2 className='text-2xl font-bold mb-6'>{title}</h2>
+    <h2 className='text-2xl font-bold mb-2'>{title}</h2>
+    <p className={`mb-6 text-sm leading-6 ${isActive ? 'text-white/75' : 'text-gray-500'}`}>
+      {benefit}
+    </p>
 
     <div className='space-y-4 mb-8'>
-      <div className='flex items-center gap-3'>
-        <img className='w-6 h-6' src='dom.png' alt='Credits' />
-        <span className='text-lg'>{credits}</span>
+      <div className={`rounded-2xl p-4 ${isActive ? 'bg-white/10' : 'bg-orange-50'}`}>
+        <div className='flex items-center gap-3'>
+          <img className='w-6 h-6' src='dom.png' alt='Credits' />
+          <span className='text-lg font-black'>{credits}</span>
+        </div>
       </div>
 
       <div className='flex items-center gap-3'>
@@ -136,7 +143,7 @@ const PricingCard: React.FC<PricingProps> = ({
             : 'bg-orange-50 text-orange-600 hover:bg-orange-100'
         }`}
     >
-      Choisir ce pack
+      Débloquer mes contacts
     </motion.button>
   </motion.div>
 );
@@ -165,12 +172,10 @@ export default function Subscriptions() {
             className='text-center max-w-3xl mx-auto mb-12'
           >
             <h1 className='text-4xl md:text-5xl font-bold text-gray-900 mb-6'>
-              Le bon plan pour votre recherche
+              Choisissez votre pack et contactez les bons annonceurs
             </h1>
             <p className='text-lg text-gray-600'>
-              Nous mettons à votre disposition plusieurs plans puissants pour
-              vous aider à trouver un logement et un espace de bureau à un prix
-              abordable.
+              Débloquez les coordonnées des biens qui vous intéressent et augmentez vos chances de trouver rapidement.
             </p>
           </motion.div>
 
@@ -180,6 +185,7 @@ export default function Subscriptions() {
               credits='20 credits'
               validity='1 semaine de validité'
               price='1000'
+              benefit='Idéal pour tester Domilix et contacter quelques annonceurs ciblés.'
               features={["Voir les informations de base d'une annonce."]}
               isActive={false}
               onChoose={() =>
@@ -188,6 +194,7 @@ export default function Subscriptions() {
                   credits: '20 credits',
                   validity: '1 semaine de validité',
                   price: '1000 ',
+                  benefit: 'Idéal pour tester Domilix et contacter quelques annonceurs ciblés.',
                   features: ["Voir les informations de base d'une annonce."],
                 })
               }
@@ -197,6 +204,7 @@ export default function Subscriptions() {
               credits='50 credits'
               validity='2 semaines de validité'
               price='2000'
+              benefit='Pour comparer plusieurs logements sans bloquer votre recherche.'
               features={["Voir les informations de base d'une annonce."]}
               isActive={false}
               onChoose={() =>
@@ -205,6 +213,7 @@ export default function Subscriptions() {
                   credits: '50 credits',
                   validity: '2 semaines de validité',
                   price: '2000',
+                  benefit: 'Pour comparer plusieurs logements sans bloquer votre recherche.',
                   features: ["Voir les informations de base d'une annonce."],
                 })
               }
@@ -214,6 +223,8 @@ export default function Subscriptions() {
               credits='100 credits'
               validity='3 semaines de validité'
               price='3500'
+              benefit='Le meilleur choix pour chercher activement et ne pas rater les bonnes annonces.'
+              badge='Recommandé'
               features={[
                 "Voir les informations de base d'une annonce.",
                 'Partagez les annonces avec vos contacts.',
@@ -225,6 +236,8 @@ export default function Subscriptions() {
                   credits: '100 credits',
                   validity: '3 semaines de validité',
                   price: '3500',
+                  benefit: 'Le meilleur choix pour chercher activement et ne pas rater les bonnes annonces.',
+                  badge: 'Recommandé',
                   features: [
                     "Voir les informations de base d'une annonce.",
                     'Partagez les annonces avec vos contacts.',
@@ -237,6 +250,7 @@ export default function Subscriptions() {
               credits='150 credits'
               validity='4 semaines de validité'
               price='5000'
+              benefit='Pour une recherche intensive avec un maximum d’opportunités de contact.'
               features={[
                 "Voir les informations de base d'une annonce.",
                 'Partagez les annonces avec vos contacts.',
@@ -248,6 +262,7 @@ export default function Subscriptions() {
                   credits: '150 credits',
                   validity: '4 semaines de validité',
                   price: '5000',
+                  benefit: 'Pour une recherche intensive avec un maximum d’opportunités de contact.',
                   features: [
                     "Voir les informations de base d'une annonce.",
                     'Partagez les annonces avec vos contacts.',

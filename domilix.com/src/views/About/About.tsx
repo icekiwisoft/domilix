@@ -51,7 +51,7 @@ export default function About(): React.ReactElement {
           className='relative overflow-hidden'
         >
           {/* Image Grid Background */}
-          <div className='grid grid-cols-2 md:grid-cols-4 gap-2 h-64 md:h-80'>
+          <div className='grid grid-cols-2 md:grid-cols-4 gap-2 h-[34rem] md:h-[42rem] lg:h-[48rem]'>
             <div className='relative overflow-hidden'>
               <img
                 src='https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400'
@@ -89,7 +89,7 @@ export default function About(): React.ReactElement {
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.2 }}
-                className='text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-4'
+                className='text-6xl md:text-8xl lg:text-9xl font-black text-white mb-6 tracking-tight'
               >
                 À propos de Domilix
               </motion.h1>
@@ -97,7 +97,7 @@ export default function About(): React.ReactElement {
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.3 }}
-                className='text-2xl md:text-3xl lg:text-4xl text-white/90 max-w-4xl mx-auto font-light'
+                className='text-2xl md:text-4xl lg:text-5xl text-white/90 max-w-5xl mx-auto font-light leading-tight'
               >
                 Votre partenaire de confiance pour l'immobilier et le mobilier
                 au Cameroun

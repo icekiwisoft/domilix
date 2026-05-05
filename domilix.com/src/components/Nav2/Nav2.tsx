@@ -8,7 +8,7 @@ import NotificationPopup from '../NotificationPopup/NotificationPopup';
 import ArticlePostDialog from '@components/ArticlePostDialog/ArticlePostDialog';
 import { notificationApi } from '../../services/notificationApi';
 import React, { useState, useEffect, useRef } from 'react';
-import { HiBars3 } from 'react-icons/hi2';
+import { HiBars3, HiXMark } from 'react-icons/hi2';
 import { HiOutlineBell } from 'react-icons/hi';
 import { MdOutlineCampaign } from 'react-icons/md';
 import { NavLink, useNavigate } from '@router';
@@ -453,7 +453,7 @@ export default function Nav2({
             aria-label={click ? 'Fermer le menu' : 'Ouvrir le menu'}
           >
             {click ? (
-              <GoX className='text-2xl sm:text-3xl' />
+              <HiXMark className='text-2xl sm:text-3xl' />
             ) : (
               <HiBars3 className='text-2xl sm:text-3xl' />
             )}

@@ -92,6 +92,7 @@ export default function Ads(): React.ReactElement {
   const [openFilterPopup, setOpenFilterPopup] = useState<
     null | 'budget' | 'type' | 'standing' | 'amenities'
   >(null);
+  const [mobileFiltersExpanded, setMobileFiltersExpanded] = useState(true);
   const [filters, setFilters] = useState({
     budget_min: '',
     budget_max: '',
@@ -629,10 +630,110 @@ export default function Ads(): React.ReactElement {
   return (
     <>
       <Nav2 />
-      <div className='fixed top-16 z-20 w-screen border-b border-gray-200/70 bg-gray-100 px-4 py-3 backdrop-blur-sm sm:px-6 lg:px-8'>
+      <div className='sticky top-16 z-20 w-screen px-4 py-3 backdrop-blur-sm sm:px-6 md:fixed md:top-16 lg:px-8'>
         <div className='mx-auto w-full max-w-6xl'>
           <div className='relative'>
-            <div className='-translate-y-1 flex items-center rounded-full border border-gray-200 bg-white px-3 py-1 shadow-[0_18px_40px_-22px_rgba(15,23,42,0.35)] transition-shadow'>
+            <div className='overflow-hidden rounded-2xl border-2 border-orange-500 bg-white shadow-xl shadow-orange-900/10 md:hidden'>
+              <div className='flex items-center justify-between gap-3 border-b border-orange-100 px-5 py-3'>
+                <div className='min-w-0 text-left'>
+                  <span className='block text-xs font-black uppercase tracking-wide text-orange-500'>Filtres</span>
+                  <span className='block truncate text-sm font-bold text-slate-700'>
+                    {searchLocation || 'Localisation'} • {adTypeSummary}
+                  </span>
+                </div>
+                <button
+                  type='button'
+                  onClick={() => {
+                    setMobileFiltersExpanded(value => !value);
+                    setOpenFilterPopup(null);
+                  }}
+                  className='rounded-full bg-orange-50 px-3 py-1.5 text-xs font-black text-orange-600 transition hover:bg-orange-100'
+                >
+                  {mobileFiltersExpanded ? 'Réduire' : 'Modifier'}
+                </button>
+              </div>
+
+              {mobileFiltersExpanded && <div className='divide-y divide-gray-100'>
+                <div className='flex items-center gap-3 px-5 py-4'>
+                  <span className='h-4 w-4 rounded-full border-4 border-slate-500' />
+                  <div className='min-w-0 flex-1 text-left'>
+                    <span className='block text-sm font-bold text-slate-600'>Localisation</span>
+                    <AddressAutocomplete
+                      value={searchLocation}
+                      onChange={handleSearchChange}
+                      onLocationSelect={handleLocationSelect}
+                      placeholder='Rechercher une localisation'
+                      className='h-5 w-full border-0 bg-transparent p-0 text-sm font-semibold text-slate-800 outline-none placeholder:text-slate-400 focus:border-0 focus:ring-0'
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type='button'
+                  onClick={() => setOpenFilterPopup(current => current === 'budget' ? null : 'budget')}
+                  className='flex w-full items-center gap-3 px-5 py-4 text-left'
+                >
+                  <span className='h-4 w-4 rounded-full border-4 border-slate-500' />
+                  <span className='min-w-0 flex-1'>
+                    <span className='block text-sm font-bold text-slate-600'>Budget</span>
+                    <span className='block truncate text-sm font-semibold text-slate-800'>{budgetSummary}</span>
+                  </span>
+                </button>
+
+                <div className='grid grid-cols-2 divide-x divide-gray-100'>
+                  <button
+                    type='button'
+                    onClick={() => setOpenFilterPopup(current => current === 'type' ? null : 'type')}
+                    className='flex items-center gap-2 px-5 py-4 text-left'
+                  >
+                    <span className='text-slate-500'>▣</span>
+                    <span className='min-w-0 flex-1'>
+                      <span className='block truncate text-sm font-bold text-slate-700'>{adTypeSummary}</span>
+                      <span className='block truncate text-xs font-semibold text-slate-400'>{filterSummary}</span>
+                    </span>
+                  </button>
+                  <button
+                    type='button'
+                    onClick={() => setOpenFilterPopup(current => current === 'standing' ? null : 'standing')}
+                    className='flex items-center gap-2 px-5 py-4 text-left'
+                  >
+                    <span className='text-slate-500'>▣</span>
+                    <span className='min-w-0 flex-1'>
+                      <span className='block text-sm font-bold text-slate-700'>Standing</span>
+                      <span className='block truncate text-xs font-semibold text-slate-400'>{standingSummary}</span>
+                    </span>
+                  </button>
+                </div>
+
+                <button
+                  type='button'
+                  onClick={() => setOpenFilterPopup(current => current === 'amenities' ? null : 'amenities')}
+                  className='flex w-full items-center gap-3 px-5 py-4 text-left'
+                >
+                  <span className='text-slate-500'>♢</span>
+                  <span className='min-w-0 flex-1'>
+                    <span className='block text-sm font-bold text-slate-700'>Équipements</span>
+                    <span className='block truncate text-sm font-semibold text-slate-500'>{amenitiesSummary}</span>
+                  </span>
+                </button>
+              </div>}
+
+              <button
+                type='button'
+                onClick={handleSearchSubmit}
+                className='w-full border-t border-orange-200 bg-orange-500 px-5 py-4 text-sm font-black text-white transition-colors hover:bg-orange-600'
+              >
+                {mobileFiltersExpanded ? 'Rechercher' : 'Rechercher avec ces filtres'}
+              </button>
+            </div>
+
+            {openFilterPopup && (
+              <div className='absolute left-0 right-0 top-[calc(100%+8px)] z-40 mx-auto w-[92vw] max-w-sm rounded-2xl border border-gray-200/80 bg-white p-3.5 shadow-[0_18px_45px_-24px_rgba(15,23,42,0.55)] ring-1 ring-black/5 md:hidden'>
+                {renderFilterPopupContent(openFilterPopup)}
+              </div>
+            )}
+
+            <div className='-translate-y-1 hidden items-center rounded-full border border-gray-200 bg-white px-3 py-1 shadow-[0_18px_40px_-22px_rgba(15,23,42,0.35)] transition-shadow md:flex'>
               <div className='flex h-[52px] min-w-0 flex-1 flex-col justify-center rounded-full bg-white px-7'>
                 <span className='block text-xs font-semibold text-gray-800'>
                   Localisation
@@ -797,7 +898,7 @@ export default function Ads(): React.ReactElement {
       </div>
 
       <div className=' min-h-screen'>
-        <section className='mt-44 px-5 sm:px-8 lg:px-12'>
+        <section className='mt-8 px-5 md:mt-44 sm:px-8 lg:px-12'>
           <div className='mb-4 flex items-center justify-between'>
             <h2 className='text-lg font-semibold text-gray-900 sm:text-xl'>
               Promotions du moment
