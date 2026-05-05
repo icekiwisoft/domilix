@@ -41,6 +41,20 @@ export class AuthService {
     return subscriptions.reduce((sum, item) => sum + item.credits, 0);
   }
 
+  private verificationCodeKey(userId: bigint) {
+    return `verification_code_${userId}`;
+  }
+
+  private emailVerificationKey(userId: bigint) {
+    return `email_verification_code_${userId}`;
+  }
+
+  private ensureMailConfigured() {
+    if (!process.env.MAIL_HOST && process.env.NODE_ENV === 'production') {
+      throw new BadRequestException('Configuration email manquante.');
+    }
+  }
+
   private async userResource(user: User) {
     const [favorites, unlocked, announcer, credits] = await Promise.all([
       this.prisma.favorite.count({ where: { userId: user.id } }),
@@ -84,16 +98,14 @@ export class AuthService {
   }
 
   private async sendResetPasswordEmail(email: string, code: string) {
-    const host = process.env.MAIL_HOST;
-    if (!host) {
-      if (process.env.NODE_ENV === 'production') {
-        throw new BadRequestException('Configuration email manquante.');
-      }
+    this.ensureMailConfigured();
+
+    if (!process.env.MAIL_HOST) {
       return;
     }
 
     const transporter = nodemailer.createTransport({
-      host,
+      host: process.env.MAIL_HOST,
       port: Number(process.env.MAIL_PORT || 587),
       secure: process.env.MAIL_SECURE === 'true',
       auth: process.env.MAIL_USERNAME
@@ -114,16 +126,14 @@ export class AuthService {
   }
 
   private async sendEmailVerificationCode(email: string, code: string) {
-    const host = process.env.MAIL_HOST;
-    if (!host) {
-      if (process.env.NODE_ENV === 'production') {
-        throw new BadRequestException('Configuration email manquante.');
-      }
+    this.ensureMailConfigured();
+
+    if (!process.env.MAIL_HOST) {
       return;
     }
 
     const transporter = nodemailer.createTransport({
-      host,
+      host: process.env.MAIL_HOST,
       port: Number(process.env.MAIL_PORT || 587),
       secure: process.env.MAIL_SECURE === 'true',
       auth: process.env.MAIL_USERNAME
@@ -151,7 +161,7 @@ export class AuthService {
       throw new BadRequestException('Ajoutez une adresse email avant de la verifier.');
     }
 
-    const code = this.verificationCodes.generate(`email_verification_code_${user.id}`);
+    const code = this.verificationCodes.generate(this.emailVerificationKey(user.id));
     await this.sendEmailVerificationCode(user.email, code);
 
     return {
@@ -161,7 +171,7 @@ export class AuthService {
   }
 
   async verifyEmail(user: User, verificationCode: string) {
-    const cachedCode = this.verificationCodes.get(`email_verification_code_${user.id}`);
+    const cachedCode = this.verificationCodes.get(this.emailVerificationKey(user.id));
     if (!cachedCode) {
       throw new BadRequestException('Le code de verification a expire.');
     }
@@ -173,7 +183,7 @@ export class AuthService {
       where: { id: user.id },
       data: { emailVerified: true },
     });
-    this.verificationCodes.forget(`email_verification_code_${user.id}`);
+    this.verificationCodes.forget(this.emailVerificationKey(user.id));
 
     return {
       message: 'Email verifie avec succes.',
@@ -200,6 +210,10 @@ export class AuthService {
       }
     }
 
+    if (dto.email && !dto.phone_number) {
+      this.ensureMailConfigured();
+    }
+
     const password = await bcrypt.hash(dto.password, 10);
     const user = await this.prisma.user.create({
       data: {
@@ -212,10 +226,19 @@ export class AuthService {
       },
     });
 
-    const code = this.verificationCodes.generate(`verification_code_${user.id}`);
+    const code = this.verificationCodes.generate(
+      dto.phone_number
+        ? this.verificationCodeKey(user.id)
+        : this.emailVerificationKey(user.id),
+    );
+
+    if (!dto.phone_number) {
+      await this.sendEmailVerificationCode(user.email, code);
+    }
+
     const message = dto.phone_number
       ? 'Un SMS de verification a ete envoye.'
-      : 'Compte cree avec succes.';
+      : 'Un code de verification a ete envoye a votre email.';
 
     const response = await this.authResponse(user, message);
     return {
@@ -292,7 +315,7 @@ export class AuthService {
       throw new BadRequestException('Le numero de telephone est deja verifie.');
     }
 
-    const code = this.verificationCodes.generate(`verification_code_${user.id}`);
+    const code = this.verificationCodes.generate(this.verificationCodeKey(user.id));
     return {
       message: 'Un nouveau SMS de verification a ete envoye.',
       verification_code: process.env.NODE_ENV !== 'production' ? code : undefined,
@@ -303,7 +326,7 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({ where: { id: BigInt(userId) } });
     if (!user) throw new NotFoundException('Utilisateur non trouve.');
 
-    const cachedCode = this.verificationCodes.get(`verification_code_${user.id}`);
+    const cachedCode = this.verificationCodes.get(this.verificationCodeKey(user.id));
     if (!cachedCode) {
       throw new BadRequestException('Le code de verification a expire.');
     }
@@ -316,7 +339,7 @@ export class AuthService {
       where: { id: user.id },
       data: { phoneVerified: true },
     });
-    this.verificationCodes.forget(`verification_code_${user.id}`);
+    this.verificationCodes.forget(this.verificationCodeKey(user.id));
     return { message: 'Verification reussie, votre compte est active.' };
   }
 
@@ -395,7 +418,7 @@ export class AuthService {
       throw new NotFoundException('Aucun utilisateur trouve avec cet email.');
     }
 
-    const code = this.verificationCodes.generate(`verification_code_${user.id}`);
+    const code = this.verificationCodes.generate(this.verificationCodeKey(user.id));
     await this.sendResetPasswordEmail(user.email, code);
 
     return {
@@ -414,7 +437,7 @@ export class AuthService {
       throw new NotFoundException('Aucun utilisateur trouve avec cet email.');
     }
 
-    const code = this.verificationCodes.get(`verification_code_${user.id}`);
+    const code = this.verificationCodes.get(this.verificationCodeKey(user.id));
     if (code !== String(dto.code)) {
       throw new BadRequestException('Code de verification invalide.');
     }
@@ -423,7 +446,7 @@ export class AuthService {
       where: { id: user.id },
       data: { password: await bcrypt.hash(dto.password, 10) },
     });
-    this.verificationCodes.forget(`verification_code_${user.id}`);
+    this.verificationCodes.forget(this.verificationCodeKey(user.id));
     return { message: 'Mot de passe reinitialise avec succes.' };
   }
 
