@@ -8,6 +8,7 @@ export enum AdType {
 export interface Announcer {
   name: string;
   avatar: string;
+  presentation?: string | null;
   furnitures: number;
   houses: number;
   contact: string;
@@ -100,6 +101,7 @@ export interface User {
   sex?: string;
   devise?: string;
   phone_number: string;
+  email_verified?: boolean;
   phone_verified?: boolean;
   liked?: number;
   announcer?: string | null;

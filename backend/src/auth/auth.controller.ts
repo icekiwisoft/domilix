@@ -7,7 +7,7 @@ import {
   Put,
   Req,
   Res,
-  UploadedFile,
+  UploadedFiles,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -21,7 +21,7 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import path from 'node:path';
 import fs from 'node:fs';
@@ -36,6 +36,7 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 import { SendResetLinkDto } from './dto/send-reset-link.dto';
 import { UpdateAnnouncerProfileDto } from './dto/update-announcer-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { VerifyEmailDto } from './dto/verify-email.dto';
 import { VerifyPhoneDto } from './dto/verify-phone.dto';
 
 const announcerUploadDir = path.join(process.cwd(), 'storage', 'announcers');
@@ -86,6 +87,22 @@ export class AuthController {
   }
 
   @UseGuards(AuthGuard)
+  @Post('sendEmailVerification')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Send email verification code to current user' })
+  sendEmailVerification(@CurrentUser() user: any) {
+    return this.authService.sendEmailVerification(user);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('verifyEmail')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Verify current user email using code' })
+  verifyEmail(@CurrentUser() user: any, @Body() dto: VerifyEmailDto) {
+    return this.authService.verifyEmail(user, dto.verification_code);
+  }
+
+  @UseGuards(AuthGuard)
   @Post('logout')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Logout current user' })
@@ -126,11 +143,15 @@ export class AuthController {
         bio: { type: 'string' },
         professional_phone: { type: 'string' },
         avatar: { type: 'string', format: 'binary' },
+        presentation: { type: 'string', format: 'binary' },
       },
     },
   })
   @UseInterceptors(
-    FileInterceptor('avatar', {
+    FileFieldsInterceptor([
+      { name: 'avatar', maxCount: 1 },
+      { name: 'presentation', maxCount: 1 },
+    ], {
       storage: diskStorage({
         destination: announcerUploadDir,
         filename: (_req, file, callback) => {
@@ -142,12 +163,15 @@ export class AuthController {
   updateAnnouncerProfilePut(
     @CurrentUser() user: any,
     @Body() dto: UpdateAnnouncerProfileDto,
-    @UploadedFile() avatar?: any,
+    @UploadedFiles() files?: { avatar?: any[]; presentation?: any[] },
   ) {
+    const avatar = files?.avatar?.[0];
+    const presentation = files?.presentation?.[0];
     return this.authService.updateAnnouncerProfile(
       user,
       dto,
       avatar ? `/storage/announcers/${avatar.filename}` : undefined,
+      presentation ? `/storage/announcers/${presentation.filename}` : undefined,
     );
   }
 
@@ -164,11 +188,15 @@ export class AuthController {
         bio: { type: 'string' },
         professional_phone: { type: 'string' },
         avatar: { type: 'string', format: 'binary' },
+        presentation: { type: 'string', format: 'binary' },
       },
     },
   })
   @UseInterceptors(
-    FileInterceptor('avatar', {
+    FileFieldsInterceptor([
+      { name: 'avatar', maxCount: 1 },
+      { name: 'presentation', maxCount: 1 },
+    ], {
       storage: diskStorage({
         destination: announcerUploadDir,
         filename: (_req, file, callback) => {
@@ -180,12 +208,15 @@ export class AuthController {
   updateAnnouncerProfilePost(
     @CurrentUser() user: any,
     @Body() dto: UpdateAnnouncerProfileDto,
-    @UploadedFile() avatar?: any,
+    @UploadedFiles() files?: { avatar?: any[]; presentation?: any[] },
   ) {
+    const avatar = files?.avatar?.[0];
+    const presentation = files?.presentation?.[0];
     return this.authService.updateAnnouncerProfile(
       user,
       dto,
       avatar ? `/storage/announcers/${avatar.filename}` : undefined,
+      presentation ? `/storage/announcers/${presentation.filename}` : undefined,
     );
   }
 

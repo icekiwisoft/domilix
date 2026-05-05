@@ -14,6 +14,7 @@ export class AnnouncersService {
     id: string;
     name: string;
     avatar: string | null;
+    presentation: string | null;
     contact: string | null;
     bio: string | null;
     verified: boolean;
@@ -47,6 +48,7 @@ export class AnnouncersService {
         announcer: announcer.id,
       },
       avatar: storageUrl(announcer.avatar),
+      presentation: storageUrl(announcer.presentation),
       contact: announcer.contact,
       email: announcer.user.email ?? null,
       creation_date: announcer.createdAt,

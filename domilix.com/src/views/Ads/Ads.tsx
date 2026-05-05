@@ -630,7 +630,7 @@ export default function Ads(): React.ReactElement {
   return (
     <>
       <Nav2 />
-      <div className='sticky top-16 z-20 w-screen px-4 py-3 backdrop-blur-sm sm:px-6 md:fixed md:top-16 lg:px-8'>
+      <div className='sticky top-[calc(4rem+var(--email-verification-banner-offset,0px))] z-20 w-screen px-4 py-3 backdrop-blur-sm sm:px-6 md:fixed md:top-[calc(4rem+var(--email-verification-banner-offset,0px))] lg:px-8'>
         <div className='mx-auto w-full max-w-6xl'>
           <div className='relative'>
             <div className='overflow-hidden rounded-2xl border-2 border-orange-500 bg-white shadow-xl shadow-orange-900/10 md:hidden'>

@@ -58,6 +58,7 @@ export class AuthService {
       devise: user.devise,
       phone_number: user.phoneNumber,
       email: user.email,
+      email_verified: user.emailVerified,
       phone_verified: user.phoneVerified,
       liked: favorites,
       announcer: announcer?.id || null,
@@ -112,6 +113,74 @@ export class AuthService {
     });
   }
 
+  private async sendEmailVerificationCode(email: string, code: string) {
+    const host = process.env.MAIL_HOST;
+    if (!host) {
+      if (process.env.NODE_ENV === 'production') {
+        throw new BadRequestException('Configuration email manquante.');
+      }
+      return;
+    }
+
+    const transporter = nodemailer.createTransport({
+      host,
+      port: Number(process.env.MAIL_PORT || 587),
+      secure: process.env.MAIL_SECURE === 'true',
+      auth: process.env.MAIL_USERNAME
+        ? {
+            user: process.env.MAIL_USERNAME,
+            pass: process.env.MAIL_PASSWORD,
+          }
+        : undefined,
+    });
+
+    await transporter.sendMail({
+      from: `"${process.env.MAIL_FROM_NAME || 'Domilix'}" <${process.env.MAIL_FROM_ADDRESS || 'noreply@domilix.com'}>`,
+      to: email,
+      subject: 'Code de verification de votre email Domilix',
+      text: `Votre code de verification Domilix est : ${code}`,
+      html: `<p>Votre code de verification Domilix est :</p><p><strong>${code}</strong></p>`,
+    });
+  }
+
+  async sendEmailVerification(user: User) {
+    if (user.emailVerified) {
+      return { message: 'Email deja verifie.' };
+    }
+    if (user.email.endsWith('@domilix.local')) {
+      throw new BadRequestException('Ajoutez une adresse email avant de la verifier.');
+    }
+
+    const code = this.verificationCodes.generate(`email_verification_code_${user.id}`);
+    await this.sendEmailVerificationCode(user.email, code);
+
+    return {
+      message: 'Un code de verification a ete envoye a votre email.',
+      verification_code: process.env.NODE_ENV !== 'production' ? code : undefined,
+    };
+  }
+
+  async verifyEmail(user: User, verificationCode: string) {
+    const cachedCode = this.verificationCodes.get(`email_verification_code_${user.id}`);
+    if (!cachedCode) {
+      throw new BadRequestException('Le code de verification a expire.');
+    }
+    if (verificationCode !== cachedCode) {
+      throw new BadRequestException('Code de verification incorrect.');
+    }
+
+    const updated = await this.prisma.user.update({
+      where: { id: user.id },
+      data: { emailVerified: true },
+    });
+    this.verificationCodes.forget(`email_verification_code_${user.id}`);
+
+    return {
+      message: 'Email verifie avec succes.',
+      user: await this.userResource(updated),
+    };
+  }
+
   async register(dto: RegisterDto) {
     if (!dto.email && !dto.phone_number) {
       throw new BadRequestException('Email ou numero de telephone requis.');
@@ -139,7 +208,7 @@ export class AuthService {
         phoneNumber: dto.phone_number || crypto.randomUUID().replace(/-/g, '').slice(0, 12),
         password,
         phoneVerified: false,
-        emailVerified: !!dto.email,
+        emailVerified: false,
       },
     });
 
@@ -170,10 +239,6 @@ export class AuthService {
 
     if (dto.phone_number && !user.phoneVerified) {
       throw new ForbiddenException("Le numero de telephone n'est pas verifie.");
-    }
-
-    if (dto.email && !user.emailVerified && !user.phoneVerified) {
-      throw new ForbiddenException("Votre compte n'est pas verifie.");
     }
 
     return this.authResponse(user);
@@ -274,7 +339,9 @@ export class AuthService {
       where: { id: user.id },
       data: {
         ...(dto.name !== undefined ? { name: dto.name } : {}),
-        ...(dto.email !== undefined && dto.email !== null ? { email: dto.email } : {}),
+        ...(dto.email !== undefined && dto.email !== null
+          ? { email: dto.email, emailVerified: dto.email === user.email ? user.emailVerified : false }
+          : {}),
         ...(dto.phone_number !== undefined ? { phoneNumber: dto.phone_number } : {}),
       },
     });
@@ -286,7 +353,7 @@ export class AuthService {
     };
   }
 
-  async updateAnnouncerProfile(user: User, dto: UpdateAnnouncerProfileDto, avatarPath?: string) {
+  async updateAnnouncerProfile(user: User, dto: UpdateAnnouncerProfileDto, avatarPath?: string, presentationPath?: string) {
     const announcer = await this.prisma.announcer.findFirst({ where: { userId: user.id } });
     if (!announcer) {
       throw new ForbiddenException("Vous n'etes pas un annonceur");
@@ -299,6 +366,7 @@ export class AuthService {
         ...(dto.bio !== undefined ? { bio: dto.bio } : {}),
         ...(dto.professional_phone !== undefined ? { contact: dto.professional_phone } : {}),
         ...(avatarPath ? { avatar: avatarPath } : {}),
+        ...(presentationPath ? { presentation: presentationPath } : {}),
       },
     });
 
@@ -314,6 +382,7 @@ export class AuthService {
         id: refreshed.id,
         name: refreshed.name,
         avatar: refreshed.avatar,
+        presentation: refreshed.presentation,
         bio: refreshed.bio,
         contact: refreshed.contact,
       },

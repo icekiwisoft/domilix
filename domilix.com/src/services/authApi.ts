@@ -40,6 +40,7 @@ export interface User {
   name: string;
   email?: string;
   phone_number: string;
+  email_verified?: boolean;
   phone_verified: boolean;
   announcer?: string | null;
   created_at: string;
@@ -97,6 +98,20 @@ export const authApi = {
     userId: number
   ): Promise<{ message: string }> => {
     const response = await api.post(`/auth/resendVerificationCode/${userId}`);
+    return response.data;
+  },
+
+  sendEmailVerification: async (): Promise<ResetEmailResponse> => {
+    const response = await api.post('/auth/sendEmailVerification');
+    return response.data;
+  },
+
+  verifyEmail: async (
+    verificationCode: string
+  ): Promise<{ message: string; user: User }> => {
+    const response = await api.post('/auth/verifyEmail', {
+      verification_code: verificationCode,
+    });
     return response.data;
   },
 };

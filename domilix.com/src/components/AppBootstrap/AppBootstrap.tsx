@@ -1,6 +1,7 @@
 'use client';
 
 import CookieConsent from '@components/CookieConsent/CookieConsent';
+import EmailVerificationBanner from '@components/EmailVerificationBanner/EmailVerificationBanner';
 import SigninDialog from '@components/SigninDialog/SigninDialog';
 import { useAuth } from '@hooks/useAuth';
 import { useAuthStore, useUiStore } from '@stores/defineStore';
@@ -37,6 +38,7 @@ export default function AppBootstrap({
 
   return (
     <>
+      <EmailVerificationBanner />
       {children}
       {signinModal && <SigninDialog />}
       <CookieConsent />

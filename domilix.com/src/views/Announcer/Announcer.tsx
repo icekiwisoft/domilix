@@ -40,6 +40,7 @@ export default function Announcer() {
     urlSearchParam.get('search') || ''
   );
   const canManageAds = Boolean(id && user?.announcer === id);
+  const presentationSrc = mediaUrl(announcer?.presentation) || coverSrc;
 
 
 
@@ -101,9 +102,12 @@ export default function Announcer() {
                 initial={{ scale: 1.1 }}
                 animate={{ scale: 1 }}
                 transition={{ duration: 1.5 }}
-                src={coverSrc}
+                src={presentationSrc}
                 className='h-full w-full object-cover opacity-80'
                 alt='Cover'
+                onError={e => {
+                  (e.target as HTMLImageElement).src = coverSrc;
+                }}
               />
             </div>
 

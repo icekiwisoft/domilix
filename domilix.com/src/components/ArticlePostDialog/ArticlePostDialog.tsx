@@ -5,7 +5,7 @@ import api from '@services/api';
 import { Category } from '@utils/types';
 import axios from 'axios';
 import { FormEvent, Fragment, useEffect, useState } from 'react';
-import { HiChevronUpDown } from 'react-icons/hi2';
+import { HiChevronUpDown, HiRocketLaunch } from 'react-icons/hi2';
 import { MdMyLocation } from 'react-icons/md';
 import AddressAutocomplete from '@components/AddressAutocomplete/AddressAutocomplete';
 
@@ -32,6 +32,7 @@ export default function ArticlePostDialog({
   const [selectedCurrency, setSelectedCurrency] = useState<SelectData | null>(
     null
   ); // Devise par défaut
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     category_id: '',
@@ -229,6 +230,7 @@ export default function ArticlePostDialog({
   // Soumission du formulaire
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
 
     // Créez une instance de FormData
     const data = new FormData();
@@ -273,6 +275,7 @@ export default function ArticlePostDialog({
     });
 
     try {
+      setIsSubmitting(true);
       // console.log(formData);
       // for (let [key, value] of data.entries()) {
       //   console.log(key, value);
@@ -288,6 +291,8 @@ export default function ArticlePostDialog({
       toggleDialog(); // Ferme la boîte de dialogue après validation
     } catch (error) {
       console.error('Erreur lors de la soumission :', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -299,12 +304,12 @@ export default function ArticlePostDialog({
     'Prix & Description',
   ];
 
-  // Stepper vertical avec titres
+  // Stepper responsive avec titres
   const renderSteppers = () => (
-    <div className='w-full py-4'>
-      <div className='space-y-4'>
+    <div className='w-full py-3 sm:py-4'>
+      <div className='flex gap-3 overflow-x-auto pb-2 sm:block sm:space-y-4 sm:overflow-visible sm:pb-0'>
         {Array.from({ length: totalSteps }, (_, i) => (
-          <div key={i} className='flex items-center'>
+          <div key={i} className='flex min-w-[11rem] items-center sm:min-w-0'>
             <div className='flex items-center'>
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-300 ${
@@ -364,7 +369,7 @@ export default function ArticlePostDialog({
       case 1:
         return (
           <div className='space-y-4'>
-            <div className='grid grid-cols-2 gap-4'>
+            <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
               {/* Type de bien */}
               <div className='space-y-1.5'>
                 <label className='block text-sm font-medium text-gray-700'>
@@ -514,7 +519,7 @@ export default function ArticlePostDialog({
               <label className='block text-sm font-medium text-gray-700'>
                 Type d'annonce
               </label>
-              <div className='grid grid-cols-2 gap-4'>
+              <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
                 {adType.map(type => (
                   <button
                     key={type.key}
@@ -574,7 +579,7 @@ export default function ArticlePostDialog({
         return (
           <div className='space-y-4'>
             {/* Caractéristiques principales */}
-            <div className='grid grid-cols-2 gap-4'>
+            <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
               <div className='space-y-1.5'>
                 <label className='block text-sm font-medium text-gray-700'>
                   Chambres
@@ -638,7 +643,7 @@ export default function ArticlePostDialog({
               </div>
             </div>
 
-            <div className='grid grid-cols-2 gap-4'>
+            <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
               <div className='space-y-1.5'>
                 <label className='block text-sm font-medium text-gray-700'>
                   Toilettes
@@ -702,7 +707,7 @@ export default function ArticlePostDialog({
               </div>
             </div>
 
-            <div className='grid grid-cols-2 gap-4'>
+            <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
               <div className='space-y-1.5'>
                 <label className='block text-sm font-medium text-gray-700'>
                   Taille (m²)
@@ -744,7 +749,7 @@ export default function ArticlePostDialog({
             {/* Commodités */}
             <div className='space-y-2'>
               <h3 className='text-sm font-medium text-gray-700'>Commodités</h3>
-              <div className='grid grid-cols-2 gap-3'>
+              <div className='grid grid-cols-1 gap-3 sm:grid-cols-2'>
                 {[
                   {
                     key: 'wifi',
@@ -980,7 +985,7 @@ export default function ArticlePostDialog({
               {/* Affichage des coordonnées (lecture seule) */}
               {formData.localization[0] !== 0 &&
                 formData.localization[1] !== 0 && (
-                  <div className='grid grid-cols-2 gap-4'>
+                  <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
                     <div className='space-y-1.5'>
                       <label className='block text-sm font-medium text-gray-500'>
                         Longitude
@@ -1161,7 +1166,7 @@ export default function ArticlePostDialog({
 
             {/* Prix et période */}
             <div
-              className={`grid gap-4 ${selectedAdType?.key === 'location' ? 'grid-cols-2' : 'grid-cols-1'}`}
+              className={`grid gap-4 ${selectedAdType?.key === 'location' ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'}`}
             >
               <div className='space-y-1.5'>
                 <label className='block text-sm font-medium text-gray-700'>
@@ -1272,17 +1277,17 @@ export default function ArticlePostDialog({
   };
 
   return (
-    <div className='fixed z-50 inset-0 overflow-y-auto'>
-      <div className='flex items-center justify-center min-h-screen p-4 text-center'>
+    <div className='fixed inset-0 z-50 overflow-y-auto overscroll-contain'>
+      <div className='flex min-h-dvh items-end justify-center p-0 text-center sm:items-center sm:p-4'>
         <div className='fixed inset-0 transition-opacity' aria-hidden='true'>
           <div className='absolute inset-0 bg-gray-500 opacity-75'></div>
         </div>
 
-        <div className='relative w-full max-w-4xl h-[80vh] bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all'>
-          <div className='bg-white h-full px-8 pt-6 pb-8 flex flex-col'>
-            <div className='flex justify-between items-center mb-2'>
+        <div className='relative flex h-[92dvh] w-full max-w-4xl transform flex-col overflow-hidden rounded-t-3xl bg-white text-left shadow-2xl transition-all sm:h-[86vh] sm:rounded-2xl'>
+          <div className='flex h-full flex-col bg-white px-4 pb-4 pt-4 sm:px-8 sm:pb-8 sm:pt-6'>
+            <div className='mb-2 flex items-start justify-between gap-4'>
               <div>
-                <h3 className='text-2xl font-semibold text-gray-900'>
+                <h3 className='text-xl font-semibold text-gray-900 sm:text-2xl'>
                   Créer une annonce
                 </h3>
                 <p className='text-sm text-gray-500 mt-1'>
@@ -1291,7 +1296,7 @@ export default function ArticlePostDialog({
               </div>
               <button
                 onClick={toggleDialog}
-                className='rounded-full p-2 hover:bg-gray-100 transition-colors duration-200'
+                className='shrink-0 rounded-full p-2 hover:bg-gray-100 transition-colors duration-200'
               >
                 <svg
                   className='w-5 h-5 text-gray-400'
@@ -1311,26 +1316,26 @@ export default function ArticlePostDialog({
 
             <form
               onSubmit={handleSubmit}
-              className='mt-4 flex flex-1 flex-col min-h-0'
+              className='mt-3 flex min-h-0 flex-1 flex-col sm:mt-4'
             >
-              <div className='flex flex-1 min-h-0 gap-8'>
+              <div className='flex min-h-0 flex-1 flex-col gap-4 sm:flex-row sm:gap-8'>
                 {/* Stepper vertical à gauche */}
-                <div className='w-64 flex-shrink-0'>{renderSteppers()}</div>
+                <div className='shrink-0 sm:w-64'>{renderSteppers()}</div>
 
                 {/* Contenu principal à droite */}
-                <div className='flex-1'>
-                  <div className='h-full overflow-y-auto px-1'>
-                    <div className='space-y-6'>{renderStepContent()}</div>
+                <div className='min-h-0 flex-1'>
+                  <div className='h-full overflow-y-auto px-1 pb-2 pr-1'>
+                    <div className='space-y-5 sm:space-y-6'>{renderStepContent()}</div>
                   </div>
                 </div>
               </div>
 
-              <div className='mt-8 flex justify-between items-center pt-6 border-t border-gray-100'>
+              <div className='mt-3 flex items-center justify-between gap-3 border-t border-gray-100 bg-white pt-4 sm:mt-8 sm:pt-6'>
                 {currentStep > 1 ? (
                   <button
                     type='button'
                     onClick={() => setCurrentStep(step => step - 1)}
-                    className='px-6 py-2.5 text-gray-600 hover:text-gray-800 font-medium transition-colors duration-200'
+                    className='px-3 py-2.5 text-sm font-medium text-gray-600 transition-colors duration-200 hover:text-gray-800 sm:px-6 sm:text-base'
                   >
                     ← Précédent
                   </button>
@@ -1358,7 +1363,7 @@ export default function ArticlePostDialog({
                       }
                       setCurrentStep(step => step + 1);
                     }}
-                    className='px-8 py-2.5 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-all duration-200 font-medium shadow-sm hover:shadow-md'
+                    className='rounded-xl bg-orange-500 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:bg-orange-600 hover:shadow-md sm:px-8 sm:text-base'
                   >
                     Suivant →
                   </button>
@@ -1366,14 +1371,25 @@ export default function ArticlePostDialog({
                   <button
                     type='submit'
                     disabled={
+                      isSubmitting ||
                       !formData.price ||
                       !formData.description ||
                       formData.medias.length === 0 ||
                       (selectedAdType?.key === 'location' && !selectedPeriod)
                     }
-                    className='px-8 py-2.5 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all duration-200 font-medium shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed'
+                    className='rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:from-orange-600 hover:to-orange-700 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50 sm:px-8 sm:text-base'
                   >
-                    🚀 Publier
+                    {isSubmitting ? (
+                      <span className='flex items-center justify-center gap-2'>
+                        <span className='h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white' />
+                        Publication...
+                      </span>
+                    ) : (
+                      <span className='flex items-center justify-center gap-2'>
+                        <HiRocketLaunch className='h-5 w-5' />
+                        Publier
+                      </span>
+                    )}
                   </button>
                 )}
               </div>

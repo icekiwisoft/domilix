@@ -19,4 +19,10 @@ export class UpdateAnnouncerProfileDto {
   @IsString()
   @MaxLength(20)
   professional_phone?: string;
+
+  @ApiPropertyOptional({ example: '/storage/announcers/presentation.jpg' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(255)
+  presentation?: string;
 }

@@ -51,8 +51,10 @@ export default function ProfileDialog({
     bio: '',
     professional_phone: '',
     avatar: null as File | null,
+    presentation: null as File | null,
   });
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [presentationPreview, setPresentationPreview] = useState<string | null>(null);
 
   // Packs state
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
@@ -89,6 +91,18 @@ export default function ProfileDialog({
       const reader = new FileReader();
       reader.onloadend = () => {
         setAvatarPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handlePresentationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setAnnouncerForm({ ...announcerForm, presentation: file });
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPresentationPreview(reader.result as string);
       };
       reader.readAsDataURL(file);
     }
@@ -180,11 +194,13 @@ export default function ProfileDialog({
       if (announcerForm.professional_phone)
         formData.append('professional_phone', announcerForm.professional_phone);
       if (announcerForm.avatar) formData.append('avatar', announcerForm.avatar);
+      if (announcerForm.presentation) formData.append('presentation', announcerForm.presentation);
 
       await profileApi.updateAnnouncerProfile(formData);
       await refreshProfile();
       alert('Profil annonceur mis à jour avec succès');
       setAvatarPreview(null);
+      setPresentationPreview(null);
     } catch (error) {
       console.error('Erreur mise à jour profil annonceur:', error);
       alert('Erreur lors de la mise à jour');
@@ -272,8 +288,10 @@ export default function ProfileDialog({
               <div className='space-y-2'>
                 <div className='flex items-center justify-between'>
                   <span className='text-sm text-gray-600'>Email</span>
-                  <span className='text-sm font-medium text-red-600'>
-                    Non vérifié
+                  <span
+                    className={`text-sm font-medium ${user?.email_verified ? 'text-green-600' : 'text-red-600'}`}
+                  >
+                    {user?.email_verified ? 'Vérifié' : 'Non vérifié'}
                   </span>
                 </div>
                 <div className='flex items-center justify-between'>
@@ -390,6 +408,7 @@ export default function ProfileDialog({
                   </p>
                 </div>
 
+                <div className='grid gap-4 md:grid-cols-[0.8fr_1.2fr]'>
                 {/* Avatar Upload */}
                 <div className='flex flex-col items-center gap-4 p-4 bg-gray-50 rounded-lg'>
                   <div className='relative'>
@@ -423,6 +442,43 @@ export default function ProfileDialog({
                   <p className='text-xs text-gray-500 text-center'>
                     Cliquez sur l'icône pour changer votre avatar
                   </p>
+                </div>
+
+                {/* Presentation Image Upload */}
+                <div className='flex flex-col gap-3 p-4 bg-gray-50 rounded-lg'>
+                  <div className='flex items-center justify-between gap-3'>
+                    <div>
+                      <p className='text-sm font-semibold text-gray-800'>Image de présentation</p>
+                      <p className='text-xs text-gray-500'>Affichée en couverture sur votre page annonceur.</p>
+                    </div>
+                    <label
+                      htmlFor='presentation-upload'
+                      className='shrink-0 rounded-full bg-orange-600 p-2 text-white shadow-lg transition-colors hover:bg-orange-700 cursor-pointer'
+                    >
+                      <HiCamera className='w-4 h-4' />
+                      <input
+                        id='presentation-upload'
+                        type='file'
+                        accept='image/*'
+                        onChange={handlePresentationChange}
+                        className='hidden'
+                      />
+                    </label>
+                  </div>
+                  <div className='h-32 overflow-hidden rounded-xl bg-gray-200'>
+                    {presentationPreview ? (
+                      <img
+                        src={presentationPreview}
+                        alt='Image de présentation'
+                        className='h-full w-full object-cover'
+                      />
+                    ) : (
+                      <div className='flex h-full w-full items-center justify-center text-sm font-medium text-gray-400'>
+                        Aucune image sélectionnée
+                      </div>
+                    )}
+                  </div>
+                </div>
                 </div>
 
                 <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
