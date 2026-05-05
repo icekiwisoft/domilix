@@ -1,6 +1,5 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
-import { HiLockClosed } from 'react-icons/hi2';
 import { motion } from 'framer-motion';
 
 interface UnlockDialogProps {
@@ -8,6 +7,7 @@ interface UnlockDialogProps {
   onClose: () => void;
   onConfirm: () => void;
   price: number;
+  hasCredits?: boolean;
 }
 
 export default function UnlockDialog({
@@ -15,6 +15,7 @@ export default function UnlockDialog({
   onClose,
   onConfirm,
   price,
+  hasCredits = true,
 }: UnlockDialogProps) {
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -51,26 +52,34 @@ export default function UnlockDialog({
                     as='h3'
                     className='text-2xl font-bold text-gray-900 text-center'
                   >
-                    Débloquer cette annonce
+                    {hasCredits ? 'Débloquer cette annonce' : 'Vous avez trouvé un bien intéressant ?'}
                   </Dialog.Title>
                 </div>
 
                 <div className='mt-4 text-center'>
                   <p className='text-gray-600 mb-4'>
-                    Pour accéder aux coordonnées de l'annonceur et aux
-                    informations complètes, vous devez débloquer cette annonce
-                    pour
+                    {hasCredits
+                      ? "Pour accéder aux coordonnées de l'annonceur et aux informations complètes, vous devez débloquer cette annonce pour"
+                      : "Achetez un pack pour accéder immédiatement au contact de l'annonceur et avancer avant que le bien ne parte."}
                   </p>
-                  <div className='flex items-center justify-center gap-2 mb-6'>
-                    <img src='/dom.png' alt='domicoin' className='w-8 h-8' />
-                    <span className='text-3xl font-bold text-orange-600'>
-                      1
-                    </span>
-                    <span className='text-lg text-gray-600'>Domicoin</span>
-                  </div>
-                  <p className='text-sm text-gray-500'>
-                    Valable pendant 7 jours
-                  </p>
+                  {hasCredits ? (
+                    <>
+                      <div className='flex items-center justify-center gap-2 mb-6'>
+                        <img src='/dom.png' alt='domicoin' className='w-8 h-8' />
+                        <span className='text-3xl font-bold text-orange-600'>
+                          {price}
+                        </span>
+                        <span className='text-lg text-gray-600'>Domicoin</span>
+                      </div>
+                      <p className='text-sm text-gray-500'>
+                        Valable pendant 7 jours
+                      </p>
+                    </>
+                  ) : (
+                    <div className='rounded-2xl bg-orange-50 p-4 text-sm font-semibold text-orange-800'>
+                      Un pack Domilix vous permet de débloquer plusieurs contacts selon vos crédits disponibles.
+                    </div>
+                  )}
                 </div>
 
                 <div className='mt-6 flex gap-4'>
@@ -88,8 +97,8 @@ export default function UnlockDialog({
                     className='flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl font-medium hover:from-orange-600 hover:to-orange-700 transition-all'
                     onClick={onConfirm}
                   >
-                    <img src='/dom.png' alt='domicoin' className='w-5 h-5' />
-                    Débloquer
+                    {hasCredits && <img src='/dom.png' alt='domicoin' className='w-5 h-5' />}
+                    {hasCredits ? 'Débloquer' : 'Acheter un pack'}
                   </motion.button>
                 </div>
               </Dialog.Panel>

@@ -35,7 +35,7 @@ import Nav2 from '@components/Nav2/Nav2';
 import ShareModal from '@components/ShareModal/ShareModal';
 import SignalDialog from '@components/SignalDialog/SignalDialog';
 import UnlockDialog from '@components/UnlockDialog/UnlockDialog';
-import { useParams } from '@router';
+import { useNavigate, useParams } from '@router';
 import { getAd, getAds, unlockAd } from '@services/announceApi';
 import { toggleLike } from '@services/favoritesApi';
 import { signinDialogActions } from '@stores/defineStore';
@@ -56,6 +56,7 @@ L.Icon.Default.mergeOptions({
 
 export default function Ad(): React.ReactElement {
   const { id } = useParams();
+  const navigate = useNavigate();
   const adId = Array.isArray(id) ? id[0] : id;
 
   const [adInfo, setAdInfo] = useState<AdType | null>(null);
@@ -68,7 +69,8 @@ export default function Ad(): React.ReactElement {
   const [modalInitialIndex, setModalInitialIndex] = useState(0);
   const [liked, setLiked] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+  const hasCredits = Number(user?.credits || 0) > 0;
 
   const openModalWithImage = (index: number) => {
     setModalInitialIndex(index);
@@ -77,6 +79,14 @@ export default function Ad(): React.ReactElement {
 
   const handleUnlock = async () => {
     if (!adInfo) return;
+    if (!isAuthenticated) {
+      signinDialogActions.toggle();
+      return;
+    }
+    if (!hasCredits) {
+      navigate('/subscriptions');
+      return;
+    }
     try {
       await unlockAd(adInfo.id);
       const updated = await getAd(adInfo.id);
@@ -240,8 +250,8 @@ export default function Ad(): React.ReactElement {
                 onClick={handleLike}
                 disabled={isLiking}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-medium transition-colors ${liked
-                    ? 'bg-red-50 border-red-200 text-red-500'
-                    : 'bg-white border-gray-200 text-gray-600 hover:border-red-200 hover:text-red-400'
+                  ? 'bg-red-50 border-red-200 text-red-500'
+                  : 'bg-white border-gray-200 text-gray-600 hover:border-red-200 hover:text-red-400'
                   }`}
               >
                 {liked ? <HiHeart className='text-base' /> : <HiOutlineHeart className='text-base' />}
@@ -528,22 +538,22 @@ export default function Ad(): React.ReactElement {
                     ) : null}
                   </div>
 
-                  {/* Unlock CTA or contact */}
+                  {/* Unlock CTA */}
                   {adInfo.unlocked ? (
-                    <div className='bg-emerald-50 border border-emerald-100 rounded-xl p-4 mb-4'>
-                      <div className='flex items-center gap-2 text-emerald-700 font-semibold text-sm mb-3'>
-                        <HiCheckCircle className='text-base flex-shrink-0' />
+                    <div className='bg-green-50 border border-green-200 rounded-2xl p-4 mb-4'>
+                      <div className='flex items-center gap-2 text-green-700 font-bold text-sm mb-2'>
+                        <HiCheckCircle className='text-xl' />
                         Annonce débloquée
                       </div>
                       {adInfo.exact_address && (
-                        <p className='text-emerald-800 text-sm font-medium mb-2'>
+                        <p className='text-green-800 text-sm font-medium'>
                           {adInfo.exact_address}
                         </p>
                       )}
                       {adInfo.announcer?.contact && (
                         <a
                           href={`tel:${adInfo.announcer.contact}`}
-                          className='block text-emerald-700 font-bold text-base hover:text-emerald-900'
+                          className='block mt-2 text-green-700 font-black text-base hover:text-green-900'
                         >
                           {adInfo.announcer.contact}
                         </a>
@@ -551,26 +561,25 @@ export default function Ad(): React.ReactElement {
                       {adInfo.announcer?.email && (
                         <a
                           href={`mailto:${adInfo.announcer.email}`}
-                          className='block mt-1 text-emerald-600 text-sm font-medium hover:text-emerald-800'
+                          className='block mt-1 text-green-700 font-semibold text-sm hover:text-green-900'
                         >
                           {adInfo.announcer.email}
                         </a>
                       )}
                     </div>
                   ) : (
-                    <div className='mb-4'>
+                    <>
                       <button
-                        type='button'
                         onClick={() => setShowUnlockDialog(true)}
-                        className='w-full text-white py-4 rounded-xl font-semibold text-base shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all bg-primary-gradient'
+                        className='w-full text-white py-5 rounded-2xl font-black text-lg shadow-xl hover:-translate-y-1 active:translate-y-0 transition-all mb-4 uppercase tracking-tight bg-primary-gradient'
                       >
-                        Débloquer l&apos;annonce
+                        Débloquer l'annonce
                       </button>
-                      <p className='flex items-center justify-center gap-1.5 text-gray-400 text-xs font-medium mt-2'>
-                        <HiLockClosed className='text-xs' />
-                        Accès sécurisé via Domicoins
-                      </p>
-                    </div>
+                      <div className='flex items-center justify-center gap-2 text-gray-400 text-xs font-bold mb-6 uppercase tracking-widest'>
+                        <HiLockClosed className='text-sm' />
+                        Accès sécurisé par Domicoins
+                      </div>
+                    </>
                   )}
 
                   {/* Divider */}
@@ -642,45 +651,45 @@ export default function Ad(): React.ReactElement {
           </div>
 
           {/* ── Similar listings ── */}
-          {similarAds.length > 0 && (
-            <section className='mt-16 pt-12 border-t border-gray-100'>
-              <h2 className='text-2xl font-bold text-gray-900 mb-8'>
-                Autres annonces
-              </h2>
-              <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5'>
-                {similarAds.map(a => (
-                  <a key={a.id} href={`/houses/${a.id}`} className='group block'>
-                    <div className='aspect-[4/3] rounded-xl overflow-hidden mb-3 bg-gray-100 relative'>
-                      <div
-                        className='absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-500'
-                        style={{
-                          backgroundImage: a.medias?.[0]?.file
-                            ? `url('${mediaUrl(a.medias[0].file)}')`
-                            : undefined,
-                        }}
-                      />
-                      <span className='absolute top-2 left-2 bg-gray-900/70 backdrop-blur-sm text-white px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide'>
-                        {a.ad_type === 'location' ? 'Location' : 'Vente'}
-                      </span>
-                    </div>
-                    <h4 className='font-semibold text-gray-900 text-sm truncate mb-0.5'>
-                      {a.category?.name || 'Annonce'} · {a.city}
-                    </h4>
-                    <p className='text-gray-400 text-xs mb-1.5'>
-                      {a.city}{a.country && `, ${a.country}`}
-                    </p>
-                    <p className='font-bold text-base text-primary'>
-                      {a.price?.toLocaleString()}{' '}
-                      <span className='font-medium text-gray-400 text-xs'>
-                        {a.devise || 'FCFA'}
-                        {a.ad_type === 'location' && ` / ${a.period || 'mois'}`}
-                      </span>
-                    </p>
-                  </a>
-                ))}
-              </div>
-            </section>
-          )}
+            {similarAds.length > 0 && (
+              <section className='mt-16 pt-12 border-t border-gray-100'>
+                <h2 className='text-2xl font-bold text-gray-900 mb-8'>
+                  Autres annonces
+                </h2>
+                <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5'>
+                  {similarAds.map(a => (
+                    <a key={a.id} href={`/houses/${a.id}`} className='group block'>
+                      <div className='aspect-[4/3] rounded-xl overflow-hidden mb-3 bg-gray-100 relative'>
+                        <div
+                          className='absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-500'
+                          style={{
+                            backgroundImage: a.medias?.[0]?.file
+                              ? `url('${mediaUrl(a.medias[0].file)}')`
+                              : undefined,
+                          }}
+                        />
+                        <span className='absolute top-2 left-2 bg-gray-900/70 backdrop-blur-sm text-white px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide'>
+                          {a.ad_type === 'location' ? 'Location' : 'Vente'}
+                        </span>
+                      </div>
+                      <h4 className='font-semibold text-gray-900 text-sm truncate mb-0.5'>
+                        {a.category?.name || 'Annonce'} · {a.city}
+                      </h4>
+                      <p className='text-gray-400 text-xs mb-1.5'>
+                        {a.city}{a.country && `, ${a.country}`}
+                      </p>
+                      <p className='font-bold text-base text-primary'>
+                        {a.price?.toLocaleString()}{' '}
+                        <span className='font-medium text-gray-400 text-xs'>
+                          {a.devise || 'FCFA'}
+                          {a.ad_type === 'location' && ` / ${a.period || 'mois'}`}
+                        </span>
+                      </p>
+                    </a>
+                  ))}
+                </div>
+              </section>
+            )}
         </main>
       </div>
 
@@ -709,6 +718,7 @@ export default function Ad(): React.ReactElement {
         onClose={() => setShowUnlockDialog(false)}
         onConfirm={handleUnlock}
         price={1}
+        hasCredits={hasCredits}
       />
 
       <SignalDialog

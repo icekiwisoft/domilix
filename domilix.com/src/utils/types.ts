@@ -146,6 +146,8 @@ export interface PricingProps {
   credits: string;
   validity: string;
   price: string;
+  benefit: string;
+  badge?: string;
   features: string[];
   isActive: boolean;
   onChoose: () => void;
