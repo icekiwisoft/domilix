@@ -9,12 +9,14 @@ import {
   FaCar,
   FaCouch,
   FaDoorOpen,
+  FaRulerCombined,
   FaSwimmingPool,
   FaTree,
   FaUtensils,
   FaWifi,
 } from 'react-icons/fa';
 import {
+  HiCheckBadge,
   HiCheckCircle,
   HiChevronRight,
   HiExclamationTriangle,
@@ -24,7 +26,7 @@ import {
   HiOutlineHeart,
   HiOutlineShare,
 } from 'react-icons/hi2';
-import { MdAcUnit, MdSecurity, MdSquareFoot, MdTv, MdVerifiedUser, MdWorkspacePremium } from 'react-icons/md';
+import { MdAcUnit, MdSecurity, MdTv, MdVerifiedUser } from 'react-icons/md';
 
 import Footer2 from '@components/Footer2/Footer2';
 import MapboxMap from '@components/MapboxMap/MapboxMap';
@@ -42,7 +44,6 @@ import { mediaUrl } from '@utils/mediaUrl';
 import { useAuth } from '../../hooks/useAuth';
 import { Ad as AdType } from '../../utils/types';
 
-// Fix default markers in react-leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:
@@ -130,7 +131,7 @@ export default function Ad(): React.ReactElement {
         const list: AdType[] = Array.isArray(ads) ? ads : (ads as any).data || [];
         setSimilarAds(list.filter(a => a.id !== parseInt(adId!)).slice(0, 4));
       })
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setLoading(false));
   }, [adId]);
 
@@ -138,10 +139,10 @@ export default function Ad(): React.ReactElement {
     return (
       <>
         <Nav2 />
-        <div className='min-h-screen bg-gray-50 pt-20 flex items-center justify-center'>
+        <div className='min-h-screen bg-white pt-20 flex items-center justify-center'>
           <div className='text-center'>
-            <div className='w-12 h-12 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin mx-auto mb-4' />
-            <p className='text-gray-600 font-medium'>Chargement de l'annonce...</p>
+            <div className='w-10 h-10 border-4 border-orange-100 border-t-primary rounded-full animate-spin mx-auto mb-4' />
+            <p className='text-gray-400 text-sm font-medium'>Chargement de l&apos;annonce…</p>
           </div>
         </div>
       </>
@@ -152,8 +153,8 @@ export default function Ad(): React.ReactElement {
     return (
       <>
         <Nav2 />
-        <div className='min-h-screen bg-gray-50 pt-20 flex items-center justify-center'>
-          <p className='text-gray-600 text-lg font-medium'>Annonce non trouvée.</p>
+        <div className='min-h-screen bg-white pt-20 flex items-center justify-center'>
+          <p className='text-gray-500 font-medium'>Annonce introuvable.</p>
         </div>
       </>
     );
@@ -161,102 +162,101 @@ export default function Ad(): React.ReactElement {
 
   const isRealestate = adInfo.type === 'realestate';
   const isForRent = adInfo.ad_type === 'location';
-  const ad = adInfo as any; // for optional API fields not yet in the TS type
+  const ad = adInfo as any;
+
+  const amenities = [
+    isRealestate && adInfo.wifi && { icon: <FaWifi />, label: 'WiFi inclus' },
+    isRealestate && adInfo.air_conditioning && { icon: <MdAcUnit />, label: 'Climatisation' },
+    isRealestate && adInfo.security_24h && { icon: <MdSecurity />, label: 'Sécurité 24h/24' },
+    isRealestate && adInfo.equipped_kitchen && { icon: <FaUtensils />, label: 'Cuisine équipée' },
+    isRealestate && adInfo.smart_tv && { icon: <MdTv />, label: 'Smart TV' },
+    isRealestate && adInfo.pool && { icon: <FaSwimmingPool />, label: 'Piscine' },
+    isRealestate && adInfo.gate && { icon: <FaDoorOpen />, label: 'Portail sécurisé' },
+    isRealestate && adInfo.garden && { icon: <FaTree />, label: 'Jardin' },
+    ad.garage && { icon: <FaCar />, label: 'Parking / Garage' },
+    isRealestate && ad.furnitured && { icon: <FaCouch />, label: 'Meublé' },
+  ].filter(Boolean) as { icon: React.ReactNode; label: string }[];
 
   return (
     <>
       <Nav2 />
-      <div className='min-h-screen bg-[#FAFAFA] pt-20'>
-        <main className='max-w-7xl mx-auto px-6 py-8'>
+      <div className='min-h-screen bg-white pt-20'>
+        <main className='max-w-6xl mx-auto px-4 sm:px-6 py-8'>
 
-          {/* ── Breadcrumb + actions ── */}
-          <div className='flex items-center justify-between mb-6'>
-            <div className='flex items-center gap-2 text-sm text-gray-500 font-medium'>
-              <span>{adInfo.country || 'Cameroun'}</span>
-              <HiChevronRight />
-              <span>{adInfo.city || 'Localisation'}</span>
-              <HiChevronRight />
-              <span className='text-gray-900 font-semibold'>
-                {adInfo.category?.name || 'Annonce'}
-              </span>
-            </div>
-            <div className='flex items-center gap-3'>
-              <button
-                onClick={() => setShowShareModal(true)}
-                className='flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-gray-200 text-sm font-bold hover:border-orange-500 transition-colors'
-              >
-                <HiOutlineShare className='text-xl' />
-                Partager
-              </button>
-              <button
-                onClick={handleLike}
-                disabled={isLiking}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-bold transition-colors ${
-                  liked
-                    ? 'bg-orange-50 border-orange-200 text-orange-600'
-                    : 'bg-white border-gray-200 text-gray-700 hover:border-orange-500'
-                }`}
-              >
-                {liked ? (
-                  <HiHeart className='text-xl text-orange-500' />
-                ) : (
-                  <HiOutlineHeart className='text-xl text-red-400' />
-                )}
-                {liked ? 'Sauvegardé' : 'Sauvegarder'}
-              </button>
-            </div>
-          </div>
+          {/* ── Breadcrumb ── */}
+          <nav className='flex items-center gap-1.5 text-sm text-gray-400 mb-6'>
+            <span>{adInfo.country || 'Cameroun'}</span>
+            <HiChevronRight className='text-xs' />
+            <span>{adInfo.city || 'Localisation'}</span>
+            <HiChevronRight className='text-xs' />
+            <span className='text-gray-700 font-medium'>{adInfo.category?.name || 'Annonce'}</span>
+          </nav>
 
-          {/* ── Title + badges + price ── */}
+          {/* ── Title row ── */}
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
+            initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            className='flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8'
+            className='flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6'
           >
-            <div>
-              <div className='flex items-center gap-2 mb-3'>
-                <span className='bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-orange-200'>
+            <div className='flex-1 min-w-0'>
+              {/* Badges */}
+              <div className='flex flex-wrap items-center gap-2 mb-3'>
+                <span className='px-2.5 py-1 bg-orange-50 text-primary border border-orange-100 rounded-full text-[11px] font-semibold uppercase tracking-wide'>
                   {adInfo.category?.name || (isRealestate ? 'Immobilier' : 'Mobilier')}
                 </span>
+                <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wide border ${isForRent ? 'bg-blue-50 text-blue-600 border-blue-100' : 'bg-green-50 text-green-600 border-green-100'}`}>
+                  {isForRent ? 'Location' : 'Vente'}
+                </span>
+                {adInfo.announcer?.verified && (
+                  <span className='flex items-center gap-1 px-2.5 py-1 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-full text-[11px] font-semibold'>
+                    <HiCheckBadge className='text-sm' />
+                    Annonceur vérifié
+                  </span>
+                )}
                 {!adInfo.unlocked && (
-                  <span className='bg-gray-900 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1'>
+                  <span className='flex items-center gap-1 px-2.5 py-1 bg-gray-100 text-gray-500 rounded-full text-[11px] font-semibold'>
                     <HiLockClosed className='text-xs' />
                     Accès par crédits
                   </span>
                 )}
               </div>
-              <h1 className='text-3xl sm:text-4xl font-black text-gray-900 mb-3 tracking-tight'>
+
+              <h1 className='text-2xl sm:text-3xl font-bold text-gray-900 mb-2 leading-tight'>
                 {isRealestate ? 'Logement' : 'Meuble'}
                 {adInfo.city && ` à ${adInfo.city}`}
-                {adInfo.address && `, ${adInfo.address}`}
               </h1>
-              <div className='flex flex-wrap items-center gap-4 text-gray-600'>
-                {adInfo.announcer?.verified && (
-                  <div className='flex items-center gap-1'>
-                    <HiCheckCircle className='text-orange-500' />
-                    <span className='font-semibold text-gray-900 text-sm'>Annonceur vérifié</span>
-                  </div>
-                )}
-                <div className='flex items-center gap-1'>
-                  <HiMapPin className='text-orange-500' />
-                  <span className='font-medium text-sm'>
-                    {adInfo.city || 'Localisation'}
-                    {adInfo.country && `, ${adInfo.country}`}
-                  </span>
-                </div>
+
+              <div className='flex items-center gap-1.5 text-gray-500 text-sm'>
+                <HiMapPin className='text-primary flex-shrink-0 text-base' />
+                <span>
+                  {[adInfo.address, adInfo.city, adInfo.country]
+                    .filter(Boolean)
+                    .join(', ') || 'Localisation non précisée'}
+                </span>
               </div>
             </div>
-            <div className='flex flex-col items-start md:items-end flex-shrink-0'>
-              <span className='text-sm font-bold text-gray-500 mb-1'>
-                {isForRent ? 'Par mois' : 'Prix de vente'}
-              </span>
-              <span className='text-3xl font-black text-primary'>
-                {adInfo.price?.toLocaleString()}{' '}
-                <span className='text-base font-medium text-gray-400'>
-                  {adInfo.devise || 'FCFA'}
-                  {isForRent && adInfo.period && ` / ${adInfo.period}`}
-                </span>
-              </span>
+
+            {/* Action buttons */}
+            <div className='flex items-center gap-2 flex-shrink-0'>
+              <button
+                onClick={() => setShowShareModal(true)}
+                className='flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:border-gray-300 hover:text-gray-900 transition-colors bg-white'
+              >
+                <HiOutlineShare className='text-base' />
+                Partager
+              </button>
+              <button
+                type='button'
+                onClick={handleLike}
+                disabled={isLiking}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-medium transition-colors ${liked
+                  ? 'bg-red-50 border-red-200 text-red-500'
+                  : 'bg-white border-gray-200 text-gray-600 hover:border-red-200 hover:text-red-400'
+                  }`}
+              >
+                {liked ? <HiHeart className='text-base' /> : <HiOutlineHeart className='text-base' />}
+                {liked ? 'Sauvegardé' : 'Sauvegarder'}
+              </button>
             </div>
           </motion.div>
 
@@ -264,19 +264,19 @@ export default function Ad(): React.ReactElement {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className='grid grid-cols-4 grid-rows-2 gap-2 h-[380px] sm:h-[480px] lg:h-[550px] mb-12 rounded-2xl overflow-hidden shadow-xl'
+            className='grid grid-cols-4 grid-rows-2 gap-2 h-[340px] sm:h-[440px] lg:h-[500px] mb-8 rounded-2xl overflow-hidden'
           >
             {adInfo.medias && adInfo.medias.length > 0 ? (
               <>
                 <div
-                  className='col-span-2 row-span-2 bg-cover bg-center cursor-pointer hover:brightness-95 transition-all duration-500 bg-gray-200'
+                  className='col-span-2 row-span-2 bg-cover bg-center cursor-pointer hover:brightness-95 transition-all duration-300 bg-gray-100'
                   style={{ backgroundImage: `url('${mediaUrl(adInfo.medias[0]?.file)}')` }}
                   onClick={() => openModalWithImage(0)}
                 />
                 {[1, 2, 3].map(i => (
                   <div
                     key={i}
-                    className='bg-cover bg-center cursor-pointer hover:brightness-90 transition-all duration-500 bg-gray-200'
+                    className='bg-cover bg-center cursor-pointer hover:brightness-90 transition-all duration-300 bg-gray-100'
                     style={{
                       backgroundImage: adInfo.medias[i]
                         ? `url('${mediaUrl(adInfo.medias[i].file)}')`
@@ -286,7 +286,7 @@ export default function Ad(): React.ReactElement {
                   />
                 ))}
                 <div
-                  className='relative bg-cover bg-center cursor-pointer hover:brightness-90 transition-all duration-500 bg-gray-200'
+                  className='relative bg-cover bg-center cursor-pointer hover:brightness-90 transition-all duration-300 bg-gray-100'
                   style={{
                     backgroundImage: adInfo.medias[4]
                       ? `url('${mediaUrl(adInfo.medias[4].file)}')`
@@ -294,49 +294,91 @@ export default function Ad(): React.ReactElement {
                   }}
                   onClick={() => openModalWithImage(0)}
                 >
-                  <button className='absolute bottom-4 right-4 bg-white px-4 py-2.5 rounded-xl text-gray-900 text-sm font-black border border-gray-200 shadow-xl flex items-center gap-2 hover:bg-gray-50 transition-colors'>
-                    <svg className='w-4 h-4' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
-                      <path
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                        strokeWidth={2}
-                        d='M4 6h16M4 10h16M4 14h16M4 18h16'
-                      />
+                  <button className='absolute bottom-3 right-3 bg-white/90 backdrop-blur-sm px-3 py-2 rounded-lg text-gray-800 text-xs font-semibold border border-white/80 shadow-md flex items-center gap-1.5 hover:bg-white transition-colors'>
+                    <svg className='w-3.5 h-3.5' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+                      <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M4 6h16M4 10h16M4 14h16M4 18h16' />
                     </svg>
-                    Galerie ({adInfo.medias.length})
+                    {adInfo.medias.length} photos
                   </button>
                 </div>
               </>
             ) : (
-              <div className='col-span-4 row-span-2 flex items-center justify-center bg-gray-100 rounded-2xl'>
-                <div className='text-center'>
-                  <div className='text-gray-400 text-5xl mb-4'>📷</div>
-                  <p className='text-gray-500 text-lg font-medium'>Aucune image disponible</p>
+              <div className='col-span-4 row-span-2 flex items-center justify-center bg-gray-50 rounded-2xl'>
+                <div className='text-center text-gray-400'>
+                  <div className='text-4xl mb-2'>📷</div>
+                  <p className='text-sm font-medium'>Aucune image disponible</p>
                 </div>
               </div>
             )}
           </motion.div>
 
-          {/* ── Content grid: 2/3 + 1/3 ── */}
-          <div className='grid grid-cols-1 lg:grid-cols-3 gap-16 relative'>
+          {/* ── Quick-stats strip ── */}
+          {isRealestate && (adInfo.bedroom || adInfo.toilet || adInfo.mainroom || adInfo.size) && (
+            <div className='flex flex-wrap items-stretch bg-gray-50 border border-gray-100 rounded-2xl divide-x divide-gray-200 mb-10 overflow-hidden'>
+              {adInfo.bedroom ? (
+                <div className='flex items-center gap-3 px-6 py-4 flex-1 justify-center min-w-[130px]'>
+                  <FaBed className='text-primary text-xl flex-shrink-0' />
+                  <div>
+                    <p className='text-lg font-bold text-gray-900 leading-none'>{adInfo.bedroom}</p>
+                    <p className='text-xs text-gray-500 mt-0.5'>Chambre{adInfo.bedroom > 1 ? 's' : ''}</p>
+                  </div>
+                </div>
+              ) : null}
+              {adInfo.toilet ? (
+                <div className='flex items-center gap-3 px-6 py-4 flex-1 justify-center min-w-[130px]'>
+                  <FaBath className='text-primary text-xl flex-shrink-0' />
+                  <div>
+                    <p className='text-lg font-bold text-gray-900 leading-none'>{adInfo.toilet}</p>
+                    <p className='text-xs text-gray-500 mt-0.5'>Salle{adInfo.toilet > 1 ? 's' : ''} de bain</p>
+                  </div>
+                </div>
+              ) : null}
+              {adInfo.mainroom ? (
+                <div className='flex items-center gap-3 px-6 py-4 flex-1 justify-center min-w-[130px]'>
+                  <FaCouch className='text-primary text-xl flex-shrink-0' />
+                  <div>
+                    <p className='text-lg font-bold text-gray-900 leading-none'>{adInfo.mainroom}</p>
+                    <p className='text-xs text-gray-500 mt-0.5'>Salon{adInfo.mainroom > 1 ? 's' : ''}</p>
+                  </div>
+                </div>
+              ) : null}
+              {adInfo.size ? (
+                <div className='flex items-center gap-3 px-6 py-4 flex-1 justify-center min-w-[130px]'>
+                  <FaRulerCombined className='text-primary text-xl flex-shrink-0' />
+                  <div>
+                    <p className='text-lg font-bold text-gray-900 leading-none'>{adInfo.size} m²</p>
+                    <p className='text-xs text-gray-500 mt-0.5'>Superficie</p>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          )}
 
-            {/* ── Left: main content ── */}
-            <div className='lg:col-span-2'>
+          {/* ── Content grid ── */}
+          <div className='grid grid-cols-1 lg:grid-cols-3 gap-12 relative'>
 
-              {/* Host */}
-              <div className='flex items-center justify-between pb-8 border-b border-gray-200'>
+            {/* ── Left column ── */}
+            <div className='lg:col-span-2 space-y-0'>
+
+              {/* Host strip */}
+              <div className='flex items-center justify-between pb-8 border-b border-gray-100'>
                 <div>
-                  <h2 className='text-2xl font-black text-gray-900 mb-1'>
+                  <h2 className='text-xl font-bold text-gray-900 mb-1'>
                     Proposé par {adInfo.announcer?.name || 'Annonceur'}
                   </h2>
-                  <p className='text-gray-500 font-medium text-sm'>
-                    {adInfo.announcer?.verified ? 'Annonceur vérifié' : 'Annonceur'}
+                  <p className='text-sm text-gray-400 font-medium'>
                     {isRealestate
-                      ? ` • ${adInfo.announcer?.houses || 0} bien(s) immobilier(s)`
-                      : ` • ${adInfo.announcer?.furnitures || 0} mobilier(s)`}
+                      ? `${adInfo.announcer?.houses || 0} bien(s) immobilier(s)`
+                      : `${adInfo.announcer?.furnitures || 0} mobilier(s)`}
+                    {adInfo.announcer?.verified && (
+                      <span className='ml-2 inline-flex items-center gap-1 text-emerald-500'>
+                        <HiCheckCircle className='text-sm' />
+                        Vérifié
+                      </span>
+                    )}
                   </p>
                 </div>
-                <div className='w-16 h-16 rounded-full border-4 border-white shadow-lg bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-white font-black text-xl overflow-hidden flex-shrink-0'>
+                <div className='w-14 h-14 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-white font-bold text-lg overflow-hidden flex-shrink-0 border-2 border-white shadow-md'>
                   {adInfo.announcer?.avatar ? (
                     <img
                       src={mediaUrl(adInfo.announcer.avatar)}
@@ -349,74 +391,46 @@ export default function Ad(): React.ReactElement {
                 </div>
               </div>
 
-              {/* Highlights */}
-              <div className='py-8 grid grid-cols-1 md:grid-cols-2 gap-8 border-b border-gray-200'>
+              {/* Trust highlights */}
+              <div className='py-8 grid grid-cols-1 sm:grid-cols-2 gap-6 border-b border-gray-100'>
+                <div className='flex items-start gap-4'>
+                  <div className='w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center flex-shrink-0'>
+                    <MdVerifiedUser className='text-primary text-xl' />
+                  </div>
+                  <div>
+                    <h4 className='font-semibold text-gray-900 text-sm mb-0.5'>Annonce vérifiée</h4>
+                    <p className='text-gray-400 text-sm leading-relaxed'>
+                      Contrôlée et validée par l&apos;équipe Domilix.
+                    </p>
+                  </div>
+                </div>
                 {adInfo.announcer?.verified && (
                   <div className='flex items-start gap-4'>
-                    <MdWorkspacePremium className='text-orange-500 text-4xl flex-shrink-0' />
+                    <div className='w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center flex-shrink-0'>
+                      <HiCheckBadge className='text-primary text-xl' />
+                    </div>
                     <div>
-                      <h4 className='font-black text-gray-900 mb-1'>Annonceur très bien noté</h4>
-                      <p className='text-gray-500 text-sm leading-relaxed'>
-                        Cet annonceur fait partie des plus fiables de la plateforme.
+                      <h4 className='font-semibold text-gray-900 text-sm mb-0.5'>Annonceur de confiance</h4>
+                      <p className='text-gray-400 text-sm leading-relaxed'>
+                        Parmi les annonceurs les plus fiables de la plateforme.
                       </p>
                     </div>
                   </div>
                 )}
-                <div className='flex items-start gap-4'>
-                  <MdVerifiedUser className='text-orange-500 text-4xl flex-shrink-0' />
-                  <div>
-                    <h4 className='font-black text-gray-900 mb-1'>Annonce vérifiée</h4>
-                    <p className='text-gray-500 text-sm leading-relaxed'>
-                      Cette annonce a été contrôlée par l'équipe Domilix.
-                    </p>
-                  </div>
-                </div>
               </div>
 
               {/* Description */}
-              <div className='py-10 border-b border-gray-200'>
-                <h3 className='text-xl font-black text-gray-900 mb-4'>
+              <div className='py-8 border-b border-gray-100'>
+                <h3 className='text-lg font-semibold text-gray-900 mb-3'>
                   À propos de ce {isRealestate ? 'logement' : 'produit'}
                 </h3>
-                <p className='text-gray-600 leading-relaxed font-medium'>
+                <p className='text-gray-500 leading-relaxed text-[15px]'>
                   {adInfo.description || 'Aucune description disponible pour cette annonce.'}
                 </p>
 
-                {isRealestate && (
-                  <div className='grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6'>
-                    {adInfo.bedroom ? (
-                      <div className='flex flex-col items-center gap-2 p-4 bg-orange-50 rounded-xl border border-orange-100'>
-                        <FaBed className='text-primary text-2xl' />
-                        <span className='text-2xl font-black text-gray-900'>{adInfo.bedroom}</span>
-                        <span className='text-xs text-gray-500 font-medium'>Chambre{adInfo.bedroom > 1 ? 's' : ''}</span>
-                      </div>
-                    ) : null}
-                    {adInfo.toilet ? (
-                      <div className='flex flex-col items-center gap-2 p-4 bg-orange-50 rounded-xl border border-orange-100'>
-                        <FaBath className='text-primary text-2xl' />
-                        <span className='text-2xl font-black text-gray-900'>{adInfo.toilet}</span>
-                        <span className='text-xs text-gray-500 font-medium'>Salle{adInfo.toilet > 1 ? 's' : ''} de bain</span>
-                      </div>
-                    ) : null}
-                    {adInfo.mainroom ? (
-                      <div className='flex flex-col items-center gap-2 p-4 bg-orange-50 rounded-xl border border-orange-100'>
-                        <FaCouch className='text-primary text-2xl' />
-                        <span className='text-2xl font-black text-gray-900'>{adInfo.mainroom}</span>
-                        <span className='text-xs text-gray-500 font-medium'>Salon{adInfo.mainroom > 1 ? 's' : ''}</span>
-                      </div>
-                    ) : null}
-                    {adInfo.size ? (
-                      <div className='flex flex-col items-center gap-2 p-4 bg-orange-50 rounded-xl border border-orange-100'>
-                        <MdSquareFoot className='text-primary text-2xl' />
-                        <span className='text-2xl font-black text-gray-900'>{adInfo.size} <span className='text-base font-semibold'>m²</span></span>
-                        <span className='text-xs text-gray-500 font-medium'>Superficie</span>
-                      </div>
-                    ) : null}
-                  </div>
-                )}
-
+                {/* Furniture dimensions */}
                 {!isRealestate && (adInfo.height || adInfo.width || adInfo.length) && (
-                  <div className='grid grid-cols-3 gap-4 mt-6'>
+                  <div className='flex flex-wrap gap-3 mt-5'>
                     {[
                       { label: 'Hauteur', value: adInfo.height, unit: 'cm' },
                       { label: 'Largeur', value: adInfo.width, unit: 'cm' },
@@ -426,12 +440,12 @@ export default function Ad(): React.ReactElement {
                       .map(item => (
                         <div
                           key={item.label}
-                          className='text-center p-4 bg-white rounded-xl border border-gray-100 shadow-sm'
+                          className='flex items-center gap-2 px-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl'
                         >
-                          <div className='text-xl font-black text-gray-900'>
+                          <span className='text-base font-bold text-gray-900'>
                             {item.value} {item.unit}
-                          </div>
-                          <div className='text-sm text-gray-500 font-medium'>{item.label}</div>
+                          </span>
+                          <span className='text-xs text-gray-400 font-medium'>{item.label}</span>
                         </div>
                       ))}
                   </div>
@@ -439,83 +453,33 @@ export default function Ad(): React.ReactElement {
               </div>
 
               {/* Amenities */}
-              <div className='py-10 border-b border-gray-200'>
-                <h3 className='text-xl font-black text-gray-900 mb-6'>
-                  Ce que propose ce {isRealestate ? 'logement' : 'produit'}
-                </h3>
-                <div className='grid grid-cols-1 sm:grid-cols-2 gap-y-5 gap-x-12'>
-                  {isRealestate && adInfo.wifi ? (
-                    <div className='flex items-center gap-4 text-gray-700 font-semibold'>
-                      <FaWifi className='text-orange-500 text-xl flex-shrink-0' />
-                      <span>WiFi inclus</span>
-                    </div>
-                  ) : null}
-                  {isRealestate && adInfo.air_conditioning ? (
-                    <div className='flex items-center gap-4 text-gray-700 font-semibold'>
-                      <MdAcUnit className='text-orange-500 text-xl flex-shrink-0' />
-                      <span>Climatisation</span>
-                    </div>
-                  ) : null}
-                  {isRealestate && adInfo.security_24h ? (
-                    <div className='flex items-center gap-4 text-gray-700 font-semibold'>
-                      <MdSecurity className='text-orange-500 text-xl flex-shrink-0' />
-                      <span>Sécurité 24h/24</span>
-                    </div>
-                  ) : null}
-                  {isRealestate && adInfo.equipped_kitchen ? (
-                    <div className='flex items-center gap-4 text-gray-700 font-semibold'>
-                      <FaUtensils className='text-orange-500 text-xl flex-shrink-0' />
-                      <span>Cuisine équipée</span>
-                    </div>
-                  ) : null}
-                  {isRealestate && adInfo.smart_tv ? (
-                    <div className='flex items-center gap-4 text-gray-700 font-semibold'>
-                      <MdTv className='text-orange-500 text-xl flex-shrink-0' />
-                      <span>Smart TV</span>
-                    </div>
-                  ) : null}
-                  {isRealestate && adInfo.pool ? (
-                    <div className='flex items-center gap-4 text-gray-700 font-semibold'>
-                      <FaSwimmingPool className='text-orange-500 text-xl flex-shrink-0' />
-                      <span>Piscine</span>
-                    </div>
-                  ) : null}
-                  {isRealestate && adInfo.gate ? (
-                    <div className='flex items-center gap-4 text-gray-700 font-semibold'>
-                      <FaDoorOpen className='text-orange-500 text-xl flex-shrink-0' />
-                      <span>Portail sécurisé</span>
-                    </div>
-                  ) : null}
-                  {isRealestate && adInfo.garden ? (
-                    <div className='flex items-center gap-4 text-gray-700 font-semibold'>
-                      <FaTree className='text-orange-500 text-xl flex-shrink-0' />
-                      <span>Jardin</span>
-                    </div>
-                  ) : null}
-                  {ad.garage ? (
-                    <div className='flex items-center gap-4 text-gray-700 font-semibold'>
-                      <FaCar className='text-orange-500 text-xl flex-shrink-0' />
-                      <span>Parking / Garage</span>
-                    </div>
-                  ) : null}
-                  {isRealestate && ad.furnitured ? (
-                    <div className='flex items-center gap-4 text-gray-700 font-semibold'>
-                      <FaCouch className='text-orange-500 text-xl flex-shrink-0' />
-                      <span>Meublé</span>
-                    </div>
-                  ) : null}
+              {amenities.length > 0 && (
+                <div className='py-8 border-b border-gray-100'>
+                  <h3 className='text-lg font-semibold text-gray-900 mb-5'>
+                    Équipements &amp; services
+                  </h3>
+                  <div className='flex flex-wrap gap-3'>
+                    {amenities.map(item => (
+                      <div
+                        key={item.label}
+                        className='flex items-center gap-2.5 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:border-orange-200 hover:bg-orange-50 transition-colors'
+                      >
+                        <span className='text-primary text-base'>{item.icon}</span>
+                        {item.label}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Map */}
-              <div className='py-10'>
-                <h3 className='text-xl font-black text-gray-900 mb-2'>Localisation</h3>
-                <p className='text-gray-500 font-medium mb-6'>
-                  {adInfo.city || ''}
-                  {adInfo.country && `, ${adInfo.country}`}
+              <div className='py-8'>
+                <h3 className='text-lg font-semibold text-gray-900 mb-1'>Localisation</h3>
+                <p className='text-sm text-gray-400 mb-5'>
+                  {[adInfo.city, adInfo.country].filter(Boolean).join(', ')}
                   {!adInfo.unlocked && (
-                    <span className='ml-2 text-sm font-bold text-primary'>
-                      — adresse exacte après déblocage
+                    <span className='ml-2 text-primary font-medium'>
+                      · adresse exacte après déblocage
                     </span>
                   )}
                 </p>
@@ -530,116 +494,100 @@ export default function Ad(): React.ReactElement {
 
             {/* ── Sidebar ── */}
             <div className='lg:col-span-1'>
-              <div className='sticky top-28 bg-white border-2 border-gray-900 rounded-[2rem] shadow-2xl p-8 overflow-hidden'>
-                <div className='absolute top-0 right-0 w-32 h-32 bg-orange-50 -mr-16 -mt-16 rounded-full pointer-events-none' />
+              <div className='sticky top-28 bg-white border border-gray-200 rounded-2xl shadow-lg overflow-hidden'>
+                {/* Orange accent stripe */}
+                <div className='h-1 bg-primary-gradient' />
 
-                {/* Price */}
-                <div className='flex items-baseline justify-between mb-8'>
-                  <div>
-                    <span className='text-3xl font-black text-gray-900'>
-                      {adInfo.price?.toLocaleString()}
+                <div className='p-6'>
+                  {/* Price */}
+                  <div className='mb-6'>
+                    <p className='text-xs font-medium text-gray-400 uppercase tracking-wide mb-1'>
+                      {isForRent ? 'Loyer mensuel' : 'Prix de vente'}
+                    </p>
+                    <div className='flex items-baseline gap-1.5'>
+                      <span className='text-3xl font-bold text-gray-900'>
+                        {adInfo.price?.toLocaleString()}
+                      </span>
+                      <span className='text-gray-400 font-medium text-sm'>
+                        {adInfo.devise || 'FCFA'}
+                      </span>
+                      {isForRent && (
+                        <span className='text-gray-400 text-sm font-medium'>
+                          / {adInfo.period || 'mois'}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Meta pills */}
+                  <div className='flex flex-wrap gap-2 mb-6'>
+                    <span className='px-3 py-1.5 bg-gray-50 border border-gray-100 rounded-lg text-xs font-medium text-gray-600'>
+                      {isRealestate ? 'Immobilier' : 'Mobilier'}
+                      {adInfo.category?.name && ` · ${adInfo.category.name}`}
                     </span>
-                    <span className='text-gray-500 font-bold ml-1 text-sm'>
-                      {adInfo.devise || 'FCFA'}
-                    </span>
-                    {isForRent && (
-                      <span className='text-gray-400 text-sm font-bold ml-1'>
-                        / {adInfo.period || 'mois'}
+                    {adInfo.city && (
+                      <span className='flex items-center gap-1 px-3 py-1.5 bg-gray-50 border border-gray-100 rounded-lg text-xs font-medium text-gray-600'>
+                        <HiMapPin className='text-primary text-xs' />
+                        {adInfo.city}
                       </span>
                     )}
+                    {adInfo.caution ? (
+                      <span className='px-3 py-1.5 bg-orange-50 border border-orange-100 rounded-lg text-xs font-medium text-orange-700'>
+                        Caution · {adInfo.caution.toLocaleString()} {adInfo.devise || 'FCFA'}
+                      </span>
+                    ) : null}
                   </div>
-                  <span className='text-xs font-black bg-orange-100 text-orange-600 px-2 py-1 rounded-lg uppercase tracking-wide'>
-                    {isForRent ? 'Location' : 'Vente'}
-                  </span>
-                </div>
 
-                {/* Meta info */}
-                <div className='border-2 border-gray-100 rounded-2xl mb-6 divide-y-2 divide-gray-100'>
-                  <div className='p-4'>
-                    <p className='text-[10px] font-black uppercase tracking-widest text-orange-500 mb-1'>
-                      Type
-                    </p>
-                    <p className='text-sm font-bold text-gray-900'>
-                      {isRealestate ? 'Immobilier' : 'Mobilier'}
-                      {adInfo.category?.name && ` • ${adInfo.category.name}`}
-                    </p>
-                  </div>
-                  <div className='p-4'>
-                    <p className='text-[10px] font-black uppercase tracking-widest text-orange-500 mb-1'>
-                      Localisation
-                    </p>
-                    <p className='text-sm font-bold text-gray-900'>
-                      {adInfo.city || 'Non précisée'}
-                      {adInfo.country && `, ${adInfo.country}`}
-                    </p>
-                  </div>
-                  {adInfo.caution ? (
-                    <div className='p-4'>
-                      <p className='text-[10px] font-black uppercase tracking-widest text-orange-500 mb-1'>
-                        Caution
-                      </p>
-                      <p className='text-sm font-bold text-gray-900'>
-                        {adInfo.caution.toLocaleString()} {adInfo.devise || 'FCFA'}
-                      </p>
+                  {/* Unlock CTA */}
+                  {adInfo.unlocked ? (
+                    <div className='bg-green-50 border border-green-200 rounded-2xl p-4 mb-4'>
+                      <div className='flex items-center gap-2 text-green-700 font-bold text-sm mb-2'>
+                        <HiCheckCircle className='text-xl' />
+                        Annonce débloquée
+                      </div>
+                      {adInfo.exact_address && (
+                        <p className='text-green-800 text-sm font-medium'>
+                          {adInfo.exact_address}
+                        </p>
+                      )}
+                      {adInfo.announcer?.contact && (
+                        <a
+                          href={`tel:${adInfo.announcer.contact}`}
+                          className='block mt-2 text-green-700 font-black text-base hover:text-green-900'
+                        >
+                          {adInfo.announcer.contact}
+                        </a>
+                      )}
+                      {adInfo.announcer?.email && (
+                        <a
+                          href={`mailto:${adInfo.announcer.email}`}
+                          className='block mt-1 text-green-700 font-semibold text-sm hover:text-green-900'
+                        >
+                          {adInfo.announcer.email}
+                        </a>
+                      )}
                     </div>
-                  ) : null}
-                </div>
-
-                {/* Unlock CTA */}
-                {adInfo.unlocked ? (
-                  <div className='bg-green-50 border border-green-200 rounded-2xl p-4 mb-4'>
-                    <div className='flex items-center gap-2 text-green-700 font-bold text-sm mb-2'>
-                      <HiCheckCircle className='text-xl' />
-                      Annonce débloquée
-                    </div>
-                    {adInfo.exact_address && (
-                      <p className='text-green-800 text-sm font-medium'>
-                        {adInfo.exact_address}
-                      </p>
-                    )}
-                    {adInfo.announcer?.contact && (
-                      <a
-                        href={`tel:${adInfo.announcer.contact}`}
-                        className='block mt-2 text-green-700 font-black text-base hover:text-green-900'
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => setShowUnlockDialog(true)}
+                        className='w-full text-white py-5 rounded-2xl font-black text-lg shadow-xl hover:-translate-y-1 active:translate-y-0 transition-all mb-4 uppercase tracking-tight bg-primary-gradient'
                       >
-                        {adInfo.announcer.contact}
-                      </a>
-                    )}
-                    {adInfo.announcer?.email && (
-                      <a
-                        href={`mailto:${adInfo.announcer.email}`}
-                        className='block mt-1 text-green-700 font-semibold text-sm hover:text-green-900'
-                      >
-                        {adInfo.announcer.email}
-                      </a>
-                    )}
-                  </div>
-                ) : (
-                  <>
-                    <button
-                      onClick={() => {
-                        if (!isAuthenticated) {
-                          signinDialogActions.toggle();
-                          return;
-                        }
-                        setShowUnlockDialog(true);
-                      }}
-                      className='w-full text-white py-5 rounded-2xl font-black text-lg shadow-xl hover:-translate-y-1 active:translate-y-0 transition-all mb-4 uppercase tracking-tight bg-primary-gradient'
-                    >
-                      Débloquer l'annonce
-                    </button>
-                    <div className='flex items-center justify-center gap-2 text-gray-400 text-xs font-bold mb-6 uppercase tracking-widest'>
-                      <HiLockClosed className='text-sm' />
-                      Accès sécurisé par Domicoins
-                    </div>
-                  </>
-                )}
+                        Débloquer l'annonce
+                      </button>
+                      <div className='flex items-center justify-center gap-2 text-gray-400 text-xs font-bold mb-6 uppercase tracking-widest'>
+                        <HiLockClosed className='text-sm' />
+                        Accès sécurisé par Domicoins
+                      </div>
+                    </>
+                  )}
 
-                {/* Announcer info */}
-                <div className='border-t border-gray-100 pt-6 space-y-4'>
-                  <h4 className='font-black text-gray-900'>L'annonceur</h4>
-                  <div className='flex items-center gap-3'>
-                    <div className='w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-white font-black text-lg overflow-hidden flex-shrink-0'>
+                  {/* Divider */}
+                  <div className='border-t border-gray-100 my-5' />
+
+                  {/* Announcer mini-card */}
+                  <div className='flex items-center gap-3 mb-4'>
+                    <div className='w-11 h-11 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-white font-bold text-base overflow-hidden flex-shrink-0'>
                       {adInfo.announcer?.avatar ? (
                         <img
                           src={mediaUrl(adInfo.announcer.avatar)}
@@ -650,103 +598,98 @@ export default function Ad(): React.ReactElement {
                         adInfo.announcer?.name?.charAt(0).toUpperCase() || 'A'
                       )}
                     </div>
-                    <div>
-                      <h5 className='font-black text-gray-900'>
+                    <div className='min-w-0'>
+                      <h5 className='font-semibold text-gray-900 text-sm truncate'>
                         {adInfo.announcer?.name || 'Annonceur'}
                       </h5>
                       {adInfo.announcer?.verified && (
-                        <div className='flex items-center gap-1 text-sm text-green-600 font-semibold'>
-                          <HiCheckCircle />
-                          Compte vérifié
-                        </div>
+                        <span className='inline-flex items-center gap-1 text-xs text-emerald-500 font-medium'>
+                          <HiCheckCircle className='text-xs' />
+                          Identité vérifiée
+                        </span>
                       )}
                     </div>
                   </div>
-                  <div className='grid grid-cols-2 gap-3'>
-                    <div className='text-center p-3 bg-gray-50 rounded-xl'>
-                      <div className='text-xl font-black text-gray-900'>
-                        {adInfo.announcer?.houses || 0}
-                      </div>
-                      <div className='text-xs text-gray-500 font-bold'>Immobiliers</div>
-                    </div>
-                    <div className='text-center p-3 bg-gray-50 rounded-xl'>
-                      <div className='text-xl font-black text-gray-900'>
-                        {adInfo.announcer?.furnitures || 0}
-                      </div>
-                      <div className='text-xs text-gray-500 font-bold'>Mobiliers</div>
-                    </div>
-                  </div>
+
                   {adInfo.announcer?.bio && (
-                    <p className='text-sm text-gray-600 font-medium leading-relaxed'>
+                    <p className='text-xs text-gray-400 leading-relaxed mb-4'>
                       {adInfo.announcer.bio}
                     </p>
                   )}
-                </div>
 
-                {/* Secondary actions */}
-                <div className='border-t border-gray-100 pt-4 mt-4 space-y-3'>
-                  <button
-                    onClick={() => setShowShareModal(true)}
-                    className='w-full flex items-center justify-center gap-2 py-3 border border-gray-200 rounded-xl text-gray-700 font-bold text-sm hover:bg-gray-50 transition-colors'
-                  >
-                    <HiOutlineShare className='text-lg' />
-                    Partager cette annonce
-                  </button>
-                  <button
-                    onClick={() => setShowSignalDialog(true)}
-                    className='w-full flex items-center justify-center gap-2 py-3 border border-red-100 rounded-xl text-red-500 font-bold text-sm hover:bg-red-50 transition-colors'
-                  >
-                    <HiExclamationTriangle className='text-lg' />
-                    Signaler un problème
-                  </button>
+                  <div className='grid grid-cols-2 gap-2 mb-5'>
+                    <div className='text-center py-3 bg-gray-50 rounded-xl'>
+                      <p className='text-lg font-bold text-gray-900'>{adInfo.announcer?.houses || 0}</p>
+                      <p className='text-[11px] text-gray-400 font-medium'>Immobiliers</p>
+                    </div>
+                    <div className='text-center py-3 bg-gray-50 rounded-xl'>
+                      <p className='text-lg font-bold text-gray-900'>{adInfo.announcer?.furnitures || 0}</p>
+                      <p className='text-[11px] text-gray-400 font-medium'>Mobiliers</p>
+                    </div>
+                  </div>
+
+                  {/* Secondary actions */}
+                  <div className='space-y-2'>
+                    <button
+                      onClick={() => setShowShareModal(true)}
+                      className='w-full flex items-center justify-center gap-2 py-2.5 border border-gray-200 rounded-xl text-gray-600 font-medium text-sm hover:bg-gray-50 transition-colors'
+                    >
+                      <HiOutlineShare className='text-base' />
+                      Partager cette annonce
+                    </button>
+                    <button
+                      onClick={() => setShowSignalDialog(true)}
+                      className='w-full flex items-center justify-center gap-2 py-2.5 border border-red-100 rounded-xl text-red-400 font-medium text-sm hover:bg-red-50 transition-colors'
+                    >
+                      <HiExclamationTriangle className='text-base' />
+                      Signaler un problème
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
           {/* ── Similar listings ── */}
-          {similarAds.length > 0 && (
-            <section className='mt-8 py-16 border-t border-gray-200'>
-              <h2 className='text-3xl font-black text-gray-900 mb-10 tracking-tight'>
-                Annonces similaires
-              </h2>
-              <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6'>
-                {similarAds.map(ad => (
-                  <a key={ad.id} href={`/houses/${ad.id}`} className='group cursor-pointer block'>
-                    <div className='aspect-square rounded-2xl overflow-hidden mb-4 bg-gray-100 relative shadow-lg'>
-                      <div
-                        className='absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-700'
-                        style={{
-                          backgroundImage: ad.medias?.[0]?.file
-                            ? `url('${mediaUrl(ad.medias[0].file)}')`
-                            : undefined,
-                        }}
-                      />
-                      <span className='absolute top-3 left-3 bg-gray-900/80 backdrop-blur-md text-white px-2 py-1 rounded text-[8px] font-black uppercase tracking-widest'>
-                        {ad.ad_type === 'location' ? 'Location' : 'Vente'}
-                      </span>
-                    </div>
-                    <div className='flex justify-between items-start mb-1'>
-                      <h4 className='font-black text-gray-900 truncate pr-2'>
-                        {ad.category?.name || 'Annonce'} • {ad.city}
+            {similarAds.length > 0 && (
+              <section className='mt-16 pt-12 border-t border-gray-100'>
+                <h2 className='text-2xl font-bold text-gray-900 mb-8'>
+                  Autres annonces
+                </h2>
+                <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5'>
+                  {similarAds.map(a => (
+                    <a key={a.id} href={`/houses/${a.id}`} className='group block'>
+                      <div className='aspect-[4/3] rounded-xl overflow-hidden mb-3 bg-gray-100 relative'>
+                        <div
+                          className='absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-500'
+                          style={{
+                            backgroundImage: a.medias?.[0]?.file
+                              ? `url('${mediaUrl(a.medias[0].file)}')`
+                              : undefined,
+                          }}
+                        />
+                        <span className='absolute top-2 left-2 bg-gray-900/70 backdrop-blur-sm text-white px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide'>
+                          {a.ad_type === 'location' ? 'Location' : 'Vente'}
+                        </span>
+                      </div>
+                      <h4 className='font-semibold text-gray-900 text-sm truncate mb-0.5'>
+                        {a.category?.name || 'Annonce'} · {a.city}
                       </h4>
-                    </div>
-                    <p className='text-gray-500 text-sm font-semibold'>
-                      {ad.city}
-                      {ad.country && `, ${ad.country}`}
-                    </p>
-                    <p className='mt-2 font-black text-lg text-primary'>
-                      {ad.price?.toLocaleString()}{' '}
-                      <span className='font-bold text-gray-400 text-xs'>
-                        {ad.devise || 'FCFA'}
-                        {ad.ad_type === 'location' && ` / ${ad.period || 'mois'}`}
-                      </span>
-                    </p>
-                  </a>
-                ))}
-              </div>
-            </section>
-          )}
+                      <p className='text-gray-400 text-xs mb-1.5'>
+                        {a.city}{a.country && `, ${a.country}`}
+                      </p>
+                      <p className='font-bold text-base text-primary'>
+                        {a.price?.toLocaleString()}{' '}
+                        <span className='font-medium text-gray-400 text-xs'>
+                          {a.devise || 'FCFA'}
+                          {a.ad_type === 'location' && ` / ${a.period || 'mois'}`}
+                        </span>
+                      </p>
+                    </a>
+                  ))}
+                </div>
+              </section>
+            )}
         </main>
       </div>
 
@@ -763,7 +706,7 @@ export default function Ad(): React.ReactElement {
         isOpen={showShareModal}
         onClose={() => setShowShareModal(false)}
         url={typeof window !== 'undefined' ? window.location.href : ''}
-        title={`${adInfo.category?.name || 'Annonce'} • ${adInfo.city || 'Localisation'}`}
+        title={`${adInfo.category?.name || 'Annonce'} · ${adInfo.city || 'Localisation'}`}
         price={`${adInfo.price?.toLocaleString()} ${adInfo.devise || 'FCFA'}`}
         location={adInfo.city || adInfo.address}
         image={mediaUrl(adInfo.medias?.[0]?.file)}
