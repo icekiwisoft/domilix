@@ -419,26 +419,36 @@ export default function Ad(): React.ReactElement {
                   Ce que propose ce {isRealestate ? 'logement' : 'produit'}
                 </h3>
                 <div className='grid grid-cols-1 sm:grid-cols-2 gap-y-5 gap-x-12'>
-                  <div className='flex items-center gap-4 text-gray-700 font-semibold'>
-                    <FaWifi className='text-orange-500 text-xl flex-shrink-0' />
-                    <span>WiFi inclus</span>
-                  </div>
-                  <div className='flex items-center gap-4 text-gray-700 font-semibold'>
-                    <MdAcUnit className='text-orange-500 text-xl flex-shrink-0' />
-                    <span>Climatisation</span>
-                  </div>
-                  <div className='flex items-center gap-4 text-gray-700 font-semibold'>
-                    <MdSecurity className='text-orange-500 text-xl flex-shrink-0' />
-                    <span>Sécurité 24h/24</span>
-                  </div>
-                  <div className='flex items-center gap-4 text-gray-700 font-semibold'>
-                    <FaUtensils className='text-orange-500 text-xl flex-shrink-0' />
-                    <span>Cuisine équipée</span>
-                  </div>
-                  <div className='flex items-center gap-4 text-gray-700 font-semibold'>
-                    <MdTv className='text-orange-500 text-xl flex-shrink-0' />
-                    <span>Smart TV</span>
-                  </div>
+                  {isRealestate && adInfo.wifi ? (
+                    <div className='flex items-center gap-4 text-gray-700 font-semibold'>
+                      <FaWifi className='text-orange-500 text-xl flex-shrink-0' />
+                      <span>WiFi inclus</span>
+                    </div>
+                  ) : null}
+                  {isRealestate && adInfo.air_conditioning ? (
+                    <div className='flex items-center gap-4 text-gray-700 font-semibold'>
+                      <MdAcUnit className='text-orange-500 text-xl flex-shrink-0' />
+                      <span>Climatisation</span>
+                    </div>
+                  ) : null}
+                  {isRealestate && adInfo.security_24h ? (
+                    <div className='flex items-center gap-4 text-gray-700 font-semibold'>
+                      <MdSecurity className='text-orange-500 text-xl flex-shrink-0' />
+                      <span>Sécurité 24h/24</span>
+                    </div>
+                  ) : null}
+                  {isRealestate && adInfo.equipped_kitchen ? (
+                    <div className='flex items-center gap-4 text-gray-700 font-semibold'>
+                      <FaUtensils className='text-orange-500 text-xl flex-shrink-0' />
+                      <span>Cuisine équipée</span>
+                    </div>
+                  ) : null}
+                  {isRealestate && adInfo.smart_tv ? (
+                    <div className='flex items-center gap-4 text-gray-700 font-semibold'>
+                      <MdTv className='text-orange-500 text-xl flex-shrink-0' />
+                      <span>Smart TV</span>
+                    </div>
+                  ) : null}
                   {isRealestate && adInfo.pool ? (
                     <div className='flex items-center gap-4 text-gray-700 font-semibold'>
                       <FaSwimmingPool className='text-orange-500 text-xl flex-shrink-0' />

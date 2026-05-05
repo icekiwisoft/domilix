@@ -1,7 +1,4 @@
-export const backendOrigin =
-  process.env.NODE_ENV === 'development'
-    ? 'http://localhost:8000'
-    : 'https://api.domilix.com';
+export const backendOrigin = 'https://api.domilix.com';
 
 export const mediaUrl = (file?: string | null) => {
   if (!file) return undefined;

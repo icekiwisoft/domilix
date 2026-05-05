@@ -13,7 +13,7 @@ export class RegisterDto {
 
   @ApiPropertyOptional({ example: '+237690000000' })
   @IsOptional()
-  @Matches(/^[0-9]+$/)
+  @Matches(/^\+?[0-9]+$/)
   phone_number?: string;
 
   @ApiProperty({ example: 'strong-password-123' })

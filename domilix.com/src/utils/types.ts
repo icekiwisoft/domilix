@@ -59,7 +59,9 @@ export interface Ad {
   // Location fields
   address?: string;
   city?: string;
+  state?: string;
   country?: string;
+  zip?: string;
   postal_code?: string;
   // Position fields (available when unlocked)
   latitude?: number;
@@ -70,8 +72,14 @@ export interface Ad {
   toilet?: number;
   mainroom?: number;
   kitchen?: number;
+  size?: number;
   garden?: number;
   gate?: number;
+  wifi?: boolean;
+  air_conditioning?: boolean;
+  security_24h?: boolean;
+  smart_tv?: boolean;
+  equipped_kitchen?: boolean;
   garage?: number;
   pool?: number;
   furnitured?: number;
@@ -159,7 +167,13 @@ export interface AdCreationRequest {
   ad_type: string;
   bedroom: number;
   mainroom: number;
+  size: number;
   medias: File[];
+  wifi: number;
+  air_conditioning: number;
+  security_24h: number;
+  smart_tv: number;
+  equipped_kitchen: number;
   gate: number;
   pool: number;
   garage: number;

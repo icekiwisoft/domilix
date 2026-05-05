@@ -1,3 +1,4 @@
+import { CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
 import { AdsModule } from './ads/ads.module';
 import { AddressesModule } from './addresses/addresses.module';
@@ -17,6 +18,11 @@ import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
+    CacheModule.register({
+      isGlobal: true,
+      ttl: 60_000,
+      max: 500,
+    }),
     PrismaModule,
     AuthModule,
     BroadcastsModule,

@@ -8,6 +8,7 @@ import {
 import { User } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import crypto from 'node:crypto';
+import nodemailer from 'nodemailer';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuthTokenService } from './auth-token.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
@@ -81,6 +82,36 @@ export class AuthService {
     }));
   }
 
+  private async sendResetPasswordEmail(email: string, code: string) {
+    const host = process.env.MAIL_HOST;
+    if (!host) {
+      if (process.env.NODE_ENV === 'production') {
+        throw new BadRequestException('Configuration email manquante.');
+      }
+      return;
+    }
+
+    const transporter = nodemailer.createTransport({
+      host,
+      port: Number(process.env.MAIL_PORT || 587),
+      secure: process.env.MAIL_SECURE === 'true',
+      auth: process.env.MAIL_USERNAME
+        ? {
+            user: process.env.MAIL_USERNAME,
+            pass: process.env.MAIL_PASSWORD,
+          }
+        : undefined,
+    });
+
+    await transporter.sendMail({
+      from: `"${process.env.MAIL_FROM_NAME || 'Domilix'}" <${process.env.MAIL_FROM_ADDRESS || 'noreply@domilix.com'}>`,
+      to: email,
+      subject: 'Code de reinitialisation de votre mot de passe Domilix',
+      text: `Votre code de reinitialisation Domilix est : ${code}`,
+      html: `<p>Votre code de reinitialisation Domilix est :</p><p><strong>${code}</strong></p>`,
+    });
+  }
+
   async register(dto: RegisterDto) {
     if (!dto.email && !dto.phone_number) {
       throw new BadRequestException('Email ou numero de telephone requis.');
@@ -108,14 +139,14 @@ export class AuthService {
         phoneNumber: dto.phone_number || crypto.randomUUID().replace(/-/g, '').slice(0, 12),
         password,
         phoneVerified: false,
-        emailVerified: false,
+        emailVerified: !!dto.email,
       },
     });
 
     const code = this.verificationCodes.generate(`verification_code_${user.id}`);
     const message = dto.phone_number
       ? 'Un SMS de verification a ete envoye.'
-      : 'Un email de verification a ete envoye.';
+      : 'Compte cree avec succes.';
 
     const response = await this.authResponse(user, message);
     return {
@@ -296,6 +327,8 @@ export class AuthService {
     }
 
     const code = this.verificationCodes.generate(`verification_code_${user.id}`);
+    await this.sendResetPasswordEmail(user.email, code);
+
     return {
       message: 'Un code de verification a ete envoye a votre email.',
       verification_code: process.env.NODE_ENV !== 'production' ? code : undefined,

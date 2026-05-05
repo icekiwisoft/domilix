@@ -1,8 +1,8 @@
 import Cover from '@assets/bg_img/cover_annonceur.jpg';
 import Domilix from '@assets/domilix_icon.png';
+import AnnouncerAdCard from '@components/AnnouncerAdCard/AnnouncerAdCard';
 import Footer2 from '@components/Footer2/Footer2';
 import Nav2 from '@components/Nav2/Nav2';
-import ProductCard from '@components/ProductCard/ProductCard';
 import { Listbox, Transition } from '@headlessui/react';
 import { Fragment, useState, useEffect } from 'react';
 import { HiCheck, HiChevronUpDown, HiMagnifyingGlass } from 'react-icons/hi2';
@@ -12,6 +12,8 @@ import { getAdsByAnnouncer } from '@services/announceApi';
 import { getAnnouncer } from '@services/announcerApi';
 import { mediaUrl } from '@utils/mediaUrl';
 import { Ad, type Announcer } from '@utils/types';
+
+import { useAuth } from '../../hooks/useAuth';
 
 const sortOptions = [
   { name: 'Plus récent' },
@@ -33,9 +35,11 @@ export default function Announcer() {
   const [ads, setAds] = useState<Ad[]>([]);
   const [announcer, setAnnouncer] = useState<Announcer | null>(null);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState(
     urlSearchParam.get('search') || ''
   );
+  const canManageAds = Boolean(id && user?.announcer === id);
 
 
 
@@ -293,7 +297,19 @@ export default function Announcer() {
               ) : ads.length > 0 ? (
                 <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5'>
                   {ads.map(ad => (
-                    <ProductCard key={ad.id} {...ad} />
+                    <AnnouncerAdCard
+                      key={ad.id}
+                      ad={ad}
+                      canManage={canManageAds}
+                      onDeleted={deletedId =>
+                        setAds(current => current.filter(item => item.id !== deletedId))
+                      }
+                      onUpdated={updatedAd =>
+                        setAds(current =>
+                          current.map(item => (item.id === updatedAd.id ? updatedAd : item))
+                        )
+                      }
+                    />
                   ))}
                 </div>
               ) : (

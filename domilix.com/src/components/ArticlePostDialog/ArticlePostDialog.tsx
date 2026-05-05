@@ -42,7 +42,13 @@ export default function ArticlePostDialog({
     mainroom: 0,
     toilet: 0,
     kitchen: 0,
+    size: 0,
     medias: [] as File[],
+    wifi: false,
+    air_conditioning: false,
+    security_24h: false,
+    smart_tv: false,
+    equipped_kitchen: false,
     gate: false,
     pool: false,
     garage: false,
@@ -236,6 +242,12 @@ export default function ArticlePostDialog({
     data.append('mainroom', formData.mainroom.toString());
     data.append('toilet', formData.toilet.toString());
     data.append('kitchen', formData.kitchen.toString());
+    data.append('size', formData.size.toString());
+    data.append('wifi', formData.wifi ? '1' : '0');
+    data.append('air_conditioning', formData.air_conditioning ? '1' : '0');
+    data.append('security_24h', formData.security_24h ? '1' : '0');
+    data.append('smart_tv', formData.smart_tv ? '1' : '0');
+    data.append('equipped_kitchen', formData.equipped_kitchen ? '1' : '0');
     data.append('gate', formData.gate ? '1' : '0');
     data.append('pool', formData.pool ? '1' : '0');
     data.append('garage', formData.garage ? '1' : '0');
@@ -690,14 +702,148 @@ export default function ArticlePostDialog({
               </div>
             </div>
 
+            <div className='grid grid-cols-2 gap-4'>
+              <div className='space-y-1.5'>
+                <label className='block text-sm font-medium text-gray-700'>
+                  Taille (m²)
+                </label>
+                <input
+                  type='number'
+                  name='size'
+                  value={formData.size}
+                  onChange={handleChange}
+                  className='w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-0 transition-all duration-200 text-sm'
+                  placeholder='Surface'
+                />
+              </div>
+              <label
+                className={`flex items-center p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
+                  formData.furnitured
+                    ? 'border-orange-500 bg-orange-50'
+                    : 'border-gray-200 hover:border-orange-200'
+                }`}
+              >
+                <input
+                  type='checkbox'
+                  name='furnitured'
+                  checked={formData.furnitured}
+                  onChange={handleChange}
+                  className='peer sr-only'
+                />
+                <span className={`font-medium ${formData.furnitured ? 'text-orange-700' : 'text-gray-700'}`}>
+                  Bien meublé
+                </span>
+                <span className='ml-auto flex h-6 w-6 items-center justify-center rounded-lg border-2 border-gray-200 bg-white transition-all peer-checked:border-orange-500 peer-checked:bg-orange-500'>
+                  <svg className='h-4 w-4 scale-0 text-white transition-transform peer-checked:scale-100' viewBox='0 0 20 20' fill='none' aria-hidden='true'>
+                    <path d='M5 10.5 8.2 14 15 6' stroke='currentColor' strokeWidth='2.4' strokeLinecap='round' strokeLinejoin='round' />
+                  </svg>
+                </span>
+              </label>
+            </div>
+
             {/* Commodités */}
             <div className='space-y-2'>
               <h3 className='text-sm font-medium text-gray-700'>Commodités</h3>
               <div className='grid grid-cols-2 gap-3'>
                 {[
                   {
+                    key: 'wifi',
+                    label: 'WiFi inclus',
+                    icon: (
+                      <svg
+                        className='w-5 h-5 text-gray-500'
+                        fill='none'
+                        viewBox='0 0 24 24'
+                        stroke='currentColor'
+                      >
+                        <path
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                          strokeWidth={2}
+                          d='M8.111 16.404a5 5 0 017.778 0M12 20h.01M4.93 12.465a10 10 0 0114.14 0M1.394 8.929a15 15 0 0121.213 0'
+                        />
+                      </svg>
+                    ),
+                  },
+                  {
+                    key: 'air_conditioning',
+                    label: 'Climatisation',
+                    icon: (
+                      <svg
+                        className='w-5 h-5 text-gray-500'
+                        fill='none'
+                        viewBox='0 0 24 24'
+                        stroke='currentColor'
+                      >
+                        <path
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                          strokeWidth={2}
+                          d='M12 3v18m6.364-15.364L5.636 18.364m12.728 0L5.636 5.636M4 12h16'
+                        />
+                      </svg>
+                    ),
+                  },
+                  {
+                    key: 'security_24h',
+                    label: 'Sécurité 24h/24',
+                    icon: (
+                      <svg
+                        className='w-5 h-5 text-gray-500'
+                        fill='none'
+                        viewBox='0 0 24 24'
+                        stroke='currentColor'
+                      >
+                        <path
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                          strokeWidth={2}
+                          d='M9 12l2 2 4-4m5-4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6l8-3 8 3z'
+                        />
+                      </svg>
+                    ),
+                  },
+                  {
+                    key: 'equipped_kitchen',
+                    label: 'Cuisine équipée',
+                    icon: (
+                      <svg
+                        className='w-5 h-5 text-gray-500'
+                        fill='none'
+                        viewBox='0 0 24 24'
+                        stroke='currentColor'
+                      >
+                        <path
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                          strokeWidth={2}
+                          d='M4 3v18m4-18v7a4 4 0 01-4 4m10-11v18m5-18v18'
+                        />
+                      </svg>
+                    ),
+                  },
+                  {
+                    key: 'smart_tv',
+                    label: 'Smart TV',
+                    icon: (
+                      <svg
+                        className='w-5 h-5 text-gray-500'
+                        fill='none'
+                        viewBox='0 0 24 24'
+                        stroke='currentColor'
+                      >
+                        <path
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                          strokeWidth={2}
+                          d='M7 21h10M4 5h16v11H4z'
+                        />
+                      </svg>
+                    ),
+                  },
+                  {
                     key: 'gate',
-                    label: 'Portail',
+                    label: 'Portail sécurisé',
                     icon: (
                       <svg
                         className='w-5 h-5 text-gray-500'
@@ -752,25 +898,6 @@ export default function ArticlePostDialog({
                       </svg>
                     ),
                   },
-                  {
-                    key: 'furnitured',
-                    label: 'Meublé',
-                    icon: (
-                      <svg
-                        className='w-5 h-5 text-gray-500'
-                        fill='none'
-                        viewBox='0 0 24 24'
-                        stroke='currentColor'
-                      >
-                        <path
-                          strokeLinecap='round'
-                          strokeLinejoin='round'
-                          strokeWidth={2}
-                          d='M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4'
-                        />
-                      </svg>
-                    ),
-                  },
                 ].map(amenity => (
                   <label
                     key={amenity.key}
@@ -789,8 +916,13 @@ export default function ArticlePostDialog({
                         ] as boolean
                       }
                       onChange={handleChange}
-                      className='hidden'
+                      className='peer sr-only'
                     />
+                    <span className='mr-3 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border-2 border-gray-200 bg-white transition-all peer-checked:border-orange-500 peer-checked:bg-orange-500'>
+                      <svg className='h-4 w-4 scale-0 text-white transition-transform peer-checked:scale-100' viewBox='0 0 20 20' fill='none' aria-hidden='true'>
+                        <path d='M5 10.5 8.2 14 15 6' stroke='currentColor' strokeWidth='2.4' strokeLinecap='round' strokeLinejoin='round' />
+                      </svg>
+                    </span>
                     <span
                       className={`mr-3 transition-colors duration-200 ${
                         formData[amenity.key as keyof typeof formData]

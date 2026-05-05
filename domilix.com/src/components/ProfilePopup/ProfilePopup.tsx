@@ -111,7 +111,7 @@ const ProfilePopup = React.forwardRef<HTMLDivElement, ProfilePopupProps>(
             onClick={event => navigateTo(subscriptionsHref, event)}
             className={itemClassName}
           >
-            Mes Abonnements
+            Mes Packs
           </button>
 
           <button type='button' onClick={onOpenSettings} className={itemClassName}>

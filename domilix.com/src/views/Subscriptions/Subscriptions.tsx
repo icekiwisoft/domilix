@@ -1,4 +1,3 @@
-import Validity from '@assets/img/4336711 1.png';
 import ChoiseMode from '@components/Cards/Paiement/ChoiseMode';
 import Footer2 from '@components/Footer2/Footer2';
 import Nav2 from '@components/Nav2/Nav2';
@@ -13,8 +12,6 @@ const options = [
   "Voir les informations de base d'une annonce.",
   'Partagez les annonces avec vos contacts.',
 ];
-
-const validitySrc = typeof Validity === 'string' ? Validity : Validity.src;
 
 const PricingCard: React.FC<PricingProps> = ({
   title,
@@ -38,13 +35,25 @@ const PricingCard: React.FC<PricingProps> = ({
       }`}
   >
     {isActive && (
-      <motion.div
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        className='absolute -top-3 -right-3 bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-semibold shadow-lg'
-      >
-        -12%
-      </motion.div>
+      <>
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className='absolute -top-5 left-1/2 -translate-x-1/2 rounded-full bg-white px-4 py-2 text-xs font-black uppercase tracking-wider text-indigo-950 shadow-xl ring-1 ring-orange-200'
+        >
+          Plus populaire
+        </motion.div>
+        <motion.div
+          initial={{ scale: 0, rotate: -8 }}
+          animate={{ scale: 1, rotate: 0 }}
+          className='absolute -top-4 -right-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-400 to-orange-600 text-white shadow-2xl ring-4 ring-white/20'
+        >
+          <div className='text-center leading-none'>
+            <div className='text-lg font-black'>-12%</div>
+            <div className='mt-0.5 text-[9px] font-bold uppercase tracking-wide'>promo</div>
+          </div>
+        </motion.div>
+      </>
     )}
 
     <h2 className='text-2xl font-bold mb-6'>{title}</h2>
@@ -56,7 +65,34 @@ const PricingCard: React.FC<PricingProps> = ({
       </div>
 
       <div className='flex items-center gap-3'>
-        <img className='w-6 h-6' src={validitySrc} alt='Validity' />
+        <svg
+          className={`w-6 h-6 flex-shrink-0 ${isActive ? 'text-orange-400' : 'text-orange-500'}`}
+          viewBox='0 0 24 24'
+          fill='none'
+          aria-hidden='true'
+        >
+          <rect
+            x='4'
+            y='5'
+            width='16'
+            height='15'
+            rx='4'
+            className={isActive ? 'fill-white/10' : 'fill-orange-50'}
+          />
+          <path
+            d='M8 3v4M16 3v4M4 9h16'
+            stroke='currentColor'
+            strokeWidth='1.8'
+            strokeLinecap='round'
+          />
+          <path
+            d='M9 14.5l2 2 4-5'
+            stroke='currentColor'
+            strokeWidth='2'
+            strokeLinecap='round'
+            strokeLinejoin='round'
+          />
+        </svg>
         <span className='text-lg'>{validity}</span>
       </div>
     </div>

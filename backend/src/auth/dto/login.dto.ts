@@ -9,7 +9,7 @@ export class LoginDto {
 
   @ApiPropertyOptional({ example: '+237698555511' })
   @IsOptional()
-  @Matches(/^[0-9]+$/)
+  @Matches(/^\+?[0-9]+$/)
   phone_number?: string;
 
   @ApiPropertyOptional({ example: 'domilix2024' })

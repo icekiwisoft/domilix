@@ -230,6 +230,19 @@ export default function NotificationPopup({
             </div>
           )}
         </div>
+
+        <div className='border-t bg-white p-3'>
+          <button
+            type='button'
+            onClick={() => {
+              onClose();
+              navigate('/notifications');
+            }}
+            className='w-full rounded-lg bg-orange-50 px-4 py-2.5 text-sm font-semibold text-orange-600 transition-colors hover:bg-orange-100 hover:text-orange-700'
+          >
+            Voir plus
+          </button>
+        </div>
       </motion.div>
     </AnimatePresence>
   );

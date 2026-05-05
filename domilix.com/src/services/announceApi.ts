@@ -33,6 +33,18 @@ export const getAd = async (id: number): Promise<Ad> => {
   return response.data;
 };
 
+export const updateAd = async (
+  id: number,
+  data: Record<string, string | number | boolean | null | undefined>
+): Promise<Ad> => {
+  const response = await api.put(`announces/${id}`, data);
+  return response.data;
+};
+
+export const deleteAd = async (id: number): Promise<void> => {
+  await api.delete(`announces/${id}`);
+};
+
 //get paginated ads for an announcer
 export const getAdsByAnnouncer = async (
   id: string,

@@ -1,0 +1,6 @@
+ALTER TABLE `real_estates`
+  ADD COLUMN `wifi` BOOLEAN NOT NULL DEFAULT false,
+  ADD COLUMN `air_conditioning` BOOLEAN NOT NULL DEFAULT false,
+  ADD COLUMN `security_24h` BOOLEAN NOT NULL DEFAULT false,
+  ADD COLUMN `smart_tv` BOOLEAN NOT NULL DEFAULT false,
+  ADD COLUMN `equipped_kitchen` BOOLEAN NOT NULL DEFAULT false;

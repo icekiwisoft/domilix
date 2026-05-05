@@ -13,7 +13,21 @@ async function bootstrap() {
     credentials: true,
   });
 
-  app.use('/storage', express.static(path.join(process.cwd(), 'storage')));
+  app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
+    const publicCacheRoutes = ['/categories', '/cities', '/broadcasts'];
+    if (req.method === 'GET' && publicCacheRoutes.some(route => req.path.startsWith(route))) {
+      res.setHeader('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
+    }
+    next();
+  });
+
+  app.use(
+    '/storage',
+    express.static(path.join(process.cwd(), 'storage'), {
+      immutable: true,
+      maxAge: '30d',
+    }),
+  );
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Domilix Backend API')

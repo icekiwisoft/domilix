@@ -3,7 +3,6 @@
 import Logo from '@assets/domilix.png';
 import { signinDialogActions } from '@stores/defineStore';
 import { useAuth } from '../../hooks/useAuth';
-import ProfileDialog from '../ProfileDialog/ProfileDialog';
 import ProfilePopup from '../ProfilePopup/ProfilePopup';
 import NotificationPopup from '../NotificationPopup/NotificationPopup';
 import ArticlePostDialog from '@components/ArticlePostDialog/ArticlePostDialog';
@@ -34,7 +33,6 @@ export default function Nav2({
   const [click, setClick] = useState(false);
   const { user, isAuthenticated, logout } = useAuth();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const [showProfileDialog, setShowProfileDialog] = useState(false);
   const [showPostDialog, setShowPostDialog] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -191,7 +189,7 @@ export default function Nav2({
 
             <button
               onClick={() => {
-                setShowProfileDialog(true);
+                navigate('/settings');
                 setClick(false);
               }}
               className='w-full text-left py-4 px-4 hover:bg-gray-50 rounded-xl transition-colors text-base sm:text-lg text-gray-700'
@@ -344,9 +342,9 @@ export default function Nav2({
                     dashboardHref='/dashboard'
                     announcerHref={user?.announcer ? `/announcers/${user.announcer}` : undefined}
                     favoritesHref='/favorite'
-                    subscriptionsHref='/subscriptions'
+                    subscriptionsHref='/settings?tab=packs'
                     onOpenSettings={() => {
-                      setShowProfileDialog(true);
+                      navigate('/settings');
                       setShowProfileMenu(false);
                     }}
                     onLogout={() => {
@@ -434,9 +432,9 @@ export default function Nav2({
                     dashboardHref='/dashboard'
                     announcerHref={user?.announcer ? `/announcers/${user.announcer}` : undefined}
                     favoritesHref='/favorite'
-                    subscriptionsHref='/subscriptions'
+                    subscriptionsHref='/settings?tab=packs'
                     onOpenSettings={() => {
-                      setShowProfileDialog(true);
+                      navigate('/settings');
                       setShowProfileMenu(false);
                     }}
                     onLogout={() => {
@@ -463,11 +461,6 @@ export default function Nav2({
         </div>
       </div>
       {click && content}
-
-      <ProfileDialog
-        isOpen={showProfileDialog}
-        onClose={() => setShowProfileDialog(false)}
-      />
 
       {showPostDialog && (
         <ArticlePostDialog toggleDialog={() => setShowPostDialog(false)} />

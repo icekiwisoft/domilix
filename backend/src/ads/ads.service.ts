@@ -126,17 +126,46 @@ export class AdsService {
     if (query.amenities?.length) {
       for (const amenity of query.amenities) {
         if (amenity === 'gate') where.gate = true;
+        if (amenity === 'wifi') where.wifi = true;
+        if (amenity === 'air_conditioning') where.airConditioning = true;
+        if (amenity === 'security_24h') where.security24h = true;
+        if (amenity === 'smart_tv') where.smartTv = true;
+        if (amenity === 'equipped_kitchen') where.equippedKitchen = true;
         if (amenity === 'pool') where.pool = true;
         if (amenity === 'garage') where.garage = true;
         if (amenity === 'furnitured') where.furnished = true;
       }
     }
 
-    const realEstates = await this.prisma.realEstate.findMany({ where, select: { id: true, gate: true, pool: true, garage: true, furnished: true } });
+    const realEstates = await this.prisma.realEstate.findMany({
+      where,
+      select: {
+        id: true,
+        gate: true,
+        wifi: true,
+        airConditioning: true,
+        security24h: true,
+        smartTv: true,
+        equippedKitchen: true,
+        pool: true,
+        garage: true,
+        furnished: true,
+      },
+    });
 
     const filtered = realEstates.filter((entry) => {
       if (!query.standing) return true;
-      const count = [entry.gate, entry.pool, entry.garage, entry.furnished].filter(Boolean).length;
+      const count = [
+        entry.gate,
+        entry.wifi,
+        entry.airConditioning,
+        entry.security24h,
+        entry.smartTv,
+        entry.equippedKitchen,
+        entry.pool,
+        entry.garage,
+        entry.furnished,
+      ].filter(Boolean).length;
       if (query.standing === 'standard') return count <= 1;
       if (query.standing === 'confort') return count >= 2 && count <= 3;
       if (query.standing === 'haut_standing') return count === 4;
@@ -453,8 +482,14 @@ export class AdsService {
         toilet: realEstate ? toNumber(realEstate.toilet) : 0,
         kitchen: realEstate ? toNumber(realEstate.kitchen) : 0,
         mainroom: realEstate ? toNumber(realEstate.mainroom) : 0,
+        size: realEstate ? toNumber(realEstate.size) : null,
         garden: realEstate ? boolFromUnknown(realEstate.garden) : false,
         gate: realEstate ? boolFromUnknown(realEstate.gate) : false,
+        wifi: realEstate ? boolFromUnknown(realEstate.wifi) : false,
+        air_conditioning: realEstate ? boolFromUnknown(realEstate.airConditioning) : false,
+        security_24h: realEstate ? boolFromUnknown(realEstate.security24h) : false,
+        smart_tv: realEstate ? boolFromUnknown(realEstate.smartTv) : false,
+        equipped_kitchen: realEstate ? boolFromUnknown(realEstate.equippedKitchen) : false,
         pool: realEstate ? boolFromUnknown(realEstate.pool) : false,
         caution: realEstate ? toNumber(realEstate.caution) : null,
       });
@@ -625,7 +660,13 @@ export class AdsService {
           mainroom: Number(body.mainroom || 0),
           toilet: Number(body.toilet || 0),
           kitchen: Number(body.kitchen || 0),
+          size: body.size ? Number(body.size) : null,
           gate: ['1', 'true', true].includes(body.gate),
+          wifi: ['1', 'true', true].includes(body.wifi),
+          airConditioning: ['1', 'true', true].includes(body.air_conditioning),
+          security24h: ['1', 'true', true].includes(body.security_24h),
+          smartTv: ['1', 'true', true].includes(body.smart_tv),
+          equippedKitchen: ['1', 'true', true].includes(body.equipped_kitchen),
           pool: ['1', 'true', true].includes(body.pool),
           garage: ['1', 'true', true].includes(body.garage),
           furnished: ['1', 'true', true].includes(body.furnitured),
@@ -732,7 +773,21 @@ export class AdsService {
           ...(body.kitchen !== undefined ? { kitchen: Number(body.kitchen) } : {}),
           ...(body.bedroom !== undefined ? { bedroom: Number(body.bedroom) } : {}),
           ...(body.mainroom !== undefined ? { mainroom: Number(body.mainroom) } : {}),
+          ...(body.size !== undefined ? { size: body.size ? Number(body.size) : null } : {}),
           ...(body.gate !== undefined ? { gate: ['1', 'true', true].includes(body.gate) } : {}),
+          ...(body.wifi !== undefined ? { wifi: ['1', 'true', true].includes(body.wifi) } : {}),
+          ...(body.air_conditioning !== undefined
+            ? { airConditioning: ['1', 'true', true].includes(body.air_conditioning) }
+            : {}),
+          ...(body.security_24h !== undefined
+            ? { security24h: ['1', 'true', true].includes(body.security_24h) }
+            : {}),
+          ...(body.smart_tv !== undefined
+            ? { smartTv: ['1', 'true', true].includes(body.smart_tv) }
+            : {}),
+          ...(body.equipped_kitchen !== undefined
+            ? { equippedKitchen: ['1', 'true', true].includes(body.equipped_kitchen) }
+            : {}),
           ...(body.pool !== undefined ? { pool: ['1', 'true', true].includes(body.pool) } : {}),
           ...(body.garage !== undefined ? { garage: ['1', 'true', true].includes(body.garage) } : {}),
           ...(body.furnitured !== undefined

@@ -192,23 +192,29 @@ model Ad {
 }
 
 model RealEstate {
-  id        BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
-  deletedAt DateTime? @map("deleted_at") @db.Timestamp(0)
-  toilet    Int       @default(0) @db.UnsignedInt
-  kitchen   Int       @default(0) @db.UnsignedInt
-  bedroom   Int       @default(0) @db.UnsignedInt
-  mainroom  Int       @default(0) @db.UnsignedInt
-  gate      Boolean   @default(false)
-  furnished Boolean   @default(false)
-  pool      Boolean   @default(false)
-  garden    Boolean   @default(false)
-  garage    Boolean   @default(false)
-  lng       Float?
-  lat       Float?
-  caution   Float?
-  standing  RealEstatesStanding    @default(standart)
-  createdAt DateTime?  @default(now()) @map("created_at") @db.Timestamp(0)
-  updatedAt DateTime?  @default(now()) @map("updated_at") @db.Timestamp(0)
+  id               BigInt              @id @default(autoincrement()) @db.UnsignedBigInt
+  deletedAt        DateTime?           @map("deleted_at") @db.Timestamp(0)
+  toilet           Int                 @default(0) @db.UnsignedInt
+  kitchen          Int                 @default(0) @db.UnsignedInt
+  bedroom          Int                 @default(0) @db.UnsignedInt
+  mainroom         Int                 @default(0) @db.UnsignedInt
+  size             Float?
+  gate             Boolean             @default(false)
+  wifi             Boolean             @default(false)
+  airConditioning  Boolean             @default(false) @map("air_conditioning")
+  security24h      Boolean             @default(false) @map("security_24h")
+  smartTv          Boolean             @default(false) @map("smart_tv")
+  equippedKitchen  Boolean             @default(false) @map("equipped_kitchen")
+  furnished        Boolean             @default(false)
+  pool             Boolean             @default(false)
+  garden           Boolean             @default(false)
+  garage           Boolean             @default(false)
+  lng              Float?
+  lat              Float?
+  caution          Float?
+  standing         RealEstatesStanding @default(standart)
+  createdAt        DateTime?           @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt        DateTime?           @default(now()) @map("updated_at") @db.Timestamp(0)
 
   @@map("real_estates")
 }

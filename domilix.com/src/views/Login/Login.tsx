@@ -53,14 +53,19 @@ export default function Login(): React.ReactNode {
           </div>
 
           <div className='flex items-center justify-between'>
-            <label className='flex items-center'>
+            <label className='group flex cursor-pointer items-center gap-2'>
               <input
                 type='checkbox'
                 checked={rememberMe}
                 onChange={() => setRememberMe(!rememberMe)}
-                className='w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-200'
+                className='peer sr-only'
               />
-              <span className='ml-2 text-sm text-gray-600'>Se souvenir de moi</span>
+              <span className='flex h-5 w-5 items-center justify-center rounded-md border-2 border-gray-300 bg-white transition-all peer-checked:border-orange-500 peer-checked:bg-orange-500 peer-focus-visible:ring-4 peer-focus-visible:ring-orange-100 group-hover:border-orange-300'>
+                <svg className='h-3.5 w-3.5 scale-0 text-white transition-transform peer-checked:scale-100' viewBox='0 0 20 20' fill='none' aria-hidden='true'>
+                  <path d='M5 10.5 8.2 14 15 6' stroke='currentColor' strokeWidth='2.4' strokeLinecap='round' strokeLinejoin='round' />
+                </svg>
+              </span>
+              <span className='text-sm text-gray-600'>Se souvenir de moi</span>
             </label>
             <a
               href='/forgot-password'

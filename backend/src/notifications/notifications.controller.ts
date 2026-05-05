@@ -52,18 +52,18 @@ export class NotificationsController {
     return this.notificationsService.markAllAsRead(user.id);
   }
 
+  @Delete('read/all')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete all read notifications' })
+  deleteAllRead(@CurrentUser() user: any) {
+    return this.notificationsService.deleteAllRead(user.id);
+  }
+
   @Delete(':id')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete a notification' })
   @ApiParam({ name: 'id', example: '1' })
   destroy(@CurrentUser() user: any, @Param('id') id: string) {
     return this.notificationsService.destroy(user.id, id);
-  }
-
-  @Delete('read/all')
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Delete all read notifications' })
-  deleteAllRead(@CurrentUser() user: any) {
-    return this.notificationsService.deleteAllRead(user.id);
   }
 }

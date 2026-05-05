@@ -43,7 +43,7 @@ export default function Favorite() {
   }, [loadFavoriteAds]);
 
   return (
-    <>
+    <div className='min-h-screen bg-white flex flex-col'>
       <Nav2 />
       <div className='bg-white fixed top-16 z-30 flex px-2  xl:px-10 lg:px-10 md:px-4 py-3 w-full '>
         <div className=' font-bold text-2xl '>Favoris</div>
@@ -85,7 +85,7 @@ export default function Favorite() {
       <section
         className={
           ' ' +
-          'grid 2xl:gap-5  mt-32 py-4  2xl:px-10 xl:px-6 gap-y-4 gap-x-4 2xl:grid-cols-4 lg:grid-cols-3 grid-cols-1  sm:grid-cols-2 md:grid-cols-3 px-2 md:px-4 '
+          'grid 2xl:gap-5 mt-32 py-4 2xl:px-10 xl:px-6 gap-y-4 gap-x-4 2xl:grid-cols-4 lg:grid-cols-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 px-2 md:px-4 flex-1 content-start '
         }
       >
         {!isAuthenticated ? (
@@ -124,6 +124,6 @@ export default function Favorite() {
         )}
       </section>
       <Footer2 />
-    </>
+    </div>
   );
 }

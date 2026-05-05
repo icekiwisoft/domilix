@@ -9,7 +9,7 @@ export interface LoginCredentials {
 export interface RegisterData {
   name: string;
   email?: string;
-  phone_number: string;
+  phone_number?: string;
   password: string;
 }
 
@@ -21,6 +21,18 @@ export interface AuthResponse {
     token: string;
     type: string;
   };
+}
+
+export interface ResetEmailResponse {
+  message: string;
+  verification_code?: string;
+}
+
+export interface ResetPasswordData {
+  email: string;
+  code: string;
+  password: string;
+  password_confirmation: string;
 }
 
 export interface User {
@@ -42,6 +54,18 @@ export const authApi = {
 
   register: async (data: RegisterData): Promise<AuthResponse> => {
     const response = await api.post('/auth/register', data);
+    return response.data;
+  },
+
+  sendResetEmail: async (email: string): Promise<ResetEmailResponse> => {
+    const response = await api.post('/auth/sendEmail', { email });
+    return response.data;
+  },
+
+  resetPassword: async (
+    data: ResetPasswordData
+  ): Promise<{ message: string }> => {
+    const response = await api.post('/auth/resetPassword', data);
     return response.data;
   },
 

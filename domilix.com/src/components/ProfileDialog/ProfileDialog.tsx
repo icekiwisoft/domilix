@@ -17,12 +17,19 @@ import {
 interface ProfileDialogProps {
   isOpen: boolean;
   onClose: () => void;
+  variant?: 'modal' | 'page';
+  initialTab?: TabType;
 }
 
 type TabType = 'profile' | 'security' | 'announcer' | 'subscriptions';
 
-export default function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
-  const [activeTab, setActiveTab] = useState<TabType>('profile');
+export default function ProfileDialog({
+  isOpen,
+  onClose,
+  variant = 'modal',
+  initialTab = 'profile',
+}: ProfileDialogProps) {
+  const [activeTab, setActiveTab] = useState<TabType>(initialTab);
   const [loading, setLoading] = useState(false);
   const { user, refreshProfile } = useAuth();
 
@@ -47,16 +54,20 @@ export default function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
   });
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
-  // Subscriptions state
+  // Packs state
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [subscriptionsLoading, setSubscriptionsLoading] = useState(false);
 
-  // Load subscriptions when tab is active
+  // Load packs when tab is active
   useEffect(() => {
     if (activeTab === 'subscriptions' && isOpen) {
       loadSubscriptions();
     }
   }, [activeTab, isOpen]);
+
+  useEffect(() => {
+    setActiveTab(initialTab);
+  }, [initialTab]);
 
   const loadSubscriptions = async () => {
     setSubscriptionsLoading(true);
@@ -64,7 +75,7 @@ export default function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
       const subscriptions = await subscriptionApi.getUserSubscriptions();
       setSubscriptions(subscriptions);
     } catch (error) {
-      console.error('Erreur lors du chargement des abonnements:', error);
+      console.error('Erreur lors du chargement des packs:', error);
       setSubscriptions([]);
     } finally {
       setSubscriptionsLoading(false);
@@ -84,28 +95,28 @@ export default function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
   };
 
   const handleCancelSubscription = async (id: number) => {
-    if (!confirm('Êtes-vous sûr de vouloir annuler cet abonnement ?')) return;
+    if (!confirm('Êtes-vous sûr de vouloir annuler ce pack ?')) return;
 
     try {
       await subscriptionApi.cancelSubscription(id);
       await loadSubscriptions();
-      alert('Abonnement annulé avec succès');
+      alert('Pack annulé avec succès');
     } catch (error) {
-      alert("Erreur lors de l'annulation de l'abonnement");
+      alert("Erreur lors de l'annulation du pack");
     }
   };
 
   const handleRenewSubscription = async (id: number) => {
-    // Pour le renouvellement, on redirige vers la page des abonnements
+    // Pour le renouvellement, on redirige vers la page des packs
     try {
       onClose();
       window.location.href = '/subscriptions';
     } catch (error) {
-      alert("Erreur lors du renouvellement de l'abonnement");
+      alert('Erreur lors du renouvellement du pack');
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen && variant === 'modal') return null;
 
   const handleUpdateProfile = async () => {
     setLoading(true);
@@ -186,7 +197,7 @@ export default function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
     { id: 'profile' as TabType, name: 'Profil' },
     { id: 'security' as TabType, name: 'Sécurité' },
     { id: 'announcer' as TabType, name: 'Annonceur' },
-    { id: 'subscriptions' as TabType, name: 'Mes abonnements' },
+    { id: 'subscriptions' as TabType, name: 'Mes packs' },
   ];
 
   const renderTabContent = () => {
@@ -485,13 +496,17 @@ export default function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
         );
 
       case 'subscriptions':
+        const usableCredits = subscriptions
+          .filter(subscription => new Date(subscription.expires_at) > new Date())
+          .reduce((sum, subscription) => sum + subscription.credits, 0);
+
         return (
           <div className='space-y-6'>
-            {/* Subscriptions List */}
+            {/* Packs List */}
             <div>
               <div className='flex items-center justify-between mb-4'>
                 <h3 className='text-lg font-medium text-gray-900'>
-                  Mes abonnements
+                  Mes packs
                 </h3>
                 <button
                   onClick={loadSubscriptions}
@@ -502,11 +517,33 @@ export default function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
                 </button>
               </div>
 
+              {!subscriptionsLoading && usableCredits <= 0 && (
+                <div className='mb-5 rounded-2xl border border-orange-200 bg-orange-50 p-4'>
+                  <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
+                    <div>
+                      <h4 className='font-black text-orange-900'>Aucun crédit utilisable</h4>
+                      <p className='mt-1 text-sm text-orange-800'>
+                        Vos packs sont expirés ou ne contiennent plus de crédits. Achetez un nouveau pack pour continuer à débloquer des annonces.
+                      </p>
+                    </div>
+                    <button
+                      type='button'
+                      onClick={() => {
+                        window.location.href = '/subscriptions';
+                      }}
+                      className='shrink-0 rounded-xl bg-orange-500 px-4 py-2 text-sm font-black text-white shadow-sm hover:bg-orange-600'
+                    >
+                      Acheter un pack
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {subscriptionsLoading ? (
                 <div className='text-center py-8'>
                   <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600 mx-auto'></div>
                   <p className='text-gray-600 mt-2'>
-                    Chargement des abonnements...
+                    Chargement des packs...
                   </p>
                 </div>
               ) : subscriptions.length === 0 ? (
@@ -515,10 +552,10 @@ export default function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
                     <DocumentTextIcon className='w-8 h-8 text-gray-400' />
                   </div>
                   <h4 className='text-lg font-medium text-gray-900 mb-2'>
-                    Aucun abonnement
+                    Aucun pack
                   </h4>
                   <p className='text-gray-600 mb-4'>
-                    Vous n'avez pas encore d'abonnement actif.
+                    Vous n'avez pas encore de pack actif.
                   </p>
                   <button
                     onClick={onClose}
@@ -635,47 +672,109 @@ export default function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
     }
   };
 
-  return (
-    <div className='fixed inset-0 z-50 overflow-y-auto'>
-      <div className='flex min-h-screen items-center justify-center p-4'>
-        <div
-          className='fixed inset-0 bg-black/50 backdrop-blur-sm'
-          onClick={onClose}
-        ></div>
-
-        <div className='relative bg-white rounded-xl shadow-xl w-full max-w-xl h-[600px] flex flex-col overflow-hidden'>
-          {/* Header */}
-          <div className='flex items-center justify-between p-6 border-b border-gray-200 flex-shrink-0'>
-            <div className='flex items-center gap-3'>
-              <div className='w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white font-semibold'>
+  const settingsPanel = (
+    <div
+      className={
+        variant === 'page'
+          ? 'grid w-full grid-cols-1 gap-6 lg:grid-cols-[280px_minmax(0,1fr)]'
+          : 'relative flex h-[760px] max-h-[92vh] w-full max-w-4xl overflow-hidden rounded-[2rem] bg-white shadow-2xl ring-1 ring-white/20'
+      }
+    >
+      <aside
+        className={
+          variant === 'page'
+            ? 'rounded-3xl border border-gray-200 bg-white p-5 text-gray-900 shadow-sm lg:sticky lg:top-24 lg:h-fit'
+            : 'hidden w-64 flex-col bg-gradient-to-br from-slate-950 via-slate-900 to-orange-950 p-6 text-white md:flex'
+        }
+      >
+            <div className='mb-8'>
+              <div
+                className={
+                  variant === 'page'
+                    ? 'mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-orange-100 text-xl font-black text-orange-600'
+                    : 'mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 text-2xl font-black shadow-inner ring-1 ring-white/10'
+                }
+              >
                 {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
               </div>
-              <div>
-                <h2 className='text-lg font-semibold text-gray-900'>
-                  {user?.name || 'Utilisateur'}
-                </h2>
-                <p className='text-sm text-gray-600'>{user?.email}</p>
-              </div>
+              <h2 className='text-lg font-black'>{user?.name || 'Utilisateur'}</h2>
+              <p className={variant === 'page' ? 'mt-1 break-all text-sm text-gray-500' : 'mt-1 break-all text-sm text-white/60'}>{user?.email}</p>
             </div>
-            <button
-              onClick={onClose}
-              className='p-2 hover:bg-gray-100 rounded-lg transition-colors'
-            >
-              <XMarkIcon className='w-5 h-5 text-gray-400' />
-            </button>
-          </div>
 
-          {/* Horizontal Tabs */}
-          <div className='border-b border-gray-200 flex-shrink-0'>
-            <nav className='flex space-x-8 px-6'>
+            <nav className='space-y-2'>
               {tabs.map(tab => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  className={
+                    variant === 'page'
+                      ? `w-full rounded-xl px-4 py-3 text-left text-sm font-bold transition-all ${
+                          activeTab === tab.id
+                            ? 'bg-orange-500 text-white shadow-sm'
+                            : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                        }`
+                      : `w-full rounded-2xl px-4 py-3 text-left text-sm font-bold transition-all ${
+                          activeTab === tab.id
+                            ? 'bg-white text-slate-950 shadow-xl'
+                            : 'text-white/70 hover:bg-white/10 hover:text-white'
+                        }`
+                  }
+                >
+                  {tab.name}
+                </button>
+              ))}
+            </nav>
+
+            <div className={variant === 'page' ? 'mt-6 rounded-2xl bg-gray-50 p-4 text-gray-600' : 'mt-auto rounded-2xl bg-white/10 p-4 ring-1 ring-white/10'}>
+              <p className={variant === 'page' ? 'text-xs font-bold uppercase tracking-widest text-orange-600' : 'text-xs font-bold uppercase tracking-widest text-orange-200'}>Domilix</p>
+              <p className={variant === 'page' ? 'mt-1 text-sm text-gray-500' : 'mt-1 text-sm text-white/70'}>Gérez votre profil, vos accès et vos packs.</p>
+            </div>
+          </aside>
+
+          <section
+            className={
+              variant === 'page'
+                ? 'min-w-0 overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm'
+                : 'flex min-w-0 flex-1 flex-col'
+            }
+          >
+          {/* Header */}
+          <div className='flex flex-shrink-0 items-center justify-between border-b border-gray-100 bg-white/95 p-5 sm:p-6'>
+            <div className='flex items-center gap-3'>
+              <div className='flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-400 to-orange-600 text-lg font-black text-white shadow-lg shadow-orange-500/20 md:hidden'>
+                {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+              </div>
+              <div>
+                <h2 className='text-xl font-black text-gray-900'>
+                  Paramètres
+                </h2>
+                <p className='text-sm text-gray-500'>
+                  {user?.name || 'Utilisateur'}{user?.email ? ` · ${user.email}` : ''}
+                </p>
+              </div>
+            </div>
+            {variant === 'modal' && (
+              <button
+                onClick={onClose}
+                className='rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-900'
+                aria-label='Fermer'
+              >
+                <XMarkIcon className='h-5 w-5' />
+              </button>
+            )}
+          </div>
+
+          {/* Horizontal Tabs */}
+          <div className='flex-shrink-0 border-b border-gray-100 bg-gray-50/80 lg:hidden'>
+            <nav className='flex gap-2 overflow-x-auto px-4 py-3'>
+              {tabs.map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-bold transition-colors ${
                     activeTab === tab.id
-                      ? 'border-orange-500 text-orange-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20'
+                      : 'bg-white text-gray-500 hover:text-gray-900'
                   }`}
                 >
                   {tab.name}
@@ -685,10 +784,31 @@ export default function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
           </div>
 
           {/* Content */}
-          <div className='p-6 overflow-y-auto flex-1'>
+          <div className={variant === 'page' ? 'bg-white p-5 sm:p-8' : 'flex-1 overflow-y-auto bg-gradient-to-br from-white to-gray-50 p-5 sm:p-6'}>
             {renderTabContent()}
           </div>
+          </section>
         </div>
+  );
+
+  if (variant === 'page') {
+    return (
+      <div className='mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8'>
+        {settingsPanel}
+      </div>
+    );
+  }
+
+  return (
+    <div className='fixed inset-0 z-50 overflow-y-auto bg-slate-950/60 backdrop-blur-md'>
+      <div className='flex min-h-screen items-center justify-center p-4'>
+        <button
+          type='button'
+          className='fixed inset-0 cursor-default'
+          onClick={onClose}
+          aria-label='Fermer les paramètres'
+        />
+        {settingsPanel}
       </div>
     </div>
   );

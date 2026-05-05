@@ -14,9 +14,13 @@ export interface Notification {
 
 export const notificationApi = {
   // Get all notifications
-  getNotifications: async (unreadOnly = false): Promise<Notification[]> => {
+  getNotifications: async (
+    unreadOnly = false,
+    page = 1,
+    perPage = 20
+  ): Promise<Notification[]> => {
     const response = await api.get('/notifications', {
-      params: { unread_only: unreadOnly },
+      params: { unread_only: unreadOnly, page, per_page: perPage },
     });
     return response.data.data;
   },

@@ -28,25 +28,25 @@ export interface CreateSubscriptionRequest {
 }
 
 export const subscriptionApi = {
-  // Récupérer les abonnements de l'utilisateur connecté
+  // Récupérer les packs de l'utilisateur connecté
   getUserSubscriptions: async (): Promise<Subscription[]> => {
     const response = await api.get('/subscriptions');
     return response.data;
   },
 
-  // Récupérer un abonnement spécifique
+  // Récupérer un pack spécifique
   getSubscription: async (id: number): Promise<Subscription> => {
     const response = await api.get(`/subscriptions/${id}`);
     return response.data;
   },
 
-  // Créer un nouvel abonnement (souscrire à un plan)
+  // Créer un nouveau pack
   createSubscription: async (data: CreateSubscriptionRequest): Promise<any> => {
     const response = await api.post('/subscriptions', data);
     return response.data;
   },
 
-  // Annuler un abonnement (soft delete)
+  // Annuler un pack (soft delete)
   cancelSubscription: async (id: number): Promise<{ message: string }> => {
     const response = await api.delete(`/subscriptions/${id}`);
     return response.data;
@@ -76,7 +76,7 @@ export const subscriptionApi = {
     }
   },
 
-  // Calculer les statistiques d'utilisation basées sur les abonnements
+  // Calculer les statistiques d'utilisation basées sur les packs
   getUsageStats: async (): Promise<{
     total_credits: number;
     used_credits: number;
@@ -126,7 +126,7 @@ export const subscriptionApi = {
     return stats.remaining_credits > 0;
   },
 
-  // Obtenir le statut d'un abonnement
+  // Obtenir le statut d'un pack
   getSubscriptionStatus: (
     subscription: Subscription
   ): 'active' | 'expired' | 'low_credits' => {

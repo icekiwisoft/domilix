@@ -234,6 +234,11 @@ export default function Search(): React.ReactElement {
             </h3>
             <div className='grid grid-cols-1 gap-2'>
               {[
+                { key: 'wifi', name: 'WiFi inclus' },
+                { key: 'air_conditioning', name: 'Climatisation' },
+                { key: 'security_24h', name: 'Sécurité 24h/24' },
+                { key: 'equipped_kitchen', name: 'Cuisine équipée' },
+                { key: 'smart_tv', name: 'Smart TV' },
                 { key: 'gate', name: 'Portail' },
                 { key: 'pool', name: 'Piscine' },
                 { key: 'garage', name: 'Garage' },
