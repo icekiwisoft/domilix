@@ -190,14 +190,12 @@ export default function Ads(): React.ReactElement {
                   {({ checked }) => (
                     <>
                       <span
-                        className={`flex h-4 w-4 items-center justify-center rounded-full border ${
-                          checked ? 'border-orange-500' : 'border-gray-300'
-                        }`}
+                        className={`flex h-4 w-4 items-center justify-center rounded-full border ${checked ? 'border-orange-500' : 'border-gray-300'
+                          }`}
                       >
                         <span
-                          className={`h-2 w-2 rounded-full ${
-                            checked ? 'bg-orange-500' : 'bg-transparent'
-                          }`}
+                          className={`h-2 w-2 rounded-full ${checked ? 'bg-orange-500' : 'bg-transparent'
+                            }`}
                         />
                       </span>
                       <span className='text-sm text-gray-700'>{type.name}</span>
@@ -264,14 +262,12 @@ export default function Ads(): React.ReactElement {
                   {({ checked }) => (
                     <>
                       <span
-                        className={`flex h-4 w-4 items-center justify-center rounded-full border ${
-                          checked ? 'border-orange-500' : 'border-gray-300'
-                        }`}
+                        className={`flex h-4 w-4 items-center justify-center rounded-full border ${checked ? 'border-orange-500' : 'border-gray-300'
+                          }`}
                       >
                         <span
-                          className={`h-2 w-2 rounded-full ${
-                            checked ? 'bg-orange-500' : 'bg-transparent'
-                          }`}
+                          className={`h-2 w-2 rounded-full ${checked ? 'bg-orange-500' : 'bg-transparent'
+                            }`}
                         />
                       </span>
                       <span className='text-sm text-gray-700'>
@@ -834,8 +830,8 @@ export default function Ads(): React.ReactElement {
                     style={
                       slide.image
                         ? {
-                            backgroundImage: `linear-gradient(120deg, rgba(17,24,39,0.78), rgba(17,24,39,0.38)), url(${slide.image})`,
-                          }
+                          backgroundImage: `linear-gradient(120deg, rgba(17,24,39,0.78), rgba(17,24,39,0.38)), url(${slide.image})`,
+                        }
                         : undefined
                     }
                   >
