@@ -100,7 +100,7 @@ export default function EmailVerificationBanner() {
             Vérifiez votre email pour sécuriser votre compte Domilix.
           </p>
           {message && <p className='font-semibold text-green-700'>{message}</p>}
-          {error && <p className='font-semibold text-red-700'>{error}</p>}
+          {/* {error && <p className='font-semibold text-red-700'> Erreur lors de l'envoie du code </p>} */}
 
           <div className='flex flex-wrap items-center justify-center gap-2'>
             {isOpen && (
