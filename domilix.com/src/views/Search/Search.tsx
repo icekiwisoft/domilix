@@ -747,7 +747,7 @@ export default function Search(): React.ReactElement {
       <div className='min-h-screen'>
         {(isLoading || ads.length > 0) && (
           <div className='mt-8 px-5 text-center md:mt-40 sm:px-8 lg:px-12'>
-            <h2 className='text-2xl font-semibold leading-tight text-gray-900 sm:text-3xl lg:text-4xl'>
+            <h2 className='text-2xl font-black leading-tight text-gray-900 sm:text-3xl lg:text-4xl'>
               Resultats pour{' '}
               <span className='relative inline-block pb-3 font-black uppercase text-orange-500'>
                 {searchLabel}
