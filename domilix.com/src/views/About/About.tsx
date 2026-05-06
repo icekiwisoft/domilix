@@ -2,10 +2,6 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import {
-  HiEnvelope,
-  HiHomeModern,
-} from 'react-icons/hi2';
 import Nav2 from '@components/Nav2/Nav2';
 import Footer2 from '@components/Footer2/Footer2';
 import { Link } from '@router';
@@ -189,22 +185,19 @@ export default function About(): React.ReactElement {
             className='overflow-hidden rounded-[2rem] bg-[#0d3556] text-white shadow-2xl'
           >
             <div className='grid lg:grid-cols-[1.08fr_1fr]'>
-              <div className='flex flex-col justify-center px-8 py-10 sm:px-12 lg:px-14 lg:py-16'>
-                <p className='mb-6 text-xs font-black uppercase tracking-[0.45em] text-orange-300 sm:text-sm'>
+              <div className='flex flex-col justify-center px-8 py-8 sm:px-10 lg:px-12 lg:py-9'>
+                <p className='mb-4 text-xs font-black uppercase tracking-[0.45em] text-orange-300 sm:text-sm'>
                   Confiance au quotidien
                 </p>
-                <h2 className='max-w-2xl text-4xl font-black leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl'>
+                <h2 className='max-w-2xl text-3xl font-black leading-[1.08] tracking-tight sm:text-4xl lg:text-[2.65rem]'>
                   Trouver un logement devient simple, clair et rassurant
                 </h2>
-                <div className='mt-8 space-y-5 text-lg font-semibold leading-8 text-white/90 sm:text-xl'>
+                <div className='mt-5 text-base font-semibold leading-7 text-white/90 sm:text-lg'>
                   <p>
-                    Domilix relie des personnes réelles à des biens réels. Chaque recherche s'inscrit dans une expérience fluide, transparente et facile à suivre.
-                  </p>
-                  <p>
-                    Pour le locataire comme pour l'annonceur, la plateforme aide à avancer avec plus de confiance, du premier coup d'oeil jusqu'au contact.
+                    Domilix facilite la recherche avec des annonces claires, des contacts utiles et une expérience simple du premier clic jusqu'au contact.
                   </p>
                 </div>
-                <div className='mt-9 flex flex-wrap gap-4'>
+                <div className='mt-7 flex flex-wrap gap-4'>
                   <Link
                     to='/houses'
                     className='rounded-full bg-orange-500 px-6 py-3 text-sm font-black text-white shadow-lg shadow-orange-950/20 transition hover:bg-orange-600'
@@ -220,7 +213,7 @@ export default function About(): React.ReactElement {
                 </div>
               </div>
 
-              <div className='grid min-h-[420px] grid-rows-[1.15fr_1fr] border-t border-white/10 lg:border-l lg:border-t-0'>
+              <div className='grid h-60 grid-rows-[1fr_0.8fr] border-t border-white/10 sm:h-72 lg:h-auto lg:self-stretch lg:border-l lg:border-t-0'>
                 <div className='relative overflow-hidden'>
                   <img
                     src='https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=900'
@@ -252,64 +245,69 @@ export default function About(): React.ReactElement {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className='relative mt-10 overflow-hidden rounded-[2rem] border border-orange-100 bg-gradient-to-br from-orange-50 via-white to-slate-50 p-8 shadow-xl shadow-orange-100/50 sm:p-10 lg:p-12'
+            className='relative mt-10 w-full overflow-hidden rounded-[2rem] bg-[#a91632] px-6 py-10 text-center shadow-xl shadow-red-950/20 sm:rounded-[2.5rem] sm:px-10 sm:py-12 lg:px-16'
           >
-            <div className='absolute -right-16 -top-16 h-56 w-56 rounded-full bg-orange-200/40 blur-3xl' />
-            <div className='absolute -bottom-20 left-10 h-56 w-56 rounded-full bg-slate-200/60 blur-3xl' />
+            <svg
+              className='pointer-events-none absolute left-7 top-4 h-32 w-32 text-white/10 sm:h-44 sm:w-44'
+              viewBox='0 0 180 180'
+              fill='none'
+              aria-hidden='true'
+            >
+              <path d='M156 13c-53 0-80 27-80 80 0 39-20 59-59 59' stroke='currentColor' strokeWidth='1.2' />
+              <path d='M163 24c-48 0-72 24-72 72 0 33-17 50-50 50' stroke='currentColor' strokeWidth='1.2' />
+              <path d='M170 35c-43 0-64 21-64 64 0 27-14 41-41 41' stroke='currentColor' strokeWidth='1.2' />
+            </svg>
+            <svg
+              className='pointer-events-none absolute -right-4 bottom-5 h-32 w-32 rotate-180 text-white/10 sm:h-44 sm:w-44'
+              viewBox='0 0 180 180'
+              fill='none'
+              aria-hidden='true'
+            >
+              <path d='M156 13c-53 0-80 27-80 80 0 39-20 59-59 59' stroke='currentColor' strokeWidth='1.2' />
+              <path d='M163 24c-48 0-72 24-72 72 0 33-17 50-50 50' stroke='currentColor' strokeWidth='1.2' />
+              <path d='M170 35c-43 0-64 21-64 64 0 27-14 41-41 41' stroke='currentColor' strokeWidth='1.2' />
+            </svg>
 
-            <div className='relative grid gap-8 lg:grid-cols-[1fr_0.85fr] lg:items-center'>
-              <div>
-                <div className='mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-orange-500 text-white shadow-lg shadow-orange-200'>
-                  <HiEnvelope className='h-7 w-7' />
+            <div className='relative mx-auto max-w-2xl'>
+              <h2 className='text-2xl font-black leading-tight text-white/70 sm:text-4xl'>
+                Rejoignez notre newsletter
+                <br />
+                Pour rester informe
+              </h2>
+
+              <form onSubmit={handleNewsletterSubmit} className='mx-auto mt-7 max-w-xl'>
+                <div className='flex rounded-full bg-white/75 p-1.5 shadow-inner backdrop-blur'>
+                  <input
+                    type='email'
+                    value={newsletterEmail}
+                    onChange={event => setNewsletterEmail(event.target.value)}
+                    className='min-w-0 flex-1 rounded-full bg-transparent px-4 text-sm font-semibold text-gray-700 outline-none placeholder:text-gray-500 sm:px-6'
+                    placeholder='Entrez votre email'
+                    required
+                  />
+                  <button
+                    type='submit'
+                    disabled={newsletterLoading}
+                    className='shrink-0 rounded-full bg-[#a91632] px-5 py-2.5 text-xs font-black text-white transition hover:bg-[#8f1029] disabled:bg-gray-400 sm:px-7'
+                  >
+                    {newsletterLoading ? 'Envoi...' : "S'inscrire"}
+                  </button>
                 </div>
-                <p className='text-xs font-black uppercase tracking-[0.35em] text-orange-500'>
-                  Newsletter
-                </p>
-                <h2 className='mt-3 max-w-2xl text-3xl font-black tracking-tight text-gray-950 sm:text-4xl lg:text-5xl'>
-                  Recevez les meilleures opportunites Domilix avant tout le monde
-                </h2>
-                <p className='mt-5 max-w-2xl text-lg leading-8 text-gray-600'>
-                  Nouveaux logements, meubles interessants, conseils pratiques et actualites de la plateforme directement dans votre boite mail.
-                </p>
-              </div>
-
-              <form onSubmit={handleNewsletterSubmit} className='rounded-3xl border border-white bg-white/80 p-5 shadow-lg shadow-slate-200/60 backdrop-blur'>
-                <label className='block text-sm font-bold text-gray-700'>
-                  Votre adresse email
-                  <div className='mt-3 flex flex-col gap-3 sm:flex-row'>
-                    <input
-                      type='email'
-                      value={newsletterEmail}
-                      onChange={event => setNewsletterEmail(event.target.value)}
-                      className='min-w-0 flex-1 rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 outline-none transition focus:border-orange-500 focus:ring-4 focus:ring-orange-100'
-                      placeholder='john@example.com'
-                      required
-                    />
-                    <button
-                      type='submit'
-                      disabled={newsletterLoading}
-                      className='rounded-2xl bg-orange-500 px-6 py-3 text-sm font-black text-white transition hover:bg-orange-600 disabled:bg-gray-400'
-                    >
-                      {newsletterLoading ? 'Envoi...' : "S'inscrire"}
-                    </button>
-                  </div>
-                </label>
 
                 {newsletterMessage && (
-                  <p className='mt-4 rounded-xl bg-green-50 px-4 py-3 text-sm font-semibold text-green-700'>
+                  <p className='mt-4 rounded-xl bg-white/90 px-4 py-3 text-sm font-semibold text-green-700'>
                     {newsletterMessage}
                   </p>
                 )}
                 {newsletterError && (
-                  <p className='mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700'>
+                  <p className='mt-4 rounded-xl bg-white/90 px-4 py-3 text-sm font-semibold text-red-700'>
                     {newsletterError}
                   </p>
                 )}
 
-                <div className='mt-5 flex items-center gap-3 text-sm font-semibold text-gray-500'>
-                  <HiHomeModern className='h-5 w-5 text-orange-500' />
-                  <span>Immobilier, mobilier et conseils utiles. Pas de spam.</span>
-                </div>
+                <p className='mx-auto mt-5 max-w-md text-xs font-medium leading-5 text-white/55'>
+                  Votre confidentialite compte. Nous protegeons vos informations pour une experience securisee.
+                </p>
               </form>
             </div>
           </motion.section>

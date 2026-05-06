@@ -11,7 +11,7 @@ import { notificationApi } from '../../services/notificationApi';
 import React, { useState, useEffect, useRef } from 'react';
 import { HiBars3, HiXMark } from 'react-icons/hi2';
 import { HiOutlineBell } from 'react-icons/hi';
-import { MdOutlineCampaign } from 'react-icons/md';
+import { MdCheck, MdOutlineCampaign, MdOutlineInventory2 } from 'react-icons/md';
 import { NavLink, useNavigate } from '@router';
 
 const defaultLinks = [
@@ -43,7 +43,6 @@ export default function Nav2({
   const notificationButtonRef = useRef<HTMLButtonElement>(null);
   const navigate = useNavigate();
 
-  console.log('user  is', user);
   const handleClick = () => setClick(!click);
 
   const userCredits = 0; // TODO: Add credits to User interface when available
@@ -77,158 +76,117 @@ export default function Nav2({
   };
 
   const content = (
-    <div className='lg:hidden text-black bg-white min-h-screen absolute z-40 top-16 w-full left-0 right-0 transition-all duration-300 ease-in-out shadow-lg'>
-      <div className='px-4 sm:px-6 py-6 max-w-7xl mx-auto'>
-        {/* Section utilisateur connecté */}
-        {isAuthenticated && user && (
-          <div className='mb-6 pb-6 border-b border-gray-200'>
-            <div className='flex items-center gap-3 sm:gap-4 mb-4'>
-              <div className='w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gray-200 flex items-center justify-center'>
-                <span className='text-lg sm:text-xl font-semibold'>
-                  {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
-                </span>
-              </div>
-              <div className='flex-1 min-w-0'>
-                <p className='font-semibold text-gray-900 text-base sm:text-lg truncate'>
-                  {user.name || 'Utilisateur'}
-                </p>
-                <p className='text-sm sm:text-base text-gray-600 truncate'>
-                  {user.email}
-                </p>
-              </div>
-            </div>
-
-            {/* Crédits */}
-            <div className='flex items-center justify-center gap-2 bg-orange-50 rounded-xl p-4'>
-              <img
-                src='/dom.png'
-                alt='coin'
-                className='w-6 h-6 sm:w-7 sm:h-7'
-              />
-              <span className='font-bold text-orange-700 text-base sm:text-lg'>
-                {userCredits} Domicoins
-              </span>
-            </div>
-
-            <button
-              onClick={() => {
-                handlePublishClick();
-                setClick(false);
-              }}
-              className='mt-4 w-full rounded-xl border border-orange-400 bg-white px-4 py-3 text-sm font-semibold text-orange-600 shadow-sm transition-colors hover:bg-orange-50 sm:text-base'
-            >
-              Publier une annonce
-            </button>
-          </div>
-        )}
-
-        {/* Navigation principale */}
-        <ul className='space-y-1 mb-6'>
+    <div className='absolute left-0 right-0 top-16 z-40 bg-white text-[#00549f] shadow-2xl lg:hidden'>
+      <div className='px-8 py-8'>
+        <div className='space-y-7 text-[1.28rem] font-black leading-tight'>
           {links.map(link => (
-            <li key={link.name}>
-                <NavLink
-                  to={link.url}
-                  className={({ isActive }) =>
-                    highlightBuyLink && link.name === 'Acheter'
-                      ? `block py-4 px-4 rounded-xl border border-pink-500 bg-pink-500 shadow-sm transition-all text-base sm:text-lg font-bold text-white ${
-                        isActive
-                          ? 'ring-2 ring-pink-200'
-                          : 'hover:bg-pink-600 hover:border-pink-600 hover:shadow'
-                      }`
-                    : `block py-4 px-4 rounded-xl transition-colors text-base sm:text-lg ${
-                        isActive
-                          ? 'bg-gray-100 text-black font-bold border-l-4 border-black'
-                          : 'hover:bg-gray-50 text-gray-700'
-                      }`
-                }
-                onClick={() => setClick(false)}
-              >
-                {link.name}
-              </NavLink>
-            </li>
-          ))}
-        </ul>
-
-        {/* Menu utilisateur connecté */}
-        {isAuthenticated && user && (
-          <div className='space-y-1 mb-6 pb-6 border-b border-gray-200'>
             <NavLink
-              to='/favorite'
+              key={link.name}
+              to={link.url}
               className={({ isActive }) =>
-                `block py-4 px-4 rounded-xl transition-colors text-base sm:text-lg ${
-                  isActive
-                    ? 'bg-gray-100 text-black font-bold border-l-4 border-black'
-                    : 'hover:bg-gray-50 text-gray-700'
+                `flex items-center gap-4 text-left transition-colors ${
+                  isActive ? 'text-orange-500' : 'text-[#00549f] hover:text-orange-500'
                 }`
               }
               onClick={() => setClick(false)}
             >
-              Mes Favoris
+              <MdOutlineInventory2 className='h-5 w-5 shrink-0' />
+              {link.name}
             </NavLink>
+          ))}
 
-            {user.announcer && (
-              <NavLink
-                to={`/announcers/${user.announcer}`}
-                className={({ isActive }) =>
-                  `block py-4 px-4 rounded-xl transition-colors text-base sm:text-lg ${
-                    isActive
-                      ? 'bg-gray-100 text-black font-bold border-l-4 border-black'
-                      : 'hover:bg-gray-50 text-gray-700'
-                  }`
-                }
-                onClick={() => setClick(false)}
-              >
-                Mon Compte Annonceur
-              </NavLink>
-            )}
-
-            {user.is_admin && (
-              <NavLink
-                to='/dashboard'
-                className={({ isActive }) =>
-                  `block py-4 px-4 rounded-xl transition-colors text-base sm:text-lg ${
-                    isActive
-                      ? 'bg-gray-100 text-black font-bold border-l-4 border-black'
-                      : 'hover:bg-gray-50 text-gray-700'
-                  }`
-                }
-                onClick={() => setClick(false)}
-              >
-                Dashboard
-              </NavLink>
-            )}
-
+          {isAuthenticated && (
             <button
+              type='button'
               onClick={() => {
-                navigate('/settings');
+                handlePublishClick();
                 setClick(false);
               }}
-              className='w-full text-left py-4 px-4 hover:bg-gray-50 rounded-xl transition-colors text-base sm:text-lg text-gray-700'
+              className='flex items-center gap-4 text-left text-[#00549f] transition-colors hover:text-orange-500'
             >
-              Paramètres
+              <MdCheck className='h-5 w-5 shrink-0' />
+              Publier une annonce
             </button>
-          </div>
-        )}
+          )}
 
-        {/* Bouton de connexion/déconnexion */}
-        <div className='pt-4'>
-          {!isAuthenticated ? (
+          {isAuthenticated && user && (
+            <>
+              <div className='h-px bg-blue-100' />
+
+              <NavLink
+                to='/favorite'
+                className={({ isActive }) =>
+                  `block transition-colors ${
+                    isActive ? 'text-orange-500' : 'text-[#00549f] hover:text-orange-500'
+                  }`
+                }
+                onClick={() => setClick(false)}
+              >
+                Mes Favoris
+              </NavLink>
+
+              {user.announcer && (
+                <NavLink
+                  to={`/announcers/${user.announcer}`}
+                  className={({ isActive }) =>
+                    `block transition-colors ${
+                      isActive ? 'text-orange-500' : 'text-[#00549f] hover:text-orange-500'
+                    }`
+                  }
+                  onClick={() => setClick(false)}
+                >
+                  Mon Compte Annonceur
+                </NavLink>
+              )}
+
+              {user.is_admin && (
+                <NavLink
+                  to='/dashboard'
+                  className={({ isActive }) =>
+                    `block transition-colors ${
+                      isActive ? 'text-orange-500' : 'text-[#00549f] hover:text-orange-500'
+                    }`
+                  }
+                  onClick={() => setClick(false)}
+                >
+                  Dashboard
+                </NavLink>
+              )}
+
               <button
+                type='button'
                 onClick={() => {
-                  signinDialogActions.toggle();
+                  navigate('/settings');
                   setClick(false);
                 }}
-                className='w-full rounded-xl border border-orange-400 bg-white px-6 py-4 text-base font-semibold text-orange-600 shadow-sm transition-colors hover:bg-orange-50 sm:text-lg'
+                className='block text-left text-[#00549f] transition-colors hover:text-orange-500'
               >
-                Se connecter
+                Paramètres
               </button>
+            </>
+          )}
+        </div>
+
+        <div className='mt-8 border-t border-blue-100 pt-6'>
+          {!isAuthenticated ? (
+            <button
+              type='button'
+              onClick={() => {
+                signinDialogActions.toggle();
+                setClick(false);
+              }}
+              className='w-full rounded-2xl border border-orange-400 bg-white px-6 py-4 text-base font-black text-orange-600 shadow-sm transition-colors hover:bg-orange-50'
+            >
+              Se connecter
+            </button>
           ) : (
             <button
+              type='button'
               onClick={() => {
                 logout();
                 setClick(false);
               }}
-              className='w-full text-red-500 hover:bg-red-50 font-semibold py-4 px-6 rounded-xl transition-colors border border-red-200 text-base sm:text-lg'
+              className='w-full rounded-2xl border border-red-200 px-6 py-4 text-base font-black text-red-500 transition-colors hover:bg-red-50'
             >
               Se déconnecter
             </button>
@@ -293,8 +251,8 @@ export default function Nav2({
               <NavLink
                 to='/subscriptions'
                 className={({ isActive }) =>
-                  `flex items-center gap-1.5 px-2 py-1 rounded-lg transition-colors ${
-                    isActive ? 'bg-yellow-50' : 'hover:bg-gray-100'
+                  `flex items-center gap-1.5 transition-colors ${
+                    isActive ? 'text-yellow-900' : 'hover:opacity-80'
                   }`
                 }
               >
@@ -383,8 +341,8 @@ export default function Nav2({
               <NavLink
                 to='/subscriptions'
                 className={({ isActive }) =>
-                  `inline-flex items-center gap-1 px-2 py-1 rounded-lg transition-colors ${
-                    isActive ? 'bg-yellow-50' : 'hover:bg-gray-100'
+                  `inline-flex items-center gap-1 transition-colors ${
+                    isActive ? 'text-yellow-900' : 'hover:opacity-80'
                   }`
                 }
               >
