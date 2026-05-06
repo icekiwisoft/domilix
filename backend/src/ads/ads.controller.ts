@@ -12,6 +12,7 @@ import { diskStorage } from 'multer';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
+import { ALLOWED_MEDIA_MIME_PATTERN, MAX_AD_MEDIAS } from '../common/media/thumbnails';
 
 const adUploadDir = path.join(process.cwd(), 'storage', 'medias');
 fs.mkdirSync(adUploadDir, { recursive: true });
@@ -110,13 +111,24 @@ export class AdsController {
     },
   })
   @UseInterceptors(
-    FilesInterceptor('medias[]', 5, {
+    FilesInterceptor('medias[]', MAX_AD_MEDIAS, {
       storage: diskStorage({
         destination: adUploadDir,
         filename: (_req, file, callback) => {
           callback(null, `${Date.now()}---${crypto.randomUUID()}${path.extname(file.originalname)}`);
         },
       }),
+      fileFilter: (_req, file, callback) => {
+        callback(
+          ALLOWED_MEDIA_MIME_PATTERN.test(file.mimetype)
+            ? null
+            : new Error('Only image and video medias are allowed.'),
+          ALLOWED_MEDIA_MIME_PATTERN.test(file.mimetype),
+        );
+      },
+      limits: {
+        fileSize: 50 * 1024 * 1024,
+      },
     }),
   )
   create(@CurrentUser() user: any, @Body() body: any, @UploadedFiles() files: any[] = []) {

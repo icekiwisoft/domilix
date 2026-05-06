@@ -5,6 +5,7 @@ import { signinDialogActions } from '@stores/defineStore';
 import { useAuth } from '../../hooks/useAuth';
 import ProfilePopup from '../ProfilePopup/ProfilePopup';
 import NotificationPopup from '../NotificationPopup/NotificationPopup';
+import AnnouncerRequiredModal from '@components/AnnouncerRequiredModal/AnnouncerRequiredModal';
 import ArticlePostDialog from '@components/ArticlePostDialog/ArticlePostDialog';
 import { notificationApi } from '../../services/notificationApi';
 import React, { useState, useEffect, useRef } from 'react';
@@ -34,6 +35,7 @@ export default function Nav2({
   const { user, isAuthenticated, logout } = useAuth();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showPostDialog, setShowPostDialog] = useState(false);
+  const [showAnnouncerRequiredModal, setShowAnnouncerRequiredModal] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const profileMenuRef = useRef<HTMLDivElement>(null);
@@ -45,6 +47,15 @@ export default function Nav2({
   const handleClick = () => setClick(!click);
 
   const userCredits = 0; // TODO: Add credits to User interface when available
+
+  const handlePublishClick = () => {
+    if (!user?.announcer) {
+      setShowAnnouncerRequiredModal(true);
+      return;
+    }
+
+    setShowPostDialog(true);
+  };
 
   // Load unread notifications count
   useEffect(() => {
@@ -101,7 +112,7 @@ export default function Nav2({
 
             <button
               onClick={() => {
-                setShowPostDialog(true);
+                handlePublishClick();
                 setClick(false);
               }}
               className='mt-4 w-full rounded-xl border border-orange-400 bg-white px-4 py-3 text-sm font-semibold text-orange-600 shadow-sm transition-colors hover:bg-orange-50 sm:text-base'
@@ -271,7 +282,7 @@ export default function Nav2({
           ) : (
             <div className='flex items-center space-x-3 xl:space-x-4'>
               <button
-                onClick={() => setShowPostDialog(true)}
+                onClick={handlePublishClick}
                 className='inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-orange-400 bg-white px-3 py-2 text-sm font-semibold text-orange-600 shadow-sm transition-colors hover:bg-orange-50 xl:px-4'
                 aria-label='Publier une annonce'
               >
@@ -362,7 +373,7 @@ export default function Nav2({
           {isAuthenticated && (
             <>
               <button
-                onClick={() => setShowPostDialog(true)}
+                onClick={handlePublishClick}
                 className='inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-orange-400 bg-white text-orange-600 shadow-sm transition-colors hover:bg-orange-50'
                 aria-label='Publier une annonce'
               >
@@ -464,6 +475,11 @@ export default function Nav2({
 
       {showPostDialog && (
         <ArticlePostDialog toggleDialog={() => setShowPostDialog(false)} />
+      )}
+      {showAnnouncerRequiredModal && (
+        <AnnouncerRequiredModal
+          onClose={() => setShowAnnouncerRequiredModal(false)}
+        />
       )}
     </nav>
   );

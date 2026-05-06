@@ -14,6 +14,8 @@ interface SelectData {
   name: string;
 }
 
+const MAX_ANNOUNCE_MEDIAS = 10;
+
 // Component principal pour créer une annonce avec un dialogue
 export default function ArticlePostDialog({
   toggleDialog,
@@ -33,6 +35,7 @@ export default function ArticlePostDialog({
     null
   ); // Devise par défaut
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [mediaError, setMediaError] = useState('');
 
   const [formData, setFormData] = useState({
     category_id: '',
@@ -200,12 +203,13 @@ export default function ArticlePostDialog({
     });
   };
 
-  // Fonction pour supprimer une image
+  // Fonction pour supprimer un media
   const removeImage = (index: number) => {
     setFormData(prev => ({
       ...prev,
       medias: prev.medias.filter((_, i) => i !== index),
     }));
+    setMediaError('');
   };
 
   // Gestion des changements de formulaire (entrées texte et cases à cocher)
@@ -221,16 +225,45 @@ export default function ArticlePostDialog({
     }
   };
 
-  // Gestion du changement d'image avec upload multiple
+  // Gestion du changement de medias avec upload multiple
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    setFormData(prev => ({ ...prev, medias: [...prev.medias, ...files] }));
+    const selectedFiles = Array.from(e.target.files || []);
+    const allowedFiles = selectedFiles.filter(file =>
+      file.type.startsWith('image/') || file.type.startsWith('video/')
+    );
+
+    if (allowedFiles.length !== selectedFiles.length) {
+      setMediaError('Seules les images et les vidéos sont acceptées.');
+    } else {
+      setMediaError('');
+    }
+
+    setFormData(prev => {
+      const availableSlots = MAX_ANNOUNCE_MEDIAS - prev.medias.length;
+      if (availableSlots <= 0) {
+        setMediaError(`Vous pouvez ajouter ${MAX_ANNOUNCE_MEDIAS} médias maximum.`);
+        return prev;
+      }
+
+      const nextFiles = allowedFiles.slice(0, availableSlots);
+      if (allowedFiles.length > availableSlots) {
+        setMediaError(`Vous pouvez ajouter ${MAX_ANNOUNCE_MEDIAS} médias maximum.`);
+      }
+
+      return { ...prev, medias: [...prev.medias, ...nextFiles] };
+    });
+
+    e.target.value = '';
   };
 
   // Soumission du formulaire
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (isSubmitting) return;
+    if (formData.medias.length > MAX_ANNOUNCE_MEDIAS) {
+      setMediaError(`Vous pouvez ajouter ${MAX_ANNOUNCE_MEDIAS} médias maximum.`);
+      return;
+    }
 
     // Créez une instance de FormData
     const data = new FormData();
@@ -1046,12 +1079,13 @@ export default function ArticlePostDialog({
             {/* Upload de médias */}
             <div className='space-y-2'>
               <label className='block text-sm font-medium text-gray-700'>
-                Photos
+                Photos et vidéos
               </label>
               <div className='border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-orange-500 transition-colors duration-200'>
                 <input
                   type='file'
                   multiple
+                  accept='image/*,video/*'
                   onChange={handleImageChange}
                   className='hidden'
                   id='media-upload'
@@ -1080,32 +1114,49 @@ export default function ArticlePostDialog({
                       ou glissez et déposez
                     </div>
                     <p className='text-gray-500 text-sm'>
-                      PNG, JPG jusqu'à 10MB
+                      Images et vidéos jusqu'à {MAX_ANNOUNCE_MEDIAS} médias
                     </p>
                   </div>
                 </label>
               </div>
+              {mediaError && (
+                <p className='text-sm font-semibold text-red-600'>{mediaError}</p>
+              )}
 
-              {/* Prévisualisation des images */}
+              {/* Prévisualisation des médias */}
               {formData.medias.length > 0 && (
                 <div className='space-y-2'>
                   <p className='text-sm text-gray-500'>
-                    Cliquez sur l'image principale
+                    Cliquez sur le média principal ({formData.medias.length}/{MAX_ANNOUNCE_MEDIAS})
                   </p>
                   <div className='grid grid-cols-6 gap-2'>
-                    {formData.medias.map((image, index) => (
+                    {formData.medias.map((media, index) => (
                       <div
                         key={index}
                         className={`relative aspect-square rounded-lg overflow-hidden cursor-pointer group ${
                           index === 0 ? 'ring-2 ring-orange-500' : ''
                         }`}
                       >
-                        <img
-                          src={URL.createObjectURL(image)}
-                          alt={`preview-${index}`}
-                          className='w-full h-full object-cover'
-                          onClick={() => handlePriorityChange(index)}
-                        />
+                        {media.type.startsWith('video/') ? (
+                          <video
+                            src={URL.createObjectURL(media)}
+                            className='w-full h-full object-cover'
+                            onClick={() => handlePriorityChange(index)}
+                            muted
+                          />
+                        ) : (
+                          <img
+                            src={URL.createObjectURL(media)}
+                            alt={`preview-${index}`}
+                            className='w-full h-full object-cover'
+                            onClick={() => handlePriorityChange(index)}
+                          />
+                        )}
+                        {media.type.startsWith('video/') && (
+                          <div className='absolute left-1 top-1 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-bold text-white'>
+                            Vidéo
+                          </div>
+                        )}
                         <div className='absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200' />
 
                         {/* Bouton de suppression */}
@@ -1358,7 +1409,7 @@ export default function ArticlePostDialog({
                         return;
                       }
                       if (currentStep === 3 && formData.medias.length === 0) {
-                        alert('Veuillez ajouter au moins une photo');
+                        setMediaError('Veuillez ajouter au moins une photo ou une vidéo.');
                         return;
                       }
                       setCurrentStep(step => step + 1);

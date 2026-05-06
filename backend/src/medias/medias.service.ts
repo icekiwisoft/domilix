@@ -7,6 +7,7 @@ import crypto from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { buildLaravelPagination } from '../common/http/pagination';
 import { storageUrl } from '../common/http/formatters';
+import { generateMediaThumbnail } from '../common/media/thumbnails';
 
 @Injectable()
 export class MediasService {
@@ -149,11 +150,12 @@ export class MediasService {
 
       const createdIds: string[] = [];
       for (const file of files) {
+        const thumbnail = await generateMediaThumbnail(file);
         const media = await this.prisma.media.create({
           data: {
             id: crypto.randomUUID(),
             file: `public/medias/${file.filename}`,
-            thumbnail: `public/medias/${file.filename}`,
+            thumbnail,
             type: file.mimetype,
             announcerId: announcer.id,
           },
@@ -183,12 +185,13 @@ export class MediasService {
 
     const created: any[] = [];
     for (const file of files) {
+      const thumbnail = await generateMediaThumbnail(file);
       created.push(
         await this.prisma.media.create({
           data: {
             id: crypto.randomUUID(),
             file: `public/medias/${file.filename}`,
-            thumbnail: `public/medias/${file.filename}`,
+            thumbnail,
             type: file.mimetype,
             announcerId: announcer.id,
           },

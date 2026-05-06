@@ -28,9 +28,6 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  experimental: {
-    optimizePackageImports: ['react-icons'],
-  },
 };
 
 export default withMDX(nextConfig);

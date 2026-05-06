@@ -22,6 +22,118 @@ const sortOptions = [
   { name: 'Prix décroissant' },
 ];
 
+function AnnouncerPageSkeleton() {
+  return (
+    <>
+      <Nav2 />
+      <div className='min-h-screen bg-gradient-to-br from-slate-50 to-gray-100'>
+        <div className='mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8'>
+          <div className='mt-20 mb-8 overflow-hidden rounded-2xl bg-white'>
+            <div className='h-32 animate-pulse bg-gray-400 sm:h-48' />
+            <div className='px-6 py-6'>
+              <div className='flex flex-col gap-6 sm:flex-row sm:items-center'>
+                <div className='-mt-16 h-20 w-20 animate-pulse rounded-full border-4 border-white bg-gray-400 sm:-mt-20 sm:h-24 sm:w-24' />
+                <div className='flex-1 space-y-3'>
+                  <div className='h-7 w-56 animate-pulse rounded-full bg-gray-400' />
+                  <div className='h-4 w-36 animate-pulse rounded-full bg-gray-300' />
+                </div>
+                <div className='flex gap-6 sm:gap-8'>
+                  {Array.from({ length: 3 }).map((_, index) => (
+                    <div key={index} className='space-y-2 text-center'>
+                      <div className='mx-auto h-7 w-10 animate-pulse rounded-full bg-gray-400' />
+                      <div className='h-3 w-16 animate-pulse rounded-full bg-gray-300' />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className='mb-6 flex w-fit gap-2 rounded-xl bg-white p-1.5 shadow-sm'>
+            <div className='h-10 w-28 animate-pulse rounded-full bg-gray-400' />
+            <div className='h-10 w-28 animate-pulse rounded-full bg-gray-300' />
+          </div>
+
+          <div className='mb-6 flex flex-col gap-4 sm:flex-row'>
+            <div className='h-12 flex-1 animate-pulse rounded-xl bg-gray-300' />
+            <div className='h-12 w-full animate-pulse rounded-xl bg-gray-300 sm:w-64' />
+          </div>
+
+          <div className='grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
+            {Array.from({ length: 8 }).map((_, index) => (
+              <div key={index} className='overflow-hidden rounded-3xl bg-gray-200 shadow-sm'>
+                <div className='aspect-[4/3] animate-pulse bg-gray-400' />
+                <div className='space-y-3 p-4'>
+                  <div className='h-4 w-3/4 animate-pulse rounded-full bg-gray-400' />
+                  <div className='h-4 w-1/2 animate-pulse rounded-full bg-gray-300' />
+                  <div className='h-9 w-full animate-pulse rounded-xl bg-gray-300' />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function AnnouncerErrorState() {
+  return (
+    <div className='flex min-h-[55vh] items-center justify-center px-5 py-16 text-center'>
+      <div className='max-w-md'>
+        <div className='mx-auto mb-6 flex h-28 w-28 items-center justify-center rounded-[2rem] bg-red-50 text-red-500'>
+          <svg viewBox='0 0 120 120' className='h-20 w-20' fill='none' aria-hidden='true'>
+            <path d='M24 70 60 23l36 47v28H24V70Z' fill='#FEF2F2' stroke='currentColor' strokeWidth='5' strokeLinejoin='round' />
+            <path d='M60 46v23' stroke='currentColor' strokeWidth='7' strokeLinecap='round' />
+            <circle cx='60' cy='82' r='4' fill='currentColor' />
+            <path d='M30 28 20 18M93 29l10-10M15 54H4M116 54h-11' stroke='#FCA5A5' strokeWidth='5' strokeLinecap='round' />
+          </svg>
+        </div>
+        <p className='text-xs font-black uppercase tracking-[0.24em] text-red-500'>
+          Erreur serveur
+        </p>
+        <h2 className='mt-3 text-3xl font-black tracking-tight text-slate-950'>
+          Impossible de charger cet annonceur
+        </h2>
+        <p className='mt-3 text-sm leading-6 text-slate-500'>
+          Une erreur interne est survenue. Veuillez réessayer dans quelques instants.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function EmptyAnnouncerAdsState({ searchTerm }: { searchTerm: string }) {
+  return (
+    <div className='flex min-h-[42vh] items-center justify-center rounded-2xl bg-white px-5 py-16 text-center'>
+      <div className='max-w-md'>
+        <div className='mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-[1.8rem] bg-orange-50 text-orange-500'>
+          <svg viewBox='0 0 120 120' className='h-16 w-16' fill='none' aria-hidden='true'>
+            <path d='M27 38h66v52a6 6 0 0 1-6 6H33a6 6 0 0 1-6-6V38Z' fill='#FFF4E5' stroke='currentColor' strokeWidth='5' />
+            <path d='M43 38c0-10 7-18 17-18s17 8 17 18' stroke='currentColor' strokeWidth='5' strokeLinecap='round' />
+            <path d='M43 61h34M43 75h22' stroke='currentColor' strokeWidth='5' strokeLinecap='round' />
+            <circle cx='92' cy='25' r='5' fill='#FDBA74' />
+            <circle cx='25' cy='22' r='4' fill='currentColor' />
+          </svg>
+        </div>
+        <p className='text-xs font-black uppercase tracking-[0.24em] text-orange-500'>
+          {searchTerm ? 'Aucun résultat' : 'Aucune annonce'}
+        </p>
+        <h2 className='mt-3 text-2xl font-black tracking-tight text-slate-950'>
+          {searchTerm
+            ? 'Aucune annonce ne correspond à votre recherche'
+            : 'Cet annonceur n’a pas encore publié d’annonce'}
+        </h2>
+        <p className='mt-3 text-sm leading-6 text-slate-500'>
+          {searchTerm
+            ? 'Essayez avec un autre mot-clé ou videz le champ de recherche.'
+            : 'Revenez plus tard pour découvrir ses prochaines publications.'}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export default function Announcer() {
   const coverSrc = typeof Cover === 'string' ? Cover : Cover.src;
   const domilixSrc = typeof Domilix === 'string' ? Domilix : Domilix.src;
@@ -35,6 +147,7 @@ export default function Announcer() {
   const [ads, setAds] = useState<Ad[]>([]);
   const [announcer, setAnnouncer] = useState<Announcer | null>(null);
   const [loading, setLoading] = useState(true);
+  const [serverError, setServerError] = useState(false);
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState(
     urlSearchParam.get('search') || ''
@@ -44,35 +157,44 @@ export default function Announcer() {
 
 
 
-  // Fetch announcer data
-  const fetchAnnouncerData = async (announcerId: string) => {
-    try {
-      const announcerData = await getAnnouncer(announcerId);
-      setAnnouncer(announcerData);
-    } catch (error) {
-      console.error('Error fetching announcer:', error);
-    }
-  };
-
-  // Fetch announcer's ads
-  const fetchAnnouncerAds = async (announcerId: string) => {
-    try {
-      setLoading(true);
-      const adsData = await getAdsByAnnouncer(announcerId, 1, 50);
-      setAds(adsData);
-    } catch (error) {
-      console.error('Error fetching ads:', error);
-      setAds([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    if (id) {
-      fetchAnnouncerData(id);
-      fetchAnnouncerAds(id);
-    }
+    if (!id) return;
+
+    let cancelled = false;
+
+    const fetchPageData = async () => {
+      setLoading(true);
+      setServerError(false);
+      setAnnouncer(null);
+      setAds([]);
+
+      try {
+        const [announcerData, adsData] = await Promise.all([
+          getAnnouncer(id),
+          getAdsByAnnouncer(id, 1, 50),
+        ]);
+
+        if (!cancelled) {
+          setAnnouncer(announcerData);
+          setAds(adsData);
+        }
+      } catch (error) {
+        console.error('Error fetching announcer page:', error);
+        if (!cancelled) {
+          setServerError(true);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchPageData();
+
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
 
   // Filter ads based on search term
@@ -86,16 +208,22 @@ export default function Announcer() {
     transition: { duration: 0.5 },
   };
 
+  if (loading) return <AnnouncerPageSkeleton />;
+
   return (
     <>
       <Nav2 />
       <div className='bg-gradient-to-br from-slate-50 to-gray-100 min-h-screen'>
         <div className='max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
-          {/* Profile Header */}
-          <motion.div
-            {...fadeIn}
-            className='bg-white rounded-2xl mt-20  overflow-hidden mb-8'
-          >
+          {serverError ? (
+            <AnnouncerErrorState />
+          ) : (
+            <>
+              {/* Profile Header */}
+              <motion.div
+                {...fadeIn}
+                className='bg-white rounded-2xl mt-20  overflow-hidden mb-8'
+              >
             {/* Cover Image */}
             <div className='h-32 sm:h-48 relative overflow-hidden bg-gradient-to-r from-orange-400 to-orange-600'>
               <motion.img
@@ -291,14 +419,7 @@ export default function Announcer() {
               </div>
 
               {/* Listings */}
-              {loading ? (
-                <div className='flex flex-col justify-center items-center py-20'>
-                  <div className='w-12 h-12 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin'></div>
-                  <p className='mt-4 text-gray-500 text-sm'>
-                    Chargement des annonces...
-                  </p>
-                </div>
-              ) : ads.length > 0 ? (
+              {ads.length > 0 ? (
                 <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5'>
                   {ads.map(ad => (
                     <AnnouncerAdCard
@@ -317,31 +438,7 @@ export default function Announcer() {
                   ))}
                 </div>
               ) : (
-                <div className='flex flex-col items-center justify-center py-20 bg-white rounded-xl'>
-                  <div className='text-gray-400 mb-4'>
-                    <svg
-                      className='w-16 h-16'
-                      fill='none'
-                      stroke='currentColor'
-                      viewBox='0 0 24 24'
-                    >
-                      <path
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                        strokeWidth={1.5}
-                        d='M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4'
-                      />
-                    </svg>
-                  </div>
-                  <p className='text-gray-600 text-lg font-medium mb-1'>
-                    {searchTerm ? 'Aucun résultat' : 'Aucune annonce'}
-                  </p>
-                  <p className='text-gray-400 text-sm'>
-                    {searchTerm
-                      ? "Essayez avec d'autres mots-clés"
-                      : "Cet annonceur n'a pas encore publié d'annonces"}
-                  </p>
-                </div>
+                <EmptyAnnouncerAdsState searchTerm={searchTerm} />
               )}
             </>
           )}
@@ -483,6 +580,8 @@ export default function Announcer() {
                 </div>
               )}
             </motion.div>
+          )}
+            </>
           )}
         </div>
       </div>

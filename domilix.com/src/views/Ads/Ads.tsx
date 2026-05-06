@@ -28,6 +28,90 @@ type PromoSlide = {
   actionUrl?: string;
 };
 
+function AdsSkeleton() {
+  return (
+    <div className='space-y-10'>
+      {[0, 1].map(section => (
+        <section key={section} className='space-y-4'>
+          <div className='flex items-center justify-between gap-3'>
+            <div className='h-6 w-40 animate-pulse rounded-full bg-gray-300' />
+            <div className='h-7 w-24 animate-pulse rounded-full bg-gray-300' />
+          </div>
+
+          <div className='grid w-full grid-cols-1 gap-x-2 gap-y-6 sm:grid-cols-2 sm:gap-x-6 lg:grid-cols-3 lg:gap-x-4 xl:grid-cols-4 2xl:grid-cols-5'>
+            {Array.from({ length: 8 }).map((_, index) => (
+              <div key={index} className='overflow-hidden rounded-3xl bg-gray-200 shadow-sm'>
+                <div className='aspect-[4/3] animate-pulse bg-gray-400' />
+                <div className='space-y-3 p-4'>
+                  <div className='h-4 w-3/4 animate-pulse rounded-full bg-gray-400' />
+                  <div className='h-4 w-1/2 animate-pulse rounded-full bg-gray-300' />
+                  <div className='flex items-center justify-between pt-2'>
+                    <div className='h-5 w-24 animate-pulse rounded-full bg-gray-400' />
+                    <div className='h-9 w-9 animate-pulse rounded-full bg-gray-300' />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
+  );
+}
+
+function EmptyAdsState() {
+  return (
+    <div className='flex min-h-[48vh] items-center justify-center px-5 py-16 text-center sm:px-8 lg:px-12'>
+      <div className='max-w-md'>
+        <div className='mx-auto mb-6 flex h-28 w-28 items-center justify-center rounded-[2rem] bg-orange-50 text-orange-500'>
+          <svg viewBox='0 0 120 120' className='h-20 w-20' fill='none' aria-hidden='true'>
+            <path d='M24 51 60 25l36 26v40a5 5 0 0 1-5 5H29a5 5 0 0 1-5-5V51Z' fill='#FFF4E5' stroke='currentColor' strokeWidth='5' strokeLinejoin='round' />
+            <path d='M48 96V67h24v29M38 52h44' stroke='currentColor' strokeWidth='5' strokeLinecap='round' strokeLinejoin='round' />
+            <path d='M91 30 102 19M100 41h14M20 24l9 9' stroke='#FDBA74' strokeWidth='5' strokeLinecap='round' />
+            <circle cx='24' cy='86' r='5' fill='currentColor' />
+            <circle cx='96' cy='86' r='4' fill='#FDBA74' />
+          </svg>
+        </div>
+        <p className='text-xs font-black uppercase tracking-[0.24em] text-orange-500'>
+          Aucun résultat
+        </p>
+        <h2 className='mt-3 text-3xl font-black tracking-tight text-slate-950'>
+          Aucune annonce mise en avant pour le moment
+        </h2>
+        <p className='mt-3 text-sm leading-6 text-slate-500'>
+          Revenez un peu plus tard ou lancez une recherche pour trouver les annonces disponibles.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function AdsErrorState() {
+  return (
+    <div className='flex min-h-[48vh] items-center justify-center px-5 py-16 text-center sm:px-8 lg:px-12'>
+      <div className='max-w-md'>
+        <div className='mx-auto mb-6 flex h-28 w-28 items-center justify-center rounded-[2rem] bg-red-50 text-red-500'>
+          <svg viewBox='0 0 120 120' className='h-20 w-20' fill='none' aria-hidden='true'>
+            <path d='M24 70 60 23l36 47v28H24V70Z' fill='#FEF2F2' stroke='currentColor' strokeWidth='5' strokeLinejoin='round' />
+            <path d='M60 46v23' stroke='currentColor' strokeWidth='7' strokeLinecap='round' />
+            <circle cx='60' cy='82' r='4' fill='currentColor' />
+            <path d='M30 28 20 18M93 29l10-10M15 54H4M116 54h-11' stroke='#FCA5A5' strokeWidth='5' strokeLinecap='round' />
+          </svg>
+        </div>
+        <p className='text-xs font-black uppercase tracking-[0.24em] text-red-500'>
+          Erreur serveur
+        </p>
+        <h2 className='mt-3 text-3xl font-black tracking-tight text-slate-950'>
+          Impossible de charger les annonces
+        </h2>
+        <p className='mt-3 text-sm leading-6 text-slate-500'>
+          Une erreur interne est survenue. Veuillez réessayer dans quelques instants.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export default function Ads(): React.ReactElement {
   const housesPromoSrc =
     typeof housesPromoImg === 'string' ? housesPromoImg : housesPromoImg.src;
@@ -86,7 +170,8 @@ export default function Ads(): React.ReactElement {
   >([]);
   const [promoSlides, setPromoSlides] = useState<PromoSlide[]>(defaultPromoSlides);
   const [promoSwiper, setPromoSwiper] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [serverError, setServerError] = useState(false);
   const [searchLocation, setSearchLocation] = useState('');
   const [categories, setCategories] = useState<any[]>([]);
   const [openFilterPopup, setOpenFilterPopup] = useState<
@@ -560,6 +645,8 @@ export default function Ads(): React.ReactElement {
 
     const loadAdsByCity = async () => {
       setIsLoading(true);
+      setServerError(false);
+      setCitySections([]);
 
       try {
         const baseParams = buildParamsFromUrl();
@@ -608,6 +695,7 @@ export default function Ads(): React.ReactElement {
         console.error('Erreur lors du chargement des villes:', error);
         if (!cancelled) {
           setCitySections([]);
+          setServerError(true);
         }
       } finally {
         if (!cancelled) {
@@ -895,16 +983,7 @@ export default function Ads(): React.ReactElement {
 
       <div className=' min-h-screen'>
         <section className='mt-8 px-5 md:mt-44 sm:px-8 lg:px-12'>
-          <div className='mb-4 flex items-center justify-between'>
-            <h2 className='text-lg font-semibold text-gray-900 sm:text-xl'>
-              Promotions du moment
-            </h2>
-            <span className='text-xs font-semibold uppercase tracking-wide text-red-500'>
-              Bons plans
-            </span>
-          </div>
-
-          <div className='relative'>
+          <div className='relative w-full max-w-full overflow-hidden'>
             <Swiper
               modules={[Autoplay, Pagination]}
               onSwiper={setPromoSwiper}
@@ -913,11 +992,12 @@ export default function Ads(): React.ReactElement {
                 clickable: true,
                 el: '.ads-promos-pagination',
                 bulletClass:
-                  'swiper-pagination-bullet !mx-1 !h-2.5 !w-2.5 !rounded-full !bg-orange-200 !opacity-100 transition-all',
+                  'swiper-pagination-bullet !mx-1 !h-2 !w-2 !rounded-full !bg-orange-200 !opacity-100 transition-all',
                 bulletActiveClass:
-                  'swiper-pagination-bullet-active !w-7 !rounded-full !bg-orange-500',
+                  'swiper-pagination-bullet-active !w-8 !rounded-full !bg-orange-500',
               }}
-              spaceBetween={16}
+              className='!w-full !max-w-full'
+              spaceBetween={18}
               breakpoints={{
                 0: { slidesPerView: 1 },
                 768: { slidesPerView: 2 },
@@ -927,36 +1007,39 @@ export default function Ads(): React.ReactElement {
               {promoSlides.map(slide => (
                 <SwiperSlide key={slide.id} className='h-auto'>
                   <article
-                    className={`relative flex h-full min-h-[240px] flex-col overflow-hidden rounded-2xl bg-gradient-to-r ${slide.bg} bg-cover bg-center p-5 text-white shadow-md`}
+                    className={`group relative flex h-full min-h-[250px] flex-col overflow-hidden rounded-3xl bg-gradient-to-br ${slide.bg} bg-cover bg-center p-5 text-white shadow-sm transition duration-300 hover:shadow-lg sm:min-h-[285px] sm:p-6`}
                     style={
                       slide.image
                         ? {
-                          backgroundImage: `linear-gradient(120deg, rgba(17,24,39,0.78), rgba(17,24,39,0.38)), url(${slide.image})`,
+                          backgroundImage: `linear-gradient(135deg, rgba(8,15,28,0.86), rgba(8,15,28,0.58)), url(${slide.image})`,
                         }
                         : undefined
                     }
                   >
-                    <span className='absolute right-3 top-3 rounded-full bg-red-600 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white'>
+                    <span className='absolute right-4 top-4 rounded-full bg-orange-500 px-3 py-1 text-xs font-black uppercase tracking-wide text-white shadow-sm'>
                       {slide.badge}
                     </span>
-                    <p className='text-xs font-semibold uppercase tracking-[0.18em] text-white/80'>
+
+                    <p className='relative text-xs font-black uppercase tracking-[0.2em] text-orange-200'>
                       Promo annonceur
                     </p>
-                    <h3 className='mt-2 pr-24 text-lg font-bold leading-tight'>
+                    <h3 className='relative mt-4 max-w-[14rem] text-2xl font-black leading-tight tracking-tight text-white sm:text-3xl'>
                       {slide.title}
                     </h3>
-                    <p className='mt-2 text-sm text-white/90'>{slide.subtitle}</p>
+                    <p className='relative mt-3 max-w-[18rem] text-sm font-medium leading-6 text-white/85'>
+                      {slide.subtitle}
+                    </p>
                     {slide.actionUrl ? (
                       <a
                         href={slide.actionUrl}
-                        className='mt-auto inline-flex w-fit rounded-full bg-white px-4 py-2 text-xs font-semibold uppercase tracking-wide text-gray-900 transition-colors hover:bg-gray-100'
+                        className='relative mt-auto inline-flex w-fit items-center rounded-full bg-orange-500 px-4 py-2.5 text-xs font-black uppercase tracking-wide text-white shadow-sm transition hover:bg-orange-600'
                       >
                         {slide.cta}
                       </a>
                     ) : (
                       <button
                         type='button'
-                        className='mt-auto rounded-full bg-white px-4 py-2 text-xs font-semibold uppercase tracking-wide text-gray-900 transition-colors hover:bg-gray-100'
+                        className='relative mt-auto w-fit rounded-full bg-orange-500 px-4 py-2.5 text-xs font-black uppercase tracking-wide text-white shadow-sm transition hover:bg-orange-600'
                       >
                         {slide.cta}
                       </button>
@@ -969,7 +1052,7 @@ export default function Ads(): React.ReactElement {
             <button
               type='button'
               onClick={() => promoSwiper?.slidePrev()}
-              className='absolute left-4 top-1/2 z-10 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-orange-200 bg-white/95 text-orange-600 shadow-sm transition-colors hover:bg-orange-50'
+              className='absolute left-5 top-1/2 z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/70 bg-white/95 text-orange-600 shadow-lg backdrop-blur transition hover:scale-105 hover:bg-orange-50 md:inline-flex'
               aria-label='Slide precedent'
             >
               <MdChevronLeft size={18} />
@@ -978,39 +1061,28 @@ export default function Ads(): React.ReactElement {
             <button
               type='button'
               onClick={() => promoSwiper?.slideNext()}
-              className='absolute right-4 top-1/2 z-10 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-orange-200 bg-white/95 text-orange-600 shadow-sm transition-colors hover:bg-orange-50'
+              className='absolute right-5 top-1/2 z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/70 bg-white/95 text-orange-600 shadow-lg backdrop-blur transition hover:scale-105 hover:bg-orange-50 md:inline-flex'
               aria-label='Slide suivant'
             >
               <MdChevronRight size={18} />
             </button>
 
             <div className='mt-4 flex items-center justify-center'>
-              <div className='ads-promos-pagination min-h-[10px]' />
+              <div className='ads-promos-pagination flex min-h-[10px] items-center justify-center' />
             </div>
           </div>
         </section>
 
-        <div className='px-5 sm:px-8 lg:px-12'>
-          <div className='flex min-h-[44px] items-center justify-between gap-3'>
-            <h2 className='mb-0 text-xl font-semibold leading-tight text-gray-900 sm:text-2xl'>
-              Annonces qui pourraient vous plaire !
-            </h2>
-          </div>
-        </div>
         <div className='mt-6 space-y-10 px-5 py-6 sm:px-8 lg:px-12'>
-          {isLoading && (
-            <p className='text-sm font-medium text-gray-500'>
-              Chargement des annonces par ville...
-            </p>
+          {isLoading && <AdsSkeleton />}
+
+          {!isLoading && serverError && <AdsErrorState />}
+
+          {!isLoading && !serverError && citySections.length === 0 && (
+            <EmptyAdsState />
           )}
 
-          {!isLoading && citySections.length === 0 && (
-            <p className='rounded-2xl border border-gray-200 bg-white px-4 py-5 text-sm text-gray-600'>
-              Aucune annonce trouvee pour ces filtres.
-            </p>
-          )}
-
-          {citySections.map(section => (
+          {!isLoading && !serverError && citySections.map(section => (
             <section
               key={`${section.city}-${section.country || 'unknown'}`}
               className='space-y-4'

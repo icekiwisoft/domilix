@@ -20,6 +20,7 @@ import path from 'node:path';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { AuthGuard } from '../auth/auth.guard';
 import { MediasService } from './medias.service';
+import { ALLOWED_MEDIA_MIME_PATTERN, MAX_AD_MEDIAS } from '../common/media/thumbnails';
 
 const mediaUploadDir = path.join(process.cwd(), 'storage', 'medias');
 fs.mkdirSync(mediaUploadDir, { recursive: true });
@@ -55,13 +56,24 @@ export class MediasController {
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Upload medias and optionally attach them to an announce' })
   @UseInterceptors(
-    FilesInterceptor('medias', 10, {
+    FilesInterceptor('medias', MAX_AD_MEDIAS, {
       storage: diskStorage({
         destination: mediaUploadDir,
         filename: (_req, file, callback) => {
           callback(null, `${Date.now()}---${crypto.randomUUID()}${path.extname(file.originalname)}`);
         },
       }),
+      fileFilter: (_req, file, callback) => {
+        callback(
+          ALLOWED_MEDIA_MIME_PATTERN.test(file.mimetype)
+            ? null
+            : new Error('Only image and video medias are allowed.'),
+          ALLOWED_MEDIA_MIME_PATTERN.test(file.mimetype),
+        );
+      },
+      limits: {
+        fileSize: 50 * 1024 * 1024,
+      },
     }),
   )
   store(

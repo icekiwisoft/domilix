@@ -9,6 +9,54 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { MdSearch } from 'react-icons/md';
 import { useNavigate, useSearchParams } from '@router';
 
+function SearchSkeleton() {
+  return (
+    <section className='mt-4 grid w-full grid-cols-1 gap-x-2 gap-y-6 px-5 py-6 sm:grid-cols-2 sm:gap-x-6 sm:px-8 lg:grid-cols-3 lg:gap-x-4 lg:px-12 xl:grid-cols-4'>
+      {Array.from({ length: 8 }).map((_, index) => (
+        <div key={index} className='overflow-hidden rounded-3xl bg-gray-200 shadow-sm'>
+          <div className='aspect-[4/3] animate-pulse bg-gray-400' />
+          <div className='space-y-3 p-4'>
+            <div className='h-4 w-3/4 animate-pulse rounded-full bg-gray-400' />
+            <div className='h-4 w-1/2 animate-pulse rounded-full bg-gray-300' />
+            <div className='flex items-center justify-between pt-2'>
+              <div className='h-5 w-24 animate-pulse rounded-full bg-gray-400' />
+              <div className='h-9 w-9 animate-pulse rounded-full bg-gray-300' />
+            </div>
+          </div>
+        </div>
+      ))}
+    </section>
+  );
+}
+
+function EmptySearchState() {
+  return (
+    <div className='mt-28 flex min-h-[50vh] items-center justify-center px-5 py-16 text-center sm:mt-32 sm:px-8 md:mt-44 lg:px-12'>
+      <div className='max-w-md'>
+        <div className='mx-auto mb-6 flex h-28 w-28 items-center justify-center rounded-[2rem] bg-orange-50 text-orange-500'>
+          <svg viewBox='0 0 120 120' className='h-20 w-20' fill='none' aria-hidden='true'>
+            <circle cx='53' cy='53' r='31' fill='#FFF4E5' stroke='currentColor' strokeWidth='5' />
+            <path d='M75 75L94 94' stroke='currentColor' strokeWidth='7' strokeLinecap='round' />
+            <path d='M42 49h23M42 61h14' stroke='currentColor' strokeWidth='5' strokeLinecap='round' />
+            <path d='M31 27c5-7 12-11 22-12M88 36c4 7 5 15 3 23' stroke='#FDBA74' strokeWidth='5' strokeLinecap='round' />
+            <circle cx='82' cy='25' r='5' fill='currentColor' />
+            <circle cx='28' cy='82' r='4' fill='#FDBA74' />
+          </svg>
+        </div>
+        <p className='text-xs font-black uppercase tracking-[0.24em] text-orange-500'>
+          Aucun résultat
+        </p>
+        <h2 className='mt-3 text-3xl font-black tracking-tight text-slate-950'>
+          Oups, il n’y a aucun résultat
+        </h2>
+        <p className='mt-3 text-sm leading-6 text-slate-500'>
+          Essayez de modifier vos filtres ou de rechercher une autre localisation.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export default function Search(): React.ReactElement {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -697,22 +745,31 @@ export default function Search(): React.ReactElement {
       </div>
 
       <div className='min-h-screen'>
-        <div className='mt-8 px-5 md:mt-40 sm:px-8 lg:px-12'>
-          <h2 className='text-2xl font-semibold leading-tight text-gray-900 sm:text-3xl lg:text-4xl'>
-            Resultats pour {searchLabel}
-          </h2>
-        </div>
+        {(isLoading || ads.length > 0) && (
+          <div className='mt-8 px-5 text-center md:mt-40 sm:px-8 lg:px-12'>
+            <h2 className='text-2xl font-semibold leading-tight text-gray-900 sm:text-3xl lg:text-4xl'>
+              Resultats pour{' '}
+              <span className='relative inline-block pb-3 font-black uppercase text-orange-500'>
+                {searchLabel}
+                <span
+                  className='absolute inset-x-0 bottom-0 h-4 bg-[url(/filter-double-underline.svg)] bg-contain bg-center bg-no-repeat'
+                  aria-hidden='true'
+                />
+              </span>
+            </h2>
+          </div>
+        )}
 
         {isLoading ? (
-          <div className='px-5 py-6 text-sm font-medium text-gray-500 sm:px-8 lg:px-12'>
-            Chargement des resultats...
-          </div>
-        ) : (
+          <SearchSkeleton />
+        ) : ads.length > 0 ? (
           <section className='mt-4 grid w-full grid-cols-1 gap-x-2 gap-y-6 px-5 py-6 sm:grid-cols-2 sm:gap-x-6 sm:px-8 lg:grid-cols-3 lg:gap-x-4 lg:px-12 xl:grid-cols-4'>
             {ads.map(ad => (
               <ProductCard {...ad} key={ad.id} />
             ))}
           </section>
+        ) : (
+          <EmptySearchState />
         )}
       </div>
       <FooterMinimal />

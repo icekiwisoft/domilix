@@ -1,13 +1,20 @@
 import ArticlePostDialog from '@components/ArticlePostDialog/ArticlePostDialog';
+import AnnouncerRequiredModal from '@components/AnnouncerRequiredModal/AnnouncerRequiredModal';
 import { useState } from 'react';
 import { MdOutlineCampaign } from 'react-icons/md';
 import { useAuth } from '../../hooks/useAuth';
 
 export default function FloatingPublishButton() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const { isAuthenticated } = useAuth();
+  const [showAnnouncerRequiredModal, setShowAnnouncerRequiredModal] = useState(false);
+  const { isAuthenticated, user } = useAuth();
 
   const toggleDialog = () => {
+    if (!user?.announcer) {
+      setShowAnnouncerRequiredModal(true);
+      return;
+    }
+
     setIsDialogOpen(!isDialogOpen);
   };
 
@@ -28,6 +35,11 @@ export default function FloatingPublishButton() {
       </button>
 
       {isDialogOpen && <ArticlePostDialog toggleDialog={toggleDialog} />}
+      {showAnnouncerRequiredModal && (
+        <AnnouncerRequiredModal
+          onClose={() => setShowAnnouncerRequiredModal(false)}
+        />
+      )}
     </>
   );
 }

@@ -181,7 +181,7 @@ export class AuthService {
 
     const updated = await this.prisma.user.update({
       where: { id: user.id },
-      data: { emailVerified: true },
+      data: { emailVerified: true, emailVerifiedAt: new Date() },
     });
     this.verificationCodes.forget(this.emailVerificationKey(user.id));
 
@@ -223,6 +223,7 @@ export class AuthService {
         password,
         phoneVerified: false,
         emailVerified: false,
+        emailVerifiedAt: null,
       },
     });
 
@@ -363,7 +364,11 @@ export class AuthService {
       data: {
         ...(dto.name !== undefined ? { name: dto.name } : {}),
         ...(dto.email !== undefined && dto.email !== null
-          ? { email: dto.email, emailVerified: dto.email === user.email ? user.emailVerified : false }
+          ? {
+              email: dto.email,
+              emailVerified: dto.email === user.email ? user.emailVerified : false,
+              emailVerifiedAt: dto.email === user.email ? user.emailVerifiedAt : null,
+            }
           : {}),
         ...(dto.phone_number !== undefined ? { phoneNumber: dto.phone_number } : {}),
       },

@@ -54,6 +54,180 @@ L.Icon.Default.mergeOptions({
     'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
+function AdSkeleton() {
+  return (
+    <>
+      <Nav2 />
+      <div className='min-h-screen bg-white pt-20'>
+        <main className='mx-auto max-w-6xl px-4 py-8 sm:px-6'>
+          <div className='mb-6 flex gap-2'>
+            <div className='h-4 w-24 animate-pulse rounded-full bg-gray-300' />
+            <div className='h-4 w-4 animate-pulse rounded-full bg-gray-300' />
+            <div className='h-4 w-32 animate-pulse rounded-full bg-gray-300' />
+          </div>
+
+          <div className='mb-6 flex flex-col justify-between gap-4 sm:flex-row'>
+            <div className='flex-1 space-y-3'>
+              <div className='flex gap-2'>
+                <div className='h-7 w-24 animate-pulse rounded-full bg-gray-300' />
+                <div className='h-7 w-20 animate-pulse rounded-full bg-gray-300' />
+              </div>
+              <div className='h-9 w-4/5 animate-pulse rounded-full bg-gray-400' />
+              <div className='h-5 w-56 animate-pulse rounded-full bg-gray-300' />
+            </div>
+            <div className='h-11 w-36 animate-pulse rounded-2xl bg-gray-300' />
+          </div>
+
+          <div className='mb-8 grid h-[340px] grid-cols-4 grid-rows-2 gap-2 overflow-hidden rounded-2xl sm:h-[440px] lg:h-[500px]'>
+            <div className='col-span-2 row-span-2 animate-pulse bg-gray-400' />
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div key={index} className='animate-pulse bg-gray-300' />
+            ))}
+          </div>
+
+          <div className='mb-10 flex flex-wrap items-stretch overflow-hidden rounded-2xl border border-gray-200 bg-gray-200'>
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div key={index} className='flex min-w-[130px] flex-1 items-center justify-center gap-3 border-r border-gray-300 px-6 py-4 last:border-r-0'>
+                <div className='h-8 w-8 animate-pulse rounded-xl bg-gray-400' />
+                <div className='space-y-2'>
+                  <div className='h-4 w-10 animate-pulse rounded-full bg-gray-400' />
+                  <div className='h-3 w-16 animate-pulse rounded-full bg-gray-300' />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className='relative grid grid-cols-1 gap-12 lg:grid-cols-3'>
+            <div className='space-y-0 lg:col-span-2'>
+              <div className='flex items-center justify-between border-b border-gray-200 pb-8'>
+                <div className='space-y-3'>
+                  <div className='h-6 w-56 animate-pulse rounded-full bg-gray-400' />
+                  <div className='h-4 w-36 animate-pulse rounded-full bg-gray-300' />
+                </div>
+                <div className='h-14 w-14 animate-pulse rounded-full bg-gray-400' />
+              </div>
+
+              <div className='grid grid-cols-1 gap-6 border-b border-gray-200 py-8 sm:grid-cols-2'>
+                {Array.from({ length: 2 }).map((_, index) => (
+                  <div key={index} className='flex items-start gap-4'>
+                    <div className='h-10 w-10 animate-pulse rounded-xl bg-gray-300' />
+                    <div className='flex-1 space-y-2'>
+                      <div className='h-4 w-36 animate-pulse rounded-full bg-gray-400' />
+                      <div className='h-4 w-full animate-pulse rounded-full bg-gray-300' />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className='border-b border-gray-200 py-8'>
+                <div className='mb-4 h-6 w-52 animate-pulse rounded-full bg-gray-400' />
+                <div className='space-y-3'>
+                  <div className='h-4 w-full animate-pulse rounded-full bg-gray-300' />
+                  <div className='h-4 w-11/12 animate-pulse rounded-full bg-gray-300' />
+                  <div className='h-4 w-2/3 animate-pulse rounded-full bg-gray-300' />
+                </div>
+              </div>
+
+              <div className='border-b border-gray-200 py-8'>
+                <div className='mb-5 h-6 w-48 animate-pulse rounded-full bg-gray-400' />
+                <div className='flex flex-wrap gap-3'>
+                  {Array.from({ length: 6 }).map((_, index) => (
+                    <div key={index} className='h-11 w-36 animate-pulse rounded-xl bg-gray-300' />
+                  ))}
+                </div>
+              </div>
+
+              <div className='py-8'>
+                <div className='mb-2 h-6 w-32 animate-pulse rounded-full bg-gray-400' />
+                <div className='mb-5 h-4 w-56 animate-pulse rounded-full bg-gray-300' />
+                <div className='h-72 animate-pulse rounded-3xl bg-gray-300' />
+              </div>
+            </div>
+
+            <div className='lg:col-span-1'>
+              <div className='sticky top-28 overflow-hidden rounded-2xl border border-gray-300 bg-white shadow-lg'>
+                <div className='h-1 bg-gray-400' />
+                <div className='space-y-6 p-6'>
+                  <div className='space-y-3'>
+                    <div className='h-3 w-28 animate-pulse rounded-full bg-gray-300' />
+                    <div className='h-9 w-44 animate-pulse rounded-full bg-gray-400' />
+                  </div>
+                  <div className='flex flex-wrap gap-2'>
+                    <div className='h-8 w-28 animate-pulse rounded-lg bg-gray-300' />
+                    <div className='h-8 w-24 animate-pulse rounded-lg bg-gray-300' />
+                    <div className='h-8 w-36 animate-pulse rounded-lg bg-gray-300' />
+                  </div>
+                  <div className='h-28 animate-pulse rounded-2xl bg-gray-300' />
+                  <div className='h-12 animate-pulse rounded-xl bg-gray-400' />
+                  <div className='h-12 animate-pulse rounded-xl bg-gray-300' />
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </>
+  );
+}
+
+function AdErrorState() {
+  return (
+    <>
+      <Nav2 />
+      <div className='flex min-h-screen items-center justify-center bg-white px-5 pt-20 text-center'>
+        <div className='max-w-md'>
+          <div className='mx-auto mb-6 flex h-28 w-28 items-center justify-center rounded-[2rem] bg-red-50 text-red-500'>
+            <svg viewBox='0 0 120 120' className='h-20 w-20' fill='none' aria-hidden='true'>
+              <path d='M24 70 60 23l36 47v28H24V70Z' fill='#FEF2F2' stroke='currentColor' strokeWidth='5' strokeLinejoin='round' />
+              <path d='M60 46v23' stroke='currentColor' strokeWidth='7' strokeLinecap='round' />
+              <circle cx='60' cy='82' r='4' fill='currentColor' />
+              <path d='M30 28 20 18M93 29l10-10M15 54H4M116 54h-11' stroke='#FCA5A5' strokeWidth='5' strokeLinecap='round' />
+            </svg>
+          </div>
+          <p className='text-xs font-black uppercase tracking-[0.24em] text-red-500'>
+            Erreur serveur
+          </p>
+          <h2 className='mt-3 text-3xl font-black tracking-tight text-slate-950'>
+            Impossible de charger cette annonce
+          </h2>
+          <p className='mt-3 text-sm leading-6 text-slate-500'>
+            Une erreur interne est survenue. Veuillez réessayer dans quelques instants.
+          </p>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function AdNotFoundState() {
+  return (
+    <>
+      <Nav2 />
+      <div className='flex min-h-screen items-center justify-center bg-white px-5 pt-20 text-center'>
+        <div className='max-w-md'>
+          <div className='mx-auto mb-6 flex h-28 w-28 items-center justify-center rounded-[2rem] bg-orange-50 text-orange-500'>
+            <svg viewBox='0 0 120 120' className='h-20 w-20' fill='none' aria-hidden='true'>
+              <path d='M28 35h64v55a6 6 0 0 1-6 6H34a6 6 0 0 1-6-6V35Z' fill='#FFF4E5' stroke='currentColor' strokeWidth='5' />
+              <path d='M43 54h34M43 68h21' stroke='currentColor' strokeWidth='5' strokeLinecap='round' />
+              <path d='M88 27 99 16M99 39h13M20 25l10 10' stroke='#FDBA74' strokeWidth='5' strokeLinecap='round' />
+              <circle cx='29' cy='88' r='5' fill='currentColor' />
+            </svg>
+          </div>
+          <p className='text-xs font-black uppercase tracking-[0.24em] text-orange-500'>
+            Introuvable
+          </p>
+          <h2 className='mt-3 text-3xl font-black tracking-tight text-slate-950'>
+            Annonce introuvable
+          </h2>
+          <p className='mt-3 text-sm leading-6 text-slate-500'>
+            Cette annonce n’existe pas ou n’est plus disponible.
+          </p>
+        </div>
+      </div>
+    </>
+  );
+}
+
 export default function Ad(): React.ReactElement {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -62,6 +236,8 @@ export default function Ad(): React.ReactElement {
   const [adInfo, setAdInfo] = useState<AdType | null>(null);
   const [similarAds, setSimilarAds] = useState<AdType[]>([]);
   const [loading, setLoading] = useState(true);
+  const [serverError, setServerError] = useState(false);
+  const [notFound, setNotFound] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showUnlockDialog, setShowUnlockDialog] = useState(false);
@@ -121,6 +297,9 @@ export default function Ad(): React.ReactElement {
   useEffect(() => {
     if (!adId) return;
     setLoading(true);
+    setServerError(false);
+    setNotFound(false);
+    setAdInfo(null);
     getAd(parseInt(adId))
       .then(ad => {
         setAdInfo(ad);
@@ -131,33 +310,30 @@ export default function Ad(): React.ReactElement {
         const list: AdType[] = Array.isArray(ads) ? ads : (ads as any).data || [];
         setSimilarAds(list.filter(a => a.id !== parseInt(adId!)).slice(0, 4));
       })
-      .catch(() => { })
+      .catch((error: any) => {
+        if (error?.response?.status === 404) {
+          setNotFound(true);
+        } else {
+          setServerError(true);
+        }
+      })
       .finally(() => setLoading(false));
   }, [adId]);
 
   if (loading) {
-    return (
-      <>
-        <Nav2 />
-        <div className='min-h-screen bg-white pt-20 flex items-center justify-center'>
-          <div className='text-center'>
-            <div className='w-10 h-10 border-4 border-orange-100 border-t-primary rounded-full animate-spin mx-auto mb-4' />
-            <p className='text-gray-400 text-sm font-medium'>Chargement de l&apos;annonce…</p>
-          </div>
-        </div>
-      </>
-    );
+    return <AdSkeleton />;
+  }
+
+  if (serverError) {
+    return <AdErrorState />;
+  }
+
+  if (notFound) {
+    return <AdNotFoundState />;
   }
 
   if (!adInfo) {
-    return (
-      <>
-        <Nav2 />
-        <div className='min-h-screen bg-white pt-20 flex items-center justify-center'>
-          <p className='text-gray-500 font-medium'>Annonce introuvable.</p>
-        </div>
-      </>
-    );
+    return <AdNotFoundState />;
   }
 
   const isRealestate = adInfo.type === 'realestate';

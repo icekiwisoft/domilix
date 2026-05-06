@@ -7,6 +7,7 @@ import {
   storageUrl,
   toNumber,
 } from '../common/http/formatters';
+import { generateMediaThumbnail, MAX_AD_MEDIAS } from '../common/media/thumbnails';
 import { buildLaravelPagination } from '../common/http/pagination';
 import { PrismaService } from '../prisma/prisma.service';
 import { QueryAdsDto } from './dto/query-ads.dto';
@@ -625,8 +626,8 @@ export class AdsService {
         ? [body.filesid]
         : [];
     const totalMediaCount = files.length + filesId.length;
-    if (totalMediaCount > 5) {
-      throw new ForbiddenException('The combined total of medias and mediasId must not exceed 5.');
+    if (totalMediaCount > MAX_AD_MEDIAS) {
+      throw new ForbiddenException(`The combined total of medias and mediasId must not exceed ${MAX_AD_MEDIAS}.`);
     }
     if (totalMediaCount === 0) {
       throw new ForbiddenException('At least one media file is required.');
@@ -701,11 +702,12 @@ export class AdsService {
 
     const createdMediaIds: string[] = [];
     for (const file of files) {
+      const thumbnail = await generateMediaThumbnail(file);
       const media = await this.prisma.media.create({
         data: {
           id: crypto.randomUUID(),
           file: `public/medias/${file.filename}`,
-          thumbnail: `public/medias/${file.filename}`,
+          thumbnail,
           type: file.mimetype,
           announcerId: announcer.id,
         },
