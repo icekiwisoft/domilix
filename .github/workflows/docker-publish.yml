@@ -207,11 +207,15 @@ jobs:
 
       - name: Optional post-deploy command
         uses: appleboy/ssh-action@v1.2.0
+        env:
+          POST_DEPLOY_CMD: ${{ secrets.POST_DEPLOY_CMD }}
         with:
           host: domilix.com
           username: root
           key: ${{ secrets.VPS_SSH }}
           script: |
-            if [ -n "${{ secrets.POST_DEPLOY_CMD }}" ]; then
-              ${{ secrets.POST_DEPLOY_CMD }}
+            if [ -n "$POST_DEPLOY_CMD" ]; then
+              eval "$POST_DEPLOY_CMD"
+            else
+              echo "No post-deploy command configured."
             fi
