@@ -11,7 +11,7 @@ import { notificationApi } from '../../services/notificationApi';
 import React, { useState, useEffect, useRef } from 'react';
 import { HiBars3, HiXMark } from 'react-icons/hi2';
 import { HiOutlineBell } from 'react-icons/hi';
-import { MdCheck, MdOutlineCampaign, MdOutlineInventory2 } from 'react-icons/md';
+import { MdAddHomeWork, MdCheck, MdOutlineCampaign, MdOutlineInventory2 } from 'react-icons/md';
 import { NavLink, useNavigate } from '@router';
 
 const defaultLinks = [
@@ -338,7 +338,7 @@ export default function Nav2({
                 className='inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-orange-400 bg-white text-orange-600 shadow-sm transition-colors hover:bg-orange-50'
                 aria-label='Publier une annonce'
               >
-                <MdOutlineCampaign className='w-4 h-4 sm:w-5 sm:h-5 -rotate-12 text-orange-600' />
+                <MdAddHomeWork className='w-4 h-4 sm:w-5 sm:h-5 text-orange-600' />
               </button>
 
               <NavLink
@@ -433,6 +433,13 @@ export default function Nav2({
           </button>
         </div>
       </div>
+      {click && (
+        <div
+          className='fixed inset-0 top-16 z-30 bg-slate-950/20 backdrop-blur-sm lg:hidden'
+          onClick={() => setClick(false)}
+          aria-hidden='true'
+        />
+      )}
       {click && content}
 
       {showPostDialog && (

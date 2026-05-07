@@ -726,6 +726,16 @@ export class AdsService {
       });
     }
 
+    await this.prisma.notification.create({
+      data: {
+        userId,
+        type: 'ad_published',
+        title: 'Annonce publiee',
+        message: 'Votre annonce a ete publiee avec succes sur Domilix.',
+        link: `/houses/${ad.id}`,
+      },
+    }).catch(() => undefined);
+
     const [serialized] = await this.serializeAds([ad], userId);
     return serialized;
   }
