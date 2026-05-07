@@ -9,9 +9,10 @@ import AnnouncerRequiredModal from '@components/AnnouncerRequiredModal/Announcer
 import ArticlePostDialog from '@components/ArticlePostDialog/ArticlePostDialog';
 import { notificationApi } from '../../services/notificationApi';
 import React, { useState, useEffect, useRef } from 'react';
-import { HiBars3, HiXMark } from 'react-icons/hi2';
+import { HiBars3, HiXMark, HiBell } from 'react-icons/hi2';
 import { HiOutlineBell } from 'react-icons/hi';
-import { MdOutlineCampaign } from 'react-icons/md';
+import { MdOutlineCampaign, MdApartment } from 'react-icons/md';
+import { FaWallet, FaCouch } from 'react-icons/fa';
 import { NavLink, useNavigate } from '@router';
 
 const defaultLinks = [
@@ -310,17 +311,6 @@ export default function Nav2({
             >
               Se connecter
             </button>
-          ) : (
-            <div className='flex items-center space-x-3 xl:space-x-4'>
-              <button
-                onClick={handlePublishClick}
-                className='inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-orange-400 bg-white px-3 py-2 text-sm font-semibold text-orange-600 shadow-sm transition-colors hover:bg-orange-50 xl:px-4'
-                aria-label='Publier une annonce'
-              >
-                <MdOutlineCampaign className='-rotate-12 text-base' />
-                Publier
-              </button>
-            </>
           ) : (
           <>
             {/* Domicoins */}

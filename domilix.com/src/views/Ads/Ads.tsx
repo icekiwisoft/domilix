@@ -10,6 +10,9 @@ import { Checkbox, RadioGroup } from '@headlessui/react';
 import { getAds, getBroadcasts, getCategories, getCities, CityItem, BroadcastItem } from '@services/announceApi';
 import { Ad } from '@utils/types';
 import React, { useCallback, useEffect, useState } from 'react';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Autoplay, Pagination } from 'swiper/modules';
+import 'swiper/css';
 import { MdSearch } from 'react-icons/md';
 import { HiMapPin, HiAdjustmentsHorizontal, HiCurrencyDollar, HiBuildingOffice2, HiStar } from 'react-icons/hi2';
 import { useSearchParams, useNavigate } from '@router';
@@ -156,6 +159,7 @@ export default function Ads(): React.ReactElement {
   const [citySections, setCitySections] = useState<
     Array<{ city: string; country?: string; adsCount?: number; ads: Ad[] }>
   >([]);
+  const [promoSwiper, setPromoSwiper] = useState<any>(null);
   const [promoSlides, setPromoSlides] = useState<PromoSlide[]>(defaultPromoSlides);
   const [isLoading, setIsLoading] = useState(true);
   const [serverError, setServerError] = useState(false);
@@ -915,7 +919,7 @@ export default function Ads(): React.ReactElement {
                 1200: { slidesPerView: 3 },
               }}
             >
-              {promoSlides.map(slide => (
+              {promoSlides.map((slide, i) => (
                 <SwiperSlide key={slide.id} className='h-auto'>
                   <article
                     className={`group relative flex h-full min-h-[250px] flex-col overflow-hidden rounded-3xl bg-gradient-to-br ${slide.bg} bg-cover bg-center p-5 text-white shadow-sm transition duration-300 hover:shadow-lg sm:min-h-[285px] sm:p-6`}
@@ -959,9 +963,10 @@ export default function Ads(): React.ReactElement {
                         {slide.cta}
                       </button>
                     )}
-                  </div>
-                </article>
+                  </article>
+                </SwiperSlide>
               ))}
+            </Swiper>
           </div>
 
           {/* Carousel dots indicator */}
