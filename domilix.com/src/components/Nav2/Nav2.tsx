@@ -11,7 +11,7 @@ import { notificationApi } from '../../services/notificationApi';
 import React, { useState, useEffect, useRef } from 'react';
 import { HiBars3, HiXMark } from 'react-icons/hi2';
 import { HiOutlineBell } from 'react-icons/hi';
-import { MdAddHomeWork, MdCheck, MdOutlineCampaign, MdOutlineInventory2 } from 'react-icons/md';
+import { MdAddHomeWork, MdOutlineCampaign, MdOutlineInventory2 } from 'react-icons/md';
 import { NavLink, useNavigate } from '@router';
 
 const defaultLinks = [
@@ -104,7 +104,7 @@ export default function Nav2({
               }}
               className='flex items-center gap-4 text-left text-[#00549f] transition-colors hover:text-orange-500'
             >
-              <MdCheck className='h-5 w-5 shrink-0' />
+              <MdAddHomeWork className='h-5 w-5 shrink-0' />
               Publier une annonce
             </button>
           )}
