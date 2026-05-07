@@ -9,9 +9,10 @@ import AnnouncerRequiredModal from '@components/AnnouncerRequiredModal/Announcer
 import ArticlePostDialog from '@components/ArticlePostDialog/ArticlePostDialog';
 import { notificationApi } from '../../services/notificationApi';
 import React, { useState, useEffect, useRef } from 'react';
+import { FaCouch, FaHeart, FaTachometerAlt, FaWallet } from 'react-icons/fa';
 import { HiBars3, HiXMark } from 'react-icons/hi2';
 import { HiOutlineBell } from 'react-icons/hi';
-import { MdAddHomeWork, MdOutlineCampaign, MdOutlineInventory2 } from 'react-icons/md';
+import { MdAddHomeWork, MdApartment, MdManageAccounts, MdOutlineCampaign, MdSettings } from 'react-icons/md';
 import { NavLink, useNavigate } from '@router';
 
 const defaultLinks = [
@@ -19,6 +20,12 @@ const defaultLinks = [
   { name: 'Immobiliers', url: '/houses' },
   { name: 'Mobiliers', url: '/furnitures' },
 ];
+
+const mobileLinkIcons: Record<string, React.ReactNode> = {
+  Acheter: <FaWallet className='h-5 w-5 shrink-0' />,
+  Immobiliers: <MdApartment className='h-5 w-5 shrink-0' />,
+  Mobiliers: <FaCouch className='h-5 w-5 shrink-0' />,
+};
 
 type Nav2Props = {
   links?: Array<{ name: string; url: string }>;
@@ -90,7 +97,7 @@ export default function Nav2({
               }
               onClick={() => setClick(false)}
             >
-              <MdOutlineInventory2 className='h-5 w-5 shrink-0' />
+              {mobileLinkIcons[link.name] || <MdApartment className='h-5 w-5 shrink-0' />}
               {link.name}
             </NavLink>
           ))}
@@ -122,7 +129,10 @@ export default function Nav2({
                 }
                 onClick={() => setClick(false)}
               >
-                Mes Favoris
+                <span className='flex items-center gap-4'>
+                  <FaHeart className='h-5 w-5 shrink-0' />
+                  Mes Favoris
+                </span>
               </NavLink>
 
               {user.announcer && (
@@ -135,7 +145,10 @@ export default function Nav2({
                   }
                   onClick={() => setClick(false)}
                 >
-                  Mon Compte Annonceur
+                  <span className='flex items-center gap-4'>
+                    <MdManageAccounts className='h-5 w-5 shrink-0' />
+                    Mon Compte Annonceur
+                  </span>
                 </NavLink>
               )}
 
@@ -149,7 +162,10 @@ export default function Nav2({
                   }
                   onClick={() => setClick(false)}
                 >
-                  Dashboard
+                  <span className='flex items-center gap-4'>
+                    <FaTachometerAlt className='h-5 w-5 shrink-0' />
+                    Dashboard
+                  </span>
                 </NavLink>
               )}
 
@@ -159,8 +175,9 @@ export default function Nav2({
                   navigate('/settings');
                   setClick(false);
                 }}
-                className='block text-left text-[#00549f] transition-colors hover:text-orange-500'
+                className='flex items-center gap-4 text-left text-[#00549f] transition-colors hover:text-orange-500'
               >
+                <MdSettings className='h-5 w-5 shrink-0' />
                 Paramètres
               </button>
             </>
