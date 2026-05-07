@@ -125,29 +125,37 @@ export default function About(): React.ReactElement {
           </motion.div>
 
           {/* Values Section with Images */}
-          <div className='grid md:grid-cols-2 gap-12 mb-20'>
+          <div className='mb-20 grid gap-8 md:grid-cols-2'>
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className='space-y-6'
+              className='group overflow-hidden rounded-[2rem] border border-slate-100 bg-white shadow-xl shadow-slate-200/60 transition duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-slate-300/60'
             >
-              <div className='rounded-2xl overflow-hidden shadow-xl'>
+              <div className='relative h-72 overflow-hidden'>
                 <img
                   src='https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=600'
                   alt='Immobilier'
-                  className='w-full h-64 object-cover'
+                  className='h-full w-full object-cover transition duration-500 group-hover:scale-105'
                 />
+                <div className='absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent' />
+                <span className='absolute left-5 top-5 rounded-full bg-white/90 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#0d3556] shadow-lg backdrop-blur'>
+                  Logements
+                </span>
               </div>
-              <div>
-                <h3 className='text-3xl md:text-4xl font-bold text-gray-900 mb-4'>
+              <div className='p-6 sm:p-7'>
+                <h3 className='mb-3 text-2xl font-black text-gray-950 md:text-3xl'>
                   Immobilier
                 </h3>
-                <p className='text-xl md:text-2xl text-gray-700 leading-relaxed font-light'>
-                  Des milliers de propriétés disponibles à la location et à la
-                  vente. Maisons, appartements, studios, villas - trouvez
-                  l'espace qui correspond à vos besoins et votre budget.
+                <p className='text-base leading-7 text-gray-600 md:text-lg'>
+                  Maisons, appartements, studios et villas pour trouver rapidement un espace adapté à vos besoins.
                 </p>
+                <Link
+                  to='/houses'
+                  className='mt-6 inline-flex rounded-full bg-orange-50 px-5 py-2.5 text-sm font-black text-orange-600 transition hover:bg-orange-500 hover:text-white'
+                >
+                  Explorer
+                </Link>
               </div>
             </motion.div>
 
@@ -155,24 +163,32 @@ export default function About(): React.ReactElement {
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className='space-y-6'
+              className='group overflow-hidden rounded-[2rem] border border-slate-100 bg-white shadow-xl shadow-slate-200/60 transition duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-slate-300/60'
             >
-              <div className='rounded-2xl overflow-hidden shadow-xl'>
+              <div className='relative h-72 overflow-hidden'>
                 <img
                   src='https://images.unsplash.com/photo-1538688525198-9b88f6f53126?w=600'
                   alt='Mobilier'
-                  className='w-full h-64 object-cover'
+                  className='h-full w-full object-cover transition duration-500 group-hover:scale-105'
                 />
+                <div className='absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent' />
+                <span className='absolute left-5 top-5 rounded-full bg-white/90 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#0d3556] shadow-lg backdrop-blur'>
+                  Mobilier
+                </span>
               </div>
-              <div>
-                <h3 className='text-3xl md:text-4xl font-bold text-gray-900 mb-4'>
+              <div className='p-6 sm:p-7'>
+                <h3 className='mb-3 text-2xl font-black text-gray-950 md:text-3xl'>
                   Mobilier
                 </h3>
-                <p className='text-xl md:text-2xl text-gray-700 leading-relaxed font-light'>
-                  Découvrez une large sélection de meubles et d'accessoires pour
-                  votre intérieur. Du mobilier neuf aux pièces d'occasion de
-                  qualité, meublez votre espace avec style.
+                <p className='text-base leading-7 text-gray-600 md:text-lg'>
+                  Meubles et accessoires neufs ou d'occasion pour équiper votre intérieur avec style.
                 </p>
+                <Link
+                  to='/furnitures'
+                  className='mt-6 inline-flex rounded-full bg-orange-50 px-5 py-2.5 text-sm font-black text-orange-600 transition hover:bg-orange-500 hover:text-white'
+                >
+                  Découvrir
+                </Link>
               </div>
             </motion.div>
           </div>
@@ -213,27 +229,27 @@ export default function About(): React.ReactElement {
                 </div>
               </div>
 
-              <div className='grid h-60 grid-rows-[1fr_0.8fr] border-t border-white/10 sm:h-72 lg:h-auto lg:self-stretch lg:border-l lg:border-t-0'>
-                <div className='relative overflow-hidden'>
+              <div className='grid h-60 min-h-0 grid-rows-[minmax(0,1fr)_minmax(0,0.8fr)] border-t border-white/10 sm:h-72 lg:h-auto lg:self-stretch lg:border-l lg:border-t-0'>
+                <div className='relative min-h-0 overflow-hidden'>
                   <img
                     src='https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=900'
                     alt='Remise des clés d’un logement'
-                    className='h-full w-full object-cover'
+                    className='block h-full min-h-0 w-full object-cover'
                   />
                 </div>
-                <div className='grid grid-cols-2 border-t border-white/80'>
-                  <div className='relative overflow-hidden border-r border-white/80'>
+                <div className='grid min-h-0 grid-cols-2 border-t border-white/80'>
+                  <div className='relative min-h-0 overflow-hidden border-r border-white/80'>
                     <img
                       src='https://images.unsplash.com/photo-1551434678-e076c223a692?w=700'
                       alt='Recherche de logement sur mobile'
-                      className='h-full w-full object-cover'
+                      className='block h-full min-h-0 w-full object-cover'
                     />
                   </div>
-                  <div className='relative overflow-hidden'>
+                  <div className='relative min-h-0 overflow-hidden'>
                     <img
                       src='https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=700'
                       alt='Maison moderne au coucher du soleil'
-                      className='h-full w-full object-cover'
+                      className='block h-full min-h-0 w-full object-cover'
                     />
                   </div>
                 </div>
@@ -276,19 +292,19 @@ export default function About(): React.ReactElement {
               </h2>
 
               <form onSubmit={handleNewsletterSubmit} className='mx-auto mt-7 max-w-xl'>
-                <div className='flex rounded-full bg-white/75 p-1.5 shadow-inner backdrop-blur'>
+                <div className='flex min-h-14 rounded-full bg-white/75 p-2 shadow-inner backdrop-blur sm:min-h-16'>
                   <input
                     type='email'
                     value={newsletterEmail}
                     onChange={event => setNewsletterEmail(event.target.value)}
-                    className='min-w-0 flex-1 rounded-full bg-transparent px-4 text-sm font-semibold text-gray-700 outline-none placeholder:text-gray-500 sm:px-6'
+                    className='min-w-0 flex-1 rounded-full bg-transparent px-5 text-base font-semibold text-gray-700 outline-none placeholder:text-gray-500 sm:px-7'
                     placeholder='Entrez votre email'
                     required
                   />
                   <button
                     type='submit'
                     disabled={newsletterLoading}
-                    className='shrink-0 rounded-full bg-[#a91632] px-5 py-2.5 text-xs font-black text-white transition hover:bg-[#8f1029] disabled:bg-gray-400 sm:px-7'
+                    className='shrink-0 rounded-full bg-[#a91632] px-6 py-3 text-sm font-black text-white transition hover:bg-[#8f1029] disabled:bg-gray-400 sm:px-8'
                   >
                     {newsletterLoading ? 'Envoi...' : "S'inscrire"}
                   </button>
