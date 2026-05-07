@@ -4,6 +4,7 @@
 @tailwind utilities;
 
 /* Variables CSS pour les polices */
+
 :root {
   --font-heading:
     'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI',
