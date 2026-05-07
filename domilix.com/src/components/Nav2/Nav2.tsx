@@ -83,7 +83,7 @@ export default function Nav2({
   };
 
   const content = (
-    <div className='absolute left-0 right-0 top-16 z-40 bg-white text-[#00549f] shadow-2xl lg:hidden'>
+    <div className='absolute left-0 right-0 top-16 z-40 bg-white text-black shadow-2xl lg:hidden'>
       <div className='px-8 py-8'>
         <div className='space-y-7 text-[1.28rem] font-black leading-tight'>
           {links.map(link => (
@@ -92,7 +92,7 @@ export default function Nav2({
               to={link.url}
               className={({ isActive }) =>
                 `flex items-center gap-4 text-left transition-colors ${
-                  isActive ? 'text-orange-500' : 'text-[#00549f] hover:text-orange-500'
+                  isActive ? 'text-orange-500' : 'text-black hover:text-orange-500'
                 }`
               }
               onClick={() => setClick(false)}
@@ -109,7 +109,7 @@ export default function Nav2({
                 handlePublishClick();
                 setClick(false);
               }}
-              className='flex items-center gap-4 text-left text-[#00549f] transition-colors hover:text-orange-500'
+              className='flex items-center gap-4 text-left text-black transition-colors hover:text-orange-500'
             >
               <MdAddHomeWork className='h-5 w-5 shrink-0' />
               Publier une annonce
@@ -124,7 +124,7 @@ export default function Nav2({
                 to='/favorite'
                 className={({ isActive }) =>
                   `block transition-colors ${
-                    isActive ? 'text-orange-500' : 'text-[#00549f] hover:text-orange-500'
+                    isActive ? 'text-orange-500' : 'text-black hover:text-orange-500'
                   }`
                 }
                 onClick={() => setClick(false)}
@@ -140,7 +140,7 @@ export default function Nav2({
                   to={`/announcers/${user.announcer}`}
                   className={({ isActive }) =>
                     `block transition-colors ${
-                      isActive ? 'text-orange-500' : 'text-[#00549f] hover:text-orange-500'
+                      isActive ? 'text-orange-500' : 'text-black hover:text-orange-500'
                     }`
                   }
                   onClick={() => setClick(false)}
@@ -157,7 +157,7 @@ export default function Nav2({
                   to='/dashboard'
                   className={({ isActive }) =>
                     `block transition-colors ${
-                      isActive ? 'text-orange-500' : 'text-[#00549f] hover:text-orange-500'
+                      isActive ? 'text-orange-500' : 'text-black hover:text-orange-500'
                     }`
                   }
                   onClick={() => setClick(false)}
@@ -175,7 +175,7 @@ export default function Nav2({
                   navigate('/settings');
                   setClick(false);
                 }}
-                className='flex items-center gap-4 text-left text-[#00549f] transition-colors hover:text-orange-500'
+                className='flex items-center gap-4 text-left text-black transition-colors hover:text-orange-500'
               >
                 <MdSettings className='h-5 w-5 shrink-0' />
                 Paramètres
