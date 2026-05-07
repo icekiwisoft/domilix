@@ -1,19 +1,17 @@
 'use client';
 
-import { HeartIcon, MapPinIcon, ShareIcon } from '@heroicons/react/24/outline';
-import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
+import { HeartIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from '@router';
 
 import { Ad } from '../../utils/types';
-import ShareModal from '@components/ShareModal/ShareModal';
 import { toggleLike } from '../../services/favoritesApi';
 import { useAuth } from '../../hooks/useAuth';
 import { signinDialogActions } from '@stores/defineStore';
 import { mediaUrl } from '@utils/mediaUrl';
 import defaultHouseImg from '@assets/default-img/houses.jpg';
 
-function formatPrice(price: number | undefined, devise: string | undefined): string {
+function formatPrice(price: number | undefined): string {
   if (typeof price !== 'number') return '—';
   return price.toLocaleString();
 }
@@ -27,67 +25,51 @@ export default function ProductCard(props: Ad): React.ReactElement {
     medias,
     category,
     devise,
-    period,
     ad_type,
     bedroom,
     pool,
     garage,
     garden,
+    size,
   }: Ad = props;
 
   const [liked, setLike] = useState(initialLiked || false);
-  const [showShareModal, setShowShareModal] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const { isAuthenticated } = useAuth();
 
   const hasMultipleImages = medias && medias.length > 1;
-  const isVerified = props.announcer?.verified;
   const currency = devise ?? 'FCFA';
-  const rentLabel =
-    ad_type === 'location'
-      ? `Location${period ? ` / ${period}` : ' mensuelle'}`
-      : 'Prix de vente';
   const locationLabel = props.city
     ? `${props.city}${props.country ? `, ${props.country}` : ''}`
     : props.address || 'Adresse non spécifiée';
-  const hasAmenities = !!bedroom || !!pool || !!garage || !!garden;
+  const hasAmenities = !!size || !!bedroom || !!pool || !!garage || !!garden;
 
   useEffect(() => {
     if (!hasMultipleImages || isHovered) return;
-
     const timerId = setInterval(() => {
       setCurrentImageIndex(prev => (prev + 1) % medias.length);
     }, 3000);
-
     return () => clearInterval(timerId);
   }, [hasMultipleImages, isHovered, medias?.length]);
 
   const handleLike = useCallback(async () => {
     if (isLiking) return;
-
     if (!isAuthenticated) {
       signinDialogActions.toggle();
       return;
     }
-
     try {
       setIsLiking(true);
       const response = await toggleLike(id);
       setLike(response.liked);
-    } catch (error) {
-      console.error('Error toggling like:', error);
+    } catch {
+      // silent
     } finally {
       setIsLiking(false);
     }
   }, [id, isAuthenticated, isLiking]);
-
-  const handleShareClick = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setShowShareModal(true);
-  }, []);
 
   const handleLikeClick = useCallback(
     (e: React.MouseEvent) => {
@@ -98,199 +80,112 @@ export default function ProductCard(props: Ad): React.ReactElement {
     [handleLike]
   );
 
-  const nextImage = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      if (medias?.length) setCurrentImageIndex(prev => (prev + 1) % medias.length);
-    },
-    [medias?.length]
-  );
-
-  const prevImage = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      if (medias?.length)
-        setCurrentImageIndex(prev => (prev - 1 + medias.length) % medias.length);
-    },
-    [medias?.length]
-  );
-
   const handleMouseEnter = useCallback(() => setIsHovered(true), []);
   const handleMouseLeave = useCallback(() => setIsHovered(false), []);
-  const handleCloseShare = useCallback(() => setShowShareModal(false), []);
-
-  const shareUrl =
-    typeof window !== 'undefined'
-      ? `${window.location.origin}/houses/${id}`
-      : `/houses/${id}`;
 
   return (
-    <>
-      <article className='group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-xl transition-all duration-300'>
-        {/* ── Image ── */}
-        <div
-          className='relative aspect-[4/3] overflow-hidden'
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
+    <article
+      className='group bg-surface-container-lowest rounded-lg overflow-hidden relative shadow-card'
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      {/* Image */}
+      <div className='relative h-[220px] w-full overflow-hidden'>
+        <Link to={`/houses/${id}`} target='_blank' className='block h-full'>
+          <img
+            alt={description || 'Annonce'}
+            loading='lazy'
+            className='w-full h-full object-cover transition-transform duration-500 group-hover:scale-105'
+            src={
+              medias && medias.length > 0
+                ? mediaUrl(medias[currentImageIndex].file)
+                : defaultHouseImg.src
+            }
+          />
+        </Link>
+
+        {/* Favorite button */}
+        <button
+          type='button'
+          onClick={handleLikeClick}
+          disabled={isLiking}
+          title={liked ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+          className={`absolute top-3 right-3 w-8 h-8 bg-surface-container-lowest/90 rounded-full flex items-center justify-center shadow-sm transition-colors ${
+            liked ? 'text-primary-container' : 'text-secondary hover:text-primary-container'
+          } ${isLiking ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
-          <Link to={`/houses/${id}`} target='_blank' className='block h-full'>
-            <img
-              alt={description || 'Annonce'}
-              loading='lazy'
-              className='w-full h-full object-cover group-hover:scale-105 transition-transform duration-500'
-              src={
-                medias && medias.length > 0
-                  ? mediaUrl(medias[currentImageIndex].file)
-                  : defaultHouseImg.src
-              }
-            />
-          </Link>
+          <HeartIcon className={`size-[18px] ${liked ? 'fill-current' : ''}`} />
+        </button>
 
-          {/* Badges haut-gauche */}
-          <div className='absolute top-4 left-4 flex gap-2 pointer-events-none'>
-            {isVerified && (
-              <span className='bg-orange-500 text-white text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded'>
-                Vérifié
+        {/* Status badge */}
+        <div className='absolute bottom-3 left-3 bg-surface-container-lowest/90 px-3 py-1 rounded text-xs font-semibold text-on-surface backdrop-blur-sm shadow-sm'>
+          {ad_type === 'location' ? 'À louer' : 'À vendre'}
+        </div>
+
+        {/* Image progress dots */}
+        {hasMultipleImages && (
+          <div className='absolute bottom-3 right-3 flex gap-1'>
+            {medias.map((_, index) => (
+              <div
+                key={index}
+                className={`w-1.5 h-1.5 rounded-full transition-all duration-200 ${
+                  index === currentImageIndex ? 'bg-white' : 'bg-white/50'
+                }`}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Content */}
+      <div className='p-6'>
+        {/* Price */}
+        <Link to={`/houses/${id}`} target='_blank'>
+          <h3 className='text-2xl font-semibold text-on-surface leading-8 mb-1 hover:text-primary transition-colors'>
+            {formatPrice(price)}{' '}
+            <span className='text-sm font-medium text-on-surface-variant'>{currency}</span>
+          </h3>
+        </Link>
+
+        {/* Title */}
+        <p className='text-base text-on-surface mb-1 truncate'>
+          {description || category?.name || 'Annonce'}
+        </p>
+
+        {/* Location */}
+        <p className='text-xs text-secondary mb-6 flex items-center gap-1'>
+          <MapPinIcon className='size-4 shrink-0' />
+          <span className='truncate'>{locationLabel}</span>
+        </p>
+
+        {/* Features */}
+        {hasAmenities && (
+          <div className='flex items-center gap-4 flex-wrap border-t border-outline-variant pt-3 text-xs text-secondary'>
+            {size ? (
+              <span className='flex items-center gap-1'>
+                <svg className='size-[15px] shrink-0' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.8' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
+                  <path d='M3 3h6v6H3zM15 3h6v6h-6zM3 15h6v6H3zM15 15h6v6h-6z' />
+                </svg>
+                {size} m²
               </span>
-            )}
-            <span className='bg-white/90 text-gray-800 text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded'>
-              {ad_type === 'location' ? 'À louer' : 'À vendre'}
-            </span>
+            ) : null}
+            {bedroom ? (
+              <span className='flex items-center gap-1'>
+                <svg className='size-[15px] shrink-0' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.8' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
+                  <path d='M2 20v-6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v6' />
+                  <path d='M2 14v-3a2 2 0 0 1 2-2h3' />
+                  <path d='M17 9h3a2 2 0 0 1 2 2v3' />
+                  <rect x='7' y='9' width='10' height='5' rx='1' />
+                </svg>
+                {bedroom} ch.
+              </span>
+            ) : null}
+            {pool ? <span>Piscine</span> : null}
+            {garage ? <span>Garage</span> : null}
+            {garden ? <span>Jardin</span> : null}
           </div>
-
-          {/* Actions haut-droit */}
-          <div className='absolute top-4 right-4 flex gap-2'>
-            <button
-              type='button'
-              onClick={handleShareClick}
-              title='Partager'
-              className='size-9 bg-white/20 backdrop-blur-md text-white hover:bg-white hover:text-gray-700 rounded-full flex items-center justify-center transition-all'
-            >
-              <ShareIcon className='size-4' />
-            </button>
-            <button
-              type='button'
-              onClick={handleLikeClick}
-              disabled={isLiking}
-              title={liked ? 'Retirer des favoris' : 'Ajouter aux favoris'}
-              className={`size-9 backdrop-blur-md rounded-full flex items-center justify-center transition-all ${
-                liked
-                  ? 'bg-orange-500 text-white'
-                  : 'bg-white/20 text-white hover:bg-white hover:text-red-500'
-              } ${isLiking ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              <HeartIcon className={`size-4 ${liked ? 'fill-current' : ''}`} />
-            </button>
-          </div>
-
-          {/* Navigation carrousel */}
-          {hasMultipleImages && (
-            <>
-              <button
-                type='button'
-                onClick={prevImage}
-                title='Image précédente'
-                className='absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-white/90 hover:bg-white text-gray-800 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-sm'
-              >
-                <ChevronLeftIcon className='w-4 h-4' />
-              </button>
-
-              <button
-                type='button'
-                onClick={nextImage}
-                title='Image suivante'
-                className='absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-white/90 hover:bg-white text-gray-800 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-sm'
-              >
-                <ChevronRightIcon className='w-4 h-4' />
-              </button>
-
-              <div className='absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1'>
-                {medias.map((_, index) => (
-                  <button
-                    key={index}
-                    type='button'
-                    title={`Image ${index + 1}`}
-                    onClick={e => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setCurrentImageIndex(index);
-                    }}
-                    className={`w-1.5 h-1.5 rounded-full transition-all duration-200 ${
-                      index === currentImageIndex
-                        ? 'bg-white'
-                        : 'bg-white/50 hover:bg-white/75'
-                    }`}
-                  />
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-
-        {/* ── Contenu ── */}
-        <div className='p-4'>
-          {/* Type + Prix */}
-          <div className='flex justify-between items-start mb-2'>
-            <p className='text-xs text-gray-500 pt-0.5'>
-              {category?.name || (ad_type === 'location' ? 'Location' : 'Vente')}
-            </p>
-            <div className='text-right shrink-0 ml-3'>
-              <p className='text-[10px] text-gray-400 leading-none mb-0.5'>{rentLabel}</p>
-              <p className='text-lg font-bold text-gray-900 leading-tight'>
-                {formatPrice(price, devise)}{' '}
-                <span className='text-xs font-medium text-gray-500'>{currency}</span>
-              </p>
-            </div>
-          </div>
-
-          {/* Titre */}
-          <Link to={`/houses/${id}`} target='_blank'>
-            <h3 className='font-bold text-base text-gray-900 line-clamp-2 mb-2 hover:text-orange-500 transition-colors'>
-              {description || 'Annonce'}
-            </h3>
-          </Link>
-
-          {/* Localisation */}
-          <p className='text-gray-500 text-sm mb-2 flex items-center gap-1'>
-            <MapPinIcon className='size-3.5 shrink-0' />
-            <span className='line-clamp-1'>{locationLabel}</span>
-          </p>
-
-          {/* Équipements en ligne */}
-          {hasAmenities && (
-            <p className='text-gray-500 text-xs mb-2 line-clamp-1'>
-              {[
-                bedroom ? `${bedroom} chambre${bedroom > 1 ? 's' : ''}` : null,
-                pool ? 'Piscine' : null,
-                garage ? 'Garage' : null,
-                garden ? 'Jardin' : null,
-              ]
-                .filter(Boolean)
-                .join(' · ')}
-            </p>
-          )}
-
-          {/* Extrait */}
-          {props.presentation && (
-            <p className='text-xs text-gray-400 line-clamp-2 mt-2'>
-              {props.presentation}
-            </p>
-          )}
-        </div>
-      </article>
-
-      <ShareModal
-        isOpen={showShareModal}
-        onClose={handleCloseShare}
-        url={shareUrl}
-        title={description || category?.name || 'Annonce'}
-        price={`${price?.toLocaleString()} ${currency}`}
-        location={props.city || props.address}
-        image={medias?.[0]?.file ? mediaUrl(medias[0].file) : undefined}
-        type={ad_type === 'location' ? 'Location' : 'Vente'}
-      />
-    </>
+        )}
+      </div>
+    </article>
   );
 }

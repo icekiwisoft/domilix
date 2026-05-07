@@ -14,7 +14,7 @@ type ClassNameInput =
   | ((props: { isActive: boolean }) => string | undefined)
   | undefined;
 
-type LinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement> & {
+type LinkProps = Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'className'> & {
   to: string;
   replace?: boolean;
   state?: unknown;

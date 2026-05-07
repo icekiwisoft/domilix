@@ -10,12 +10,9 @@ import { Checkbox, RadioGroup } from '@headlessui/react';
 import { getAds, getBroadcasts, getCategories, getCities, CityItem, BroadcastItem } from '@services/announceApi';
 import { Ad } from '@utils/types';
 import React, { useCallback, useEffect, useState } from 'react';
-import { MdChevronLeft, MdChevronRight, MdSearch } from 'react-icons/md';
-import { Autoplay, Pagination } from 'swiper/modules';
-import { Swiper, SwiperSlide } from 'swiper/react';
+import { MdSearch } from 'react-icons/md';
+import { HiMapPin, HiAdjustmentsHorizontal, HiCurrencyDollar, HiBuildingOffice2, HiStar } from 'react-icons/hi2';
 import { useSearchParams, useNavigate } from '@router';
-import 'swiper/css';
-import 'swiper/css/pagination';
 
 type PromoSlide = {
   id: string;
@@ -34,20 +31,19 @@ function AdsSkeleton() {
       {[0, 1].map(section => (
         <section key={section} className='space-y-4'>
           <div className='flex items-center justify-between gap-3'>
-            <div className='h-6 w-40 animate-pulse rounded-full bg-gray-300' />
-            <div className='h-7 w-24 animate-pulse rounded-full bg-gray-300' />
+            <div className='h-6 w-40 animate-pulse rounded-full bg-surface-container-high' />
+            <div className='h-7 w-24 animate-pulse rounded-full bg-surface-container-high' />
           </div>
-
-          <div className='grid w-full grid-cols-1 gap-x-2 gap-y-6 sm:grid-cols-2 sm:gap-x-6 lg:grid-cols-3 lg:gap-x-4 xl:grid-cols-4 2xl:grid-cols-5'>
+          <div className='grid w-full grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2 sm:gap-x-6 lg:grid-cols-3 lg:gap-x-4 xl:grid-cols-4 2xl:grid-cols-5'>
             {Array.from({ length: 8 }).map((_, index) => (
-              <div key={index} className='overflow-hidden rounded-3xl bg-gray-200 shadow-sm'>
-                <div className='aspect-[4/3] animate-pulse bg-gray-400' />
+              <div key={index} className='overflow-hidden rounded-xl bg-surface-container shadow-card'>
+                <div className='aspect-[4/3] animate-pulse bg-surface-container-high' />
                 <div className='space-y-3 p-4'>
-                  <div className='h-4 w-3/4 animate-pulse rounded-full bg-gray-400' />
-                  <div className='h-4 w-1/2 animate-pulse rounded-full bg-gray-300' />
+                  <div className='h-4 w-3/4 animate-pulse rounded-full bg-surface-container-high' />
+                  <div className='h-4 w-1/2 animate-pulse rounded-full bg-surface-container' />
                   <div className='flex items-center justify-between pt-2'>
-                    <div className='h-5 w-24 animate-pulse rounded-full bg-gray-400' />
-                    <div className='h-9 w-9 animate-pulse rounded-full bg-gray-300' />
+                    <div className='h-5 w-24 animate-pulse rounded-full bg-surface-container-high' />
+                    <div className='h-9 w-9 animate-pulse rounded-full bg-surface-container' />
                   </div>
                 </div>
               </div>
@@ -63,22 +59,20 @@ function EmptyAdsState() {
   return (
     <div className='flex min-h-[48vh] items-center justify-center px-5 py-16 text-center sm:px-8 lg:px-12'>
       <div className='max-w-md'>
-        <div className='mx-auto mb-6 flex h-28 w-28 items-center justify-center rounded-[2rem] bg-orange-50 text-orange-500'>
+        <div className='mx-auto mb-6 flex h-28 w-28 items-center justify-center rounded-[2rem] bg-primary/10 text-primary'>
           <svg viewBox='0 0 120 120' className='h-20 w-20' fill='none' aria-hidden='true'>
-            <path d='M24 51 60 25l36 26v40a5 5 0 0 1-5 5H29a5 5 0 0 1-5-5V51Z' fill='#FFF4E5' stroke='currentColor' strokeWidth='5' strokeLinejoin='round' />
+            <path d='M24 51 60 25l36 26v40a5 5 0 0 1-5 5H29a5 5 0 0 1-5-5V51Z' fill='currentColor' fillOpacity='0.08' stroke='currentColor' strokeWidth='5' strokeLinejoin='round' />
             <path d='M48 96V67h24v29M38 52h44' stroke='currentColor' strokeWidth='5' strokeLinecap='round' strokeLinejoin='round' />
-            <path d='M91 30 102 19M100 41h14M20 24l9 9' stroke='#FDBA74' strokeWidth='5' strokeLinecap='round' />
+            <path d='M91 30 102 19M100 41h14M20 24l9 9' stroke='currentColor' strokeOpacity='0.4' strokeWidth='5' strokeLinecap='round' />
             <circle cx='24' cy='86' r='5' fill='currentColor' />
-            <circle cx='96' cy='86' r='4' fill='#FDBA74' />
+            <circle cx='96' cy='86' r='4' fill='currentColor' fillOpacity='0.4' />
           </svg>
         </div>
-        <p className='text-xs font-black uppercase tracking-[0.24em] text-orange-500'>
-          Aucun résultat
-        </p>
-        <h2 className='mt-3 text-3xl font-black tracking-tight text-slate-950'>
+        <p className='text-xs font-bold uppercase tracking-[0.2em] text-primary'>Aucun résultat</p>
+        <h2 className='mt-3 text-2xl font-bold tracking-tight text-on-surface sm:text-3xl'>
           Aucune annonce mise en avant pour le moment
         </h2>
-        <p className='mt-3 text-sm leading-6 text-slate-500'>
+        <p className='mt-3 text-sm leading-6 text-on-surface-variant'>
           Revenez un peu plus tard ou lancez une recherche pour trouver les annonces disponibles.
         </p>
       </div>
@@ -90,21 +84,19 @@ function AdsErrorState() {
   return (
     <div className='flex min-h-[48vh] items-center justify-center px-5 py-16 text-center sm:px-8 lg:px-12'>
       <div className='max-w-md'>
-        <div className='mx-auto mb-6 flex h-28 w-28 items-center justify-center rounded-[2rem] bg-red-50 text-red-500'>
+        <div className='mx-auto mb-6 flex h-28 w-28 items-center justify-center rounded-[2rem] bg-error/10 text-error'>
           <svg viewBox='0 0 120 120' className='h-20 w-20' fill='none' aria-hidden='true'>
-            <path d='M24 70 60 23l36 47v28H24V70Z' fill='#FEF2F2' stroke='currentColor' strokeWidth='5' strokeLinejoin='round' />
+            <path d='M24 70 60 23l36 47v28H24V70Z' fill='currentColor' fillOpacity='0.08' stroke='currentColor' strokeWidth='5' strokeLinejoin='round' />
             <path d='M60 46v23' stroke='currentColor' strokeWidth='7' strokeLinecap='round' />
             <circle cx='60' cy='82' r='4' fill='currentColor' />
-            <path d='M30 28 20 18M93 29l10-10M15 54H4M116 54h-11' stroke='#FCA5A5' strokeWidth='5' strokeLinecap='round' />
+            <path d='M30 28 20 18M93 29l10-10M15 54H4M116 54h-11' stroke='currentColor' strokeOpacity='0.4' strokeWidth='5' strokeLinecap='round' />
           </svg>
         </div>
-        <p className='text-xs font-black uppercase tracking-[0.24em] text-red-500'>
-          Erreur serveur
-        </p>
-        <h2 className='mt-3 text-3xl font-black tracking-tight text-slate-950'>
+        <p className='text-xs font-bold uppercase tracking-[0.2em] text-error'>Erreur serveur</p>
+        <h2 className='mt-3 text-2xl font-bold tracking-tight text-on-surface sm:text-3xl'>
           Impossible de charger les annonces
         </h2>
-        <p className='mt-3 text-sm leading-6 text-slate-500'>
+        <p className='mt-3 text-sm leading-6 text-on-surface-variant'>
           Une erreur interne est survenue. Veuillez réessayer dans quelques instants.
         </p>
       </div>
@@ -116,13 +108,9 @@ export default function Ads(): React.ReactElement {
   const housesPromoSrc =
     typeof housesPromoImg === 'string' ? housesPromoImg : housesPromoImg.src;
   const furnituresPromoSrc =
-    typeof furnituresPromoImg === 'string'
-      ? furnituresPromoImg
-      : furnituresPromoImg.src;
+    typeof furnituresPromoImg === 'string' ? furnituresPromoImg : furnituresPromoImg.src;
   const coverAnnonceurSrc =
-    typeof coverAnnonceurImg === 'string'
-      ? coverAnnonceurImg
-      : coverAnnonceurImg.src;
+    typeof coverAnnonceurImg === 'string' ? coverAnnonceurImg : coverAnnonceurImg.src;
   const homePromoSrc =
     typeof homePromoImg === 'string' ? homePromoImg : homePromoImg.src;
 
@@ -133,7 +121,7 @@ export default function Ads(): React.ReactElement {
       subtitle: 'Premiere annonce sans frais pour attirer vos premiers clients',
       badge: '100% OFF',
       cta: 'Publier maintenant',
-      bg: 'from-orange-500 to-rose-500',
+      bg: 'from-orange-600 to-rose-500',
       image: coverAnnonceurSrc,
     },
     {
@@ -142,7 +130,7 @@ export default function Ads(): React.ReactElement {
       subtitle: 'Mettez votre annonce en tete des recherches pendant 7 jours',
       badge: '50% OFF',
       cta: 'Activer le boost',
-      bg: 'from-pink-500 to-red-500',
+      bg: 'from-amber-500 to-orange-600',
       image: housesPromoSrc,
     },
     {
@@ -151,7 +139,7 @@ export default function Ads(): React.ReactElement {
       subtitle: 'Publiez en illimite et obtenez plus de visibilite chaque semaine',
       badge: '35% OFF',
       cta: 'Voir le pack pro',
-      bg: 'from-amber-500 to-orange-600',
+      bg: 'from-rose-600 to-pink-600',
       image: furnituresPromoSrc,
     },
     {
@@ -160,7 +148,7 @@ export default function Ads(): React.ReactElement {
       subtitle: 'Donnez plus de confiance a vos annonces et vendez plus vite',
       badge: '20% OFF',
       cta: 'Decouvrir le service',
-      bg: 'from-blue-500 to-indigo-500',
+      bg: 'from-orange-700 to-amber-600',
       image: homePromoSrc,
     },
   ];
@@ -169,7 +157,6 @@ export default function Ads(): React.ReactElement {
     Array<{ city: string; country?: string; adsCount?: number; ads: Ad[] }>
   >([]);
   const [promoSlides, setPromoSlides] = useState<PromoSlide[]>(defaultPromoSlides);
-  const [promoSwiper, setPromoSwiper] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [serverError, setServerError] = useState(false);
   const [searchLocation, setSearchLocation] = useState('');
@@ -191,7 +178,6 @@ export default function Ads(): React.ReactElement {
   const [UrlSearchParam] = useSearchParams();
   const navigate = useNavigate();
 
-  // Compter les filtres actifs
   const budgetSummary =
     filters.budget_min || filters.budget_max
       ? `${filters.budget_min || '0'} - ${filters.budget_max || '...'} FCFA`
@@ -223,45 +209,115 @@ export default function Ads(): React.ReactElement {
       ? `${filters.amenities.length} equipement${filters.amenities.length > 1 ? 's' : ''}`
       : 'Aucun equipement';
 
-  const renderFilterPopupContent = (
-    popup: 'budget' | 'type' | 'standing' | 'amenities'
-  ) => {
+  const radioOption = (checked: boolean) => (
+    <span className={`flex h-4 w-4 items-center justify-center rounded-full border transition-colors ${checked ? 'border-primary' : 'border-outline'}`}>
+      <span className={`h-2 w-2 rounded-full transition-colors ${checked ? 'bg-primary' : 'bg-transparent'}`} />
+    </span>
+  );
+
+  const checkboxIcon = (
+    <svg viewBox='0 0 16 16' fill='none' className='hidden h-3 w-3 text-primary group-data-[checked]:block'>
+      <path d='M3 8.5L6.2 11.2L13 4.5' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' />
+    </svg>
+  );
+
+  const popupPanelClass = 'absolute z-40 rounded-2xl border border-outline-variant bg-white p-4 shadow-card-hover ring-1 ring-black/5';
+
+  const renderFilterPopupContent = (popup: 'budget' | 'type' | 'standing' | 'amenities') => {
     return (
       <>
         {popup === 'budget' && (
-          <div className='space-y-3'>
-            <h3 className='text-sm font-semibold tracking-tight text-gray-900'>
-              Budget
-            </h3>
-            <p className='text-xs text-gray-500'>Definissez votre fourchette</p>
-            <div className='space-y-2'>
+          <div className='space-y-4'>
+            <div>
+              <h3 className='text-sm font-semibold text-on-surface'>Budget</h3>
+              <p className='mt-0.5 text-xs text-on-surface-variant'>Fourchette de prix en FCFA</p>
+            </div>
+
+            <div className='space-y-1.5'>
+              <div className='flex items-center justify-between text-xs'>
+                <span className='font-medium text-on-surface-variant'>Minimum</span>
+                <span className='font-bold text-on-surface'>
+                  {filters.budget_min ? Number(filters.budget_min).toLocaleString('fr-FR') : '0'} FCFA
+                </span>
+              </div>
               <input
-                type='number'
-                placeholder='Prix minimum'
-                value={filters.budget_min}
-                onChange={e => handleFilterChange('budget_min', e.target.value)}
-                className='h-10 w-full rounded-xl border border-gray-200 bg-gray-50 px-3 text-sm text-gray-900 outline-none placeholder:text-gray-400 transition-colors focus:border-orange-300 focus:bg-white focus:ring-2 focus:ring-orange-100'
+                type='range'
+                min='0'
+                max='10000000'
+                step='50000'
+                value={filters.budget_min || 0}
+                onChange={e => handleFilterChange('budget_min', e.target.value === '0' ? '' : e.target.value)}
+                className='h-1.5 w-full cursor-pointer appearance-none rounded-full [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:shadow-md [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-primary [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:cursor-pointer'
+                style={{
+                  background: `linear-gradient(to right, #E8921A 0%, #E8921A ${((Number(filters.budget_min) || 0) / 10000000) * 100}%, #D5C3B9 ${((Number(filters.budget_min) || 0) / 10000000) * 100}%, #D5C3B9 100%)`,
+                }}
               />
+              <div className='flex justify-between text-[10px] text-on-surface-variant'>
+                <span>0</span>
+                <span>10 000 000</span>
+              </div>
+            </div>
+
+            <div className='space-y-1.5'>
+              <div className='flex items-center justify-between text-xs'>
+                <span className='font-medium text-on-surface-variant'>Maximum</span>
+                <span className='font-bold text-on-surface'>
+                  {filters.budget_max ? Number(filters.budget_max).toLocaleString('fr-FR') + ' FCFA' : 'Illimité'}
+                </span>
+              </div>
               <input
-                type='number'
-                placeholder='Prix maximum'
-                value={filters.budget_max}
-                onChange={e => handleFilterChange('budget_max', e.target.value)}
-                className='h-10 w-full rounded-xl border border-gray-200 bg-gray-50 px-3 text-sm text-gray-900 outline-none placeholder:text-gray-400 transition-colors focus:border-orange-300 focus:bg-white focus:ring-2 focus:ring-orange-100'
+                type='range'
+                min='0'
+                max='10000000'
+                step='50000'
+                value={filters.budget_max || 10000000}
+                onChange={e => handleFilterChange('budget_max', e.target.value === '10000000' ? '' : e.target.value)}
+                className='h-1.5 w-full cursor-pointer appearance-none rounded-full [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:shadow-md [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-primary [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:cursor-pointer'
+                style={{
+                  background: `linear-gradient(to right, #E8921A 0%, #E8921A ${((Number(filters.budget_max) || 10000000) / 10000000) * 100}%, #D5C3B9 ${((Number(filters.budget_max) || 10000000) / 10000000) * 100}%, #D5C3B9 100%)`,
+                }}
               />
+              <div className='flex justify-between text-[10px] text-on-surface-variant'>
+                <span>0</span>
+                <span>10M+</span>
+              </div>
+            </div>
+
+            <div>
+              <p className='mb-2 text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant'>Raccourcis</p>
+              <div className='flex flex-wrap gap-1.5'>
+                {[
+                  { label: '< 100k', max: '100000' },
+                  { label: '< 300k', max: '300000' },
+                  { label: '< 500k', max: '500000' },
+                  { label: '< 1M', max: '1000000' },
+                  { label: '< 5M', max: '5000000' },
+                ].map(preset => (
+                  <button
+                    key={preset.label}
+                    type='button'
+                    onClick={() => handleFilterChange('budget_max', preset.max)}
+                    className={`rounded-xl border px-3 py-1.5 text-xs font-semibold transition-colors ${
+                      filters.budget_max === preset.max
+                        ? 'border-primary bg-primary/10 text-primary'
+                        : 'border-outline-variant bg-white text-on-surface-variant hover:border-primary/40 hover:text-primary'
+                    }`}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         )}
 
         {popup === 'type' && (
           <div className='space-y-3'>
-            <h3 className='text-sm font-semibold tracking-tight text-gray-900'>
-              Type et categories
-            </h3>
+            <h3 className='text-sm font-semibold text-on-surface'>Type et categories</h3>
             <RadioGroup
               value={filters.ad_type}
               onChange={(value: string) => handleFilterChange('ad_type', value)}
-              className='space-y-2'
+              className='space-y-1.5'
             >
               {[
                 { key: '', name: 'Tous' },
@@ -271,51 +327,29 @@ export default function Ads(): React.ReactElement {
                 <RadioGroup.Option
                   key={type.key}
                   value={type.key}
-                  className='flex cursor-pointer items-center gap-2 rounded-md px-1 py-1'
+                  className='flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-surface-container-low'
                 >
                   {({ checked }) => (
                     <>
-                      <span
-                        className={`flex h-4 w-4 items-center justify-center rounded-full border ${checked ? 'border-orange-500' : 'border-gray-300'
-                          }`}
-                      >
-                        <span
-                          className={`h-2 w-2 rounded-full ${checked ? 'bg-orange-500' : 'bg-transparent'
-                            }`}
-                        />
-                      </span>
-                      <span className='text-sm text-gray-700'>{type.name}</span>
+                      {radioOption(checked)}
+                      <span className='text-sm text-on-surface'>{type.name}</span>
                     </>
                   )}
                 </RadioGroup.Option>
               ))}
             </RadioGroup>
-            <div className='max-h-40 space-y-2 overflow-y-auto rounded-xl border border-gray-100 bg-gray-50/70 p-2.5'>
+            <div className='max-h-40 space-y-1 overflow-y-auto rounded-xl border border-outline-variant bg-surface-container-low p-2'>
               {categories.map(category => (
                 <Checkbox
                   key={category.id}
                   checked={filters.category_id.includes(category.id)}
-                  onChange={(checked: boolean) =>
-                    handleCategoryChange(category.id, checked)
-                  }
+                  onChange={(checked: boolean) => handleCategoryChange(category.id, checked)}
                   className='group flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-white'
                 >
-                  <span className='flex h-4 w-4 items-center justify-center rounded border border-gray-300 bg-white group-data-[checked]:border-orange-500'>
-                    <svg
-                      viewBox='0 0 16 16'
-                      fill='none'
-                      className='hidden h-3 w-3 text-orange-500 group-data-[checked]:block'
-                    >
-                      <path
-                        d='M3 8.5L6.2 11.2L13 4.5'
-                        stroke='currentColor'
-                        strokeWidth='2'
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                      />
-                    </svg>
+                  <span className='flex h-4 w-4 items-center justify-center rounded border border-outline bg-white transition-colors group-data-[checked]:border-primary'>
+                    {checkboxIcon}
                   </span>
-                  <span className='text-sm text-gray-700'>{category.name}</span>
+                  <span className='text-sm text-on-surface'>{category.name}</span>
                 </Checkbox>
               ))}
             </div>
@@ -324,15 +358,11 @@ export default function Ads(): React.ReactElement {
 
         {popup === 'standing' && (
           <div className='space-y-3'>
-            <h3 className='text-sm font-semibold tracking-tight text-gray-900'>
-              Standing
-            </h3>
+            <h3 className='text-sm font-semibold text-on-surface'>Standing</h3>
             <RadioGroup
               value={filters.standing}
-              onChange={(value: string) =>
-                handleFilterChange('standing', value)
-              }
-              className='space-y-2'
+              onChange={(value: string) => handleFilterChange('standing', value)}
+              className='space-y-1.5'
             >
               {[
                 { key: '', name: 'Tous' },
@@ -343,22 +373,12 @@ export default function Ads(): React.ReactElement {
                 <RadioGroup.Option
                   key={standing.key}
                   value={standing.key}
-                  className='flex cursor-pointer items-center gap-2 rounded-md px-1 py-1'
+                  className='flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-surface-container-low'
                 >
                   {({ checked }) => (
                     <>
-                      <span
-                        className={`flex h-4 w-4 items-center justify-center rounded-full border ${checked ? 'border-orange-500' : 'border-gray-300'
-                          }`}
-                      >
-                        <span
-                          className={`h-2 w-2 rounded-full ${checked ? 'bg-orange-500' : 'bg-transparent'
-                            }`}
-                        />
-                      </span>
-                      <span className='text-sm text-gray-700'>
-                        {standing.name}
-                      </span>
+                      {radioOption(checked)}
+                      <span className='text-sm text-on-surface'>{standing.name}</span>
                     </>
                   )}
                 </RadioGroup.Option>
@@ -369,10 +389,8 @@ export default function Ads(): React.ReactElement {
 
         {popup === 'amenities' && (
           <div className='space-y-3'>
-            <h3 className='text-sm font-semibold tracking-tight text-gray-900'>
-              Equipements
-            </h3>
-            <div className='grid grid-cols-1 gap-2'>
+            <h3 className='text-sm font-semibold text-on-surface'>Equipements</h3>
+            <div className='grid grid-cols-1 gap-1'>
               {[
                 { key: 'wifi', name: 'WiFi inclus' },
                 { key: 'air_conditioning', name: 'Climatisation' },
@@ -382,50 +400,36 @@ export default function Ads(): React.ReactElement {
                 { key: 'gate', name: 'Portail' },
                 { key: 'pool', name: 'Piscine' },
                 { key: 'garage', name: 'Garage' },
-                { key: 'furnitured', name: 'Meuble' },
+                { key: 'furnitured', name: 'Meublé' },
               ].map(amenity => (
                 <Checkbox
                   key={amenity.key}
                   checked={filters.amenities.includes(amenity.key)}
-                  onChange={(checked: boolean) =>
-                    handleAmenityChange(amenity.key, checked)
-                  }
-                  className='group flex cursor-pointer items-center gap-2 rounded-md px-1 py-1'
+                  onChange={(checked: boolean) => handleAmenityChange(amenity.key, checked)}
+                  className='group flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-surface-container-low'
                 >
-                  <span className='flex h-4 w-4 items-center justify-center rounded border border-gray-300 bg-white group-data-[checked]:border-orange-500'>
-                    <svg
-                      viewBox='0 0 16 16'
-                      fill='none'
-                      className='hidden h-3 w-3 text-orange-500 group-data-[checked]:block'
-                    >
-                      <path
-                        d='M3 8.5L6.2 11.2L13 4.5'
-                        stroke='currentColor'
-                        strokeWidth='2'
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                      />
-                    </svg>
+                  <span className='flex h-4 w-4 items-center justify-center rounded border border-outline bg-white transition-colors group-data-[checked]:border-primary'>
+                    {checkboxIcon}
                   </span>
-                  <span className='text-sm text-gray-700'>{amenity.name}</span>
+                  <span className='text-sm text-on-surface'>{amenity.name}</span>
                 </Checkbox>
               ))}
             </div>
           </div>
         )}
 
-        <div className='mt-4 flex items-center justify-end gap-2 border-t border-gray-100 pt-3'>
+        <div className='mt-4 flex items-center justify-end gap-2 border-t border-outline-variant pt-3'>
           <button
             type='button'
             onClick={resetFilters}
-            className='rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors hover:border-gray-300 hover:text-gray-800'
+            className='rounded-lg border border-outline-variant bg-white px-3 py-1.5 text-sm font-medium text-on-surface-variant transition-colors hover:border-outline hover:text-on-surface'
           >
-            Reinitialiser
+            Réinitialiser
           </button>
           <button
             type='button'
             onClick={applyFilters}
-            className='rounded-lg bg-gradient-to-r from-orange-500 to-amber-500 px-3 py-1.5 text-sm font-medium text-white shadow-sm transition-all hover:from-orange-600 hover:to-amber-600'
+            className='rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-light'
           >
             Appliquer
           </button>
@@ -434,14 +438,13 @@ export default function Ads(): React.ReactElement {
     );
   };
 
-  // Charger les catégories
   useEffect(() => {
     const loadCategories = async () => {
       try {
         const categoriesData = await getCategories('house');
         setCategories(categoriesData);
-      } catch (error) {
-        console.error('Erreur lors du chargement des catégories:', error);
+      } catch {
+        // silent
       }
     };
     loadCategories();
@@ -465,23 +468,19 @@ export default function Ads(): React.ReactElement {
             actionUrl: item.action_url || undefined,
           })),
         );
-      } catch (error) {
-        console.error('Erreur lors du chargement des broadcasts:', error);
+      } catch {
+        // silent
       }
     };
 
     loadBroadcasts();
   }, [coverAnnonceurSrc]);
 
-  // Initialiser la valeur de recherche et les filtres depuis l'URL
   useEffect(() => {
     const searchParam = UrlSearchParam.get('search');
-    if (searchParam) {
-      setSearchLocation(searchParam);
-    }
+    if (searchParam) setSearchLocation(searchParam);
 
-    // Initialiser les filtres depuis l'URL
-    const newFilters = {
+    setFilters({
       budget_min: UrlSearchParam.get('budget_min') || '',
       budget_max: UrlSearchParam.get('budget_max') || '',
       category_id: UrlSearchParam.getAll('category_id'),
@@ -490,11 +489,9 @@ export default function Ads(): React.ReactElement {
       bedroom_max: UrlSearchParam.get('bedroom_max') || '',
       ad_type: UrlSearchParam.get('ad_type') || '',
       amenities: UrlSearchParam.getAll('amenities'),
-    };
-    setFilters(newFilters);
+    });
   }, [UrlSearchParam]);
 
-  // Gérer la sélection d'une localisation
   const handleLocationSelect = (location: {
     coordinates: [number, number];
     address: string;
@@ -506,26 +503,19 @@ export default function Ads(): React.ReactElement {
     const searchQuery = location.city || location.address;
     setSearchLocation(searchQuery);
 
-    // Mettre à jour l'URL avec la nouvelle recherche
     const newSearchParams = new URLSearchParams(UrlSearchParam);
     newSearchParams.set('search', searchQuery);
     navigate(`?${newSearchParams.toString()}`, { replace: true });
   };
 
-  // Gérer la recherche manuelle
   const handleSearchChange = (value: string) => {
     setSearchLocation(value);
   };
 
-  // Gérer les changements de filtres
   const handleFilterChange = (filterName: string, value: any) => {
-    setFilters(prev => ({
-      ...prev,
-      [filterName]: value,
-    }));
+    setFilters(prev => ({ ...prev, [filterName]: value }));
   };
 
-  // Gérer les filtres de catégorie (checkbox multiple)
   const handleCategoryChange = (categoryId: string, checked: boolean) => {
     setFilters(prev => ({
       ...prev,
@@ -535,7 +525,6 @@ export default function Ads(): React.ReactElement {
     }));
   };
 
-  // Gérer les filtres d'équipements (checkbox multiple)
   const handleAmenityChange = (amenity: string, checked: boolean) => {
     setFilters(prev => ({
       ...prev,
@@ -545,7 +534,6 @@ export default function Ads(): React.ReactElement {
     }));
   };
 
-  // Appliquer les filtres
   const applyFilters = () => {
     const newSearchParams = new URLSearchParams(UrlSearchParam);
 
@@ -555,23 +543,12 @@ export default function Ads(): React.ReactElement {
       newSearchParams.delete('search');
     }
 
-    [
-      'budget_min',
-      'budget_max',
-      'standing',
-      'bedroom_min',
-      'bedroom_max',
-      'ad_type',
-      'category_id',
-      'amenities',
-    ].forEach(param => newSearchParams.delete(param));
+    ['budget_min', 'budget_max', 'standing', 'bedroom_min', 'bedroom_max', 'ad_type', 'category_id', 'amenities']
+      .forEach(param => newSearchParams.delete(param));
 
-    // Ajouter les filtres non vides aux paramètres URL
     Object.entries(filters).forEach(([key, value]) => {
       if (Array.isArray(value)) {
-        if (value.length > 0) {
-          value.forEach(v => newSearchParams.append(key, v));
-        }
+        if (value.length > 0) value.forEach(v => newSearchParams.append(key, v));
       } else if (value && value.toString().trim()) {
         newSearchParams.set(key, value.toString());
       }
@@ -584,15 +561,11 @@ export default function Ads(): React.ReactElement {
   const buildSearchParams = () => {
     const newSearchParams = new URLSearchParams();
 
-    if (searchLocation.trim()) {
-      newSearchParams.set('search', searchLocation.trim());
-    }
+    if (searchLocation.trim()) newSearchParams.set('search', searchLocation.trim());
 
     Object.entries(filters).forEach(([key, value]) => {
       if (Array.isArray(value)) {
-        if (value.length > 0) {
-          value.forEach(v => newSearchParams.append(key, v));
-        }
+        if (value.length > 0) value.forEach(v => newSearchParams.append(key, v));
       } else if (value && value.toString().trim()) {
         newSearchParams.set(key, value.toString());
       }
@@ -606,7 +579,6 @@ export default function Ads(): React.ReactElement {
     navigate(`/search?${params.toString()}`);
   };
 
-  // Réinitialiser les filtres
   const resetFilters = () => {
     setFilters({
       budget_min: '',
@@ -619,9 +591,7 @@ export default function Ads(): React.ReactElement {
       amenities: [],
     });
     const newSearchParams = new URLSearchParams();
-    if (searchLocation) {
-      newSearchParams.set('search', searchLocation);
-    }
+    if (searchLocation) newSearchParams.set('search', searchLocation);
     navigate(`?${newSearchParams.toString()}`, { replace: true });
   };
 
@@ -661,24 +631,14 @@ export default function Ads(): React.ReactElement {
         const cities = await getCities(cityParams);
 
         if (!cities.length) {
-          if (!cancelled) {
-            setCitySections([]);
-          }
+          if (!cancelled) setCitySections([]);
           return;
         }
 
         const sections = await Promise.all(
           cities.map(async (cityItem: CityItem) => {
-            const response: any = await getAds({
-              ...baseParams,
-              city: cityItem.city,
-              page: 1,
-            });
-
-            const responseData = Array.isArray(response)
-              ? response
-              : response.data || [];
-
+            const response: any = await getAds({ ...baseParams, city: cityItem.city, page: 1 });
+            const responseData = Array.isArray(response) ? response : response.data || [];
             return {
               city: cityItem.city,
               country: cityItem.country,
@@ -691,278 +651,233 @@ export default function Ads(): React.ReactElement {
         if (!cancelled) {
           setCitySections(sections.filter(section => section.ads.length > 0));
         }
-      } catch (error) {
-        console.error('Erreur lors du chargement des villes:', error);
+      } catch {
         if (!cancelled) {
           setCitySections([]);
           setServerError(true);
         }
       } finally {
-        if (!cancelled) {
-          setIsLoading(false);
-        }
+        if (!cancelled) setIsLoading(false);
       }
     };
 
     loadAdsByCity();
-
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [buildParamsFromUrl]);
 
   return (
     <>
       <Nav2 />
-      <div className='sticky top-[calc(4rem+var(--email-verification-banner-offset,0px))] z-20 w-screen px-4 py-3 backdrop-blur-sm sm:px-6 md:fixed md:top-[calc(4rem+var(--email-verification-banner-offset,0px))] lg:px-8'>
+
+      {/* ── Filter bar ── */}
+      <div className='sticky top-[calc(5rem+var(--email-verification-banner-offset,0px))] z-20 w-screen px-4 py-3 backdrop-blur-sm sm:px-6 md:fixed md:top-[calc(5rem+var(--email-verification-banner-offset,0px))] lg:px-8'>
         <div className='mx-auto w-full max-w-6xl'>
           <div className='relative'>
-            <div className='overflow-hidden rounded-2xl border-2 border-orange-500 bg-white shadow-xl shadow-orange-900/10 md:hidden'>
-              <div className='flex items-center justify-between gap-3 border-b border-orange-100 px-5 py-3'>
+
+            {/* ── Mobile filter card ── */}
+            <div className='overflow-hidden rounded-2xl border border-outline-variant bg-white shadow-card md:hidden'>
+              <div className='flex items-center justify-between gap-3 border-b border-outline-variant px-4 py-3'>
                 <div className='min-w-0 text-left'>
-                  <span className='block text-xs font-black uppercase tracking-wide text-orange-500'>Filtres</span>
-                  <span className='block truncate text-sm font-bold text-slate-700'>
-                    {searchLocation || 'Localisation'} • {adTypeSummary}
+                  <span className='block text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant'>Recherche</span>
+                  <span className='block truncate text-sm font-semibold text-on-surface'>
+                    {searchLocation || 'Toute localisation'} · {adTypeSummary}
                   </span>
                 </div>
                 <button
                   type='button'
-                  onClick={() => {
-                    setMobileFiltersExpanded(value => !value);
-                    setOpenFilterPopup(null);
-                  }}
-                  className='rounded-full bg-orange-50 px-3 py-1.5 text-xs font-black text-orange-600 transition hover:bg-orange-100'
+                  onClick={() => { setMobileFiltersExpanded(v => !v); setOpenFilterPopup(null); }}
+                  className='flex items-center gap-1.5 rounded-xl border border-outline-variant bg-white px-3 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:bg-surface-container-low'
                 >
-                  {mobileFiltersExpanded ? 'Réduire' : 'Modifier'}
+                  <HiAdjustmentsHorizontal className='h-3.5 w-3.5' />
+                  {mobileFiltersExpanded ? 'Réduire' : 'Filtres'}
                 </button>
               </div>
 
-              {mobileFiltersExpanded && <div className='divide-y divide-gray-100'>
-                <div className='flex items-center gap-3 px-5 py-4'>
-                  <span className='h-4 w-4 rounded-full border-4 border-slate-500' />
-                  <div className='min-w-0 flex-1 text-left'>
-                    <span className='block text-sm font-bold text-slate-600'>Localisation</span>
-                    <AddressAutocomplete
-                      value={searchLocation}
-                      onChange={handleSearchChange}
-                      onLocationSelect={handleLocationSelect}
-                      placeholder='Rechercher une localisation'
-                      className='h-5 w-full border-0 bg-transparent p-0 text-sm font-semibold text-slate-800 outline-none placeholder:text-slate-400 focus:border-0 focus:ring-0'
-                    />
+              {mobileFiltersExpanded && (
+                <div className='divide-y divide-outline-variant/60'>
+                  <div className='flex items-center gap-3 px-4 py-3.5'>
+                    <HiMapPin className='h-4 w-4 flex-shrink-0 text-primary' />
+                    <div className='min-w-0 flex-1 text-left'>
+                      <span className='block text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant'>Localisation</span>
+                      <AddressAutocomplete
+                        value={searchLocation}
+                        onChange={handleSearchChange}
+                        onLocationSelect={handleLocationSelect}
+                        placeholder='Ville, quartier…'
+                        className='h-5 w-full border-0 bg-transparent p-0 text-sm font-medium text-on-surface outline-none placeholder:text-on-surface-variant/50 focus:border-0 focus:ring-0'
+                      />
+                    </div>
                   </div>
-                </div>
 
-                <button
-                  type='button'
-                  onClick={() => setOpenFilterPopup(current => current === 'budget' ? null : 'budget')}
-                  className='flex w-full items-center gap-3 px-5 py-4 text-left'
-                >
-                  <span className='h-4 w-4 rounded-full border-4 border-slate-500' />
-                  <span className='min-w-0 flex-1'>
-                    <span className='block text-sm font-bold text-slate-600'>Budget</span>
-                    <span className='block truncate text-sm font-semibold text-slate-800'>{budgetSummary}</span>
-                  </span>
-                </button>
-
-                <div className='grid grid-cols-2 divide-x divide-gray-100'>
                   <button
                     type='button'
-                    onClick={() => setOpenFilterPopup(current => current === 'type' ? null : 'type')}
-                    className='flex items-center gap-2 px-5 py-4 text-left'
+                    onClick={() => setOpenFilterPopup(c => c === 'budget' ? null : 'budget')}
+                    className='flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-surface-container-low'
                   >
-                    <span className='text-slate-500'>▣</span>
+                    <HiCurrencyDollar className='h-4 w-4 flex-shrink-0 text-on-surface-variant' />
                     <span className='min-w-0 flex-1'>
-                      <span className='block truncate text-sm font-bold text-slate-700'>{adTypeSummary}</span>
-                      <span className='block truncate text-xs font-semibold text-slate-400'>{filterSummary}</span>
+                      <span className='block text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant'>Budget</span>
+                      <span className='block truncate text-sm font-medium text-on-surface'>{budgetSummary}</span>
                     </span>
+                    {(filters.budget_min || filters.budget_max) && (
+                      <span className='h-2 w-2 flex-shrink-0 rounded-full bg-primary' />
+                    )}
                   </button>
+
+                  <div className='grid grid-cols-2 divide-x divide-outline-variant/60'>
+                    <button
+                      type='button'
+                      onClick={() => setOpenFilterPopup(c => c === 'type' ? null : 'type')}
+                      className='flex items-center gap-2.5 px-4 py-3.5 text-left transition-colors hover:bg-surface-container-low'
+                    >
+                      <HiBuildingOffice2 className='h-4 w-4 flex-shrink-0 text-on-surface-variant' />
+                      <span className='min-w-0 flex-1'>
+                        <span className='block truncate text-sm font-medium text-on-surface'>{adTypeSummary}</span>
+                        <span className='block truncate text-[11px] text-on-surface-variant'>{filterSummary}</span>
+                      </span>
+                      {filters.ad_type && <span className='h-2 w-2 flex-shrink-0 rounded-full bg-primary' />}
+                    </button>
+                    <button
+                      type='button'
+                      onClick={() => setOpenFilterPopup(c => c === 'standing' ? null : 'standing')}
+                      className='flex items-center gap-2.5 px-4 py-3.5 text-left transition-colors hover:bg-surface-container-low'
+                    >
+                      <HiStar className='h-4 w-4 flex-shrink-0 text-on-surface-variant' />
+                      <span className='min-w-0 flex-1'>
+                        <span className='block text-sm font-medium text-on-surface'>Standing</span>
+                        <span className='block truncate text-[11px] text-on-surface-variant'>{standingSummary}</span>
+                      </span>
+                      {filters.standing && <span className='h-2 w-2 flex-shrink-0 rounded-full bg-primary' />}
+                    </button>
+                  </div>
+
                   <button
                     type='button'
-                    onClick={() => setOpenFilterPopup(current => current === 'standing' ? null : 'standing')}
-                    className='flex items-center gap-2 px-5 py-4 text-left'
+                    onClick={() => setOpenFilterPopup(c => c === 'amenities' ? null : 'amenities')}
+                    className='flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-surface-container-low'
                   >
-                    <span className='text-slate-500'>▣</span>
+                    <HiAdjustmentsHorizontal className='h-4 w-4 flex-shrink-0 text-on-surface-variant' />
                     <span className='min-w-0 flex-1'>
-                      <span className='block text-sm font-bold text-slate-700'>Standing</span>
-                      <span className='block truncate text-xs font-semibold text-slate-400'>{standingSummary}</span>
+                      <span className='block text-sm font-medium text-on-surface'>Équipements</span>
+                      <span className='block truncate text-[11px] text-on-surface-variant'>{amenitiesSummary}</span>
                     </span>
+                    {filters.amenities.length > 0 && (
+                      <span className='h-2 w-2 flex-shrink-0 rounded-full bg-primary' />
+                    )}
                   </button>
                 </div>
-
-                <button
-                  type='button'
-                  onClick={() => setOpenFilterPopup(current => current === 'amenities' ? null : 'amenities')}
-                  className='flex w-full items-center gap-3 px-5 py-4 text-left'
-                >
-                  <span className='text-slate-500'>♢</span>
-                  <span className='min-w-0 flex-1'>
-                    <span className='block text-sm font-bold text-slate-700'>Équipements</span>
-                    <span className='block truncate text-sm font-semibold text-slate-500'>{amenitiesSummary}</span>
-                  </span>
-                </button>
-              </div>}
+              )}
 
               <button
                 type='button'
                 onClick={handleSearchSubmit}
-                className='w-full border-t border-orange-200 bg-orange-500 px-5 py-4 text-sm font-black text-white transition-colors hover:bg-orange-600'
+                className='w-full bg-primary px-4 py-4 text-sm font-bold text-white transition-colors hover:bg-primary-light'
               >
-                {mobileFiltersExpanded ? 'Rechercher' : 'Rechercher avec ces filtres'}
+                Lancer la recherche
               </button>
             </div>
 
+            {/* Mobile popup */}
             {openFilterPopup && (
-              <div className='absolute left-0 right-0 top-[calc(100%+8px)] z-40 mx-auto w-[92vw] max-w-sm rounded-2xl border border-gray-200/80 bg-white p-3.5 shadow-[0_18px_45px_-24px_rgba(15,23,42,0.55)] ring-1 ring-black/5 md:hidden'>
+              <div className={`${popupPanelClass} left-0 right-0 top-[calc(100%+8px)] mx-auto w-[92vw] max-w-sm md:hidden`}>
                 {renderFilterPopupContent(openFilterPopup)}
               </div>
             )}
 
-            <div className='-translate-y-1 hidden items-center rounded-full border border-gray-200 bg-white px-3 py-1 shadow-[0_18px_40px_-22px_rgba(15,23,42,0.35)] transition-shadow md:flex'>
-              <div className='flex h-[52px] min-w-0 flex-1 flex-col justify-center rounded-full bg-white px-7'>
-                <span className='block text-xs font-semibold text-gray-800'>
-                  Localisation
-                </span>
+            {/* ── Desktop search bar ── */}
+            <div className='hidden items-center rounded-full border border-outline-variant bg-white px-3 py-1 shadow-card transition-shadow hover:shadow-card-hover md:flex'>
+
+              <div className='flex h-[52px] min-w-0 flex-1 flex-col justify-center rounded-full px-5'>
+                <span className='block text-xs font-semibold text-on-surface'>Localisation</span>
                 <AddressAutocomplete
                   value={searchLocation}
                   onChange={handleSearchChange}
                   onLocationSelect={handleLocationSelect}
                   placeholder='Rechercher une localisation'
-                  className='h-5 w-full border-0 bg-transparent p-0 text-sm leading-5 text-gray-600 outline-none placeholder:text-gray-400 focus:border-0 focus:ring-0'
+                  className='h-5 w-full border-0 bg-transparent p-0 text-sm leading-5 text-on-surface-variant outline-none placeholder:text-on-surface-variant/50 focus:border-0 focus:ring-0'
                 />
               </div>
 
-              <div className='hidden h-10 w-px bg-gray-200 md:block' />
+              <div className='hidden h-8 w-px bg-outline-variant md:block' />
 
               <div className='relative hidden min-w-0 flex-1 md:block'>
                 <button
                   type='button'
-                  onClick={() =>
-                    setOpenFilterPopup(current =>
-                      current === 'budget' ? null : 'budget'
-                    )
-                  }
-                  className='h-[52px] w-full rounded-full px-7 py-1.5 text-left transition-colors hover:bg-gray-50'
+                  onClick={() => setOpenFilterPopup(c => c === 'budget' ? null : 'budget')}
+                  className='h-[52px] w-full rounded-full px-5 py-1.5 text-left transition-colors hover:bg-surface-container-low'
                 >
-                  <span className='block text-xs font-semibold text-gray-800'>
-                    Budget
-                  </span>
-                  <span className='block truncate text-sm text-gray-500'>
+                  <span className='block text-xs font-semibold text-on-surface'>Budget</span>
+                  <span className='flex items-center gap-1.5 truncate text-sm text-on-surface-variant'>
                     {budgetSummary}
+                    {(filters.budget_min || filters.budget_max) && <span className='inline-block h-1.5 w-1.5 rounded-full bg-primary' />}
                   </span>
                 </button>
                 {openFilterPopup === 'budget' && (
-                  <div className='absolute left-0 top-[calc(100%+8px)] z-40 w-72 max-w-[90vw] rounded-2xl border border-gray-200/80 bg-white p-3.5 shadow-[0_18px_45px_-24px_rgba(15,23,42,0.55)] ring-1 ring-black/5'>
+                  <div className={`${popupPanelClass} left-0 top-[calc(100%+8px)] w-72 max-w-[90vw]`}>
                     {renderFilterPopupContent('budget')}
                   </div>
                 )}
               </div>
 
-              <div className='hidden h-10 w-px bg-gray-200 md:block' />
+              <div className='hidden h-8 w-px bg-outline-variant md:block' />
 
               <div className='relative hidden min-w-0 flex-1 md:block'>
                 <button
                   type='button'
-                  onClick={() =>
-                    setOpenFilterPopup(current =>
-                      current === 'type' ? null : 'type'
-                    )
-                  }
-                  className='h-[52px] w-full rounded-full px-7 py-1.5 text-left transition-colors hover:bg-gray-50'
+                  onClick={() => setOpenFilterPopup(c => c === 'type' ? null : 'type')}
+                  className='h-[52px] w-full rounded-full px-5 py-1.5 text-left transition-colors hover:bg-surface-container-low'
                 >
-                  <span className='block text-xs font-semibold text-gray-800'>
-                    Type et categories
-                  </span>
-                  <span className='block truncate text-sm text-gray-500'>
-                    {adTypeSummary} . {filterSummary}
+                  <span className='block text-xs font-semibold text-on-surface'>Type et categories</span>
+                  <span className='flex items-center gap-1.5 truncate text-sm text-on-surface-variant'>
+                    {adTypeSummary} · {filterSummary}
+                    {filters.ad_type && <span className='inline-block h-1.5 w-1.5 rounded-full bg-primary' />}
                   </span>
                 </button>
                 {openFilterPopup === 'type' && (
-                  <div className='absolute left-0 top-[calc(100%+8px)] z-40 w-80 max-w-[90vw] rounded-2xl border border-gray-200/80 bg-white p-3.5 shadow-[0_18px_45px_-24px_rgba(15,23,42,0.55)] ring-1 ring-black/5'>
+                  <div className={`${popupPanelClass} left-0 top-[calc(100%+8px)] w-80 max-w-[90vw]`}>
                     {renderFilterPopupContent('type')}
                   </div>
                 )}
               </div>
 
-              <div className='hidden h-10 w-px bg-gray-200 lg:block' />
+              <div className='hidden h-8 w-px bg-outline-variant lg:block' />
 
               <div className='relative hidden min-w-0 flex-1 lg:block'>
                 <button
                   type='button'
-                  onClick={() =>
-                    setOpenFilterPopup(current =>
-                      current === 'standing' ? null : 'standing'
-                    )
-                  }
-                  className='h-[52px] w-full rounded-full px-7 py-1.5 text-left transition-colors hover:bg-gray-50'
+                  onClick={() => setOpenFilterPopup(c => c === 'standing' ? null : 'standing')}
+                  className='h-[52px] w-full rounded-full px-5 py-1.5 text-left transition-colors hover:bg-surface-container-low'
                 >
-                  <span className='block text-xs font-semibold text-gray-800'>
-                    Standing
-                  </span>
-                  <span className='block truncate text-sm text-gray-500'>
+                  <span className='block text-xs font-semibold text-on-surface'>Standing</span>
+                  <span className='flex items-center gap-1.5 truncate text-sm text-on-surface-variant'>
                     {standingSummary}
+                    {filters.standing && <span className='inline-block h-1.5 w-1.5 rounded-full bg-primary' />}
                   </span>
                 </button>
                 {openFilterPopup === 'standing' && (
-                  <div className='absolute left-0 top-[calc(100%+8px)] z-40 w-72 max-w-[90vw] rounded-2xl border border-gray-200/80 bg-white p-3.5 shadow-[0_18px_45px_-24px_rgba(15,23,42,0.55)] ring-1 ring-black/5'>
+                  <div className={`${popupPanelClass} left-0 top-[calc(100%+8px)] w-72 max-w-[90vw]`}>
                     {renderFilterPopupContent('standing')}
                   </div>
                 )}
               </div>
 
-              <div className='hidden h-10 w-px bg-gray-200 lg:block' />
+              <div className='hidden h-8 w-px bg-outline-variant lg:block' />
 
               <div className='relative hidden min-w-0 flex-1 lg:block'>
                 <button
                   type='button'
-                  onClick={() =>
-                    setOpenFilterPopup(current =>
-                      current === 'amenities' ? null : 'amenities'
-                    )
-                  }
-                  className='h-[52px] w-full rounded-full px-7 py-1.5 text-left transition-colors hover:bg-gray-50'
+                  onClick={() => setOpenFilterPopup(c => c === 'amenities' ? null : 'amenities')}
+                  className='h-[52px] w-full rounded-full px-5 py-1.5 text-left transition-colors hover:bg-surface-container-low'
                 >
-                  <span className='block text-xs font-semibold text-gray-800'>
-                    Equipements
-                  </span>
-                  <span className='block truncate text-sm text-gray-500'>
+                  <span className='block text-xs font-semibold text-on-surface'>Equipements</span>
+                  <span className='flex items-center gap-1.5 truncate text-sm text-on-surface-variant'>
                     {amenitiesSummary}
+                    {filters.amenities.length > 0 && <span className='inline-block h-1.5 w-1.5 rounded-full bg-primary' />}
                   </span>
                 </button>
                 {openFilterPopup === 'amenities' && (
-                  <div className='absolute right-0 top-[calc(100%+8px)] z-40 w-72 max-w-[90vw] rounded-2xl border border-gray-200/80 bg-white p-3.5 shadow-[0_18px_45px_-24px_rgba(15,23,42,0.55)] ring-1 ring-black/5'>
+                  <div className={`${popupPanelClass} right-0 top-[calc(100%+8px)] w-72 max-w-[90vw]`}>
                     {renderFilterPopupContent('amenities')}
-                  </div>
-                )}
-              </div>
-
-              <div className='relative md:hidden'>
-                <button
-                  type='button'
-                  onClick={() =>
-                    setOpenFilterPopup(current =>
-                      current === 'budget' ? null : 'budget'
-                    )
-                  }
-                  className='mx-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 transition-colors hover:bg-gray-100'
-                  title='Ouvrir les filtres'
-                >
-                  <svg
-                    className='h-5 w-5'
-                    fill='none'
-                    viewBox='0 0 24 24'
-                    stroke='currentColor'
-                  >
-                    <path
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                      strokeWidth={2}
-                      d='M4 6h16M7 12h10M10 18h4'
-                    />
-                  </svg>
-                </button>
-                {openFilterPopup === 'budget' && (
-                  <div className='absolute right-0 top-[calc(100%+8px)] z-40 w-[86vw] max-w-xs rounded-2xl border border-gray-200/80 bg-white p-3.5 shadow-[0_18px_45px_-24px_rgba(15,23,42,0.55)] ring-1 ring-black/5'>
-                    {renderFilterPopupContent('budget')}
                   </div>
                 )}
               </div>
@@ -970,117 +885,103 @@ export default function Ads(): React.ReactElement {
               <button
                 type='button'
                 onClick={handleSearchSubmit}
-                className='relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-orange-500 text-white shadow-sm transition-colors hover:bg-orange-600'
+                className='relative ml-1 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-primary text-white shadow-sm transition-colors hover:bg-primary-light'
                 title='Rechercher'
               >
-                <MdSearch size={18} />
+                <MdSearch size={20} />
               </button>
-
             </div>
           </div>
         </div>
       </div>
 
-      <div className=' min-h-screen'>
-        <section className='mt-8 px-5 md:mt-44 sm:px-8 lg:px-12'>
-          <div className='relative w-full max-w-full overflow-hidden'>
-            <Swiper
-              modules={[Autoplay, Pagination]}
-              onSwiper={setPromoSwiper}
-              autoplay={{ delay: 3500, disableOnInteraction: false }}
-              pagination={{
-                clickable: true,
-                el: '.ads-promos-pagination',
-                bulletClass:
-                  'swiper-pagination-bullet !mx-1 !h-2 !w-2 !rounded-full !bg-orange-200 !opacity-100 transition-all',
-                bulletActiveClass:
-                  'swiper-pagination-bullet-active !w-8 !rounded-full !bg-orange-500',
-              }}
-              className='!w-full !max-w-full'
-              spaceBetween={18}
-              breakpoints={{
-                0: { slidesPerView: 1 },
-                768: { slidesPerView: 2 },
-                1200: { slidesPerView: 3 },
-              }}
-            >
-              {promoSlides.map(slide => (
-                <SwiperSlide key={slide.id} className='h-auto'>
-                  <article
-                    className={`group relative flex h-full min-h-[250px] flex-col overflow-hidden rounded-3xl bg-gradient-to-br ${slide.bg} bg-cover bg-center p-5 text-white shadow-sm transition duration-300 hover:shadow-lg sm:min-h-[285px] sm:p-6`}
-                    style={
-                      slide.image
-                        ? {
-                          backgroundImage: `linear-gradient(135deg, rgba(8,15,28,0.86), rgba(8,15,28,0.58)), url(${slide.image})`,
-                        }
-                        : undefined
-                    }
-                  >
-                    <span className='absolute right-4 top-4 rounded-full bg-orange-500 px-3 py-1 text-xs font-black uppercase tracking-wide text-white shadow-sm'>
-                      {slide.badge}
-                    </span>
+      {/* ── Page content ── */}
+      <div className='min-h-screen'>
 
-                    <p className='relative text-xs font-black uppercase tracking-[0.2em] text-orange-200'>
-                      Promo annonceur
-                    </p>
-                    <h3 className='relative mt-4 max-w-[14rem] text-2xl font-black leading-tight tracking-tight text-white sm:text-3xl'>
-                      {slide.title}
-                    </h3>
-                    <p className='relative mt-3 max-w-[18rem] text-sm font-medium leading-6 text-white/85'>
-                      {slide.subtitle}
-                    </p>
-                    {slide.actionUrl ? (
-                      <a
-                        href={slide.actionUrl}
-                        className='relative mt-auto inline-flex w-fit items-center rounded-full bg-orange-500 px-4 py-2.5 text-xs font-black uppercase tracking-wide text-white shadow-sm transition hover:bg-orange-600'
-                      >
-                        {slide.cta}
-                      </a>
-                    ) : (
-                      <button
-                        type='button'
-                        className='relative mt-auto w-fit rounded-full bg-orange-500 px-4 py-2.5 text-xs font-black uppercase tracking-wide text-white shadow-sm transition hover:bg-orange-600'
-                      >
-                        {slide.cta}
-                      </button>
-                    )}
-                  </article>
-                </SwiperSlide>
-              ))}
-            </Swiper>
+        {/* ── Promo cards (3-column dark) ── */}
+        <section className='mt-8 px-5 md:mt-52 sm:px-8 lg:px-12'>
+          <div className='grid grid-cols-1 gap-6 md:grid-cols-3'>
+            {promoSlides.slice(0, 3).map((slide, i) => (
+              <article
+                key={slide.id}
+                className='relative flex h-[280px] flex-col overflow-hidden rounded-xl p-6'
+              >
+                {/* Background image */}
+                <img
+                  src={slide.image}
+                  alt=''
+                  aria-hidden='true'
+                  className='absolute inset-0 h-full w-full object-cover'
+                />
+                {/* Dark overlay */}
+                <div className='absolute inset-0 bg-on-secondary-fixed/75' />
 
-            <button
-              type='button'
-              onClick={() => promoSwiper?.slidePrev()}
-              className='absolute left-5 top-1/2 z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/70 bg-white/95 text-orange-600 shadow-lg backdrop-blur transition hover:scale-105 hover:bg-orange-50 md:inline-flex'
-              aria-label='Slide precedent'
-            >
-              <MdChevronLeft size={18} />
-            </button>
+                {/* Badge top-right */}
+                <div className='absolute right-0 top-0 z-10 rounded-bl-lg bg-primary-container px-3 py-1 text-label-md font-label-md text-on-primary-container'>
+                  {slide.badge}
+                </div>
 
-            <button
-              type='button'
-              onClick={() => promoSwiper?.slideNext()}
-              className='absolute right-5 top-1/2 z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/70 bg-white/95 text-orange-600 shadow-lg backdrop-blur transition hover:scale-105 hover:bg-orange-50 md:inline-flex'
-              aria-label='Slide suivant'
-            >
-              <MdChevronRight size={18} />
-            </button>
+                {/* Content */}
+                <div className='relative z-10 flex h-full flex-col'>
+                  {/* Category pill */}
+                  <span className={`mt-2 inline-block w-max rounded-full px-3 py-1 text-caption font-caption ${
+                    i === 1 ? 'bg-surface-container text-on-surface' :
+                    i === 2 ? 'bg-tertiary text-on-tertiary' :
+                    'bg-tertiary-container text-on-tertiary-container'
+                  }`}>
+                    {i === 0 ? 'Service Premium' : i === 1 ? 'Estimation' : 'Nouveauté'}
+                  </span>
 
-            <div className='mt-4 flex items-center justify-center'>
-              <div className='ads-promos-pagination flex min-h-[10px] items-center justify-center' />
-            </div>
+                  <h3 className='mt-4 text-headline-sm font-headline-sm text-on-primary leading-tight'>
+                    {slide.title}
+                  </h3>
+                  <p className='mt-2 flex-1 text-body-md text-secondary-fixed-dim'>
+                    {slide.subtitle}
+                  </p>
+
+                  {slide.actionUrl ? (
+                    <a
+                      href={slide.actionUrl}
+                      className={`mt-4 inline-flex w-fit items-center self-start rounded-full px-4 py-2 text-label-md font-label-md transition-colors ${
+                        i === 1
+                          ? 'bg-primary-container text-on-primary-container hover:opacity-90'
+                          : 'border border-white/40 text-on-primary hover:bg-white/10'
+                      }`}
+                    >
+                      {slide.cta}
+                    </a>
+                  ) : (
+                    <button
+                      type='button'
+                      className={`mt-4 inline-flex w-fit items-center self-start rounded-full px-4 py-2 text-label-md font-label-md transition-colors ${
+                        i === 1
+                          ? 'bg-primary-container text-on-primary-container hover:opacity-90'
+                          : 'border border-white/40 text-on-primary hover:bg-white/10'
+                      }`}
+                    >
+                      {slide.cta}
+                    </button>
+                  )}
+                </div>
+              </article>
+            ))}
+          </div>
+
+          {/* Carousel dots indicator */}
+          <div className='mt-4 flex items-center justify-center gap-1.5'>
+            <div className='h-2 w-2 rounded-full bg-primary-container' />
+            <div className='h-2 w-2 rounded-full bg-outline-variant' />
+            <div className='h-2 w-2 rounded-full bg-outline-variant' />
           </div>
         </section>
 
+        {/* ── City sections ── */}
         <div className='mt-6 space-y-10 px-5 py-6 sm:px-8 lg:px-12'>
           {isLoading && <AdsSkeleton />}
 
           {!isLoading && serverError && <AdsErrorState />}
 
-          {!isLoading && !serverError && citySections.length === 0 && (
-            <EmptyAdsState />
-          )}
+          {!isLoading && !serverError && citySections.length === 0 && <EmptyAdsState />}
 
           {!isLoading && !serverError && citySections.map(section => (
             <section
@@ -1088,17 +989,19 @@ export default function Ads(): React.ReactElement {
               className='space-y-4'
             >
               <div className='flex flex-wrap items-center justify-between gap-2'>
-                <h3 className='text-lg font-semibold text-gray-900 sm:text-xl'>
-                  {section.city}
-                  {section.country ? `, ${section.country}` : ''}
-                </h3>
-                <span className='inline-flex items-center rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-700'>
+                <div className='flex items-center gap-2'>
+                  <HiMapPin className='h-5 w-5 flex-shrink-0 text-primary' />
+                  <h3 className='text-lg font-bold text-on-surface sm:text-xl'>
+                    {section.city}{section.country ? `, ${section.country}` : ''}
+                  </h3>
+                </div>
+                <span className='inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-medium text-primary'>
                   {section.adsCount ?? section.ads.length} annonce
                   {(section.adsCount ?? section.ads.length) > 1 ? 's' : ''}
                 </span>
               </div>
 
-              <div className='grid w-full grid-cols-1 gap-x-2 gap-y-6 sm:grid-cols-2 sm:gap-x-6 lg:grid-cols-3 lg:gap-x-4 xl:grid-cols-4 2xl:grid-cols-5'>
+              <div className='grid w-full grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2 sm:gap-x-6 lg:grid-cols-3 lg:gap-x-4 xl:grid-cols-4 2xl:grid-cols-5'>
                 {section.ads.map(ad => (
                   <ProductCard {...ad} key={ad.id} />
                 ))}

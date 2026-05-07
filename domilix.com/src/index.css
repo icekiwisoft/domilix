@@ -35,7 +35,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  /* background: #eee; */
+  background-color: #fff8f4;
+  color: #211a12;
 }
 
 /* Navbar */

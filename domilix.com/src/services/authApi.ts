@@ -43,6 +43,8 @@ export interface User {
   email_verified?: boolean;
   phone_verified: boolean;
   announcer?: string | null;
+  is_admin?: boolean;
+  credits?: number;
   created_at: string;
   updated_at: string;
 }

@@ -16,6 +16,7 @@ out
 .env
 .kiro
 card.md
+references/*
 
 # Editor directories and files
 .vscode/*
