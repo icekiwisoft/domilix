@@ -26,6 +26,8 @@ const generateVideoThumbnail = async (inputPath: string, outputPath: string) => 
   await new Promise<void>((resolve, reject) => {
     const child = spawn(ffmpegPath, [
       '-y',
+      '-loglevel',
+      'error',
       '-ss',
       '00:00:01',
       '-i',
@@ -35,10 +37,19 @@ const generateVideoThumbnail = async (inputPath: string, outputPath: string) => 
       '-vf',
       'scale=500:-1',
       outputPath,
-    ]);
+    ], { stdio: 'ignore' });
 
-    child.on('error', reject);
+    const timeout = setTimeout(() => {
+      child.kill('SIGKILL');
+      reject(new Error('ffmpeg thumbnail generation timed out'));
+    }, 30000);
+
+    child.on('error', error => {
+      clearTimeout(timeout);
+      reject(error);
+    });
     child.on('close', code => {
+      clearTimeout(timeout);
       if (code === 0) resolve();
       else reject(new Error(`ffmpeg exited with code ${code}`));
     });

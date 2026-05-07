@@ -1,3 +1,4 @@
+import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, Req, Res, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../auth/current-user.decorator';
@@ -53,6 +54,8 @@ export class AdsController {
   }
 
   @Get('cities')
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(60_000)
   @ApiOperation({ summary: 'List cities having announces' })
   cities(@Query() query: QueryCitiesDto) {
     return this.adsService.cities(query);

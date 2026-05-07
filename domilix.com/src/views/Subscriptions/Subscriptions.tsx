@@ -13,12 +13,19 @@ const options = [
   'Partagez les annonces avec vos contacts.',
 ];
 
+const mobileFeatureLabels: Record<string, string> = {
+  "Voir les informations de base d'une annonce.": 'Voir les infos de base.',
+  'Partagez les annonces avec vos contacts.': 'Partager les annonces.',
+};
+
 const PricingCard: React.FC<PricingProps> = ({
   title,
   credits,
   validity,
+  mobileValidity,
   price,
   benefit,
+  mobileBenefit,
   badge,
   features,
   isActive,
@@ -58,17 +65,16 @@ const PricingCard: React.FC<PricingProps> = ({
       </>
     )}
 
-    <h2 className='text-2xl font-bold mb-2'>{title}</h2>
-    <p className={`mb-6 text-sm leading-6 ${isActive ? 'text-white/75' : 'text-gray-500'}`}>
-      {benefit}
+    <h2 className='mb-2 text-xl font-bold sm:text-2xl'>{title}</h2>
+    <p className={`mb-6 text-xs leading-5 sm:text-sm sm:leading-6 ${isActive ? 'text-white/75' : 'text-gray-500'}`}>
+      <span className='sm:hidden'>{mobileBenefit || benefit}</span>
+      <span className='hidden sm:inline'>{benefit}</span>
     </p>
 
     <div className='space-y-4 mb-8'>
-      <div className={`rounded-2xl p-4 ${isActive ? 'bg-white/10' : 'bg-orange-50'}`}>
-        <div className='flex items-center gap-3'>
-          <img className='w-6 h-6' src='dom.png' alt='Credits' />
-          <span className='text-lg font-black'>{credits}</span>
-        </div>
+      <div className='flex items-center gap-3'>
+        <img className='w-6 h-6' src='dom.png' alt='Credits' />
+        <span className='text-lg font-black'>{credits}</span>
       </div>
 
       <div className='flex items-center gap-3'>
@@ -100,7 +106,10 @@ const PricingCard: React.FC<PricingProps> = ({
             strokeLinejoin='round'
           />
         </svg>
-        <span className='text-lg'>{validity}</span>
+        <span className='text-base sm:text-lg'>
+          <span className='sm:hidden'>{mobileValidity || validity}</span>
+          <span className='hidden sm:inline'>{validity}</span>
+        </span>
       </div>
     </div>
 
@@ -122,7 +131,10 @@ const PricingCard: React.FC<PricingProps> = ({
               <FaPlus className='rotate-45 opacity-50' size={12} />
             )}
           </span>
-          <span className='text-sm'>{feature}</span>
+          <span className='text-xs sm:text-sm'>
+            <span className='sm:hidden'>{mobileFeatureLabels[feature] || feature}</span>
+            <span className='hidden sm:inline'>{feature}</span>
+          </span>
         </motion.li>
       ))}
     </ul>
@@ -171,21 +183,25 @@ export default function Subscriptions() {
             animate={{ opacity: 1, y: 0 }}
             className='text-center max-w-3xl mx-auto mb-12'
           >
-            <h1 className='text-4xl md:text-5xl font-bold text-gray-900 mb-6'>
-              Choisissez votre pack et contactez les bons annonceurs
+            <h1 className='mb-4 text-2xl font-bold text-gray-900 sm:text-3xl md:mb-6 md:text-5xl'>
+              <span className='sm:hidden'>Choisissez votre pack</span>
+              <span className='hidden sm:inline'>Choisissez votre pack et contactez les bons annonceurs</span>
             </h1>
-            <p className='text-lg text-gray-600'>
-              Débloquez les coordonnées des biens qui vous intéressent et augmentez vos chances de trouver rapidement.
+            <p className='text-sm leading-6 text-gray-600 sm:text-base md:text-lg'>
+              <span className='sm:hidden'>Débloquez les contacts des annonces qui vous intéressent.</span>
+              <span className='hidden sm:inline'>Débloquez les coordonnées des biens qui vous intéressent et augmentez vos chances de trouver rapidement.</span>
             </p>
           </motion.div>
 
-          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto'>
+          <div data-tour='packs-grid' className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto'>
             <PricingCard
               title='Pack Standard'
               credits='20 credits'
               validity='1 semaine de validité'
+              mobileValidity='1 semaine'
               price='1000'
               benefit='Idéal pour tester Domilix et contacter quelques annonceurs ciblés.'
+              mobileBenefit='Pour tester Domilix.'
               features={["Voir les informations de base d'une annonce."]}
               isActive={false}
               onChoose={() =>
@@ -203,8 +219,10 @@ export default function Subscriptions() {
               title='Pack Avantage'
               credits='50 credits'
               validity='2 semaines de validité'
+              mobileValidity='2 semaines'
               price='2000'
               benefit='Pour comparer plusieurs logements sans bloquer votre recherche.'
+              mobileBenefit='Pour comparer plusieurs logements.'
               features={["Voir les informations de base d'une annonce."]}
               isActive={false}
               onChoose={() =>
@@ -222,8 +240,10 @@ export default function Subscriptions() {
               title='Pack Premium'
               credits='100 credits'
               validity='3 semaines de validité'
+              mobileValidity='3 semaines'
               price='3500'
               benefit='Le meilleur choix pour chercher activement et ne pas rater les bonnes annonces.'
+              mobileBenefit='Pour chercher activement.'
               badge='Recommandé'
               features={[
                 "Voir les informations de base d'une annonce.",
@@ -249,8 +269,10 @@ export default function Subscriptions() {
               title='Pack Ultime'
               credits='150 credits'
               validity='4 semaines de validité'
+              mobileValidity='4 semaines'
               price='5000'
               benefit='Pour une recherche intensive avec un maximum d’opportunités de contact.'
+              mobileBenefit='Pour une recherche intensive.'
               features={[
                 "Voir les informations de base d'une annonce.",
                 'Partagez les annonces avec vos contacts.',

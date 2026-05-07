@@ -1329,12 +1329,12 @@ export default function ArticlePostDialog({
 
   return (
     <div className='fixed inset-0 z-50 overflow-y-auto overscroll-contain'>
-      <div className='flex min-h-dvh items-end justify-center p-0 text-center sm:items-center sm:p-4'>
+      <div className='flex min-h-dvh items-stretch justify-center p-0 text-center sm:items-center sm:p-4'>
         <div className='fixed inset-0 transition-opacity' aria-hidden='true'>
           <div className='absolute inset-0 bg-gray-500 opacity-75'></div>
         </div>
 
-        <div className='relative flex h-[92dvh] w-full max-w-4xl transform flex-col overflow-hidden rounded-t-3xl bg-white text-left shadow-2xl transition-all sm:h-[86vh] sm:rounded-2xl'>
+        <div className='relative flex h-dvh w-full max-w-4xl transform flex-col overflow-hidden bg-white text-left shadow-2xl transition-all sm:h-[86vh] sm:rounded-2xl'>
           <div className='flex h-full flex-col bg-white px-4 pb-4 pt-4 sm:px-8 sm:pb-8 sm:pt-6'>
             <div className='mb-2 flex items-start justify-between gap-4'>
               <div>

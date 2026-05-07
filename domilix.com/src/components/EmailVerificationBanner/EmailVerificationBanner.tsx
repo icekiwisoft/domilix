@@ -146,21 +146,21 @@ export default function EmailVerificationBanner() {
         ref={bannerRef}
         className='fixed left-0 right-0 top-20 z-40 border-b border-orange-200 bg-orange-50/95 px-3 py-1 shadow-sm backdrop-blur sm:px-4'
       >
-        <div className='mx-auto flex h-9 max-w-7xl items-center justify-between gap-2 text-xs sm:text-sm'>
+        <div className='mx-auto flex min-h-10 max-w-7xl items-center justify-between gap-2 text-xs sm:text-sm'>
           <div className='flex min-w-0 flex-1 items-center gap-2'>
-            <p className='shrink-0 font-bold text-orange-900'>Email non vérifié.</p>
-            <p className='hidden truncate text-orange-800 sm:block'>
+            <p className='mb-0 shrink-0 leading-none font-bold text-amber-950'>Email non vérifié.</p>
+            <p className='mb-0 hidden truncate leading-none text-amber-900 sm:block'>
               Sécurisez votre compte Domilix.
             </p>
-            {message && <p className='truncate font-semibold text-green-700'>{message}</p>}
-            {error && <p className='truncate font-semibold text-red-700'>{error}</p>}
+            {message && <p className='mb-0 truncate leading-none font-semibold text-green-700'>{message}</p>}
+            {error && <p className='mb-0 truncate leading-none font-semibold text-red-700'>{error}</p>}
           </div>
 
           <button
             type='button'
             onClick={handleSendCode}
             disabled={loading}
-            className='h-7 shrink-0 rounded-lg bg-orange-500 px-3 text-xs font-black text-white transition hover:bg-orange-600 disabled:bg-gray-400 sm:h-8 sm:px-4 sm:text-sm'
+            className='h-7 shrink-0 rounded-lg bg-green-500 px-3 text-xs font-black text-white transition hover:bg-green-600 disabled:bg-gray-400 sm:h-8 sm:px-4 sm:text-sm'
           >
             {loading ? '...' : 'Vérifier'}
           </button>

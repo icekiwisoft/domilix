@@ -42,52 +42,58 @@ export default function ShareModal({
     <>
       {/* Overlay */}
       <div
-        className='fixed inset-0 bg-black/50 backdrop-blur-sm z-50 transition-opacity duration-300'
+        className='fixed inset-0 z-50 bg-slate-950/35 backdrop-blur-sm transition-opacity duration-300'
         onClick={onClose}
       />
       
       {/* Modal */}
-      <div className='fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[95%] max-w-md'>
-        <div className='bg-white rounded-2xl shadow-2xl overflow-hidden'>
-          {/* Header avec informations */}
-          {(image || title || price || location) && (
-            <div className='relative p-5 bg-gradient-to-br from-orange-50 to-white'>
-              <button
-                onClick={onClose}
-                className='absolute top-3 right-3 p-1.5 hover:bg-white/80 rounded-full transition-colors'
-              >
-                <HiXMark className='w-5 h-5 text-gray-600' />
-              </button>
+      <div className='fixed left-1/2 top-1/2 z-50 w-[92%] max-w-md -translate-x-1/2 -translate-y-1/2'>
+        <div className='overflow-hidden rounded-3xl bg-white shadow-2xl shadow-slate-950/20'>
+          <div className='flex items-start justify-between gap-4 border-b border-gray-100 px-5 py-4'>
+            <div>
+              <p className='text-xs font-black uppercase tracking-[0.18em] text-orange-500'>Partager</p>
+              <h3 className='mt-1 text-lg font-black text-gray-950'>Envoyer cette annonce</h3>
+            </div>
+            <button
+              onClick={onClose}
+              className='rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-900'
+              aria-label='Fermer'
+            >
+              <HiXMark className='h-5 w-5' />
+            </button>
+          </div>
 
+          {(image || title || price || location) && (
+            <div className='px-5 pt-5'>
               <div className='flex gap-3'>
                 {image && (
-                  <div className='w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-white shadow-sm'>
+                  <div className='h-16 w-16 flex-shrink-0 overflow-hidden rounded-2xl bg-gray-100'>
                     <img
                       src={image}
                       alt={title}
-                      className='w-full h-full object-cover'
+                      className='h-full w-full object-cover'
                     />
                   </div>
                 )}
-                <div className='flex-1 min-w-0 pr-8'>
+                <div className='min-w-0 flex-1'>
                   {type && (
-                    <span className='inline-block px-2 py-0.5 text-xs font-medium text-orange-600 bg-white rounded-full mb-1.5'>
+                    <span className='mb-1.5 inline-block rounded-full bg-orange-50 px-2.5 py-1 text-xs font-bold text-orange-600'>
                       {type}
                     </span>
                   )}
                   {title && (
-                    <h3 className='text-sm font-semibold text-gray-900 truncate mb-1'>
+                    <h4 className='mb-1 truncate text-sm font-bold text-gray-950'>
                       {title}
-                    </h3>
+                    </h4>
                   )}
                   {price && (
-                    <p className='text-base font-bold text-orange-600 mb-0.5'>
+                    <p className='mb-0.5 text-sm font-black text-orange-600'>
                       {price}
                     </p>
                   )}
                   {location && (
-                    <p className='text-xs text-gray-600 truncate flex items-center gap-1'>
-                      <svg className='w-3 h-3' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                    <p className='flex items-center gap-1 truncate text-xs font-medium text-gray-500'>
+                      <svg className='h-3 w-3' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                         <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z' />
                         <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 11a3 3 0 11-6 0 3 3 0 016 0z' />
                       </svg>
@@ -101,60 +107,55 @@ export default function ShareModal({
 
           {/* Contenu */}
           <div className='p-5'>
-            <h3 className='text-base font-semibold text-gray-900 mb-4'>
-              Partager sur
-            </h3>
-
-            {/* Boutons de partage en grille */}
-            <div className='grid grid-cols-3 gap-3 mb-5'>
+            <div className='grid gap-2'>
               <a
                 href={`https://wa.me/?text=${shareTitle}%20${shareUrl}`}
                 target='_blank'
                 rel='noopener noreferrer'
-                className='flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-gray-50 transition-colors group'
+                className='flex items-center gap-3 rounded-2xl border border-gray-100 px-4 py-3 transition-colors hover:bg-gray-50'
               >
-                <div className='w-12 h-12 bg-green-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform'>
-                  <FaWhatsapp className='w-6 h-6 text-white' />
+                <div className='flex h-10 w-10 items-center justify-center rounded-full bg-green-50 text-green-600'>
+                  <FaWhatsapp className='h-5 w-5' />
                 </div>
-                <span className='text-xs font-medium text-gray-700'>WhatsApp</span>
+                <span className='text-sm font-bold text-gray-800'>WhatsApp</span>
               </a>
 
               <a
                 href={`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`}
                 target='_blank'
                 rel='noopener noreferrer'
-                className='flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-gray-50 transition-colors group'
+                className='flex items-center gap-3 rounded-2xl border border-gray-100 px-4 py-3 transition-colors hover:bg-gray-50'
               >
-                <div className='w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform'>
-                  <FaFacebook className='w-6 h-6 text-white' />
+                <div className='flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-blue-600'>
+                  <FaFacebook className='h-5 w-5' />
                 </div>
-                <span className='text-xs font-medium text-gray-700'>Facebook</span>
+                <span className='text-sm font-bold text-gray-800'>Facebook</span>
               </a>
 
               <a
                 href={`https://www.instagram.com/share?url=${shareUrl}`}
                 target='_blank'
                 rel='noopener noreferrer'
-                className='flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-gray-50 transition-colors group'
+                className='flex items-center gap-3 rounded-2xl border border-gray-100 px-4 py-3 transition-colors hover:bg-gray-50'
               >
-                <div className='w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform'>
-                  <FaInstagram className='w-6 h-6 text-white' />
+                <div className='flex h-10 w-10 items-center justify-center rounded-full bg-pink-50 text-pink-600'>
+                  <FaInstagram className='h-5 w-5' />
                 </div>
-                <span className='text-xs font-medium text-gray-700'>Instagram</span>
+                <span className='text-sm font-bold text-gray-800'>Instagram</span>
               </a>
             </div>
 
             {/* Copier le lien */}
-            <div className='relative'>
+            <div className='relative mt-4'>
               <input
                 type='text'
                 value={url || window.location.href}
                 readOnly
-                className='w-full px-4 py-3 pr-24 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-600 focus:outline-none focus:border-orange-300'
+                className='w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 pr-24 text-sm text-gray-500 outline-none'
               />
               <button
                 onClick={handleCopyLink}
-                className={`absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                className={`absolute right-2 top-1/2 -translate-y-1/2 rounded-xl px-3 py-2 text-xs font-black transition-all ${
                   copied
                     ? 'bg-green-100 text-green-700'
                     : 'bg-orange-500 text-white hover:bg-orange-600'

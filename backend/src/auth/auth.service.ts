@@ -49,6 +49,27 @@ export class AuthService {
     return `email_verification_code_${userId}`;
   }
 
+  private async createUserNotification(userId: bigint, data: {
+    type: string;
+    title: string;
+    message: string;
+    link?: string;
+  }) {
+    try {
+      await this.prisma.notification.create({
+        data: {
+          userId,
+          type: data.type,
+          title: data.title,
+          message: data.message,
+          link: data.link,
+        },
+      });
+    } catch {
+      // Notifications should never block authentication flows.
+    }
+  }
+
   private ensureMailConfigured() {
     if (!process.env.MAIL_HOST && process.env.NODE_ENV === 'production') {
       throw new BadRequestException('Configuration email manquante.');
@@ -237,6 +258,13 @@ export class AuthService {
       await this.sendEmailVerificationCode(user.email, code);
     }
 
+    await this.createUserNotification(user.id, {
+      type: 'welcome',
+      title: 'Bienvenue sur Domilix',
+      message: 'Votre compte a ete cree avec succes. Vous pouvez maintenant rechercher des annonces, sauvegarder vos favoris et configurer votre profil.',
+      link: '/settings',
+    });
+
     const message = dto.phone_number
       ? 'Un SMS de verification a ete envoye.'
       : 'Un code de verification a ete envoye a votre email.';
@@ -264,6 +292,13 @@ export class AuthService {
     if (dto.phone_number && !user.phoneVerified) {
       throw new ForbiddenException("Le numero de telephone n'est pas verifie.");
     }
+
+    await this.createUserNotification(user.id, {
+      type: 'new_login',
+      title: 'Nouvelle connexion',
+      message: 'Une nouvelle connexion a votre compte Domilix vient d etre effectuee.',
+      link: '/settings',
+    });
 
     return this.authResponse(user);
   }

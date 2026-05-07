@@ -297,11 +297,10 @@ export default function Ads(): React.ReactElement {
                     key={preset.label}
                     type='button'
                     onClick={() => handleFilterChange('budget_max', preset.max)}
-                    className={`rounded-xl border px-3 py-1.5 text-xs font-semibold transition-colors ${
-                      filters.budget_max === preset.max
+                    className={`rounded-xl border px-3 py-1.5 text-xs font-semibold transition-colors ${filters.budget_max === preset.max
                         ? 'border-primary bg-primary/10 text-primary'
                         : 'border-outline-variant bg-white text-on-surface-variant hover:border-primary/40 hover:text-primary'
-                    }`}
+                      }`}
                   >
                     {preset.label}
                   </button>
@@ -668,9 +667,7 @@ export default function Ads(): React.ReactElement {
   return (
     <>
       <Nav2 />
-
-      {/* ── Filter bar ── */}
-      <div className='sticky top-[calc(5rem+var(--email-verification-banner-offset,0px))] z-20 w-screen px-4 py-3 backdrop-blur-sm sm:px-6 md:fixed md:top-[calc(5rem+var(--email-verification-banner-offset,0px))] lg:px-8'>
+      <div className='sticky top-[calc(4rem+var(--email-verification-banner-offset,0px))] z-20 w-screen px-4 py-3 backdrop-blur-sm sm:px-6 md:fixed md:top-[calc(4rem+var(--email-verification-banner-offset,0px))] lg:px-8'>
         <div className='mx-auto w-full max-w-6xl'>
           <div className='relative'>
 
@@ -895,76 +892,76 @@ export default function Ads(): React.ReactElement {
         </div>
       </div>
 
-      {/* ── Page content ── */}
-      <div className='min-h-screen'>
+      <div className=' min-h-screen'>
+        <section className='mt-8 px-5 md:mt-44 sm:px-8 lg:px-12'>
+          <div className='relative w-full max-w-full overflow-hidden'>
+            <Swiper
+              modules={[Autoplay, Pagination]}
+              onSwiper={setPromoSwiper}
+              autoplay={{ delay: 3500, disableOnInteraction: false }}
+              pagination={{
+                clickable: true,
+                el: '.ads-promos-pagination',
+                bulletClass:
+                  'swiper-pagination-bullet !mx-1 !h-2 !w-2 !rounded-full !bg-orange-200 !opacity-100 transition-all',
+                bulletActiveClass:
+                  'swiper-pagination-bullet-active !w-8 !rounded-full !bg-orange-500',
+              }}
+              className='!w-full !max-w-full'
+              spaceBetween={18}
+              breakpoints={{
+                0: { slidesPerView: 1 },
+                768: { slidesPerView: 2 },
+                1200: { slidesPerView: 3 },
+              }}
+            >
+              {promoSlides.map(slide => (
+                <SwiperSlide key={slide.id} className='h-auto'>
+                  <article
+                    className={`group relative flex h-full min-h-[250px] flex-col overflow-hidden rounded-3xl bg-gradient-to-br ${slide.bg} bg-cover bg-center p-5 text-white shadow-sm transition duration-300 hover:shadow-lg sm:min-h-[285px] sm:p-6`}
+                    style={
+                      slide.image
+                        ? {
+                          backgroundImage: `linear-gradient(135deg, rgba(8,15,28,0.86), rgba(8,15,28,0.58)), url(${slide.image})`,
+                        }
+                        : undefined
+                    }
+                  >
+                    <span className='absolute right-4 top-4 rounded-full bg-orange-500 px-3 py-1 text-xs font-black uppercase tracking-wide text-white shadow-sm'>
+                      {slide.badge}
+                    </span>
 
-        {/* ── Promo cards (3-column dark) ── */}
-        <section className='mt-8 px-5 md:mt-52 sm:px-8 lg:px-12'>
-          <div className='grid grid-cols-1 gap-6 md:grid-cols-3'>
-            {promoSlides.slice(0, 3).map((slide, i) => (
-              <article
-                key={slide.id}
-                className='relative flex h-[280px] flex-col overflow-hidden rounded-xl p-6'
-              >
-                {/* Background image */}
-                <img
-                  src={slide.image}
-                  alt=''
-                  aria-hidden='true'
-                  className='absolute inset-0 h-full w-full object-cover'
-                />
-                {/* Dark overlay */}
-                <div className='absolute inset-0 bg-on-secondary-fixed/75' />
+                    <h3 className='mt-4 text-headline-sm font-headline-sm text-on-primary leading-tight'>
+                      {slide.title}
+                    </h3>
+                    <p className='mt-2 flex-1 text-body-md text-secondary-fixed-dim'>
+                      {slide.subtitle}
+                    </p>
 
-                {/* Badge top-right */}
-                <div className='absolute right-0 top-0 z-10 rounded-bl-lg bg-primary-container px-3 py-1 text-label-md font-label-md text-on-primary-container'>
-                  {slide.badge}
-                </div>
-
-                {/* Content */}
-                <div className='relative z-10 flex h-full flex-col'>
-                  {/* Category pill */}
-                  <span className={`mt-2 inline-block w-max rounded-full px-3 py-1 text-caption font-caption ${
-                    i === 1 ? 'bg-surface-container text-on-surface' :
-                    i === 2 ? 'bg-tertiary text-on-tertiary' :
-                    'bg-tertiary-container text-on-tertiary-container'
-                  }`}>
-                    {i === 0 ? 'Service Premium' : i === 1 ? 'Estimation' : 'Nouveauté'}
-                  </span>
-
-                  <h3 className='mt-4 text-headline-sm font-headline-sm text-on-primary leading-tight'>
-                    {slide.title}
-                  </h3>
-                  <p className='mt-2 flex-1 text-body-md text-secondary-fixed-dim'>
-                    {slide.subtitle}
-                  </p>
-
-                  {slide.actionUrl ? (
-                    <a
-                      href={slide.actionUrl}
-                      className={`mt-4 inline-flex w-fit items-center self-start rounded-full px-4 py-2 text-label-md font-label-md transition-colors ${
-                        i === 1
-                          ? 'bg-primary-container text-on-primary-container hover:opacity-90'
-                          : 'border border-white/40 text-on-primary hover:bg-white/10'
-                      }`}
-                    >
-                      {slide.cta}
-                    </a>
-                  ) : (
-                    <button
-                      type='button'
-                      className={`mt-4 inline-flex w-fit items-center self-start rounded-full px-4 py-2 text-label-md font-label-md transition-colors ${
-                        i === 1
-                          ? 'bg-primary-container text-on-primary-container hover:opacity-90'
-                          : 'border border-white/40 text-on-primary hover:bg-white/10'
-                      }`}
-                    >
-                      {slide.cta}
-                    </button>
-                  )}
-                </div>
-              </article>
-            ))}
+                    {slide.actionUrl ? (
+                      <a
+                        href={slide.actionUrl}
+                        className={`mt-4 inline-flex w-fit items-center self-start rounded-full px-4 py-2 text-label-md font-label-md transition-colors ${i === 1
+                            ? 'bg-primary-container text-on-primary-container hover:opacity-90'
+                            : 'border border-white/40 text-on-primary hover:bg-white/10'
+                          }`}
+                      >
+                        {slide.cta}
+                      </a>
+                    ) : (
+                      <button
+                        type='button'
+                        className={`mt-4 inline-flex w-fit items-center self-start rounded-full px-4 py-2 text-label-md font-label-md transition-colors ${i === 1
+                            ? 'bg-primary-container text-on-primary-container hover:opacity-90'
+                            : 'border border-white/40 text-on-primary hover:bg-white/10'
+                          }`}
+                      >
+                        {slide.cta}
+                      </button>
+                    )}
+                  </div>
+                </article>
+              ))}
           </div>
 
           {/* Carousel dots indicator */}
@@ -1001,7 +998,7 @@ export default function Ads(): React.ReactElement {
                 </span>
               </div>
 
-              <div className='grid w-full grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2 sm:gap-x-6 lg:grid-cols-3 lg:gap-x-4 xl:grid-cols-4 2xl:grid-cols-5'>
+              <div className='grid w-full grid-cols-1 gap-x-2 gap-y-6 sm:grid-cols-2 sm:gap-x-6 lg:grid-cols-3 lg:gap-x-4 xl:grid-cols-4 2xl:grid-cols-5'>
                 {section.ads.map(ad => (
                   <ProductCard {...ad} key={ad.id} />
                 ))}

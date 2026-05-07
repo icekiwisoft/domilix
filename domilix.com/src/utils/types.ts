@@ -149,6 +149,8 @@ export interface PricingProps {
   validity: string;
   price: string;
   benefit: string;
+  mobileBenefit?: string;
+  mobileValidity?: string;
   badge?: string;
   features: string[];
   isActive: boolean;
