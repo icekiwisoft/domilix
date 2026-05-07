@@ -1,4 +1,8 @@
 import {
+  CacheInterceptor,
+  CacheTTL,
+} from '@nestjs/cache-manager';
+import {
   Body,
   Controller,
   Delete,
@@ -9,6 +13,7 @@ import {
   Query,
   Res,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -29,6 +34,8 @@ export class BroadcastsController {
   constructor(private readonly broadcastsService: BroadcastsService) {}
 
   @Get()
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(60_000)
   @ApiOperation({ summary: 'List homepage broadcasts' })
   @ApiQuery({ name: 'include_inactive', required: false, type: Boolean })
   index(@Query() query: QueryBroadcastsDto) {
@@ -36,6 +43,8 @@ export class BroadcastsController {
   }
 
   @Get(':id')
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(300_000)
   @ApiOperation({ summary: 'Get broadcast details' })
   @ApiParam({ name: 'id', example: '1' })
   show(@Param('id') id: string) {
