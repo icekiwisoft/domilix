@@ -199,7 +199,7 @@ export default function Nav2({
   return (
     <nav className='bg-white navbar top-0 left-0 fixed w-full px-4 sm:px-6 lg:px-10 z-50 shadow-sm'>
       <div className='h-16 flex justify-between items-center text-black max-w-7xl mx-auto'>
-        <div className='flex items-center flex-shrink-0'>
+        <div className='flex items-center flex-shrink-0' data-tour='nav-logo'>
           <NavLink className='text-2xl font-bold flex' to='/'>
             <img src={logoSrc} alt='logo' className='h-6 sm:h-7' />
           </NavLink>
@@ -207,7 +207,7 @@ export default function Nav2({
 
         {/* Menu Desktop */}
         <div className='hidden lg:flex items-center space-x-6'>
-          <ul className='flex items-center space-x-6 xl:space-x-8'>
+          <ul className='flex items-center space-x-6 xl:space-x-8' data-tour='nav-links'>
             {links.map(link => (
               <li key={link.name}>
                 <NavLink
@@ -241,6 +241,7 @@ export default function Nav2({
             <div className='flex items-center space-x-3 xl:space-x-4'>
               <button
                 onClick={handlePublishClick}
+                data-tour='publish-ad'
                 className='inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-orange-400 bg-white px-3 py-2 text-sm font-semibold text-orange-600 shadow-sm transition-colors hover:bg-orange-50 xl:px-4'
                 aria-label='Publier une annonce'
               >
@@ -250,6 +251,7 @@ export default function Nav2({
 
               <NavLink
                 to='/subscriptions'
+                data-tour='user-credits'
                 className={({ isActive }) =>
                   `flex items-center gap-1.5 transition-colors ${
                     isActive ? 'text-yellow-900' : 'hover:opacity-80'
@@ -332,6 +334,7 @@ export default function Nav2({
             <>
               <button
                 onClick={handlePublishClick}
+                data-tour='publish-ad'
                 className='inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-orange-400 bg-white text-orange-600 shadow-sm transition-colors hover:bg-orange-50'
                 aria-label='Publier une annonce'
               >
@@ -340,6 +343,7 @@ export default function Nav2({
 
               <NavLink
                 to='/subscriptions'
+                data-tour='user-credits'
                 className={({ isActive }) =>
                   `inline-flex items-center gap-1 transition-colors ${
                     isActive ? 'text-yellow-900' : 'hover:opacity-80'

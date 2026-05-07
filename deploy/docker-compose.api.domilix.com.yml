@@ -26,7 +26,16 @@ services:
       - traefik.http.routers.domilix-api.entrypoints=${TRAEFIK_ENTRYPOINT:-websecure}
       - traefik.http.routers.domilix-api.tls=true
       - traefik.http.routers.domilix-api.tls.certresolver=${TRAEFIK_CERTRESOLVER:-le}
+      - traefik.http.routers.domilix-api.middlewares=domilix-api-upload-buffer
       - traefik.http.services.domilix-api.loadbalancer.server.port=8000
+      - traefik.http.services.domilix-api.loadbalancer.serverstransport=domilix-api-transport
+      - traefik.http.middlewares.domilix-api-upload-buffer.buffering.maxRequestBodyBytes=104857600
+      - traefik.http.middlewares.domilix-api-upload-buffer.buffering.memRequestBodyBytes=10485760
+      - traefik.http.middlewares.domilix-api-upload-buffer.buffering.maxResponseBodyBytes=104857600
+      - traefik.http.middlewares.domilix-api-upload-buffer.buffering.memResponseBodyBytes=10485760
+      - traefik.http.serverstransports.domilix-api-transport.forwardingtimeouts.dialtimeout=30s
+      - traefik.http.serverstransports.domilix-api-transport.forwardingtimeouts.responseheadertimeout=300s
+      - traefik.http.serverstransports.domilix-api-transport.forwardingtimeouts.idleconntimeout=300s
 
   db:
     image: mysql:8.0

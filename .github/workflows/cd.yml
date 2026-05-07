@@ -1,10 +1,6 @@
 name: CD
 
 on:
-  push:
-    branches:
-      - main
-      - master
   workflow_run:
     workflows:
       - Docker Publish

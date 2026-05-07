@@ -193,7 +193,7 @@ export default function Subscriptions() {
             </p>
           </motion.div>
 
-          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto'>
+          <div data-tour='packs-grid' className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto'>
             <PricingCard
               title='Pack Standard'
               credits='20 credits'

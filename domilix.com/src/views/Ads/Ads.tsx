@@ -714,7 +714,7 @@ export default function Ads(): React.ReactElement {
   return (
     <>
       <Nav2 />
-      <div className='sticky top-[calc(4rem+var(--email-verification-banner-offset,0px))] z-20 w-screen px-4 py-3 backdrop-blur-sm sm:px-6 md:fixed md:top-[calc(4rem+var(--email-verification-banner-offset,0px))] lg:px-8'>
+      <div data-tour='houses-filters' className='sticky top-[calc(4rem+var(--email-verification-banner-offset,0px))] z-20 w-screen px-4 py-3 backdrop-blur-sm sm:px-6 md:fixed md:top-[calc(4rem+var(--email-verification-banner-offset,0px))] lg:px-8'>
         <div className='mx-auto w-full max-w-6xl'>
           <div className='relative'>
             <div className='overflow-hidden rounded-2xl border-2 border-orange-500 bg-white shadow-xl shadow-orange-900/10 md:hidden'>
@@ -983,7 +983,7 @@ export default function Ads(): React.ReactElement {
 
       <div className=' min-h-screen'>
         <section className='mt-8 px-5 md:mt-44 sm:px-8 lg:px-12'>
-          <div className='relative w-full max-w-full overflow-hidden'>
+          <div data-tour='promo-swiper' className='relative w-full max-w-full overflow-hidden'>
             <Swiper
               modules={[Autoplay, Pagination]}
               onSwiper={setPromoSwiper}
@@ -996,7 +996,7 @@ export default function Ads(): React.ReactElement {
                 bulletActiveClass:
                   'swiper-pagination-bullet-active !w-8 !rounded-full !bg-orange-500',
               }}
-              className='!w-full !max-w-full'
+              className='!w-full !max-w-full [&_.swiper-wrapper]:items-stretch'
               spaceBetween={18}
               breakpoints={{
                 0: { slidesPerView: 1 },
@@ -1005,9 +1005,9 @@ export default function Ads(): React.ReactElement {
               }}
             >
               {promoSlides.map(slide => (
-                <SwiperSlide key={slide.id} className='h-auto'>
+                <SwiperSlide key={slide.id} className='!h-auto'>
                   <article
-                    className={`group relative flex h-full min-h-[250px] flex-col overflow-hidden rounded-3xl bg-gradient-to-br ${slide.bg} bg-cover bg-center p-5 text-white shadow-sm transition duration-300 hover:shadow-lg sm:min-h-[285px] sm:p-6`}
+                    className={`group relative flex h-[250px] w-full flex-col overflow-hidden rounded-3xl bg-gradient-to-br ${slide.bg} bg-cover bg-center p-5 text-white shadow-sm transition duration-300 hover:shadow-lg sm:h-[285px] sm:p-6`}
                     style={
                       slide.image
                         ? {
@@ -1098,7 +1098,7 @@ export default function Ads(): React.ReactElement {
                 </span>
               </div>
 
-              <div className='grid w-full grid-cols-1 gap-x-2 gap-y-6 sm:grid-cols-2 sm:gap-x-6 lg:grid-cols-3 lg:gap-x-4 xl:grid-cols-4 2xl:grid-cols-5'>
+              <div data-tour='ads-grid' className='grid w-full grid-cols-1 gap-x-2 gap-y-6 sm:grid-cols-2 sm:gap-x-6 lg:grid-cols-3 lg:gap-x-4 xl:grid-cols-4 2xl:grid-cols-5'>
                 {section.ads.map(ad => (
                   <ProductCard {...ad} key={ad.id} />
                 ))}

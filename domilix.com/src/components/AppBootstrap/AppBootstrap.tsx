@@ -3,6 +3,7 @@
 import CookieConsent from '@components/CookieConsent/CookieConsent';
 import EmailVerificationBanner from '@components/EmailVerificationBanner/EmailVerificationBanner';
 import SigninDialog from '@components/SigninDialog/SigninDialog';
+import SiteTour from '@components/SiteTour/SiteTour';
 import { useAuth } from '@hooks/useAuth';
 import { useAuthStore, useUiStore } from '@stores/defineStore';
 import React, { useEffect } from 'react';
@@ -42,6 +43,7 @@ export default function AppBootstrap({
       {children}
       {signinModal && <SigninDialog />}
       <CookieConsent />
+      <SiteTour />
     </>
   );
 }
