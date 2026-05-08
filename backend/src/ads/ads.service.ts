@@ -728,7 +728,9 @@ export class AdsService {
         adType: body.ad_type,
         adId: adableId,
         announcerId: announcer.id,
-        categoryId: body.category_id,
+        categoryId: body.category_id !== undefined && body.category_id !== null && body.category_id !== ''
+          ? String(body.category_id)
+          : null,
         period: this.normalizePeriod(body.period) || 'month',
         description: body.description || null,
       },
