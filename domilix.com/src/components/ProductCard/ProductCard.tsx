@@ -85,7 +85,7 @@ export default function ProductCard(props: Ad): React.ReactElement {
 
   return (
     <article
-      className='group bg-surface-container-lowest rounded-lg overflow-hidden relative shadow-card'
+      className='group relative overflow-hidden rounded-lg bg-surface-container-lowest shadow-card'
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -95,7 +95,7 @@ export default function ProductCard(props: Ad): React.ReactElement {
           <img
             alt={description || 'Annonce'}
             loading='lazy'
-            className='w-full h-full object-cover transition-transform duration-500 group-hover:scale-105'
+            className='h-full w-full object-cover transition-transform duration-500 group-hover:scale-105'
             src={
               medias && medias.length > 0
                 ? mediaUrl(medias[currentImageIndex].file)
@@ -110,25 +110,25 @@ export default function ProductCard(props: Ad): React.ReactElement {
           onClick={handleLikeClick}
           disabled={isLiking}
           title={liked ? 'Retirer des favoris' : 'Ajouter aux favoris'}
-          className={`absolute top-3 right-3 w-8 h-8 bg-surface-container-lowest/90 rounded-full flex items-center justify-center shadow-sm transition-colors ${
+          className={`absolute right-sm top-sm flex h-8 w-8 items-center justify-center rounded-full bg-surface-container-lowest/90 shadow-sm transition-colors ${
             liked ? 'text-primary-container' : 'text-secondary hover:text-primary-container'
-          } ${isLiking ? 'opacity-50 cursor-not-allowed' : ''}`}
+          } ${isLiking ? 'cursor-not-allowed opacity-50' : ''}`}
         >
           <HeartIcon className={`size-[18px] ${liked ? 'fill-current' : ''}`} />
         </button>
 
         {/* Status badge */}
-        <div className='absolute bottom-3 left-3 bg-surface-container-lowest/90 px-3 py-1 rounded text-xs font-semibold text-on-surface backdrop-blur-sm shadow-sm'>
+        <div className='absolute bottom-sm left-sm rounded bg-surface-container-lowest/90 px-sm py-xs text-label-md text-on-surface shadow-sm backdrop-blur-sm'>
           {ad_type === 'location' ? 'À louer' : 'À vendre'}
         </div>
 
         {/* Image progress dots */}
         {hasMultipleImages && (
-          <div className='absolute bottom-3 right-3 flex gap-1'>
+          <div className='absolute bottom-sm right-sm flex gap-1'>
             {medias.map((_, index) => (
               <div
                 key={index}
-                className={`w-1.5 h-1.5 rounded-full transition-all duration-200 ${
+                className={`h-1.5 w-1.5 rounded-full transition-all duration-200 ${
                   index === currentImageIndex ? 'bg-white' : 'bg-white/50'
                 }`}
               />
@@ -138,51 +138,51 @@ export default function ProductCard(props: Ad): React.ReactElement {
       </div>
 
       {/* Content */}
-      <div className='p-6'>
+      <div className='p-md'>
         {/* Price */}
         <Link to={`/houses/${id}`} target='_blank'>
-          <h3 className='text-2xl font-semibold text-on-surface leading-8 mb-1 hover:text-primary transition-colors'>
+          <h3 className='mb-xs text-headline-sm text-on-surface transition-colors hover:text-primary'>
             {formatPrice(price)}{' '}
-            <span className='text-sm font-medium text-on-surface-variant'>{currency}</span>
+            <span className='text-body-md font-normal text-on-surface-variant'>{currency}</span>
           </h3>
         </Link>
 
         {/* Title */}
-        <p className='text-base text-on-surface mb-1 truncate'>
+        <p className='mb-xs truncate text-body-md text-on-surface'>
           {description || category?.name || 'Annonce'}
         </p>
 
         {/* Location */}
-        <p className='text-xs text-secondary mb-6 flex items-center gap-1'>
+        <p className='mb-md flex items-center gap-xs text-caption text-secondary'>
           <MapPinIcon className='size-4 shrink-0' />
           <span className='truncate'>{locationLabel}</span>
         </p>
 
         {/* Features */}
         {hasAmenities && (
-          <div className='flex items-center gap-4 flex-wrap border-t border-outline-variant pt-3 text-xs text-secondary'>
+          <div className='flex flex-wrap items-center gap-md border-t border-outline-variant pt-sm'>
             {size ? (
-              <span className='flex items-center gap-1'>
+              <div className='flex items-center gap-xs text-caption text-secondary'>
                 <svg className='size-[15px] shrink-0' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.8' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
                   <path d='M3 3h6v6H3zM15 3h6v6h-6zM3 15h6v6H3zM15 15h6v6h-6z' />
                 </svg>
                 {size} m²
-              </span>
+              </div>
             ) : null}
             {bedroom ? (
-              <span className='flex items-center gap-1'>
+              <div className='flex items-center gap-xs text-caption text-secondary'>
                 <svg className='size-[15px] shrink-0' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.8' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
                   <path d='M2 20v-6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v6' />
                   <path d='M2 14v-3a2 2 0 0 1 2-2h3' />
                   <path d='M17 9h3a2 2 0 0 1 2 2v3' />
                   <rect x='7' y='9' width='10' height='5' rx='1' />
                 </svg>
-                {bedroom} ch.
-              </span>
+                {bedroom} pce.
+              </div>
             ) : null}
-            {pool ? <span>Piscine</span> : null}
-            {garage ? <span>Garage</span> : null}
-            {garden ? <span>Jardin</span> : null}
+            {pool ? <span className='text-caption text-secondary'>Piscine</span> : null}
+            {garage ? <span className='text-caption text-secondary'>Garage</span> : null}
+            {garden ? <span className='text-caption text-secondary'>Jardin</span> : null}
           </div>
         )}
       </div>

@@ -21,7 +21,8 @@ type PromoSlide = {
   id: string;
   title: string;
   subtitle: string;
-  badge: string;
+  badge?: string;
+  chip?: string;
   cta: string;
   bg: string;
   image: string;
@@ -120,37 +121,41 @@ export default function Ads(): React.ReactElement {
   const defaultPromoSlides: PromoSlide[] = [
     {
       id: 'promo-publier-gratuit',
+      chip: 'Propriétaires',
+      badge: '100% Gratuit',
       title: 'Publiez Votre Bien Gratuitement',
-      subtitle: 'Premiere annonce sans frais pour attirer vos premiers clients',
-      badge: '100% OFF',
+      subtitle: 'Première annonce sans frais pour attirer vos premiers clients.',
       cta: 'Publier maintenant',
       bg: 'from-orange-600 to-rose-500',
       image: coverAnnonceurSrc,
     },
     {
       id: 'promo-boost-annonce',
-      title: 'Boostez Votre Annonce',
-      subtitle: 'Mettez votre annonce en tete des recherches pendant 7 jours',
+      chip: 'Visibilité',
       badge: '50% OFF',
+      title: 'Boostez Votre Annonce',
+      subtitle: 'Mettez votre annonce en tête des recherches pendant 7 jours.',
       cta: 'Activer le boost',
       bg: 'from-amber-500 to-orange-600',
       image: housesPromoSrc,
     },
     {
       id: 'promo-pack-pro',
-      title: 'Pack Pro Agence',
-      subtitle: 'Publiez en illimite et obtenez plus de visibilite chaque semaine',
+      chip: 'Agences',
       badge: '35% OFF',
+      title: 'Pack Pro Agence',
+      subtitle: 'Publiez en illimité et obtenez plus de visibilité chaque semaine.',
       cta: 'Voir le pack pro',
       bg: 'from-rose-600 to-pink-600',
       image: furnituresPromoSrc,
     },
     {
       id: 'promo-photo-pro',
-      title: 'Photos Pro + Verification',
-      subtitle: 'Donnez plus de confiance a vos annonces et vendez plus vite',
+      chip: 'Premium',
       badge: '20% OFF',
-      cta: 'Decouvrir le service',
+      title: 'Photos Pro + Vérification',
+      subtitle: 'Donnez plus de confiance à vos annonces et vendez plus vite.',
+      cta: 'Découvrir le service',
       bg: 'from-orange-700 to-amber-600',
       image: homePromoSrc,
     },
@@ -159,7 +164,6 @@ export default function Ads(): React.ReactElement {
   const [citySections, setCitySections] = useState<
     Array<{ city: string; country?: string; adsCount?: number; ads: Ad[] }>
   >([]);
-  const [promoSwiper, setPromoSwiper] = useState<any>(null);
   const [promoSlides, setPromoSlides] = useState<PromoSlide[]>(defaultPromoSlides);
   const [isLoading, setIsLoading] = useState(true);
   const [serverError, setServerError] = useState(false);
@@ -302,8 +306,8 @@ export default function Ads(): React.ReactElement {
                     type='button'
                     onClick={() => handleFilterChange('budget_max', preset.max)}
                     className={`rounded-xl border px-3 py-1.5 text-xs font-semibold transition-colors ${filters.budget_max === preset.max
-                        ? 'border-primary bg-primary/10 text-primary'
-                        : 'border-outline-variant bg-white text-on-surface-variant hover:border-primary/40 hover:text-primary'
+                      ? 'border-primary bg-primary/10 text-primary'
+                      : 'border-outline-variant bg-white text-on-surface-variant hover:border-primary/40 hover:text-primary'
                       }`}
                   >
                     {preset.label}
@@ -671,8 +675,13 @@ export default function Ads(): React.ReactElement {
   return (
     <>
       <Nav2 />
-      <div className='sticky top-[calc(4rem+var(--email-verification-banner-offset,0px))] z-20 w-screen px-4 py-3 backdrop-blur-sm sm:px-6 md:fixed md:top-[calc(4rem+var(--email-verification-banner-offset,0px))] lg:px-8'>
-        <div className='mx-auto w-full max-w-6xl'>
+      {/* ── Hero ── */}
+      <section className='mx-auto w-full max-w-container px-gutter pb-xl pt-24 text-center sm:pt-28'>
+        {/* <h1 className='mx-auto mb-lg max-w-[800px] text-display-xl text-on-surface'>
+          L&apos;immobilier à votre image.
+        </h1> */}
+
+        <div className='relative mx-auto w-full max-w-[1000px]'>
           <div className='relative'>
 
             {/* ── Mobile filter card ── */}
@@ -894,122 +903,135 @@ export default function Ads(): React.ReactElement {
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div className=' min-h-screen'>
-        <section className='mt-8 px-5 md:mt-44 sm:px-8 lg:px-12'>
-          <div className='relative w-full max-w-full overflow-hidden'>
-            <Swiper
-              modules={[Autoplay, Pagination]}
-              onSwiper={setPromoSwiper}
-              autoplay={{ delay: 3500, disableOnInteraction: false }}
-              pagination={{
-                clickable: true,
-                el: '.ads-promos-pagination',
-                bulletClass:
-                  'swiper-pagination-bullet !mx-1 !h-2 !w-2 !rounded-full !bg-orange-200 !opacity-100 transition-all',
-                bulletActiveClass:
-                  'swiper-pagination-bullet-active !w-8 !rounded-full !bg-orange-500',
-              }}
-              className='!w-full !max-w-full'
-              spaceBetween={18}
-              breakpoints={{
-                0: { slidesPerView: 1 },
-                768: { slidesPerView: 2 },
-                1200: { slidesPerView: 3 },
-              }}
-            >
-              {promoSlides.map((slide, i) => (
-                <SwiperSlide key={slide.id} className='h-auto'>
-                  <article
-                    className={`group relative flex h-full min-h-[250px] flex-col overflow-hidden rounded-3xl bg-gradient-to-br ${slide.bg} bg-cover bg-center p-5 text-white shadow-sm transition duration-300 hover:shadow-lg sm:min-h-[285px] sm:p-6`}
-                    style={
-                      slide.image
-                        ? {
-                          backgroundImage: `linear-gradient(135deg, rgba(8,15,28,0.86), rgba(8,15,28,0.58)), url(${slide.image})`,
-                        }
-                        : undefined
-                    }
-                  >
-                    <span className='absolute right-4 top-4 rounded-full bg-orange-500 px-3 py-1 text-xs font-black uppercase tracking-wide text-white shadow-sm'>
+      <div className='min-h-screen'>
+        {/* ── Promo cards ── */}
+        <section className='mx-auto max-w-container px-gutter pb-xl'>
+          <Swiper
+            modules={[Autoplay, Pagination]}
+            loop={true}
+            autoplay={{ delay: 3500, disableOnInteraction: false }}
+            pagination={{
+              clickable: true,
+              el: '.promo-pagination',
+              bulletClass: 'inline-block h-2 w-2 rounded-full bg-outline-variant opacity-100 transition-all duration-300 cursor-pointer mx-1',
+              bulletActiveClass: '!w-6 !bg-primary-container',
+            }}
+            spaceBetween={24}
+            breakpoints={{
+              0: { slidesPerView: 1, slidesPerGroup: 1 },
+              768: { slidesPerView: 2, slidesPerGroup: 2 },
+              1024: { slidesPerView: 3, slidesPerGroup: 3 },
+            }}
+            className='!pb-10'
+          >
+            {promoSlides.map((slide, i) => (
+              <SwiperSlide key={slide.id} className='h-auto'>
+                <article
+                  className='relative flex h-[280px] flex-col overflow-hidden rounded-xl bg-on-secondary-fixed bg-cover bg-center p-md'
+                  style={slide.image ? {
+                    backgroundImage: `linear-gradient(135deg, rgba(8,15,28,0.88), rgba(8,15,28,0.65)), url(${slide.image})`,
+                  } : undefined}
+                >
+                  {/* Badge top-right */}
+                  {slide.badge && (
+                    <div className='absolute right-0 top-0 rounded-bl-lg bg-primary-container px-sm py-xs text-label-md text-on-primary-container'>
                       {slide.badge}
+                    </div>
+                  )}
+
+                  {/* Category chip */}
+                  {slide.chip && (
+                    <span className='mb-md mt-sm inline-block w-max rounded-full bg-tertiary-container px-sm py-xs text-caption text-on-tertiary-container'>
+                      {slide.chip}
                     </span>
+                  )}
 
-                    <h3 className='mt-4 text-headline-sm font-headline-sm text-on-primary leading-tight'>
-                      {slide.title}
-                    </h3>
-                    <p className='mt-2 flex-1 text-body-md text-secondary-fixed-dim'>
-                      {slide.subtitle}
-                    </p>
+                  {/* Title */}
+                  <h3 className='mb-sm text-headline-sm text-on-primary'>
+                    {slide.title}
+                  </h3>
 
-                    {slide.actionUrl ? (
-                      <a
-                        href={slide.actionUrl}
-                        className={`mt-4 inline-flex w-fit items-center self-start rounded-full px-4 py-2 text-label-md font-label-md transition-colors ${i === 1
-                            ? 'bg-primary-container text-on-primary-container hover:opacity-90'
-                            : 'border border-white/40 text-on-primary hover:bg-white/10'
-                          }`}
-                      >
-                        {slide.cta}
-                      </a>
-                    ) : (
-                      <button
-                        type='button'
-                        className={`mt-4 inline-flex w-fit items-center self-start rounded-full px-4 py-2 text-label-md font-label-md transition-colors ${i === 1
-                            ? 'bg-primary-container text-on-primary-container hover:opacity-90'
-                            : 'border border-white/40 text-on-primary hover:bg-white/10'
-                          }`}
-                      >
-                        {slide.cta}
-                      </button>
-                    )}
-                  </article>
-                </SwiperSlide>
-              ))}
-            </Swiper>
-          </div>
+                  {/* Description */}
+                  <p className='mb-auto text-body-md text-secondary-fixed-dim'>
+                    {slide.subtitle}
+                  </p>
 
-          {/* Carousel dots indicator */}
-          <div className='mt-4 flex items-center justify-center gap-1.5'>
-            <div className='h-2 w-2 rounded-full bg-primary-container' />
-            <div className='h-2 w-2 rounded-full bg-outline-variant' />
-            <div className='h-2 w-2 rounded-full bg-outline-variant' />
-          </div>
+                  {/* CTA */}
+                  {slide.actionUrl ? (
+                    <a
+                      href={slide.actionUrl}
+                      className={`mt-md self-start rounded-full px-md py-sm text-label-md transition-colors ${i % 2 === 1
+                        ? 'bg-primary-container text-on-primary-container hover:opacity-90'
+                        : 'border border-outline/40 text-on-primary hover:bg-white/10'
+                        }`}
+                    >
+                      {slide.cta}
+                    </a>
+                  ) : (
+                    <button
+                      type='button'
+                      className={`mt-md self-start rounded-full px-md py-sm text-label-md transition-colors ${i % 2 === 1
+                        ? 'bg-primary-container text-on-primary-container hover:opacity-90'
+                        : 'border border-outline/40 text-on-primary hover:bg-white/10'
+                        }`}
+                    >
+                      {slide.cta}
+                    </button>
+                  )}
+                </article>
+              </SwiperSlide>
+            ))}
+          </Swiper>
+
+          {/* Dots */}
+          <div className='promo-pagination mt-xs flex justify-center' />
         </section>
 
         {/* ── City sections ── */}
-        <div className='mt-6 space-y-10 px-5 py-6 sm:px-8 lg:px-12'>
+        <div className='mx-auto max-w-container space-y-xl px-gutter py-xl'>
           {isLoading && <AdsSkeleton />}
 
           {!isLoading && serverError && <AdsErrorState />}
 
           {!isLoading && !serverError && citySections.length === 0 && <EmptyAdsState />}
 
-          {!isLoading && !serverError && citySections.map(section => (
-            <section
-              key={`${section.city}-${section.country || 'unknown'}`}
-              className='space-y-4'
-            >
-              <div className='flex flex-wrap items-center justify-between gap-2'>
-                <div className='flex items-center gap-2'>
-                  <HiMapPin className='h-5 w-5 flex-shrink-0 text-primary' />
-                  <h3 className='text-lg font-bold text-on-surface sm:text-xl'>
+          {!isLoading && !serverError && citySections.map(section => {
+            const count = section.adsCount ?? section.ads.length;
+            const cityParam = encodeURIComponent(section.city);
+            return (
+              <section key={`${section.city}-${section.country || 'unknown'}`}>
+                {/* Header */}
+                <div className='mb-md flex flex-wrap items-center gap-sm'>
+                  <h2 className='text-headline-sm tracking-tight text-on-surface'>
                     {section.city}{section.country ? `, ${section.country}` : ''}
-                  </h3>
+                  </h2>
+                  <span className='rounded-full border border-primary-fixed bg-surface-container px-sm py-xs text-label-md text-on-primary-container'>
+                    {count.toLocaleString()} annonce{count > 1 ? 's' : ''}
+                  </span>
                 </div>
-                <span className='inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-medium text-primary'>
-                  {section.adsCount ?? section.ads.length} annonce
-                  {(section.adsCount ?? section.ads.length) > 1 ? 's' : ''}
-                </span>
-              </div>
 
-              <div className='grid w-full grid-cols-1 gap-x-2 gap-y-6 sm:grid-cols-2 sm:gap-x-6 lg:grid-cols-3 lg:gap-x-4 xl:grid-cols-4 2xl:grid-cols-5'>
-                {section.ads.map(ad => (
-                  <ProductCard {...ad} key={ad.id} />
-                ))}
-              </div>
-            </section>
-          ))}
+                {/* Cards grid */}
+                <div className='grid grid-cols-1 gap-gutter sm:grid-cols-2 lg:grid-cols-4'>
+                  {section.ads.map(ad => (
+                    <ProductCard {...ad} key={ad.id} />
+                  ))}
+                </div>
+
+                {/* Voir toutes */}
+                {/* <div className='mt-lg flex justify-center'>
+                  <button
+                    type='button'
+                    onClick={() => navigate(`/houses?search=${cityParam}`)}
+                    className='rounded-full border border-outline bg-surface-container-lowest px-xl py-sm text-label-md text-on-surface shadow-sm transition-colors hover:bg-surface-container'
+                  >
+                    Voir toutes les annonces
+                  </button>
+                </div> */}
+              </section>
+            );
+          })}
         </div>
       </div>
       <FooterMinimal />
