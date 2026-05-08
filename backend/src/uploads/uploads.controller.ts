@@ -3,6 +3,7 @@ import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nes
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { AuthGuard } from '../auth/auth.guard';
+import { CurrentUser } from '../auth/current-user.decorator';
 import { UploadsService } from './uploads.service';
 import type { UploadType } from './uploads.service';
 
@@ -32,8 +33,8 @@ export class UploadsController {
       limits: { fileSize: 50 * 1024 * 1024 },
     }),
   )
-  upload(@Body('type') type: UploadType, @UploadedFile() file?: any) {
+  upload(@CurrentUser() user: any, @Body('type') type: UploadType, @UploadedFile() file?: any) {
     if (!file) throw new BadRequestException('Aucun fichier fourni.');
-    return this.uploadsService.upload(type, file);
+    return this.uploadsService.upload(user, type, file);
   }
 }

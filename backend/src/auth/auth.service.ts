@@ -10,6 +10,7 @@ import bcrypt from 'bcryptjs';
 import crypto from 'node:crypto';
 import nodemailer from 'nodemailer';
 import { PrismaService } from '../prisma/prisma.service';
+import { ObjectStorageService } from '../common/object-storage/object-storage.service';
 import { AuthTokenService } from './auth-token.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { LoginDto } from './dto/login.dto';
@@ -26,6 +27,7 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly tokens: AuthTokenService,
     private readonly verificationCodes: VerificationCodeService,
+    private readonly objectStorage: ObjectStorageService,
   ) {}
 
   private async totalCreditsForUser(userId: bigint) {
@@ -102,6 +104,20 @@ export class AuthService {
       created_at: user.createdAt,
       updated_at: user.updatedAt,
     };
+  }
+
+  private async ensureOwnedMedia(userId: bigint, mediaId: string | undefined, purpose: string) {
+    if (!mediaId) return null;
+
+    const announcer = await this.prisma.announcer.findFirst({ where: { userId } });
+    if (!announcer) throw new ForbiddenException("Vous n'etes pas un annonceur");
+
+    const media = await this.prisma.media.findFirst({
+      where: { id: mediaId, announcerId: announcer.id, purpose },
+    });
+    if (!media) throw new BadRequestException('Media invalide.');
+
+    return media;
   }
 
   private authResponse(user: User, message?: string) {
@@ -422,6 +438,11 @@ export class AuthService {
       throw new ForbiddenException("Vous n'etes pas un annonceur");
     }
 
+    const [avatarMedia, presentationMedia] = await Promise.all([
+      this.ensureOwnedMedia(user.id, dto.avatar_media_id, 'avatar'),
+      this.ensureOwnedMedia(user.id, dto.presentation_media_id, 'presentation'),
+    ]);
+
     await this.prisma.announcer.update({
       where: { id: announcer.id },
       data: {
@@ -429,7 +450,10 @@ export class AuthService {
         ...(dto.bio !== undefined ? { bio: dto.bio } : {}),
         ...(dto.professional_phone !== undefined ? { contact: dto.professional_phone } : {}),
         ...(avatarPath ? { avatar: avatarPath } : {}),
+        ...(dto.avatar_bucket && dto.avatar_path ? { avatarBucket: dto.avatar_bucket, avatarPath: dto.avatar_path } : {}),
+        ...(avatarMedia ? { avatarMediaId: avatarMedia.id, avatar: avatarMedia.file, avatarBucket: avatarMedia.bucket, avatarPath: avatarMedia.originalPath } : {}),
         ...(presentationPath ? { presentation: presentationPath } : {}),
+        ...(presentationMedia ? { presentationMediaId: presentationMedia.id, presentation: presentationMedia.file } : {}),
       },
     });
 
@@ -444,8 +468,12 @@ export class AuthService {
       announcer: {
         id: refreshed.id,
         name: refreshed.name,
-        avatar: refreshed.avatar,
-        presentation: refreshed.presentation,
+        avatar: await this.objectStorage.getSignedUrl(refreshed.avatarBucket, refreshed.avatarPath) || refreshed.avatar,
+        presentation: await this.objectStorage.getSignedUrl(presentationMedia?.bucket, presentationMedia?.originalPath) || refreshed.presentation,
+        avatar_media_id: refreshed.avatarMediaId,
+        presentation_media_id: refreshed.presentationMediaId,
+        avatar_bucket: refreshed.avatarBucket,
+        avatar_path: refreshed.avatarPath,
         bio: refreshed.bio,
         contact: refreshed.contact,
       },

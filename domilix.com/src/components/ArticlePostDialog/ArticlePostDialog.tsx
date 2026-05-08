@@ -300,8 +300,7 @@ export default function ArticlePostDialog({
         state: formData.state,
         country: formData.country,
         zip: formData.zip,
-        media_urls: uploadedMedias.map(media => media.url),
-        media_thumbnails: uploadedMedias.map(media => media.thumbnail || media.url),
+        media_ids: uploadedMedias.map(media => media.id),
         media_types: uploadedMedias.map(media => media.mime_type),
       };
 

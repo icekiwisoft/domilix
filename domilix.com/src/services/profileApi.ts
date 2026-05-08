@@ -17,6 +17,10 @@ export interface BecomeAnnouncerData {
   bio?: string;
   professional_phone?: string;
   avatar_url?: string;
+  avatar_bucket?: string;
+  avatar_path?: string;
+  avatar_media_id?: string;
+  presentation_media_id?: string;
   presentation_url?: string;
 }
 

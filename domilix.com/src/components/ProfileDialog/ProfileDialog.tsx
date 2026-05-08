@@ -193,8 +193,8 @@ export default function ProfileDialog({
         ...(announcerForm.company_name ? { company_name: announcerForm.company_name } : {}),
         ...(announcerForm.bio ? { bio: announcerForm.bio } : {}),
         ...(announcerForm.professional_phone ? { professional_phone: announcerForm.professional_phone } : {}),
-        ...(avatarUpload ? { avatar_url: avatarUpload.url } : {}),
-        ...(presentationUpload ? { presentation_url: presentationUpload.url } : {}),
+        ...(avatarUpload ? { avatar_media_id: avatarUpload.id } : {}),
+        ...(presentationUpload ? { presentation_media_id: presentationUpload.id } : {}),
       });
       await refreshProfile();
       alert('Profil annonceur mis à jour avec succès');

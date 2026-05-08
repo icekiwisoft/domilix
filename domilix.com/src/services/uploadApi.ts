@@ -3,11 +3,11 @@ import api from './api';
 export type UploadType = 'media' | 'avatar' | 'presentation-image';
 
 export type UploadResponse = {
-  url: string;
-  thumbnail: string | null;
+  id: string;
   type: UploadType;
+  purpose: string;
   mime_type: string;
-  size: number;
+  size?: number | null;
   original_name?: string;
 };
 

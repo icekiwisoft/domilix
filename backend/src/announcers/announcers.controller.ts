@@ -22,7 +22,7 @@ export class AnnouncersController {
     if (!file) return undefined;
 
     try {
-      return await this.objectStorage.uploadFile(file, 'announcers');
+      return (await this.objectStorage.uploadFile(file, 'announcers')).url;
     } catch {
       throw new InternalServerErrorException('Impossible d uploader l avatar.');
     }

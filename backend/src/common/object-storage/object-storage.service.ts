@@ -1,5 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import crypto from 'node:crypto';
 import path from 'node:path';
 
@@ -10,11 +11,18 @@ type UploadableFile = {
   buffer: Buffer;
 };
 
+export type StoredObject = {
+  bucket: string;
+  path: string;
+  url: string;
+};
+
 @Injectable()
 export class ObjectStorageService {
   private readonly bucketName = process.env.WASABI_BUCKET;
   private readonly endpoint = process.env.WASABI_ENDPOINT;
   private readonly publicBaseUrl = process.env.WASABI_PUBLIC_BASE_URL;
+  private readonly signedUrlTtlSeconds = Number(process.env.WASABI_SIGNED_URL_TTL_SECONDS || 3600);
   private client?: S3Client;
 
   private get storageClient() {
@@ -68,7 +76,24 @@ export class ObjectStorageService {
       ACL: 'public-read',
     }));
 
-    return this.publicUrl(destination);
+    return {
+      bucket: this.bucketName!,
+      path: destination,
+      url: this.publicUrl(destination),
+    };
+  }
+
+  async getSignedUrl(bucket: string | null | undefined, path: string | null | undefined) {
+    if (!bucket || !path) return null;
+
+    return getSignedUrl(
+      this.storageClient,
+      new GetObjectCommand({
+        Bucket: bucket,
+        Key: path,
+      }),
+      { expiresIn: this.signedUrlTtlSeconds },
+    );
   }
 
   async uploadFile(file: UploadableFile, folder: string) {

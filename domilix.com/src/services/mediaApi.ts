@@ -35,8 +35,7 @@ export const uploadMediasForAd = async (
 
   const response = await api.post('medias', {
     AdId: String(adId),
-    media_urls: uploadedMedias.map(media => media.url),
-    media_thumbnails: uploadedMedias.map(media => media.thumbnail || media.url),
+    media_ids: uploadedMedias.map(media => media.id),
     media_types: uploadedMedias.map(media => media.mime_type),
   });
   return response.data;

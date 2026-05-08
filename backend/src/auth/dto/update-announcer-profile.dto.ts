@@ -31,6 +31,30 @@ export class UpdateAnnouncerProfileDto {
   @IsString()
   avatar_url?: string;
 
+  @ApiPropertyOptional({ example: 'domilix-prod' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(255)
+  avatar_bucket?: string;
+
+  @ApiPropertyOptional({ example: 'avatars/file.jpg' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(1024)
+  avatar_path?: string;
+
+  @ApiPropertyOptional({ example: 'media-uuid' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(36)
+  avatar_media_id?: string;
+
+  @ApiPropertyOptional({ example: 'media-uuid' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(36)
+  presentation_media_id?: string;
+
   @ApiPropertyOptional({ example: 'https://storage.googleapis.com/bucket/presentations/file.jpg' })
   @IsOptional()
   @IsString()

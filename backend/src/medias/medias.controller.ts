@@ -75,17 +75,25 @@ export class MediasController {
       : body.filesid
         ? [body.filesid]
         : [];
+    const mediaIds = [body.media_ids, body['media_ids[]']].flat().filter(Boolean);
     const mediaUrls = [body.media_urls, body['media_urls[]']].flat().filter(Boolean);
     const mediaThumbnails = [body.media_thumbnails, body['media_thumbnails[]']].flat().filter(Boolean);
     const mediaTypes = [body.media_types, body['media_types[]']].flat().filter(Boolean);
+    const mediaBuckets = [body.media_buckets, body['media_buckets[]']].flat().filter(Boolean);
+    const mediaOriginalPaths = [body.media_original_paths, body['media_original_paths[]']].flat().filter(Boolean);
+    const mediaThumbnailPaths = [body.media_thumbnail_paths, body['media_thumbnail_paths[]']].flat().filter(Boolean);
     return this.mediasService.store(
       user,
       {
         AdId: body.AdId,
         filesid,
+        media_ids: mediaIds,
         media_urls: mediaUrls,
         media_thumbnails: mediaThumbnails,
         media_types: mediaTypes,
+        media_buckets: mediaBuckets,
+        media_original_paths: mediaOriginalPaths,
+        media_thumbnail_paths: mediaThumbnailPaths,
       },
       files,
     );

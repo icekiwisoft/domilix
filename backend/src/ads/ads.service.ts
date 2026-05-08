@@ -262,12 +262,17 @@ export class AdsService {
     };
   }
 
-  private serializeAnnouncer(announcer: any) {
+  private async serializeAnnouncer(announcer: any) {
+    const avatarMedia = announcer.avatarMediaId
+      ? await this.prisma.media.findUnique({ where: { id: announcer.avatarMediaId } })
+      : null;
+
     return {
       id: announcer.id,
       name: announcer.name,
       user: this.serializeUser(announcer.user, announcer.id),
-      avatar: storageUrl(announcer.avatar),
+      avatar: await this.objectStorage.getSignedUrl(avatarMedia?.bucket || announcer.avatarBucket, avatarMedia?.originalPath || announcer.avatarPath) || storageUrl(announcer.avatar),
+      avatar_media_id: announcer.avatarMediaId,
       contact: announcer.contact,
       email: announcer.user.email ?? null,
       creation_date: announcer.createdAt,
@@ -278,13 +283,16 @@ export class AdsService {
     };
   }
 
-  private serializeMedia(media: any) {
+  private async serializeMedia(media: any) {
+    const signedFile = await this.objectStorage.getSignedUrl(media.bucket, media.originalPath);
+    const signedThumbnail = await this.objectStorage.getSignedUrl(media.bucket, media.thumbnailPath || media.originalPath);
+
     return {
       id: media.id,
-      file: storageUrl(media.file),
-      thumbnail: storageUrl(media.thumbnail),
+      file: signedFile || storageUrl(media.file),
+      thumbnail: signedThumbnail || storageUrl(media.thumbnail),
       type: media.type,
-      announcer: this.serializeAnnouncer(media.announcer),
+      announcer: await this.serializeAnnouncer(media.announcer),
       ads: 0,
     };
   }
@@ -408,13 +416,13 @@ export class AdsService {
         )
       : new Set<string>();
 
-    return ads.map((ad) => {
+    return Promise.all(ads.map(async (ad) => {
       const category = ad.categoryId ? relations.categories.get(ad.categoryId) : null;
       const mediaEntries = relations.adMedias.get(ad.id.toString()) || [];
-      const medias = mediaEntries
+      const medias = await Promise.all(mediaEntries
         .map((entry) => relations.medias.get(entry.mediaId))
         .filter(Boolean)
-        .map((media) => this.serializeMedia(media));
+        .map((media) => this.serializeMedia(media)));
 
       return {
         id: toNumber(ad.id),
@@ -434,7 +442,7 @@ export class AdsService {
         liked: favoriteIds.has(ad.id.toString()),
         unlocked: unlockedIds.has(ad.id.toString()),
       };
-    });
+    }));
   }
 
   async show(id: string, currentUserId?: bigint) {
@@ -445,10 +453,10 @@ export class AdsService {
     const category = ad.categoryId ? relations.categories.get(ad.categoryId) : null;
     const announcer = relations.announcers.get(ad.announcerId);
     const mediaEntries = relations.adMedias.get(ad.id.toString()) || [];
-    const medias = mediaEntries
+    const medias = await Promise.all(mediaEntries
       .map((entry) => relations.medias.get(entry.mediaId))
       .filter(Boolean)
-      .map((media) => this.serializeMedia(media));
+      .map((media) => this.serializeMedia(media)));
 
     const [isLiked, unlocking] = currentUserId
       ? await Promise.all([
@@ -473,7 +481,7 @@ export class AdsService {
       country: ad.country,
       postal_code: ad.zip,
       category: this.serializeCategory(category),
-      announcer: announcer ? this.serializeAnnouncer(announcer) : null,
+      announcer: announcer ? await this.serializeAnnouncer(announcer) : null,
       creation_date: ad.createdAt,
       liked: Boolean(isLiked),
       unlocked: Boolean(unlocking),
@@ -633,12 +641,25 @@ export class AdsService {
     const mediaTypes = [body.media_types, body['media_types[]']]
       .flat()
       .filter(Boolean) as string[];
+    const mediaBuckets = [body.media_buckets, body['media_buckets[]']]
+      .flat()
+      .filter(Boolean) as string[];
+    const mediaOriginalPaths = [body.media_original_paths, body['media_original_paths[]']]
+      .flat()
+      .filter(Boolean) as string[];
+    const mediaThumbnailPaths = [body.media_thumbnail_paths, body['media_thumbnail_paths[]']]
+      .flat()
+      .filter(Boolean) as string[];
     const filesId = Array.isArray(body.filesid)
       ? body.filesid
       : body.filesid
         ? [body.filesid]
         : [];
-    const totalMediaCount = files.length + filesId.length + mediaUrls.length;
+    const mediaIds = [body.media_ids, body['media_ids[]']]
+      .flat()
+      .filter(Boolean) as string[];
+    const existingMediaIds = [...filesId, ...mediaIds];
+    const totalMediaCount = files.length + existingMediaIds.length + mediaUrls.length;
     if (totalMediaCount > MAX_AD_MEDIAS) {
       throw new ForbiddenException(`The combined total of medias and mediasId must not exceed ${MAX_AD_MEDIAS}.`);
     }
@@ -714,12 +735,30 @@ export class AdsService {
     });
 
     const createdMediaIds: string[] = [];
+    if (existingMediaIds.length) {
+      const ownedMedias = await this.prisma.media.findMany({
+        where: {
+          id: { in: existingMediaIds },
+          announcerId: announcer.id,
+          purpose: 'ad_media',
+        },
+        select: { id: true },
+      });
+      if (ownedMedias.length !== new Set(existingMediaIds).size) {
+        throw new ForbiddenException('Un ou plusieurs medias sont invalides.');
+      }
+    }
+
     for (const [index, mediaUrl] of mediaUrls.entries()) {
       const media = await this.prisma.media.create({
         data: {
           id: crypto.randomUUID(),
           file: mediaUrl,
           thumbnail: mediaThumbnails[index] || mediaUrl,
+          bucket: mediaBuckets[index] || null,
+          originalPath: mediaOriginalPaths[index] || null,
+          thumbnailPath: mediaThumbnailPaths[index] || mediaOriginalPaths[index] || null,
+          purpose: 'ad_media',
           type: mediaTypes[index] || 'application/octet-stream',
           announcerId: announcer.id,
         },
@@ -728,16 +767,22 @@ export class AdsService {
     }
 
     for (const file of files) {
-      const fileUrl = await this.objectStorage.uploadFile(file, 'medias');
+      const uploaded = await this.objectStorage.uploadFile(file, 'medias');
       const thumbnailBuffer = await generateMediaThumbnailBuffer(file).catch(() => null);
       const thumbnail = thumbnailBuffer
-        ? await this.objectStorage.uploadThumbnail(thumbnailBuffer, file).catch(() => fileUrl)
-        : fileUrl;
+        ? await this.objectStorage.uploadThumbnail(thumbnailBuffer, file).catch(() => uploaded)
+        : uploaded;
       const media = await this.prisma.media.create({
         data: {
           id: crypto.randomUUID(),
-          file: fileUrl,
-          thumbnail,
+          file: uploaded.url,
+          thumbnail: thumbnail.url,
+          bucket: uploaded.bucket,
+          originalPath: uploaded.path,
+          thumbnailPath: thumbnail.path,
+          purpose: 'ad_media',
+          size: file.size,
+          originalName: file.originalname,
           type: file.mimetype,
           announcerId: announcer.id,
         },
@@ -745,7 +790,7 @@ export class AdsService {
       createdMediaIds.push(media.id);
     }
 
-    const attachIds = [...createdMediaIds, ...filesId];
+    const attachIds = [...createdMediaIds, ...existingMediaIds];
     for (const [index, mediaId] of attachIds.entries()) {
       await this.prisma.adMedia.create({
         data: {

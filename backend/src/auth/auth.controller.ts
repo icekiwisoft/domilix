@@ -51,7 +51,7 @@ export class AuthController {
     if (!file) return undefined;
 
     try {
-      return await this.objectStorage.uploadFile(file, folder);
+      return (await this.objectStorage.uploadFile(file, folder)).url;
     } catch {
       throw new InternalServerErrorException('Impossible d uploader le fichier.');
     }

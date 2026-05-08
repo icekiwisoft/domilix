@@ -18,17 +18,23 @@ export class MediasService {
   ) {}
 
   private async createObjectStorageMedia(file: any, announcerId: string) {
-    const fileUrl = await this.objectStorage.uploadFile(file, 'medias');
+    const uploaded = await this.objectStorage.uploadFile(file, 'medias');
     const thumbnailBuffer = await generateMediaThumbnailBuffer(file).catch(() => null);
     const thumbnail = thumbnailBuffer
-      ? await this.objectStorage.uploadThumbnail(thumbnailBuffer, file).catch(() => fileUrl)
-      : fileUrl;
+      ? await this.objectStorage.uploadThumbnail(thumbnailBuffer, file).catch(() => uploaded)
+      : uploaded;
 
     return this.prisma.media.create({
       data: {
         id: crypto.randomUUID(),
-        file: fileUrl,
-        thumbnail,
+        file: uploaded.url,
+        thumbnail: thumbnail.url,
+        bucket: uploaded.bucket,
+        originalPath: uploaded.path,
+        thumbnailPath: thumbnail.path,
+        purpose: 'ad_media',
+        size: file.size,
+        originalName: file.originalname,
         type: file.mimetype,
         announcerId,
       },
@@ -42,9 +48,12 @@ export class MediasService {
     });
     if (!announcer) return null;
 
-    const [houses, furnitures] = await Promise.all([
+    const [houses, furnitures, avatarMedia] = await Promise.all([
       this.prisma.ad.count({ where: { announcerId, itemType: 'App\\Models\\RealEstate' } }),
       this.prisma.ad.count({ where: { announcerId, itemType: 'App\\Models\\Furniture' } }),
+      announcer.avatarMediaId
+        ? this.prisma.media.findUnique({ where: { id: announcer.avatarMediaId } })
+        : Promise.resolve(null),
     ]);
 
     return {
@@ -58,7 +67,10 @@ export class MediasService {
         liked: 0,
         announcer: announcer.id,
       },
-      avatar: announcer.avatar,
+      avatar: await this.objectStorage.getSignedUrl(avatarMedia?.bucket || announcer.avatarBucket, avatarMedia?.originalPath || announcer.avatarPath) || storageUrl(announcer.avatar),
+      avatar_media_id: announcer.avatarMediaId,
+      avatar_bucket: announcer.avatarBucket,
+      avatar_path: announcer.avatarPath,
       contact: announcer.contact,
       email: announcer.user.email ?? null,
       creation_date: announcer.createdAt,
@@ -70,6 +82,8 @@ export class MediasService {
   }
 
   private async serializeMedia(media: any) {
+    const signedFile = await this.objectStorage.getSignedUrl(media.bucket, media.originalPath);
+    const signedThumbnail = await this.objectStorage.getSignedUrl(media.bucket, media.thumbnailPath || media.originalPath);
     const [announcer, ads] = await Promise.all([
       this.serializeAnnouncer(media.announcerId),
       this.prisma.adMedia.count({ where: { mediaId: media.id } }),
@@ -77,8 +91,8 @@ export class MediasService {
 
     return {
       id: media.id,
-      file: storageUrl(media.file),
-      thumbnail: storageUrl(media.thumbnail),
+      file: signedFile || storageUrl(media.file),
+      thumbnail: signedThumbnail || storageUrl(media.thumbnail),
       type: media.type,
       announcer,
       ads,
@@ -157,7 +171,7 @@ export class MediasService {
 
   async store(
     currentUser: any,
-    payload: { AdId?: string; filesid?: string[]; media_urls?: string[]; media_thumbnails?: string[]; media_types?: string[] },
+    payload: { AdId?: string; filesid?: string[]; media_ids?: string[]; media_urls?: string[]; media_thumbnails?: string[]; media_types?: string[]; media_buckets?: string[]; media_original_paths?: string[]; media_thumbnail_paths?: string[] },
     files: Array<{ filename: string; mimetype: string }> = [],
   ) {
     if (!currentUser) throw new UnauthorizedException('User not authenticated');
@@ -171,12 +185,31 @@ export class MediasService {
       if (!ad) throw new NotFoundException('Ad not found');
 
       const createdIds: string[] = [];
+      const existingMediaIds = [...(payload.filesid || []), ...(payload.media_ids || [])];
+      if (existingMediaIds.length) {
+        const ownedMedias = await this.prisma.media.findMany({
+          where: {
+            id: { in: existingMediaIds },
+            announcerId: announcer.id,
+            purpose: 'ad_media',
+          },
+          select: { id: true },
+        });
+        if (ownedMedias.length !== new Set(existingMediaIds).size) {
+          throw new UnauthorizedException('Invalid media');
+        }
+      }
+
       for (const [index, mediaUrl] of (payload.media_urls || []).entries()) {
         const media = await this.prisma.media.create({
           data: {
             id: crypto.randomUUID(),
             file: mediaUrl,
             thumbnail: payload.media_thumbnails?.[index] || mediaUrl,
+            bucket: payload.media_buckets?.[index] || null,
+            originalPath: payload.media_original_paths?.[index] || null,
+            thumbnailPath: payload.media_thumbnail_paths?.[index] || payload.media_original_paths?.[index] || null,
+            purpose: 'ad_media',
             type: payload.media_types?.[index] || 'application/octet-stream',
             announcerId: announcer.id,
           },
@@ -189,7 +222,7 @@ export class MediasService {
         createdIds.push(media.id);
       }
 
-      const attachIds = [...createdIds, ...(payload.filesid || [])];
+      const attachIds = [...createdIds, ...existingMediaIds];
       for (const [index, mediaId] of attachIds.entries()) {
         const exists = await this.prisma.adMedia.findFirst({
           where: { adId: payload.AdId, mediaId },
@@ -217,6 +250,10 @@ export class MediasService {
             id: crypto.randomUUID(),
             file: mediaUrl,
             thumbnail: payload.media_thumbnails?.[index] || mediaUrl,
+            bucket: payload.media_buckets?.[index] || null,
+            originalPath: payload.media_original_paths?.[index] || null,
+            thumbnailPath: payload.media_thumbnail_paths?.[index] || payload.media_original_paths?.[index] || null,
+            purpose: 'ad_media',
             type: payload.media_types?.[index] || 'application/octet-stream',
             announcerId: announcer.id,
           },

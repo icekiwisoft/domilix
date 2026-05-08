@@ -1,0 +1,4 @@
+ALTER TABLE `media`
+  ADD COLUMN `bucket` VARCHAR(255) NULL,
+  ADD COLUMN `original_path` VARCHAR(1024) NULL,
+  ADD COLUMN `thumbnail_path` VARCHAR(1024) NULL;

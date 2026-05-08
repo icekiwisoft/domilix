@@ -5,23 +5,31 @@ import { QueryAnnouncersDto } from './dto/query-announcers.dto';
 import { buildLaravelPagination } from '../common/http/pagination';
 import { storageUrl } from '../common/http/formatters';
 import { UpsertAnnouncerDto } from './dto/upsert-announcer.dto';
+import { ObjectStorageService } from '../common/object-storage/object-storage.service';
 
 @Injectable()
 export class AnnouncersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly objectStorage: ObjectStorageService,
+  ) {}
 
   private async serializeAnnouncer(announcer: {
     id: string;
     name: string;
     avatar: string | null;
     presentation: string | null;
+    avatarBucket?: string | null;
+    avatarPath?: string | null;
+    avatarMediaId?: string | null;
+    presentationMediaId?: string | null;
     contact: string | null;
     bio: string | null;
     verified: boolean;
     createdAt: Date | null;
     user: { name: string; sex: string; devise: string; phoneNumber: string; email: string };
   }) {
-    const [houses, furnitures] = await Promise.all([
+    const [houses, furnitures, avatarMedia, presentationMedia] = await Promise.all([
       this.prisma.ad.count({
         where: {
           announcerId: announcer.id,
@@ -34,6 +42,12 @@ export class AnnouncersService {
           itemType: 'App\\Models\\Furniture',
         },
       }),
+      announcer.avatarMediaId
+        ? this.prisma.media.findUnique({ where: { id: announcer.avatarMediaId } })
+        : Promise.resolve(null),
+      announcer.presentationMediaId
+        ? this.prisma.media.findUnique({ where: { id: announcer.presentationMediaId } })
+        : Promise.resolve(null),
     ]);
 
     return {
@@ -47,8 +61,12 @@ export class AnnouncersService {
         liked: 0,
         announcer: announcer.id,
       },
-      avatar: storageUrl(announcer.avatar),
-      presentation: storageUrl(announcer.presentation),
+      avatar: await this.objectStorage.getSignedUrl(avatarMedia?.bucket || announcer.avatarBucket, avatarMedia?.originalPath || announcer.avatarPath) || storageUrl(announcer.avatar),
+      avatar_media_id: announcer.avatarMediaId,
+      avatar_bucket: announcer.avatarBucket,
+      avatar_path: announcer.avatarPath,
+      presentation: await this.objectStorage.getSignedUrl(presentationMedia?.bucket, presentationMedia?.originalPath) || storageUrl(announcer.presentation),
+      presentation_media_id: announcer.presentationMediaId,
       contact: announcer.contact,
       email: announcer.user.email ?? null,
       creation_date: announcer.createdAt,
@@ -106,6 +124,9 @@ export class AnnouncersService {
     const targetUserId = dto.user_id ? BigInt(dto.user_id) : user.id;
     const targetUser = await this.prisma.user.findUnique({ where: { id: targetUserId } });
     if (!targetUser) throw new NotFoundException('User not found');
+    const avatarMedia = dto.avatar_media_id
+      ? await this.prisma.media.findFirst({ where: { id: dto.avatar_media_id, purpose: 'avatar' } })
+      : null;
 
     const announcer = await this.prisma.announcer.create({
       data: {
@@ -116,6 +137,8 @@ export class AnnouncersService {
         bio: dto.bio,
         contact: dto.contact,
         ...(avatar ? { avatar } : {}),
+        ...(dto.avatar_bucket && dto.avatar_path ? { avatarBucket: dto.avatar_bucket, avatarPath: dto.avatar_path } : {}),
+        ...(avatarMedia ? { avatarMediaId: avatarMedia.id, avatar: avatarMedia.file, avatarBucket: avatarMedia.bucket, avatarPath: avatarMedia.originalPath } : {}),
       },
       include: { user: true },
     });
@@ -127,6 +150,9 @@ export class AnnouncersService {
     this.ensureAdmin(user);
     const announcer = await this.prisma.announcer.findUnique({ where: { id } });
     if (!announcer) throw new NotFoundException('Announcer not found');
+    const avatarMedia = dto.avatar_media_id
+      ? await this.prisma.media.findFirst({ where: { id: dto.avatar_media_id, announcerId: id, purpose: 'avatar' } })
+      : null;
 
     let userId = announcer.userId;
     if (dto.user_id) {
@@ -143,6 +169,8 @@ export class AnnouncersService {
         ...(dto.contact !== undefined ? { contact: dto.contact } : {}),
         userId,
         ...(avatar ? { avatar } : {}),
+        ...(dto.avatar_bucket && dto.avatar_path ? { avatarBucket: dto.avatar_bucket, avatarPath: dto.avatar_path } : {}),
+        ...(avatarMedia ? { avatarMediaId: avatarMedia.id, avatar: avatarMedia.file, avatarBucket: avatarMedia.bucket, avatarPath: avatarMedia.originalPath } : {}),
       },
       include: { user: true },
     });

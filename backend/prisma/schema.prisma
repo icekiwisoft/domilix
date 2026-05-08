@@ -142,6 +142,10 @@ model Announcer {
   verified     Boolean   @default(false)
   presentation String?   @db.VarChar(255)
   avatar       String?   @db.VarChar(255)
+  avatarBucket String?   @map("avatar_bucket") @db.VarChar(255)
+  avatarPath   String?   @map("avatar_path") @db.VarChar(1024)
+  avatarMediaId String?  @map("avatar_media_id") @db.Char(36)
+  presentationMediaId String? @map("presentation_media_id") @db.Char(36)
   bio          String?   @db.Text
   contact      String?   @db.VarChar(255)
   createdAt    DateTime? @default(now()) @map("created_at") @db.Timestamp(0)
@@ -238,6 +242,12 @@ model Media {
   deletedAt   DateTime? @map("deleted_at") @db.Timestamp(0)
   file        String    @db.VarChar(255)
   thumbnail   String    @db.VarChar(255)
+  bucket      String?   @db.VarChar(255)
+  originalPath String?  @map("original_path") @db.VarChar(1024)
+  thumbnailPath String? @map("thumbnail_path") @db.VarChar(1024)
+  purpose     String    @default("ad_media") @db.VarChar(50)
+  size        Int?
+  originalName String?  @map("original_name") @db.VarChar(255)
   type        String    @default("image") @db.VarChar(255)
   announcerId String    @map("announcer_id") @db.VarChar(255)
   createdAt   DateTime?  @default(now()) @map("created_at") @db.Timestamp(0)
