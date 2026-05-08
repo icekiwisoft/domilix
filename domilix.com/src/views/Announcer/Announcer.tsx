@@ -154,6 +154,7 @@ export default function Announcer() {
   );
   const canManageAds = Boolean(id && user?.announcer === id);
   const presentationSrc = mediaUrl(announcer?.presentation) || coverSrc;
+  const avatarSrc = mediaUrl(announcer?.avatar) || domilixSrc;
 
 
 
@@ -250,7 +251,7 @@ export default function Announcer() {
                   className='relative w-20 h-20  sm:w-24 sm:h-24  shadow-sm rounded-full overflow-hidden bg-white  border-white border-4  -mt-16 sm:-mt-20'
                 >
                   <img
-                    src={mediaUrl(announcer?.avatar) || domilixSrc}
+                    src={avatarSrc}
                     className='object-cover w-full h-full'
                     alt='Profile'
                     onError={e => {
