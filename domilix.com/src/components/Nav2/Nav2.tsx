@@ -125,8 +125,8 @@ export default function Nav2({
         </div>
 
         {/* Menu Desktop */}
-        <div className='hidden lg:flex items-center space-x-6'>
-          <ul className='flex items-center space-x-6 xl:space-x-8' data-tour='nav-links'>
+        <div className='hidden lg:flex items-center gap-6 xl:gap-8'>
+          <ul className='flex items-center gap-6 xl:gap-8' data-tour='nav-links'>
             {links.map(link => (
               <li key={link.name}>
                 <NavLink
@@ -228,39 +228,25 @@ export default function Nav2({
         </div>
 
         {/* ── Mobile right cluster ── */}
-        <div className='flex lg:hidden items-center gap-1.5'>
+        <div className='flex lg:hidden items-center gap-2'>
           {isAuthenticated && (
             <>
-              <button
-                onClick={handlePublishClick}
-                className='inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-primary-container text-on-primary-container shadow-sm transition-opacity hover:opacity-90'
-                aria-label='Publier une annonce'
-              >
-                <MdOutlineCampaign className='w-4 h-4 sm:w-5 sm:h-5 -rotate-12' />
-              </button>
-
+              {/* Domicoins — icon only on xs, icon+count on sm+ */}
               <NavLink
                 to='/subscriptions'
                 className={({ isActive }) =>
-                  `inline-flex items-center gap-1 px-2 py-1 rounded-lg transition-colors ${isActive ? 'bg-surface-container' : 'hover:bg-surface-container-low'
-                  }`
+                  `inline-flex items-center gap-1 rounded-lg px-2 py-1.5 transition-colors ${isActive ? 'bg-surface-container' : 'hover:bg-surface-container-low'}`
                 }
               >
-                <img
-                  src='/dom.png'
-                  alt='coin'
-                  className='w-5 h-5 sm:w-6 sm:h-6'
-                />
-                <span className='text-sm sm:text-base font-semibold text-primary'>
-                  {userCredits}
-                </span>
+                <img src='/dom.png' alt='coin' className='h-5 w-5' />
+                <span className='hidden text-sm font-semibold text-primary sm:inline'>{userCredits}</span>
               </NavLink>
 
-              {/* Notifications Mobile */}
+              {/* Notifications */}
               <div className='relative'>
                 <button
                   onClick={() => { setShowNotifications(prev => !prev); setShowProfileMenu(false); }}
-                  className='relative flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-surface-container-low'
+                  className='relative flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-surface-container-low'
                   aria-label='Notifications'
                 >
                   <HiBell className='h-5 w-5 text-on-surface-variant' />
@@ -275,12 +261,12 @@ export default function Nav2({
                 )}
               </div>
 
-              {/* Avatar mobile */}
+              {/* Avatar */}
               <div className='relative'>
                 <button
                   ref={profileButtonMobileRef}
                   onClick={e => { e.stopPropagation(); setShowProfileMenu(prev => !prev); setShowNotifications(false); }}
-                  className='flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 text-sm font-semibold text-primary transition-colors hover:bg-primary/25'
+                  className='flex h-9 w-9 items-center justify-center rounded-full bg-primary/15 text-sm font-semibold text-primary transition-colors hover:bg-primary/25'
                 >
                   {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
                 </button>
@@ -301,8 +287,9 @@ export default function Nav2({
             </>
           )}
 
+          {/* Hamburger */}
           <button
-            className='flex h-8 w-8 items-center justify-center rounded-lg transition-colors hover:bg-surface-container-low'
+            className='flex h-9 w-9 items-center justify-center rounded-lg transition-colors hover:bg-surface-container-low'
             onClick={() => setClick(c => !c)}
             aria-label={click ? 'Fermer le menu' : 'Ouvrir le menu'}
           >
@@ -314,9 +301,22 @@ export default function Nav2({
           </button>
         </div>
       </div>
+
+      {/* ── Backdrop ── */}
+      <div
+        className={`fixed inset-0 top-20 z-30 bg-black/20 backdrop-blur-[2px] transition-opacity duration-300 lg:hidden ${
+          click ? 'opacity-100' : 'pointer-events-none opacity-0'
+        }`}
+        onClick={() => setClick(false)}
+      />
+
       {/* ── Mobile drawer ── */}
-      {click && (
-        <div className='lg:hidden absolute top-20 left-0 right-0 z-40 bg-surface border-t border-outline-variant shadow-lg overflow-y-auto max-h-[calc(100vh-5rem)]'>
+      <div
+        className={`absolute left-0 right-0 top-20 z-40 overflow-hidden border-t border-outline-variant bg-surface shadow-xl transition-[max-height,opacity] duration-300 ease-in-out lg:hidden ${
+          click ? 'max-h-[calc(100vh-5rem)] opacity-100' : 'max-h-0 opacity-0 pointer-events-none'
+        }`}
+      >
+        <div className='overflow-y-auto max-h-[calc(100vh-5rem)]'>
           <div className='px-4 py-6 max-w-container mx-auto space-y-6'>
 
             {/* User card */}
@@ -419,7 +419,7 @@ export default function Nav2({
             </div>
           </div>
         </div>
-      )}
+      </div>
 
       {showPostDialog && <ArticlePostDialog toggleDialog={() => setShowPostDialog(false)} />}
       {showAnnouncerRequiredModal && (
