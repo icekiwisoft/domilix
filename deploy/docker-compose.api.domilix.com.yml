@@ -13,6 +13,12 @@ services:
       JWT_SECRET: ${JWT_SECRET:-change-me}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change-me-too}
       MAPBOX_ACCESS_TOKEN: ${MAPBOX_ACCESS_TOKEN:-}
+      WASABI_ACCESS_KEY_ID: ${WASABI_ACCESS_KEY_ID:-}
+      WASABI_SECRET_ACCESS_KEY: ${WASABI_SECRET_ACCESS_KEY:-}
+      WASABI_REGION: ${WASABI_REGION:-eu-west-1}
+      WASABI_BUCKET: ${WASABI_BUCKET:-}
+      WASABI_ENDPOINT: ${WASABI_ENDPOINT:-https://s3.eu-west-1.wasabisys.com}
+      WASABI_PUBLIC_BASE_URL: ${WASABI_PUBLIC_BASE_URL:-}
     depends_on:
       db:
         condition: service_healthy

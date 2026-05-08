@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  InternalServerErrorException,
   Param,
   Post,
   Put,
@@ -22,10 +23,8 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import path from 'node:path';
-import fs from 'node:fs';
-import crypto from 'node:crypto';
+import { memoryStorage } from 'multer';
+import { ObjectStorageService } from '../common/object-storage/object-storage.service';
 import { CurrentUser } from './current-user.decorator';
 import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
@@ -39,13 +38,24 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { VerifyPhoneDto } from './dto/verify-phone.dto';
 
-const announcerUploadDir = path.join(process.cwd(), 'storage', 'announcers');
-fs.mkdirSync(announcerUploadDir, { recursive: true });
-
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly objectStorage: ObjectStorageService,
+  ) {}
+
+  private async uploadOptionalProfileFile(file: any | undefined, folder: string, existingUrl?: string) {
+    if (existingUrl) return existingUrl;
+    if (!file) return undefined;
+
+    try {
+      return await this.objectStorage.uploadFile(file, folder);
+    } catch {
+      throw new InternalServerErrorException('Impossible d uploader le fichier.');
+    }
+  }
 
   @Post('register')
   @ApiOperation({ summary: 'Register a new user' })
@@ -152,15 +162,10 @@ export class AuthController {
       { name: 'avatar', maxCount: 1 },
       { name: 'presentation', maxCount: 1 },
     ], {
-      storage: diskStorage({
-        destination: announcerUploadDir,
-        filename: (_req, file, callback) => {
-          callback(null, `${crypto.randomUUID()}${path.extname(file.originalname)}`);
-        },
-      }),
+      storage: memoryStorage(),
     }),
   )
-  updateAnnouncerProfilePut(
+  async updateAnnouncerProfilePut(
     @CurrentUser() user: any,
     @Body() dto: UpdateAnnouncerProfileDto,
     @UploadedFiles() files?: { avatar?: any[]; presentation?: any[] },
@@ -170,8 +175,8 @@ export class AuthController {
     return this.authService.updateAnnouncerProfile(
       user,
       dto,
-      avatar ? `/storage/announcers/${avatar.filename}` : undefined,
-      presentation ? `/storage/announcers/${presentation.filename}` : undefined,
+      await this.uploadOptionalProfileFile(avatar, 'announcers', (dto as any).avatar_url),
+      await this.uploadOptionalProfileFile(presentation, 'announcers', (dto as any).presentation_url),
     );
   }
 
@@ -197,15 +202,10 @@ export class AuthController {
       { name: 'avatar', maxCount: 1 },
       { name: 'presentation', maxCount: 1 },
     ], {
-      storage: diskStorage({
-        destination: announcerUploadDir,
-        filename: (_req, file, callback) => {
-          callback(null, `${crypto.randomUUID()}${path.extname(file.originalname)}`);
-        },
-      }),
+      storage: memoryStorage(),
     }),
   )
-  updateAnnouncerProfilePost(
+  async updateAnnouncerProfilePost(
     @CurrentUser() user: any,
     @Body() dto: UpdateAnnouncerProfileDto,
     @UploadedFiles() files?: { avatar?: any[]; presentation?: any[] },
@@ -215,8 +215,8 @@ export class AuthController {
     return this.authService.updateAnnouncerProfile(
       user,
       dto,
-      avatar ? `/storage/announcers/${avatar.filename}` : undefined,
-      presentation ? `/storage/announcers/${presentation.filename}` : undefined,
+      await this.uploadOptionalProfileFile(avatar, 'announcers', (dto as any).avatar_url),
+      await this.uploadOptionalProfileFile(presentation, 'announcers', (dto as any).presentation_url),
     );
   }
 

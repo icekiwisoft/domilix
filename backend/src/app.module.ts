@@ -9,11 +9,13 @@ import { BroadcastsModule } from './broadcasts/broadcasts.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { CategoriesModule } from './categories/categories.module';
+import { ObjectStorageModule } from './common/object-storage/object-storage.module';
 import { MediasModule } from './medias/medias.module';
 import { NewslettersModule } from './newsletters/newsletters.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
+import { UploadsModule } from './uploads/uploads.module';
 import { UsersModule } from './users/users.module';
 
 @Module({
@@ -23,6 +25,7 @@ import { UsersModule } from './users/users.module';
       ttl: 60_000,
       max: 500,
     }),
+    ObjectStorageModule,
     PrismaModule,
     AuthModule,
     BroadcastsModule,
@@ -36,6 +39,7 @@ import { UsersModule } from './users/users.module';
     NewslettersModule,
     NotificationsModule,
     SubscriptionsModule,
+    UploadsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

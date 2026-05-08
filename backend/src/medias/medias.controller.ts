@@ -13,17 +13,11 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import crypto from 'node:crypto';
-import fs from 'node:fs';
-import path from 'node:path';
+import { memoryStorage } from 'multer';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { AuthGuard } from '../auth/auth.guard';
 import { MediasService } from './medias.service';
 import { ALLOWED_MEDIA_MIME_PATTERN, MAX_AD_MEDIAS } from '../common/media/thumbnails';
-
-const mediaUploadDir = path.join(process.cwd(), 'storage', 'medias');
-fs.mkdirSync(mediaUploadDir, { recursive: true });
 
 @ApiTags('Medias')
 @Controller('medias')
@@ -57,12 +51,7 @@ export class MediasController {
   @ApiOperation({ summary: 'Upload medias and optionally attach them to an announce' })
   @UseInterceptors(
     FilesInterceptor('medias', MAX_AD_MEDIAS, {
-      storage: diskStorage({
-        destination: mediaUploadDir,
-        filename: (_req, file, callback) => {
-          callback(null, `${Date.now()}---${crypto.randomUUID()}${path.extname(file.originalname)}`);
-        },
-      }),
+      storage: memoryStorage(),
       fileFilter: (_req, file, callback) => {
         callback(
           ALLOWED_MEDIA_MIME_PATTERN.test(file.mimetype)
@@ -86,10 +75,19 @@ export class MediasController {
       : body.filesid
         ? [body.filesid]
         : [];
+    const mediaUrls = [body.media_urls, body['media_urls[]']].flat().filter(Boolean);
+    const mediaThumbnails = [body.media_thumbnails, body['media_thumbnails[]']].flat().filter(Boolean);
+    const mediaTypes = [body.media_types, body['media_types[]']].flat().filter(Boolean);
     return this.mediasService.store(
       user,
-      { AdId: body.AdId, filesid },
-      files.map((file) => ({ filename: file.filename, mimetype: file.mimetype })),
+      {
+        AdId: body.AdId,
+        filesid,
+        media_urls: mediaUrls,
+        media_thumbnails: mediaThumbnails,
+        media_types: mediaTypes,
+      },
+      files,
     );
   }
 

@@ -7,11 +7,33 @@ import crypto from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { buildLaravelPagination } from '../common/http/pagination';
 import { storageUrl } from '../common/http/formatters';
-import { generateMediaThumbnail } from '../common/media/thumbnails';
+import { ObjectStorageService } from '../common/object-storage/object-storage.service';
+import { generateMediaThumbnailBuffer } from '../common/media/thumbnails';
 
 @Injectable()
 export class MediasService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly objectStorage: ObjectStorageService,
+  ) {}
+
+  private async createObjectStorageMedia(file: any, announcerId: string) {
+    const fileUrl = await this.objectStorage.uploadFile(file, 'medias');
+    const thumbnailBuffer = await generateMediaThumbnailBuffer(file).catch(() => null);
+    const thumbnail = thumbnailBuffer
+      ? await this.objectStorage.uploadThumbnail(thumbnailBuffer, file).catch(() => fileUrl)
+      : fileUrl;
+
+    return this.prisma.media.create({
+      data: {
+        id: crypto.randomUUID(),
+        file: fileUrl,
+        thumbnail,
+        type: file.mimetype,
+        announcerId,
+      },
+    });
+  }
 
   private async serializeAnnouncer(announcerId: string) {
     const announcer = await this.prisma.announcer.findUnique({
@@ -135,7 +157,7 @@ export class MediasService {
 
   async store(
     currentUser: any,
-    payload: { AdId?: string; filesid?: string[] },
+    payload: { AdId?: string; filesid?: string[]; media_urls?: string[]; media_thumbnails?: string[]; media_types?: string[] },
     files: Array<{ filename: string; mimetype: string }> = [],
   ) {
     if (!currentUser) throw new UnauthorizedException('User not authenticated');
@@ -149,17 +171,21 @@ export class MediasService {
       if (!ad) throw new NotFoundException('Ad not found');
 
       const createdIds: string[] = [];
-      for (const file of files) {
-        const thumbnail = await generateMediaThumbnail(file);
+      for (const [index, mediaUrl] of (payload.media_urls || []).entries()) {
         const media = await this.prisma.media.create({
           data: {
             id: crypto.randomUUID(),
-            file: `public/medias/${file.filename}`,
-            thumbnail,
-            type: file.mimetype,
+            file: mediaUrl,
+            thumbnail: payload.media_thumbnails?.[index] || mediaUrl,
+            type: payload.media_types?.[index] || 'application/octet-stream',
             announcerId: announcer.id,
           },
         });
+        createdIds.push(media.id);
+      }
+
+      for (const file of files) {
+        const media = await this.createObjectStorageMedia(file, announcer.id);
         createdIds.push(media.id);
       }
 
@@ -184,19 +210,22 @@ export class MediasService {
     }
 
     const created: any[] = [];
-    for (const file of files) {
-      const thumbnail = await generateMediaThumbnail(file);
+    for (const [index, mediaUrl] of (payload.media_urls || []).entries()) {
       created.push(
         await this.prisma.media.create({
           data: {
             id: crypto.randomUUID(),
-            file: `public/medias/${file.filename}`,
-            thumbnail,
-            type: file.mimetype,
+            file: mediaUrl,
+            thumbnail: payload.media_thumbnails?.[index] || mediaUrl,
+            type: payload.media_types?.[index] || 'application/octet-stream',
             announcerId: announcer.id,
           },
         }),
       );
+    }
+
+    for (const file of files) {
+      created.push(await this.createObjectStorageMedia(file, announcer.id));
     }
     return Promise.all(created.map((media) => this.serializeMedia(media)));
   }

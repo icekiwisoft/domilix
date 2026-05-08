@@ -7,7 +7,8 @@ import {
   storageUrl,
   toNumber,
 } from '../common/http/formatters';
-import { generateMediaThumbnail, MAX_AD_MEDIAS } from '../common/media/thumbnails';
+import { generateMediaThumbnailBuffer, MAX_AD_MEDIAS } from '../common/media/thumbnails';
+import { ObjectStorageService } from '../common/object-storage/object-storage.service';
 import { buildLaravelPagination } from '../common/http/pagination';
 import { PrismaService } from '../prisma/prisma.service';
 import { QueryAdsDto } from './dto/query-ads.dto';
@@ -23,7 +24,10 @@ const AD_DEVISES = [
 
 @Injectable()
 export class AdsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly objectStorage: ObjectStorageService,
+  ) {}
 
   private async ensureAnnouncerUser(userId: bigint) {
     const announcer = await this.prisma.announcer.findFirst({ where: { userId } });
@@ -620,12 +624,21 @@ export class AdsService {
     const announcer = await this.ensureAnnouncerUser(userId);
 
     const type = body.type;
+    const mediaUrls = [body.media_urls, body['media_urls[]']]
+      .flat()
+      .filter(Boolean) as string[];
+    const mediaThumbnails = [body.media_thumbnails, body['media_thumbnails[]']]
+      .flat()
+      .filter(Boolean) as string[];
+    const mediaTypes = [body.media_types, body['media_types[]']]
+      .flat()
+      .filter(Boolean) as string[];
     const filesId = Array.isArray(body.filesid)
       ? body.filesid
       : body.filesid
         ? [body.filesid]
         : [];
-    const totalMediaCount = files.length + filesId.length;
+    const totalMediaCount = files.length + filesId.length + mediaUrls.length;
     if (totalMediaCount > MAX_AD_MEDIAS) {
       throw new ForbiddenException(`The combined total of medias and mediasId must not exceed ${MAX_AD_MEDIAS}.`);
     }
@@ -701,12 +714,29 @@ export class AdsService {
     });
 
     const createdMediaIds: string[] = [];
-    for (const file of files) {
-      const thumbnail = await generateMediaThumbnail(file);
+    for (const [index, mediaUrl] of mediaUrls.entries()) {
       const media = await this.prisma.media.create({
         data: {
           id: crypto.randomUUID(),
-          file: `public/medias/${file.filename}`,
+          file: mediaUrl,
+          thumbnail: mediaThumbnails[index] || mediaUrl,
+          type: mediaTypes[index] || 'application/octet-stream',
+          announcerId: announcer.id,
+        },
+      });
+      createdMediaIds.push(media.id);
+    }
+
+    for (const file of files) {
+      const fileUrl = await this.objectStorage.uploadFile(file, 'medias');
+      const thumbnailBuffer = await generateMediaThumbnailBuffer(file).catch(() => null);
+      const thumbnail = thumbnailBuffer
+        ? await this.objectStorage.uploadThumbnail(thumbnailBuffer, file).catch(() => fileUrl)
+        : fileUrl;
+      const media = await this.prisma.media.create({
+        data: {
+          id: crypto.randomUUID(),
+          file: fileUrl,
           thumbnail,
           type: file.mimetype,
           announcerId: announcer.id,

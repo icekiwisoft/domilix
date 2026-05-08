@@ -9,14 +9,8 @@ import { AdsService } from './ads.service';
 import { QueryAdsDto } from './dto/query-ads.dto';
 import { QueryCitiesDto } from './dto/query-cities.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import crypto from 'node:crypto';
-import fs from 'node:fs';
-import path from 'node:path';
+import { memoryStorage } from 'multer';
 import { ALLOWED_MEDIA_MIME_PATTERN, MAX_AD_MEDIAS } from '../common/media/thumbnails';
-
-const adUploadDir = path.join(process.cwd(), 'storage', 'medias');
-fs.mkdirSync(adUploadDir, { recursive: true });
 
 @ApiTags('Ads')
 @Controller()
@@ -115,12 +109,7 @@ export class AdsController {
   })
   @UseInterceptors(
     FilesInterceptor('medias[]', MAX_AD_MEDIAS, {
-      storage: diskStorage({
-        destination: adUploadDir,
-        filename: (_req, file, callback) => {
-          callback(null, `${Date.now()}---${crypto.randomUUID()}${path.extname(file.originalname)}`);
-        },
-      }),
+      storage: memoryStorage(),
       fileFilter: (_req, file, callback) => {
         callback(
           ALLOWED_MEDIA_MIME_PATTERN.test(file.mimetype)

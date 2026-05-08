@@ -25,4 +25,14 @@ export class UpdateAnnouncerProfileDto {
   @IsString()
   @MaxLength(255)
   presentation?: string;
+
+  @ApiPropertyOptional({ example: 'https://storage.googleapis.com/bucket/avatars/file.jpg' })
+  @IsOptional()
+  @IsString()
+  avatar_url?: string;
+
+  @ApiPropertyOptional({ example: 'https://storage.googleapis.com/bucket/presentations/file.jpg' })
+  @IsOptional()
+  @IsString()
+  presentation_url?: string;
 }

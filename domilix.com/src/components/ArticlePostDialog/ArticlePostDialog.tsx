@@ -2,6 +2,7 @@
 
 import { Listbox, Transition } from '@headlessui/react';
 import api from '@services/api';
+import { uploadApi } from '@services/uploadApi';
 import { Category } from '@utils/types';
 import axios from 'axios';
 import { FormEvent, Fragment, useEffect, useState } from 'react';
@@ -265,60 +266,46 @@ export default function ArticlePostDialog({
       return;
     }
 
-    // Créez une instance de FormData
-    const data = new FormData();
-
-    // Ajoutez les champs du formulaire au FormData
-    data.append('category_id', formData.category_id);
-    data.append('price', formData.price);
-    data.append('type', formData.type);
-    data.append('ad_type', formData.ad_type);
-    data.append('bedroom', formData.bedroom.toString());
-    data.append('mainroom', formData.mainroom.toString());
-    data.append('toilet', formData.toilet.toString());
-    data.append('kitchen', formData.kitchen.toString());
-    data.append('size', formData.size.toString());
-    data.append('wifi', formData.wifi ? '1' : '0');
-    data.append('air_conditioning', formData.air_conditioning ? '1' : '0');
-    data.append('security_24h', formData.security_24h ? '1' : '0');
-    data.append('smart_tv', formData.smart_tv ? '1' : '0');
-    data.append('equipped_kitchen', formData.equipped_kitchen ? '1' : '0');
-    data.append('gate', formData.gate ? '1' : '0');
-    data.append('pool', formData.pool ? '1' : '0');
-    data.append('garage', formData.garage ? '1' : '0');
-    data.append('furnitured', formData.furnitured ? '1' : '0');
-    data.append('period', formData.period);
-    data.append('description', formData.description);
-    data.append('devise', formData.devise);
-
-    // Ajoutez les coordonnées de localisation
-    data.append('localization[]', formData.localization[0].toString());
-    data.append('localization[]', formData.localization[1].toString());
-
-    // Ajoutez les champs d'adresse
-    data.append('address', formData.address);
-    data.append('city', formData.city);
-    data.append('state', formData.state);
-    data.append('country', formData.country);
-    data.append('zip', formData.zip);
-
-    // Ajoutez les fichiers (images) au FormData
-    formData.medias.forEach(file => {
-      data.append('medias[]', file);
-    });
-
     try {
       setIsSubmitting(true);
-      // console.log(formData);
-      // for (let [key, value] of data.entries()) {
-      //   console.log(key, value);
-      // }
-      // Envoyez la requête avec Axios
-      const response = await api.post('/announces', data, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const uploadedMedias = await Promise.all(
+        formData.medias.map(file => uploadApi.uploadFile(file, 'media')),
+      );
+
+      const data = {
+        category_id: formData.category_id,
+        price: formData.price,
+        type: formData.type,
+        ad_type: formData.ad_type,
+        bedroom: formData.bedroom.toString(),
+        mainroom: formData.mainroom.toString(),
+        toilet: formData.toilet.toString(),
+        kitchen: formData.kitchen.toString(),
+        size: formData.size.toString(),
+        wifi: formData.wifi ? '1' : '0',
+        air_conditioning: formData.air_conditioning ? '1' : '0',
+        security_24h: formData.security_24h ? '1' : '0',
+        smart_tv: formData.smart_tv ? '1' : '0',
+        equipped_kitchen: formData.equipped_kitchen ? '1' : '0',
+        gate: formData.gate ? '1' : '0',
+        pool: formData.pool ? '1' : '0',
+        garage: formData.garage ? '1' : '0',
+        furnitured: formData.furnitured ? '1' : '0',
+        period: formData.period,
+        description: formData.description,
+        devise: formData.devise,
+        localization: [formData.localization[0].toString(), formData.localization[1].toString()],
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        country: formData.country,
+        zip: formData.zip,
+        media_urls: uploadedMedias.map(media => media.url),
+        media_thumbnails: uploadedMedias.map(media => media.thumbnail || media.url),
+        media_types: uploadedMedias.map(media => media.mime_type),
+      };
+
+      const response = await api.post('/announces', data);
 
       console.log("Réponse de l'API :", response.data);
       toggleDialog(); // Ferme la boîte de dialogue après validation

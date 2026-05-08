@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, InternalServerErrorException, Param, Post, Put, Query, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { AuthGuard } from '../auth/auth.guard';
@@ -6,18 +6,27 @@ import { AnnouncersService } from './announcers.service';
 import { QueryAnnouncersDto } from './dto/query-announcers.dto';
 import { UpsertAnnouncerDto } from './dto/upsert-announcer.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import crypto from 'node:crypto';
-import fs from 'node:fs';
-import path from 'node:path';
-
-const announcerImageDir = path.join(process.cwd(), 'storage', 'images');
-fs.mkdirSync(announcerImageDir, { recursive: true });
+import { memoryStorage } from 'multer';
+import { ObjectStorageService } from '../common/object-storage/object-storage.service';
 
 @ApiTags('Announcers')
 @Controller('announcers')
 export class AnnouncersController {
-  constructor(private readonly announcersService: AnnouncersService) {}
+  constructor(
+    private readonly announcersService: AnnouncersService,
+    private readonly objectStorage: ObjectStorageService,
+  ) {}
+
+  private async uploadOptionalAvatar(file: any | undefined, existingUrl?: string) {
+    if (existingUrl) return existingUrl;
+    if (!file) return undefined;
+
+    try {
+      return await this.objectStorage.uploadFile(file, 'announcers');
+    } catch {
+      throw new InternalServerErrorException('Impossible d uploader l avatar.');
+    }
+  }
 
   @Get()
   @ApiOperation({ summary: 'List announcers' })
@@ -51,16 +60,11 @@ export class AnnouncersController {
   })
   @UseInterceptors(
     FileInterceptor('avatar', {
-      storage: diskStorage({
-        destination: announcerImageDir,
-        filename: (_req, file, callback) => {
-          callback(null, `${crypto.randomUUID()}${path.extname(file.originalname)}`);
-        },
-      }),
+      storage: memoryStorage(),
     }),
   )
-  create(@CurrentUser() user: any, @Body() dto: UpsertAnnouncerDto, @UploadedFile() avatar?: any) {
-    return this.announcersService.create(user, dto, avatar ? `/storage/images/${avatar.filename}` : undefined);
+  async create(@CurrentUser() user: any, @Body() dto: UpsertAnnouncerDto, @UploadedFile() avatar?: any) {
+    return this.announcersService.create(user, dto, await this.uploadOptionalAvatar(avatar, (dto as any).avatar_url));
   }
 
   @UseGuards(AuthGuard)
@@ -83,16 +87,11 @@ export class AnnouncersController {
   })
   @UseInterceptors(
     FileInterceptor('avatar', {
-      storage: diskStorage({
-        destination: announcerImageDir,
-        filename: (_req, file, callback) => {
-          callback(null, `${crypto.randomUUID()}${path.extname(file.originalname)}`);
-        },
-      }),
+      storage: memoryStorage(),
     }),
   )
-  update(@CurrentUser() user: any, @Param('id') id: string, @Body() dto: Partial<UpsertAnnouncerDto>, @UploadedFile() avatar?: any) {
-    return this.announcersService.update(user, id, dto, avatar ? `/storage/images/${avatar.filename}` : undefined);
+  async update(@CurrentUser() user: any, @Param('id') id: string, @Body() dto: Partial<UpsertAnnouncerDto>, @UploadedFile() avatar?: any) {
+    return this.announcersService.update(user, id, dto, await this.uploadOptionalAvatar(avatar, (dto as any).avatar_url));
   }
 
   @UseGuards(AuthGuard)

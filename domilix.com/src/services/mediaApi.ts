@@ -1,5 +1,6 @@
 import { Media } from '../utils/types';
 import api from './api';
+import { uploadApi } from './uploadApi';
 
 //get medias for a specific ad
 export const getMediasByAd = async (adId: number): Promise<Media[]> => {
@@ -29,10 +30,14 @@ export const uploadMediasForAd = async (
   adId: number,
   formData: FormData
 ): Promise<Media[]> => {
-  const response = await api.post(`medias?AdId=${adId}`, formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
+  const files = formData.getAll('medias').filter((value): value is File => value instanceof File);
+  const uploadedMedias = await Promise.all(files.map(file => uploadApi.uploadFile(file, 'media')));
+
+  const response = await api.post('medias', {
+    AdId: String(adId),
+    media_urls: uploadedMedias.map(media => media.url),
+    media_thumbnails: uploadedMedias.map(media => media.thumbnail || media.url),
+    media_types: uploadedMedias.map(media => media.mime_type),
   });
   return response.data;
 };

@@ -9,6 +9,7 @@ import {
 import { HiCamera } from 'react-icons/hi2';
 import { useAuth } from '../../hooks/useAuth';
 import { profileApi } from '../../services/profileApi';
+import { uploadApi } from '../../services/uploadApi';
 import {
   subscriptionApi,
   type Subscription,
@@ -183,20 +184,18 @@ export default function ProfileDialog({
   const handleUpdateAnnouncerProfile = async () => {
     setLoading(true);
     try {
-      const formData = new FormData();
-      
-      // Ajouter _method pour Laravel
-      formData.append('_method', 'PUT');
-      
-      if (announcerForm.company_name)
-        formData.append('company_name', announcerForm.company_name);
-      if (announcerForm.bio) formData.append('bio', announcerForm.bio);
-      if (announcerForm.professional_phone)
-        formData.append('professional_phone', announcerForm.professional_phone);
-      if (announcerForm.avatar) formData.append('avatar', announcerForm.avatar);
-      if (announcerForm.presentation) formData.append('presentation', announcerForm.presentation);
+      const [avatarUpload, presentationUpload] = await Promise.all([
+        announcerForm.avatar ? uploadApi.uploadFile(announcerForm.avatar, 'avatar') : Promise.resolve(null),
+        announcerForm.presentation ? uploadApi.uploadFile(announcerForm.presentation, 'presentation-image') : Promise.resolve(null),
+      ]);
 
-      await profileApi.updateAnnouncerProfile(formData);
+      await profileApi.updateAnnouncerProfile({
+        ...(announcerForm.company_name ? { company_name: announcerForm.company_name } : {}),
+        ...(announcerForm.bio ? { bio: announcerForm.bio } : {}),
+        ...(announcerForm.professional_phone ? { professional_phone: announcerForm.professional_phone } : {}),
+        ...(avatarUpload ? { avatar_url: avatarUpload.url } : {}),
+        ...(presentationUpload ? { presentation_url: presentationUpload.url } : {}),
+      });
       await refreshProfile();
       alert('Profil annonceur mis à jour avec succès');
       setAvatarPreview(null);
