@@ -42,7 +42,7 @@ import { signinDialogActions } from '@stores/defineStore';
 import { mediaUrl } from '@utils/mediaUrl';
 
 import { useAuth } from '../../hooks/useAuth';
-import { Ad as AdType } from '../../utils/types';
+import { Ad as AdType, Media } from '../../utils/types';
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -225,6 +225,66 @@ function AdNotFoundState() {
         </div>
       </div>
     </>
+  );
+}
+
+function isVideoMedia(media?: Media | null) {
+  return Boolean(media?.type?.toLowerCase().startsWith('video/'));
+}
+
+function GalleryMediaPreview({
+  media,
+  className,
+  onClick,
+  showCount,
+}: {
+  media?: Media;
+  className?: string;
+  onClick?: () => void;
+  showCount?: number;
+}) {
+  const src = mediaUrl(media?.file);
+
+  return (
+    <button
+      type='button'
+      className={`relative overflow-hidden bg-gray-100 text-left transition-all duration-300 hover:brightness-90 ${className || ''}`}
+      onClick={onClick}
+      disabled={!media && !showCount}
+    >
+      {media && src ? (
+        isVideoMedia(media) ? (
+          <>
+            <video
+              src={src}
+              className='h-full w-full object-cover'
+              muted
+              playsInline
+              preload='metadata'
+            />
+            <span className='absolute left-3 top-3 rounded-full bg-black/65 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm'>
+              Vidéo
+            </span>
+            <span className='absolute inset-0 flex items-center justify-center'>
+              <span className='flex h-12 w-12 items-center justify-center rounded-full bg-white/90 text-gray-900 shadow-lg'>
+                <span className='ml-1 h-0 w-0 border-y-[9px] border-l-[14px] border-y-transparent border-l-current' />
+              </span>
+            </span>
+          </>
+        ) : (
+          <img src={src} alt='' className='h-full w-full object-cover' loading='lazy' />
+        )
+      ) : null}
+
+      {showCount ? (
+        <span className='absolute bottom-3 right-3 flex items-center gap-1.5 rounded-lg border border-white/80 bg-white/90 px-3 py-2 text-xs font-semibold text-gray-800 shadow-md backdrop-blur-sm transition-colors hover:bg-white'>
+          <svg className='h-3.5 w-3.5' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+            <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M4 6h16M4 10h16M4 14h16M4 18h16' />
+          </svg>
+          {showCount} médias
+        </span>
+      ) : null}
+    </button>
   );
 }
 
@@ -444,39 +504,25 @@ export default function Ad(): React.ReactElement {
           >
             {adInfo.medias && adInfo.medias.length > 0 ? (
               <>
-                <div
-                  className='col-span-2 row-span-2 bg-cover bg-center cursor-pointer hover:brightness-95 transition-all duration-300 bg-gray-100'
-                  style={{ backgroundImage: `url('${mediaUrl(adInfo.medias[0]?.file)}')` }}
+                <GalleryMediaPreview
+                  media={adInfo.medias[0]}
+                  className='col-span-2 row-span-2 cursor-pointer hover:brightness-95'
                   onClick={() => openModalWithImage(0)}
                 />
                 {[1, 2, 3].map(i => (
-                  <div
+                  <GalleryMediaPreview
                     key={i}
-                    className='bg-cover bg-center cursor-pointer hover:brightness-90 transition-all duration-300 bg-gray-100'
-                    style={{
-                      backgroundImage: adInfo.medias[i]
-                        ? `url('${mediaUrl(adInfo.medias[i].file)}')`
-                        : undefined,
-                    }}
+                    media={adInfo.medias[i]}
+                    className='cursor-pointer'
                     onClick={() => adInfo.medias[i] && openModalWithImage(i)}
                   />
                 ))}
-                <div
-                  className='relative bg-cover bg-center cursor-pointer hover:brightness-90 transition-all duration-300 bg-gray-100'
-                  style={{
-                    backgroundImage: adInfo.medias[4]
-                      ? `url('${mediaUrl(adInfo.medias[4].file)}')`
-                      : undefined,
-                  }}
+                <GalleryMediaPreview
+                  media={adInfo.medias[4]}
+                  className='cursor-pointer'
                   onClick={() => openModalWithImage(0)}
-                >
-                  <button className='absolute bottom-3 right-3 bg-white/90 backdrop-blur-sm px-3 py-2 rounded-lg text-gray-800 text-xs font-semibold border border-white/80 shadow-md flex items-center gap-1.5 hover:bg-white transition-colors'>
-                    <svg className='w-3.5 h-3.5' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
-                      <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M4 6h16M4 10h16M4 14h16M4 18h16' />
-                    </svg>
-                    {adInfo.medias.length} photos
-                  </button>
-                </div>
+                  showCount={adInfo.medias.length}
+                />
               </>
             ) : (
               <div className='col-span-4 row-span-2 flex items-center justify-center bg-gray-50 rounded-2xl'>

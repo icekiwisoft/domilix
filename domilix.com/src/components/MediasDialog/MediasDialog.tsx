@@ -8,6 +8,10 @@ interface MediasDialogProps {
   initialIndex?: number;
 }
 
+function isVideoMedia(media?: Media | null) {
+  return Boolean(media?.type?.toLowerCase().startsWith('video/'));
+}
+
 export default function MediasDialog({
   toggleModal,
   medias,
@@ -67,10 +71,10 @@ export default function MediasDialog({
         <div className='flex items-center justify-between mb-6 flex-shrink-0'>
           <div>
             <h2 id='gallery-title' className='text-2xl font-bold text-gray-900'>
-              Galerie photos
+              Galerie médias
             </h2>
             <p className='text-gray-600 text-sm'>
-              {currentIndex + 1} sur {medias.length} photo
+              {currentIndex + 1} sur {medias.length} média
               {medias.length > 1 ? 's' : ''}
             </p>
           </div>
@@ -96,14 +100,25 @@ export default function MediasDialog({
         </div>
 
         <div className='flex flex-1 gap-6 min-h-0'>
-          {/* Main image */}
+          {/* Main media */}
           <div className='flex-1 relative bg-gray-100 rounded-lg overflow-hidden'>
-            <img
-              src={mediaUrl(currentMedia.file)}
-              alt={`Photo ${currentIndex + 1} de ${medias.length}`}
-              className='w-full h-full object-contain'
-              loading='lazy'
-            />
+            {isVideoMedia(currentMedia) ? (
+              <video
+                key={currentMedia.id}
+                src={mediaUrl(currentMedia.file)}
+                className='h-full w-full object-contain bg-black'
+                controls
+                playsInline
+                preload='metadata'
+              />
+            ) : (
+              <img
+                src={mediaUrl(currentMedia.file)}
+                alt={`Media ${currentIndex + 1} de ${medias.length}`}
+                className='w-full h-full object-contain'
+                loading='lazy'
+              />
+            )}
 
             {/* Navigation arrows */}
             {medias.length > 1 && (
@@ -169,14 +184,37 @@ export default function MediasDialog({
                           : 'hover:opacity-80'
                       }`}
                       onClick={() => changeImage(index)}
-                      aria-label={`Voir l'image ${index + 1}`}
+                      aria-label={`Voir le média ${index + 1}`}
                     >
-                      <img
-                        src={mediaUrl(media.file)}
-                        alt={`Miniature ${index + 1}`}
-                        className='w-full h-20 object-cover'
-                        loading='lazy'
-                      />
+                      {isVideoMedia(media) ? (
+                        <>
+                          {media.thumbnail ? (
+                            <img
+                              src={mediaUrl(media.thumbnail)}
+                              alt={`Miniature vidéo ${index + 1}`}
+                              className='h-20 w-full object-cover bg-black'
+                              loading='lazy'
+                            />
+                          ) : (
+                            <div className='h-20 w-full bg-black' />
+                          )}
+                          <span className='absolute left-2 top-2 rounded-full bg-black/65 px-2 py-0.5 text-[10px] font-semibold text-white'>
+                            Vidéo
+                          </span>
+                          <span className='absolute inset-0 flex items-center justify-center'>
+                            <span className='flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-gray-900 shadow'>
+                              <span className='ml-0.5 h-0 w-0 border-y-[6px] border-l-[9px] border-y-transparent border-l-current' />
+                            </span>
+                          </span>
+                        </>
+                      ) : (
+                        <img
+                          src={mediaUrl(media.file)}
+                          alt={`Miniature ${index + 1}`}
+                          className='w-full h-20 object-cover'
+                          loading='lazy'
+                        />
+                      )}
                       {index === currentIndex && (
                         <div className='absolute inset-0 bg-orange-500/20 flex items-center justify-center'>
                           <div className='w-3 h-3 bg-orange-500 rounded-full'></div>
@@ -202,7 +240,7 @@ export default function MediasDialog({
                     ? 'bg-orange-500'
                     : 'bg-gray-300 hover:bg-gray-400'
                 }`}
-                aria-label={`Aller à l'image ${index + 1}`}
+                aria-label={`Aller au média ${index + 1}`}
               />
             ))}
           </div>

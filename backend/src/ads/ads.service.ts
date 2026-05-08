@@ -285,7 +285,9 @@ export class AdsService {
 
   private async serializeMedia(media: any) {
     const signedFile = await this.objectStorage.getSignedUrl(media.bucket, media.originalPath);
-    const signedThumbnail = await this.objectStorage.getSignedUrl(media.bucket, media.thumbnailPath || media.originalPath);
+    const signedThumbnail = media.thumbnailPath && media.thumbnailPath !== media.originalPath
+      ? await this.objectStorage.getSignedUrl(media.bucket, media.thumbnailPath)
+      : null;
 
     return {
       id: media.id,
@@ -772,16 +774,16 @@ export class AdsService {
       const uploaded = await this.objectStorage.uploadFile(file, 'medias');
       const thumbnailBuffer = await generateMediaThumbnailBuffer(file).catch(() => null);
       const thumbnail = thumbnailBuffer
-        ? await this.objectStorage.uploadThumbnail(thumbnailBuffer, file).catch(() => uploaded)
-        : uploaded;
+        ? await this.objectStorage.uploadThumbnail(thumbnailBuffer, file).catch(() => null)
+        : null;
       const media = await this.prisma.media.create({
         data: {
           id: crypto.randomUUID(),
           file: uploaded.url,
-          thumbnail: thumbnail.url,
+          thumbnail: thumbnail?.url || '',
           bucket: uploaded.bucket,
           originalPath: uploaded.path,
-          thumbnailPath: thumbnail.path,
+          thumbnailPath: thumbnail?.path || null,
           purpose: 'ad_media',
           size: file.size,
           originalName: file.originalname,

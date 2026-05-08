@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import crypto from 'node:crypto';
 import { ObjectStorageService } from '../common/object-storage/object-storage.service';
+import type { StoredObject } from '../common/object-storage/object-storage.service';
 import { ALLOWED_MEDIA_MIME_PATTERN, generateMediaThumbnailBuffer } from '../common/media/thumbnails';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -34,23 +35,23 @@ export class UploadsService {
     if (!announcer) throw new UnauthorizedException('Announcer not found');
 
     const uploaded = await this.objectStorage.uploadFile(file, rule.folder);
-    let thumbnail = uploaded;
+    let thumbnail: StoredObject | null = null;
 
     if (type === 'media') {
       const thumbnailBuffer = await generateMediaThumbnailBuffer(file).catch(() => null);
       thumbnail = thumbnailBuffer
-        ? await this.objectStorage.uploadThumbnail(thumbnailBuffer, file).catch(() => uploaded)
-        : uploaded;
+        ? await this.objectStorage.uploadThumbnail(thumbnailBuffer, file).catch(() => null)
+        : null;
     }
 
     const media = await this.prisma.media.create({
       data: {
         id: crypto.randomUUID(),
         file: uploaded.url,
-        thumbnail: type === 'media' ? thumbnail.url : uploaded.url,
+        thumbnail: thumbnail?.url || '',
         bucket: uploaded.bucket,
         originalPath: uploaded.path,
-        thumbnailPath: type === 'media' ? thumbnail.path : null,
+        thumbnailPath: thumbnail?.path || null,
         purpose: uploadPurpose[type],
         size: file.size,
         originalName: file.originalname,

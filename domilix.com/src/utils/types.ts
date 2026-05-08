@@ -31,7 +31,7 @@ export interface Announcer {
 //interface for media
 export interface Media {
   file: string;
-  thumbnail: string;
+  thumbnail?: string | null;
   id: string;
   type: string;
   announcer: Announcer;
