@@ -1,14 +1,16 @@
-import { BadRequestException, Body, Controller, Post, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Post, UploadedFile, UseFilters, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { AuthGuard } from '../auth/auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
+import { UploadExceptionFilter } from '../common/filters/upload-exception.filter';
 import { UploadsService } from './uploads.service';
 import type { UploadType } from './uploads.service';
 
 @ApiTags('Uploads')
 @UseGuards(AuthGuard)
+@UseFilters(UploadExceptionFilter)
 @Controller('uploads')
 export class UploadsController {
   constructor(private readonly uploadsService: UploadsService) {}

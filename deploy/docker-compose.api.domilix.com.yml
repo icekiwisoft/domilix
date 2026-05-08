@@ -9,6 +9,7 @@ services:
       - domilix_backend_storage:/app/storage
     environment:
       PORT: 8000
+      HTTP_REQUEST_TIMEOUT_MS: ${HTTP_REQUEST_TIMEOUT_MS:-900000}
       DATABASE_URL: ${DATABASE_URL}
       JWT_SECRET: ${JWT_SECRET:-change-me}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change-me-too}

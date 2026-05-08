@@ -7,6 +7,11 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const server = app.getHttpServer();
+  const requestTimeout = Number(process.env.HTTP_REQUEST_TIMEOUT_MS || 15 * 60 * 1000);
+
+  server.requestTimeout = requestTimeout;
+  server.headersTimeout = requestTimeout + 60 * 1000;
 
   app.enableCors({
     origin: true,
