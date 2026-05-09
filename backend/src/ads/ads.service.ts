@@ -507,6 +507,8 @@ export class AdsService {
         equipped_kitchen: realEstate ? boolFromUnknown(realEstate.equippedKitchen) : false,
         pool: realEstate ? boolFromUnknown(realEstate.pool) : false,
         caution: realEstate ? toNumber(realEstate.caution) : null,
+        longitude: realEstate ? toNumber(realEstate.lng) : null,
+        latitude: realEstate ? toNumber(realEstate.lat) : null,
       });
     }
 
@@ -857,6 +859,15 @@ export class AdsService {
         },
       });
     } else {
+      const localization = Array.isArray(body.localization)
+        ? body.localization
+        : body['localization[]']
+          ? [body['localization[]']]
+          : undefined;
+      const localizationValues = Array.isArray(localization)
+        ? localization.map((value) => Number(value))
+        : [];
+
       await this.prisma.realEstate.update({
         where: { id: ad.adId },
         data: {
@@ -886,6 +897,7 @@ export class AdsService {
             : {}),
           ...(body.garden !== undefined ? { garden: ['1', 'true', true].includes(body.garden) } : {}),
           ...(body.caution !== undefined ? { caution: Number(body.caution) } : {}),
+          ...(localizationValues.length >= 2 ? { lng: localizationValues[0], lat: localizationValues[1] } : {}),
         },
       });
     }

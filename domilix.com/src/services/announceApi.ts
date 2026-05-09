@@ -35,7 +35,7 @@ export const getAd = async (id: number): Promise<Ad> => {
 
 export const updateAd = async (
   id: number,
-  data: Record<string, string | number | boolean | null | undefined>
+  data: Record<string, string | number | boolean | null | undefined | string[]>
 ): Promise<Ad> => {
   const response = await api.put(`announces/${id}`, data);
   return response.data;

@@ -7,9 +7,10 @@ import ProfilePopup from '../ProfilePopup/ProfilePopup';
 import NotificationPopup from '../NotificationPopup/NotificationPopup';
 import AnnouncerRequiredModal from '@components/AnnouncerRequiredModal/AnnouncerRequiredModal';
 import ArticlePostDialog from '@components/ArticlePostDialog/ArticlePostDialog';
+import ConfirmDialog from '@components/ConfirmDialog/ConfirmDialog';
 import { notificationApi } from '../../services/notificationApi';
 import React, { useState, useEffect, useRef } from 'react';
-import { HiBars3, HiXMark, HiBell } from 'react-icons/hi2';
+import { HiBars3, HiXMark, HiBell, HiHomeModern, HiSparkles } from 'react-icons/hi2';
 import { MdOutlineCampaign } from 'react-icons/md';
 import { NavLink, useNavigate } from '@router';
 
@@ -36,6 +37,7 @@ export default function Nav2({
   const [showPostDialog, setShowPostDialog] = useState(false);
   const [showAnnouncerRequiredModal, setShowAnnouncerRequiredModal] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const profileButtonDesktopRef = useRef<HTMLButtonElement>(null);
@@ -50,6 +52,17 @@ export default function Nav2({
       return;
     }
     setShowPostDialog(true);
+  };
+
+  const requestLogout = () => {
+    setShowProfileMenu(false);
+    setClick(false);
+    setShowLogoutConfirm(true);
+  };
+
+  const confirmLogout = () => {
+    logout();
+    setShowLogoutConfirm(false);
   };
 
   // Body scroll lock while mobile drawer is open
@@ -219,7 +232,7 @@ export default function Nav2({
                   favoritesHref='/favorite'
                   subscriptionsHref='/settings?tab=packs'
                   onOpenSettings={() => { navigate('/settings'); setShowProfileMenu(false); }}
-                  onLogout={() => { logout(); setShowProfileMenu(false); }}
+                  onLogout={requestLogout}
                 />
               )}
             </div>
@@ -228,28 +241,16 @@ export default function Nav2({
         </div>
 
         {/* ── Mobile right cluster ── */}
-        <div className='flex lg:hidden items-center gap-2'>
+        <div className='flex lg:hidden items-center gap-3'>
           {isAuthenticated && (
             <>
-              {/* Domicoins — icon only on xs, icon+count on sm+ */}
-              <NavLink
-                to='/subscriptions'
-                className={({ isActive }) =>
-                  `inline-flex items-center gap-1 rounded-lg px-2 py-1.5 transition-colors ${isActive ? 'bg-surface-container' : 'hover:bg-surface-container-low'}`
-                }
-              >
-                <img src='/dom.png' alt='coin' className='h-5 w-5' />
-                <span className='hidden text-sm font-semibold text-primary sm:inline'>{userCredits}</span>
-              </NavLink>
-
-              {/* Notifications */}
               <div className='relative'>
                 <button
                   onClick={() => { setShowNotifications(prev => !prev); setShowProfileMenu(false); }}
                   className='relative flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-surface-container-low'
                   aria-label='Notifications'
                 >
-                  <HiBell className='h-5 w-5 text-on-surface-variant' />
+                  <HiBell className='h-6 w-6 text-slate-700' />
                   {unreadCount > 0 && (
                     <span className='absolute -right-0.5 -top-0.5 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-primary text-[9px] font-bold text-white'>
                       {unreadCount > 9 ? '9+' : unreadCount}
@@ -261,12 +262,20 @@ export default function Nav2({
                 )}
               </div>
 
-              {/* Avatar */}
+              <NavLink
+                to='/subscriptions'
+                className='inline-flex items-center gap-1.5 text-sm font-semibold text-slate-800'
+              >
+                <img src='/dom.png' alt='Domicoins' className='h-5 w-5' />
+                <span>{userCredits}</span>
+              </NavLink>
+
+              {/* Avatar mobile */}
               <div className='relative'>
                 <button
                   ref={profileButtonMobileRef}
                   onClick={e => { e.stopPropagation(); setShowProfileMenu(prev => !prev); setShowNotifications(false); }}
-                  className='flex h-9 w-9 items-center justify-center rounded-full bg-primary/15 text-sm font-semibold text-primary transition-colors hover:bg-primary/25'
+                  className='flex h-10 w-10 items-center justify-center rounded-full border-2 border-slate-200 bg-white text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50'
                 >
                   {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
                 </button>
@@ -280,151 +289,115 @@ export default function Nav2({
                     favoritesHref='/favorite'
                     subscriptionsHref='/settings?tab=packs'
                     onOpenSettings={() => { navigate('/settings'); setShowProfileMenu(false); }}
-                    onLogout={() => { logout(); setShowProfileMenu(false); }}
+                    onLogout={requestLogout}
                   />
                 )}
               </div>
             </>
           )}
 
-          {/* Hamburger */}
           <button
             className='flex h-9 w-9 items-center justify-center rounded-lg transition-colors hover:bg-surface-container-low'
             onClick={() => setClick(c => !c)}
             aria-label={click ? 'Fermer le menu' : 'Ouvrir le menu'}
           >
             {click ? (
-              <HiXMark className='h-5 w-5 text-on-surface' />
+              <HiXMark className='h-7 w-7 text-slate-700' />
             ) : (
-              <HiBars3 className='h-5 w-5 text-on-surface' />
+              <HiBars3 className='h-7 w-7 text-slate-700' />
             )}
           </button>
         </div>
       </div>
 
-      {/* ── Backdrop ── */}
-      <div
-        className={`fixed inset-0 top-20 z-30 bg-black/20 backdrop-blur-[2px] transition-opacity duration-300 lg:hidden ${
-          click ? 'opacity-100' : 'pointer-events-none opacity-0'
-        }`}
-        onClick={() => setClick(false)}
-      />
+      {click && (
+        <button
+          type='button'
+          className='fixed inset-x-0 bottom-0 top-20 z-30 bg-white/45 backdrop-blur-md lg:hidden'
+          aria-label='Fermer le menu mobile'
+          onClick={() => setClick(false)}
+        />
+      )}
 
       {/* ── Mobile drawer ── */}
-      <div
-        className={`absolute left-0 right-0 top-20 z-40 overflow-hidden border-t border-outline-variant bg-surface shadow-xl transition-[max-height,opacity] duration-300 ease-in-out lg:hidden ${
-          click ? 'max-h-[calc(100vh-5rem)] opacity-100' : 'max-h-0 opacity-0 pointer-events-none'
-        }`}
-      >
-        <div className='overflow-y-auto max-h-[calc(100vh-5rem)]'>
-          <div className='px-4 py-6 max-w-container mx-auto space-y-6'>
-
-            {/* User card */}
-            {isAuthenticated && user && (
-              <div className='pb-5 border-b border-outline-variant'>
-                <div className='flex items-center gap-3 mb-4'>
-                  <div className='w-11 h-11 rounded-full bg-surface-container-high flex items-center justify-center'>
-                    <span className='text-base font-semibold text-on-surface'>
-                      {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
-                    </span>
-                  </div>
-                  <div className='flex-1 min-w-0'>
-                    <p className='font-semibold text-on-surface text-sm truncate'>
-                      {user.name || 'Utilisateur'}
-                    </p>
-                    <p className='text-xs text-on-surface-variant truncate'>{user.email}</p>
-                  </div>
-                </div>
-
-                <div className='flex items-center justify-center gap-2 bg-primary/10 rounded-xl p-3'>
-                  <img src='/dom.png' alt='coin' className='w-5 h-5' />
-                  <span className='font-bold text-primary text-sm'>{userCredits} Domicoins</span>
-                </div>
-
+      {click && (
+        <div className='absolute left-0 right-0 top-20 z-40 bg-white shadow-xl lg:hidden'>
+          <div className='mx-auto max-w-container px-6 py-7'>
+            <ul className='space-y-8 text-[20px] font-bold text-primary'>
+              <li>
                 <button
+                  type='button'
                   onClick={() => { handlePublishClick(); setClick(false); }}
-                  className='mt-3 w-full rounded-xl bg-primary-container px-4 py-3 text-sm font-semibold text-on-primary-container transition-opacity hover:opacity-90'
+                  className='flex items-center gap-4 text-left'
                 >
-                  <MdOutlineCampaign className='inline -rotate-12 mr-1.5 -mt-0.5' />
-                  Publier une annonce
+                  <MdOutlineCampaign className='h-5 w-5 shrink-0 -rotate-12' />
+                  Je publie une annonce
                 </button>
-              </div>
-            )}
-
-            {/* Main nav links */}
-            <ul className='space-y-1'>
-              {links.map(link => (
-                <li key={link.name}>
-                  <NavLink
-                    to={link.url}
-                    className={
-                      highlightBuyLink && link.name === 'Acheter'
-                        ? mobileBuyLinkClass
-                        : mobileNavLinkClass
-                    }
-                    onClick={() => setClick(false)}
-                  >
-                    {link.name}
-                  </NavLink>
-                </li>
-              ))}
+              </li>
+              <li>
+                <NavLink
+                  to='/houses'
+                  className='flex items-center gap-4'
+                  onClick={() => setClick(false)}
+                >
+                  <HiHomeModern className='h-5 w-5 shrink-0' />
+                  Je cherche un logement
+                </NavLink>
+              </li>
+              <li>
+                <NavLink
+                  to='/subscriptions'
+                  className='flex items-center gap-4'
+                  onClick={() => setClick(false)}
+                >
+                  <HiSparkles className='h-5 w-5 shrink-0' />
+                  Acheter un pack Domilix
+                </NavLink>
+              </li>
             </ul>
 
-            {/* Authenticated sub-links */}
-            {isAuthenticated && user && (
-              <div className='space-y-1 pt-1 pb-5 border-b border-outline-variant'>
-                <NavLink to='/favorite' className={mobileNavLinkClass} onClick={() => setClick(false)}>
-                  Mes Favoris
-                </NavLink>
-                {user.announcer && (
-                  <NavLink
-                    to={`/announcers/${user.announcer}`}
-                    className={mobileNavLinkClass}
-                    onClick={() => setClick(false)}
-                  >
-                    Mon Compte Annonceur
-                  </NavLink>
-                )}
-                {user.is_admin && (
-                  <NavLink to='/dashboard' className={mobileNavLinkClass} onClick={() => setClick(false)}>
-                    Dashboard
-                  </NavLink>
-                )}
-                <button
-                  onClick={() => { navigate('/settings'); setClick(false); }}
-                  className='w-full text-left py-3.5 px-4 rounded-xl text-sm font-medium text-on-surface hover:bg-surface-container-low transition-colors'
-                >
-                  Paramètres
-                </button>
-              </div>
-            )}
-
-            {/* Auth action */}
-            <div>
+            <div className='mt-8 border-t border-slate-100 pt-5'>
               {!isAuthenticated ? (
                 <button
                   onClick={() => { signinDialogActions.toggle(); setClick(false); }}
-                  className='w-full rounded-xl border border-primary bg-surface-container-lowest px-6 py-3.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/5'
+                  className='text-base font-bold text-primary'
                 >
                   Se connecter
                 </button>
               ) : (
-                <button
-                  onClick={() => { logout(); setClick(false); }}
-                  className='w-full rounded-xl border border-error/30 bg-surface-container-lowest px-6 py-3.5 text-sm font-semibold text-error transition-colors hover:bg-error/5'
-                >
-                  Se déconnecter
-                </button>
+                <div className='flex items-center justify-between gap-4'>
+                  <button
+                    onClick={() => { navigate('/settings'); setClick(false); }}
+                    className='text-base font-bold text-primary'
+                  >
+                    Paramètres
+                  </button>
+                  <button
+                    onClick={requestLogout}
+                    className='text-base font-bold text-red-600'
+                  >
+                    Se déconnecter
+                  </button>
+                </div>
               )}
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {showPostDialog && <ArticlePostDialog toggleDialog={() => setShowPostDialog(false)} />}
       {showAnnouncerRequiredModal && (
         <AnnouncerRequiredModal onClose={() => setShowAnnouncerRequiredModal(false)} />
       )}
+      <ConfirmDialog
+        open={showLogoutConfirm}
+        title='Se déconnecter ?'
+        description='Vous devrez vous reconnecter pour publier, gérer vos annonces ou consulter vos informations.'
+        confirmLabel='Se déconnecter'
+        tone='danger'
+        onCancel={() => setShowLogoutConfirm(false)}
+        onConfirm={confirmLogout}
+      />
     </nav>
   );
 }
