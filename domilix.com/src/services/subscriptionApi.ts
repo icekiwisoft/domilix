@@ -96,7 +96,7 @@ export const subscriptionApi = {
     return response.data;
   },
 
-  // Fonction pour démarrer l'achat de crédits
+  // Fonction pour démarrer l'achat de Domicoins
   startCreditPurchase: async (
     plan_name: string,
     payment_info: CreateSubscriptionRequest['payment_info'],
@@ -133,7 +133,7 @@ export const subscriptionApi = {
 
       // Calculer les statistiques basées sur les données réelles
       const totalCredits = subscriptions.reduce((sum, sub) => {
-        // Supposer que les crédits initiaux étaient stockés ou calculés
+        // Supposer que les Domicoins initiaux étaient stockés ou calculés
         return sum + sub.credits;
       }, 0);
 
@@ -160,7 +160,7 @@ export const subscriptionApi = {
     }
   },
 
-  // Vérifier si l'utilisateur a des crédits disponibles
+  // Vérifier si l'utilisateur a des Domicoins disponibles
   hasAvailableCredits: async (): Promise<boolean> => {
     const stats = await subscriptionApi.getUsageStats();
     return stats.remaining_credits > 0;

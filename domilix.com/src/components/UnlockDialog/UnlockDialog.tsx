@@ -69,7 +69,9 @@ export default function UnlockDialog({
                         <span className='text-3xl font-bold text-orange-600'>
                           {price}
                         </span>
-                        <span className='text-lg text-gray-600'>Domicoin</span>
+                        <span className='text-lg text-gray-600'>
+                          {price > 1 ? 'Domicoins' : 'Domicoin'}
+                        </span>
                       </div>
                       <p className='text-sm text-gray-500'>
                         Valable pendant 7 jours
@@ -77,7 +79,7 @@ export default function UnlockDialog({
                     </>
                   ) : (
                     <div className='rounded-2xl bg-orange-50 p-4 text-sm font-semibold text-orange-800'>
-                      Un pack Domilix vous permet de débloquer plusieurs contacts selon vos crédits disponibles.
+                      Un pack Domilix vous permet de débloquer plusieurs contacts selon vos Domicoins disponibles.
                     </div>
                   )}
                 </div>

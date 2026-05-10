@@ -272,8 +272,8 @@ export class SubscriptionsService {
       }),
       this.createUserNotification(payment.userId, {
         type: 'credits_received',
-        title: 'Credits recus',
-        message: `${config.credits} credits ont ete ajoutes a votre compte Domilix. Ils sont valables jusqu'au ${endDate.toLocaleDateString('fr-FR')}.`,
+        title: 'Domicoins recus',
+        message: `${config.credits} ${config.credits > 1 ? 'Domicoins ont ete ajoutes' : 'Domicoin a ete ajoute'} a votre compte Domilix. Ils sont valables jusqu'au ${endDate.toLocaleDateString('fr-FR')}.`,
         link: '/settings?tab=packs',
       }),
     ]);

@@ -622,7 +622,7 @@ export class AdsService {
       orderBy: [{ startDate: 'desc' }, { createdAt: 'desc' }],
     });
     if (!subscription) {
-      return { message: 'Crédits insuffisants' };
+      return { message: 'Domicoins insuffisants' };
     }
 
     await this.prisma.subscription.update({
@@ -638,6 +638,16 @@ export class AdsService {
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       },
     });
+
+    await this.prisma.notification.create({
+      data: {
+        userId,
+        type: 'ad_unlocked',
+        title: 'Annonce debloquee',
+        message: 'Vous pouvez maintenant consulter les informations de contact de cette annonce pendant 7 jours.',
+        link: `/houses/${ad.id}`,
+      },
+    }).catch(() => undefined);
 
     return {
       message: 'Annonce debloquee avec succes',

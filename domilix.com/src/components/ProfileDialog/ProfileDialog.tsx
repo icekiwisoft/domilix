@@ -588,9 +588,9 @@ export default function ProfileDialog({
                 <div className='mb-5 rounded-2xl border border-orange-200 bg-orange-50 p-4'>
                   <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
                     <div>
-                      <h4 className='font-black text-orange-900'>Aucun crédit utilisable</h4>
+                      <h4 className='font-black text-orange-900'>Aucun Domicoin utilisable</h4>
                       <p className='mt-1 text-sm text-orange-800'>
-                        Vos packs sont expirés ou ne contiennent plus de crédits. Achetez un nouveau pack pour continuer à débloquer des annonces.
+                        Vos packs sont expirés ou ne contiennent plus de Domicoins. Achetez un nouveau pack pour continuer à débloquer des annonces.
                       </p>
                     </div>
                     <button
@@ -665,13 +665,13 @@ export default function ProfileDialog({
                                       subscription
                                     ) === 'expired'
                                   ? 'Expiré'
-                                  : 'Crédits faibles'}
+                                  : 'Domicoins faibles'}
                             </span>
                           </div>
 
                           <div className='grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600'>
                             <div>
-                              <span className='font-medium'>Crédits restants:</span>
+                              <span className='font-medium'>Domicoins restants:</span>
                               <div>{subscription.credits}</div>
                             </div>
                             <div>
