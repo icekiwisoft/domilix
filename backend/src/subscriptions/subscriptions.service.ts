@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import crypto from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
@@ -30,6 +30,68 @@ export class SubscriptionsService {
       default:
         return { price: 0, duration: 0, credits: 0 };
     }
+  }
+
+  private getCampayConfig() {
+    const token = process.env.CAMPAY_TOKEN;
+    const endpoint = process.env.CAMPAY_ENDPOINT || 'https://demo.campay.net/api/collect/';
+
+    if (!token) {
+      throw new InternalServerErrorException('CAMPAY_TOKEN is not configured.');
+    }
+
+    return { token, endpoint };
+  }
+
+  private normalizePaymentInfo(paymentInfo: unknown) {
+    if (typeof paymentInfo === 'string') return paymentInfo;
+    if (paymentInfo && typeof paymentInfo === 'object') {
+      const info = paymentInfo as Record<string, unknown>;
+      const phone = info.phone_number || info.phone || info.msisdn || info.from;
+      if (typeof phone === 'string') return phone;
+      if (typeof phone === 'number') return String(phone);
+    }
+    throw new BadRequestException('payment_info must contain a phone number.');
+  }
+
+  private async collectCampayPayment(data: {
+    amount: number;
+    from: string;
+    externalReference: string;
+    description: string;
+  }) {
+    const { token, endpoint } = this.getCampayConfig();
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        Authorization: `Token ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        amount: data.amount,
+        from: data.from,
+        description: data.description,
+        external_reference: data.externalReference,
+      }),
+    });
+
+    const text = await response.text();
+    let payload: unknown = text;
+    try {
+      payload = text ? JSON.parse(text) : null;
+    } catch {
+      payload = text;
+    }
+
+    if (!response.ok) {
+      throw new BadRequestException({
+        message: 'Campay payment request failed.',
+        status: response.status,
+        response: payload,
+      });
+    }
+
+    return payload;
   }
 
   private serialize(subscription: any, planName: string, user?: any) {
@@ -76,7 +138,6 @@ export class SubscriptionsService {
   async create(userId: bigint, dto: CreateSubscriptionDto) {
     const normalizedMethod = dto.method.toLowerCase();
     const methodMap: Record<string, string> = {
-      campay: 'campay',
       orange_money: 'orange',
       mtn_money: 'mtn',
       orange: 'orange',
@@ -89,8 +150,7 @@ export class SubscriptionsService {
 
     const planName = this.normalizePlanName(dto.plan_name);
     const config = this.getPlanConfig(planName);
-    const paymentInfo =
-      typeof dto.payment_info === 'string' ? dto.payment_info : JSON.stringify(dto.payment_info);
+    const paymentInfo = this.normalizePaymentInfo(dto.payment_info);
 
     const payment = await this.prisma.payment.create({
       data: {
@@ -106,14 +166,14 @@ export class SubscriptionsService {
       },
     });
 
-    return {
-      reference: payment.id,
-      ussd_code: '*126#',
-      operator: paymentMethod,
+    const campayResponse = await this.collectCampayPayment({
       amount: config.price,
-      status: 'success',
-      message: 'valid the transaction',
-    };
+      from: paymentInfo,
+      description: `Domilix ${planName}`,
+      externalReference: payment.id,
+    });
+
+    return campayResponse;
   }
 
   async destroy(userId: bigint, id: string) {
