@@ -51,12 +51,6 @@ const assertPaymentRequestAccepted = (data: any) => {
   }
 };
 
-const startOfToday = () => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return today;
-};
-
 const parseDate = (date?: string | null) => {
   if (!date) return null;
 
@@ -68,14 +62,11 @@ const isSubscriptionUsable = (subscription: Subscription) => {
   if (subscription.credits <= 0) return false;
 
   const now = new Date();
-  const today = startOfToday();
-  const startDate = parseDate(subscription.start_date);
   const endDate = parseDate(subscription.end_date);
   const expiresAt = parseDate(subscription.expires_at);
 
-  if (startDate && startDate > today) return false;
   if (expiresAt) return expiresAt > now;
-  if (endDate) return endDate >= today;
+  if (endDate) return endDate > now;
 
   return false;
 };
@@ -183,7 +174,7 @@ export const subscriptionApi = {
     const expiresAt = parseDate(subscription.expires_at);
     const endDate = parseDate(subscription.end_date);
 
-    if ((expiresAt && expiresAt <= now) || (!expiresAt && endDate && endDate < startOfToday())) {
+    if ((expiresAt && expiresAt <= now) || (!expiresAt && endDate && endDate <= now)) {
       return 'expired';
     }
 
