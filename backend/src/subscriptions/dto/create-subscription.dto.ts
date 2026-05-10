@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { Allow, IsString } from 'class-validator';
 
 export class CreateSubscriptionDto {
   @ApiProperty({ example: 'Premium' })
@@ -11,5 +11,6 @@ export class CreateSubscriptionDto {
   method!: string;
 
   @ApiProperty({ example: { phone_number: '+237690000000' } })
+  @Allow()
   payment_info!: any;
 }
