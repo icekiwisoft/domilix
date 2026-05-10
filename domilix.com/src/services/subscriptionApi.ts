@@ -10,15 +10,17 @@ export interface Subscription {
   plan_name: string;
   credits: number;
   price: number;
-  duration: string;
-  expires_at: string;
+  duration: number | string;
+  start_date?: string | null;
+  end_date?: string | null;
+  expires_at?: string | null;
   created_at: string;
   updated_at: string;
 }
 
 export interface CreateSubscriptionRequest {
   payment_info: string | {
-    amount: number;
+    amount?: number;
     currency?: string;
     phone_number?: string;
     email?: string;
@@ -47,6 +49,35 @@ const assertPaymentRequestAccepted = (data: any) => {
       throw new Error('La demande de paiement a été refusée.');
     }
   }
+};
+
+const startOfToday = () => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return today;
+};
+
+const parseDate = (date?: string | null) => {
+  if (!date) return null;
+
+  const parsed = new Date(date);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
+const isSubscriptionUsable = (subscription: Subscription) => {
+  if (subscription.credits <= 0) return false;
+
+  const now = new Date();
+  const today = startOfToday();
+  const startDate = parseDate(subscription.start_date);
+  const endDate = parseDate(subscription.end_date);
+  const expiresAt = parseDate(subscription.expires_at);
+
+  if (startDate && startDate > today) return false;
+  if (expiresAt) return expiresAt > now;
+  if (endDate) return endDate >= today;
+
+  return false;
 };
 
 export const subscriptionApi = {
@@ -105,9 +136,8 @@ export const subscriptionApi = {
     try {
       const subscriptions = await subscriptionApi.getUserSubscriptions();
 
-      const now = new Date();
       const activeSubscriptions = subscriptions.filter(
-        sub => new Date(sub.expires_at) > now && sub.credits > 0
+        sub => isSubscriptionUsable(sub)
       );
 
       // Calculer les statistiques basées sur les données réelles
@@ -150,11 +180,14 @@ export const subscriptionApi = {
     subscription: Subscription
   ): 'active' | 'expired' | 'low_credits' => {
     const now = new Date();
-    const expiresAt = new Date(subscription.expires_at);
+    const expiresAt = parseDate(subscription.expires_at);
+    const endDate = parseDate(subscription.end_date);
 
-    if (expiresAt <= now) {
+    if ((expiresAt && expiresAt <= now) || (!expiresAt && endDate && endDate < startOfToday())) {
       return 'expired';
     }
+
+    if (!isSubscriptionUsable(subscription)) return 'expired';
 
     if (subscription.credits <= 5) {
       return 'low_credits';

@@ -32,6 +32,10 @@ export class SubscriptionsService {
     }
   }
 
+  private addDays(date: Date, days: number) {
+    return new Date(date.getTime() + days * 24 * 60 * 60 * 1000);
+  }
+
   private getCampayConfig() {
     const token = process.env.CAMPAY_TOKEN;
     const endpoint = process.env.CAMPAY_ENDPOINT || 'https://demo.campay.net/api/collect/';
@@ -111,6 +115,8 @@ export class SubscriptionsService {
       credits: subscription.credits,
       price: Number(subscription.price),
       duration: subscription.duration,
+      start_date: subscription.startDate,
+      end_date: subscription.endDate,
       expires_at: subscription.expireAt,
       created_at: subscription.createdAt,
       updated_at: subscription.updatedAt,
@@ -197,28 +203,45 @@ export class SubscriptionsService {
     const payment = await this.prisma.payment.findUnique({ where: { id: externalReference } });
     if (!payment) throw new NotFoundException('Payment not found');
 
+    if (payment.status === 'completed' && payment.referenceId) {
+      const subscription = await this.prisma.subscription.findUnique({ where: { id: payment.referenceId } });
+      if (subscription) return this.serialize(subscription, payment.paymentTypeInfo);
+    }
+    if (payment.status === 'completed') {
+      return { message: 'Payment already processed.' };
+    }
+
     const planName = this.normalizePlanName(payment.paymentTypeInfo);
     const config = this.getPlanConfig(planName);
     const plan = await this.prisma.subscriptionPlan.findFirst({ where: { name: planName } });
     if (!plan) throw new NotFoundException('Subscription plan not found');
 
-    await this.prisma.payment.update({
-      where: { id: payment.id },
-      data: { status: 'completed' },
+    const startDate = new Date();
+    const endDate = this.addDays(startDate, config.duration);
+
+    const subscription = await this.prisma.$transaction(async (tx) => {
+      const created = await tx.subscription.create({
+        data: {
+          userId: payment.userId,
+          subscriptionPlanId: String(plan.id),
+          initialCredits: config.credits,
+          credits: config.credits,
+          price: config.price,
+          duration: config.duration,
+          startDate,
+          endDate,
+          expireAt: endDate,
+        },
+      });
+
+      await tx.payment.update({
+        where: { id: payment.id },
+        data: { status: 'completed', referenceId: created.id },
+      });
+
+      return created;
     });
 
-    await this.prisma.subscription.create({
-      data: {
-        userId: payment.userId,
-        subscriptionPlanId: String(plan.id),
-        initialCredits: config.credits,
-        credits: config.credits,
-        price: config.price,
-        duration: config.duration,
-        expireAt: new Date(Date.now() + config.duration * 24 * 60 * 60 * 1000),
-      },
-    });
-
-    return null;
+    return this.serialize(subscription, planName);
   }
 }

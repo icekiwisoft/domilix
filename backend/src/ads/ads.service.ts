@@ -585,8 +585,19 @@ export class AdsService {
   }
 
   private async totalCreditsForUser(userId: bigint) {
+    const now = new Date();
+    const today = new Date(now);
+    today.setHours(0, 0, 0, 0);
+
     const subscriptions = await this.prisma.subscription.findMany({
-      where: { userId, credits: { gt: 0 }, expireAt: { gt: new Date() } },
+      where: {
+        userId,
+        credits: { gt: 0 },
+        AND: [
+          { OR: [{ startDate: null }, { startDate: { lte: today } }] },
+          { OR: [{ expireAt: { gt: now } }, { AND: [{ expireAt: null }, { endDate: { gte: today } }] }] },
+        ],
+      },
       select: { credits: true },
     });
     return subscriptions.reduce((sum, item) => sum + item.credits, 0);
@@ -603,8 +614,19 @@ export class AdsService {
       return { message: 'Annonce deja debloquee' };
     }
 
+    const now = new Date();
+    const today = new Date(now);
+    today.setHours(0, 0, 0, 0);
+
     const subscription = await this.prisma.subscription.findFirst({
-      where: { userId, credits: { gt: 0 }, expireAt: { gt: new Date() } },
+      where: {
+        userId,
+        credits: { gt: 0 },
+        AND: [
+          { OR: [{ startDate: null }, { startDate: { lte: today } }] },
+          { OR: [{ expireAt: { gt: now } }, { AND: [{ expireAt: null }, { endDate: { gte: today } }] }] },
+        ],
+      },
       orderBy: { expireAt: 'asc' },
     });
     if (!subscription) {

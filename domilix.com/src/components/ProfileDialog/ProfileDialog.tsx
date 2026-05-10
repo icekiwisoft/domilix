@@ -24,6 +24,18 @@ interface ProfileDialogProps {
 
 type TabType = 'profile' | 'security' | 'announcer' | 'subscriptions';
 
+const formatSubscriptionDate = (date?: string | null) => {
+  if (!date) return '-';
+
+  const parsed = new Date(date);
+  if (Number.isNaN(parsed.getTime())) return '-';
+
+  return parsed.toLocaleDateString('fr-FR');
+};
+
+const isSubscriptionUsable = (subscription: Subscription) =>
+  subscriptionApi.getSubscriptionStatus(subscription) !== 'expired';
+
 export default function ProfileDialog({
   isOpen,
   onClose,
@@ -552,7 +564,7 @@ export default function ProfileDialog({
 
       case 'subscriptions':
         const usableCredits = subscriptions
-          .filter(subscription => new Date(subscription.expires_at) > new Date())
+          .filter(isSubscriptionUsable)
           .reduce((sum, subscription) => sum + subscription.credits, 0);
 
         return (
@@ -670,19 +682,11 @@ export default function ProfileDialog({
                             </div>
                             <div>
                               <span className='font-medium'>Début:</span>
-                              <div>
-                                {new Date(
-                                  subscription.start_date
-                                ).toLocaleDateString('fr-FR')}
-                              </div>
+                              <div>{formatSubscriptionDate(subscription.start_date)}</div>
                             </div>
                             <div>
                               <span className='font-medium'>Fin:</span>
-                              <div>
-                                {new Date(
-                                  subscription.end_date
-                                ).toLocaleDateString('fr-FR')}
-                              </div>
+                              <div>{formatSubscriptionDate(subscription.end_date || subscription.expires_at)}</div>
                             </div>
                           </div>
                         </div>
