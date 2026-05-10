@@ -465,6 +465,7 @@ export class AdsService {
           this.prisma.favorite.findFirst({ where: { userId: currentUserId, adId: id } }),
           this.prisma.unlocking.findFirst({
             where: { userId: currentUserId, adId: id, expiresAt: { gt: new Date() } },
+            orderBy: [{ unlockedAt: 'desc' }, { createdAt: 'desc' }],
           }),
         ])
       : [null, null];
@@ -604,6 +605,7 @@ export class AdsService {
 
     const existing = await this.prisma.unlocking.findFirst({
       where: { userId, adId, expiresAt: { gt: new Date() } },
+      orderBy: [{ unlockedAt: 'desc' }, { createdAt: 'desc' }],
     });
     if (existing) {
       return { message: 'Annonce deja debloquee' };

@@ -36,6 +36,27 @@ export class SubscriptionsService {
     return new Date(date.getTime() + days * 24 * 60 * 60 * 1000);
   }
 
+  private async createUserNotification(userId: bigint, data: {
+    type: string;
+    title: string;
+    message: string;
+    link?: string;
+  }) {
+    try {
+      await this.prisma.notification.create({
+        data: {
+          userId,
+          type: data.type,
+          title: data.title,
+          message: data.message,
+          link: data.link,
+        },
+      });
+    } catch {
+      // Notifications must not block payment confirmation.
+    }
+  }
+
   private getCampayConfig() {
     const token = process.env.CAMPAY_TOKEN;
     const endpoint = process.env.CAMPAY_ENDPOINT || 'https://demo.campay.net/api/collect/';
@@ -241,6 +262,21 @@ export class SubscriptionsService {
 
       return created;
     });
+
+    await Promise.all([
+      this.createUserNotification(payment.userId, {
+        type: 'payment_success',
+        title: 'Paiement effectue avec succes',
+        message: `Votre paiement de ${Number(payment.amount).toLocaleString('fr-FR')} FCFA pour le pack ${planName} a ete confirme.`,
+        link: '/settings?tab=packs',
+      }),
+      this.createUserNotification(payment.userId, {
+        type: 'credits_received',
+        title: 'Credits recus',
+        message: `${config.credits} credits ont ete ajoutes a votre compte Domilix. Ils sont valables jusqu'au ${endDate.toLocaleDateString('fr-FR')}.`,
+        link: '/settings?tab=packs',
+      }),
+    ]);
 
     return this.serialize(subscription, planName);
   }
