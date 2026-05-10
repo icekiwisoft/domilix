@@ -18,6 +18,7 @@ const defaultLinks = [
   { name: 'Acheter', url: '/subscriptions' },
   { name: 'Immobiliers', url: '/houses' },
   { name: 'Mobiliers', url: '/furnitures' },
+  { name: 'Terrains', url: '/terrains' },
 ];
 
 type Nav2Props = {
@@ -342,6 +343,28 @@ export default function Nav2({
                 >
                   <HiHomeModern className='h-5 w-5 shrink-0' />
                   Je cherche un logement
+                </NavLink>
+              </li>
+              <li>
+                <NavLink
+                  to='/furnitures'
+                  className='flex items-center gap-4'
+                  onClick={() => setClick(false)}
+                >
+                  <HiSparkles className='h-5 w-5 shrink-0' />
+                  Je cherche du mobilier
+                </NavLink>
+              </li>
+              <li>
+                <NavLink
+                  to='/terrains'
+                  className='flex items-center gap-4'
+                  onClick={() => setClick(false)}
+                >
+                  <svg className='h-5 w-5 shrink-0' fill='none' viewBox='0 0 24 24' stroke='currentColor' strokeWidth={2}>
+                    <path strokeLinecap='round' strokeLinejoin='round' d='M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064' />
+                  </svg>
+                  Je cherche un terrain
                 </NavLink>
               </li>
               <li>

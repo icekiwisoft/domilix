@@ -6,9 +6,13 @@ import type { ClipboardEvent, KeyboardEvent } from 'react';
 import { useAuth } from '@hooks/useAuth';
 import { authApi } from '@services/authApi';
 import { setAuthUser } from '@stores/defineStore';
+import { usePathname } from 'next/navigation';
+
+const HIDDEN_PATHS = ['/about'];
 
 export default function EmailVerificationBanner() {
   const { user, isAuthenticated } = useAuth();
+  const pathname = usePathname();
   const bannerRef = useRef<HTMLDivElement>(null);
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
   const [bannerHeight, setBannerHeight] = useState(0);
@@ -19,7 +23,12 @@ export default function EmailVerificationBanner() {
   const [error, setError] = useState('');
 
   const hasVerifiableEmail = !!user?.email && !user.email.endsWith('@domilix.local');
-  const shouldShowBanner = isAuthenticated && user && !user.email_verified && hasVerifiableEmail;
+  const shouldShowBanner =
+    isAuthenticated &&
+    user &&
+    !user.email_verified &&
+    hasVerifiableEmail &&
+    !HIDDEN_PATHS.includes(pathname);
 
   useEffect(() => {
     if (!shouldShowBanner || !bannerRef.current) {
@@ -110,8 +119,8 @@ export default function EmailVerificationBanner() {
           ? `Code de test : ${response.verification_code}`
           : 'Code envoyé. Vérifiez votre boîte mail.',
       );
-    } catch (error: any) {
-      setError(error.response?.data?.message || "Impossible d'envoyer le code.");
+    } catch {
+      setError("Une erreur est survenue lors de l'envoi de l'email. Veuillez réessayer.");
     } finally {
       setLoading(false);
     }
@@ -144,23 +153,23 @@ export default function EmailVerificationBanner() {
     <>
       <div
         ref={bannerRef}
-        className='fixed left-0 right-0 top-20 z-40 border-b border-orange-200 bg-orange-50/95 px-3 py-1 shadow-sm backdrop-blur sm:px-4'
+        className='fixed left-0 right-0 top-20 z-40 border-b border-yellow-400/60 bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-400 px-3 py-1 shadow-sm sm:px-4'
       >
         <div className='mx-auto flex min-h-10 max-w-7xl items-center justify-between gap-2 text-xs sm:text-sm'>
           <div className='flex min-w-0 flex-1 items-center gap-2'>
-            <p className='mb-0 shrink-0 leading-none font-bold text-amber-950'>Email non vérifié.</p>
-            <p className='mb-0 hidden truncate leading-none text-amber-900 sm:block'>
+            <p className='mb-0 shrink-0 leading-none font-bold text-yellow-950'>Email non vérifié.</p>
+            <p className='mb-0 hidden truncate leading-none text-yellow-900 sm:block'>
               Sécurisez votre compte Domilix.
             </p>
-            {message && <p className='mb-0 truncate leading-none font-semibold text-green-700'>{message}</p>}
-            {error && <p className='mb-0 truncate leading-none font-semibold text-red-700'>{error}</p>}
+            {message && <p className='mb-0 truncate leading-none font-semibold text-green-800'>{message}</p>}
+            {error && <p className='mb-0 truncate leading-none font-semibold text-red-800'>{error}</p>}
           </div>
 
           <button
             type='button'
             onClick={handleSendCode}
             disabled={loading}
-            className='h-7 shrink-0 rounded-lg bg-green-500 px-3 text-xs font-black text-white transition hover:bg-green-600 disabled:bg-gray-400 sm:h-8 sm:px-4 sm:text-sm'
+            className='h-7 shrink-0 rounded-lg bg-yellow-900/20 px-3 text-xs font-black text-yellow-950 transition hover:bg-yellow-900/30 disabled:opacity-50 sm:h-8 sm:px-4 sm:text-sm'
           >
             {loading ? '...' : 'Vérifier'}
           </button>
