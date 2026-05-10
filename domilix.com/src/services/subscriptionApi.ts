@@ -17,7 +17,7 @@ export interface Subscription {
 }
 
 export interface CreateSubscriptionRequest {
-  payment_info: {
+  payment_info: string | {
     amount: number;
     currency?: string;
     phone_number?: string;
@@ -26,6 +26,28 @@ export interface CreateSubscriptionRequest {
   plan_name: string;
   method: 'orange' | 'mtn' | 'orange_money' | 'mtn_money';
 }
+
+const assertPaymentRequestAccepted = (data: any) => {
+  if (!data) {
+    throw new Error('La demande de paiement n’a pas été acceptée.');
+  }
+
+  if (typeof data === 'object') {
+    const code = Number(data.code ?? data.statusCode);
+    const status = String(data.status ?? '').toLowerCase();
+    const message = String(data.message ?? data.error ?? '').toLowerCase();
+
+    if (
+      code >= 400 ||
+      ['failed', 'failure', 'error', 'cancelled', 'canceled'].includes(status) ||
+      message.includes('unsupported') ||
+      message.includes('failed') ||
+      message.includes('error')
+    ) {
+      throw new Error('La demande de paiement a été refusée.');
+    }
+  }
+};
 
 export const subscriptionApi = {
   // Récupérer les packs de l'utilisateur connecté
@@ -55,8 +77,8 @@ export const subscriptionApi = {
   // Fonction pour démarrer l'achat de crédits
   startCreditPurchase: async (
     plan_name: string,
-    payment_info: any,
-    method: string
+    payment_info: CreateSubscriptionRequest['payment_info'],
+    method: CreateSubscriptionRequest['method']
   ): Promise<any> => {
     try {
       const response = await api.post('/subscriptions', {
@@ -65,10 +87,7 @@ export const subscriptionApi = {
         method: method,
       });
 
-      console.log(
-        'Credit purchase initiated, follow mobile payment instructions',
-        response
-      );
+      assertPaymentRequestAccepted(response.data);
       return response.data;
     } catch (error) {
       console.error('Credit purchase error:', error);

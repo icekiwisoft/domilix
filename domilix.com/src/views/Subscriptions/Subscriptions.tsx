@@ -199,7 +199,7 @@ export default function Subscriptions() {
               credits='20 credits'
               validity='1 semaine de validité'
               mobileValidity='1 semaine'
-              price='1000'
+              price='50'
               benefit='Idéal pour tester Domilix et contacter quelques annonceurs ciblés.'
               mobileBenefit='Pour tester Domilix.'
               features={["Voir les informations de base d'une annonce."]}
@@ -209,7 +209,7 @@ export default function Subscriptions() {
                   title: 'Pack Standard',
                   credits: '20 credits',
                   validity: '1 semaine de validité',
-                  price: '1000 ',
+                  price: '50 ',
                   benefit: 'Idéal pour tester Domilix et contacter quelques annonceurs ciblés.',
                   features: ["Voir les informations de base d'une annonce."],
                 })
@@ -220,7 +220,7 @@ export default function Subscriptions() {
               credits='50 credits'
               validity='2 semaines de validité'
               mobileValidity='2 semaines'
-              price='2000'
+              price='100'
               benefit='Pour comparer plusieurs logements sans bloquer votre recherche.'
               mobileBenefit='Pour comparer plusieurs logements.'
               features={["Voir les informations de base d'une annonce."]}
@@ -230,7 +230,7 @@ export default function Subscriptions() {
                   title: 'Pack Avantage',
                   credits: '50 credits',
                   validity: '2 semaines de validité',
-                  price: '2000',
+                  price: '100',
                   benefit: 'Pour comparer plusieurs logements sans bloquer votre recherche.',
                   features: ["Voir les informations de base d'une annonce."],
                 })
@@ -241,7 +241,7 @@ export default function Subscriptions() {
               credits='100 credits'
               validity='3 semaines de validité'
               mobileValidity='3 semaines'
-              price='3500'
+              price='200'
               benefit='Le meilleur choix pour chercher activement et ne pas rater les bonnes annonces.'
               mobileBenefit='Pour chercher activement.'
               badge='Recommandé'
@@ -255,7 +255,7 @@ export default function Subscriptions() {
                   title: 'Pack Premium',
                   credits: '100 credits',
                   validity: '3 semaines de validité',
-                  price: '3500',
+                  price: '200',
                   benefit: 'Le meilleur choix pour chercher activement et ne pas rater les bonnes annonces.',
                   badge: 'Recommandé',
                   features: [
@@ -270,7 +270,7 @@ export default function Subscriptions() {
               credits='150 credits'
               validity='4 semaines de validité'
               mobileValidity='4 semaines'
-              price='5000'
+              price='250'
               benefit='Pour une recherche intensive avec un maximum d’opportunités de contact.'
               mobileBenefit='Pour une recherche intensive.'
               features={[
@@ -283,7 +283,7 @@ export default function Subscriptions() {
                   title: 'Pack Ultime',
                   credits: '150 credits',
                   validity: '4 semaines de validité',
-                  price: '5000',
+                  price: '250',
                   benefit: 'Pour une recherche intensive avec un maximum d’opportunités de contact.',
                   features: [
                     "Voir les informations de base d'une annonce.",

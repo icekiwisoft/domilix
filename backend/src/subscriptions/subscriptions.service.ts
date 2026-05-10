@@ -20,13 +20,13 @@ export class SubscriptionsService {
     const normalized = this.normalizePlanName(planName);
     switch (normalized) {
       case 'Standart':
-        return { price: 5, duration: 3, credits: 20 };
+        return { price: 50, duration: 7, credits: 20 };
       case 'Advantage':
-        return { price: 10, duration: 7, credits: 50 };
+        return { price: 100, duration: 14, credits: 50 };
       case 'Premium':
-        return { price: 20, duration: 14, credits: 100 };
+        return { price: 200, duration: 21, credits: 100 };
       case 'Ultimate':
-        return { price: 25, duration: 30, credits: 250 };
+        return { price: 250, duration: 28, credits: 150 };
       default:
         return { price: 0, duration: 0, credits: 0 };
     }
@@ -145,11 +145,15 @@ export class SubscriptionsService {
     };
     const paymentMethod = methodMap[normalizedMethod];
     if (!paymentMethod) {
-      return { code: 403, message: 'unsupported payment method' };
+      throw new BadRequestException('Unsupported payment method.');
     }
 
     const planName = this.normalizePlanName(dto.plan_name);
     const config = this.getPlanConfig(planName);
+    if (config.price <= 0) {
+      throw new BadRequestException('Unsupported subscription plan.');
+    }
+
     const paymentInfo = this.normalizePaymentInfo(dto.payment_info);
 
     const payment = await this.prisma.payment.create({
@@ -173,7 +177,12 @@ export class SubscriptionsService {
       externalReference: payment.id,
     });
 
-    return campayResponse;
+    return {
+      message: 'Campay payment request sent.',
+      payment_id: payment.id,
+      provider: 'campay',
+      campay: campayResponse,
+    };
   }
 
   async destroy(userId: bigint, id: string) {

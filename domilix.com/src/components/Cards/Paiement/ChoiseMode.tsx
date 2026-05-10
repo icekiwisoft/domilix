@@ -48,7 +48,7 @@ const ChoiseMode: React.FC<OfferDetailsProps> = ({
     try {
       await subscriptionApi.startCreditPurchase(
         planNames[title] || title,
-        phone,
+        { phone_number: phone },
         selectedPayment,
       );
       setShowSuccessAlert(true);
