@@ -169,7 +169,7 @@ export default function EmailVerificationBanner() {
             type='button'
             onClick={handleSendCode}
             disabled={loading}
-            className='h-7 shrink-0 rounded-lg bg-yellow-900/20 px-3 text-xs font-black text-yellow-950 transition hover:bg-yellow-900/30 disabled:opacity-50 sm:h-8 sm:px-4 sm:text-sm'
+            className='h-7 shrink-0 rounded-lg bg-green-500 px-3 text-xs font-black text-white transition hover:bg-green-600 disabled:opacity-50 sm:h-8 sm:px-4 sm:text-sm'
           >
             {loading ? '...' : 'Vérifier'}
           </button>
