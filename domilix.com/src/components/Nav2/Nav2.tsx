@@ -44,7 +44,7 @@ export default function Nav2({
   const profileButtonMobileRef = useRef<HTMLButtonElement>(null);
   const navigate = useNavigate();
 
-  const userCredits = 0; // TODO: Add credits to User interface when available
+  const userCredits = Number(user?.credits || 0);
 
   const handlePublishClick = () => {
     if (!user?.announcer) {
