@@ -24,7 +24,7 @@ export interface CreateSubscriptionRequest {
     email?: string;
   };
   plan_name: string;
-  method: 'campay' | 'orange_money' | 'mtn_money';
+  method: 'orange' | 'mtn' | 'orange_money' | 'mtn_money';
 }
 
 export const subscriptionApi = {
