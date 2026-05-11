@@ -88,7 +88,7 @@ export default withMT({
       fontFamily: {
         sans:    ['Plus Jakarta Sans', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         display: ['Plus Jakarta Sans', 'ui-sans-serif', 'sans-serif'],
-        body:    ['Plus Jakarta Sans', 'ui-sans-serif', 'sans-serif'],
+        body:    ['Manrope', 'ui-sans-serif', 'sans-serif'],
       },
 
       fontSize: {

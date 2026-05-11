@@ -32,7 +32,6 @@ export default function ConfirmDialog({
   return (
     <div className='fixed inset-0 z-[80] flex items-center justify-center bg-slate-950/45 px-4 backdrop-blur-sm'>
       <div className='relative w-full max-w-md overflow-hidden rounded-[1.7rem] bg-white shadow-2xl shadow-slate-950/20'>
-        <div className={`absolute inset-x-0 top-0 h-1.5 ${isDanger ? 'bg-red-500' : 'bg-primary'}`} />
         <button
           type='button'
           onClick={onCancel}

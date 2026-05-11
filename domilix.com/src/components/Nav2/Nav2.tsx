@@ -153,7 +153,7 @@ export default function Nav2({
                       }`
                       : isActive
                         ? 'text-primary border-b-2 border-primary pb-1 text-body-md font-semibold'
-                        : 'text-on-surface-variant hover:text-primary transition-colors text-body-md whitespace-nowrap'
+                        : 'text-on-surface-variant hover:text-primary transition-colors text-body-md font-semibold whitespace-nowrap'
                   }
                 >
                   {link.name}

@@ -172,9 +172,9 @@ export default function MediasDialog({
 
           {/* Thumbnails */}
           {medias.length > 1 && (
-            <div className='w-64 flex-shrink-0'>
-              <div className='h-full overflow-y-auto pr-2'>
-                <div className='space-y-3'>
+            <div className='w-36 flex-shrink-0 xl:w-44'>
+              <div className='h-full overflow-y-auto'>
+                <div className='space-y-2'>
                   {medias.map((media, index) => (
                     <button
                       key={media.id}
@@ -192,18 +192,18 @@ export default function MediasDialog({
                             <img
                               src={mediaUrl(media.thumbnail)}
                               alt={`Miniature vidéo ${index + 1}`}
-                              className='h-20 w-full object-cover bg-black'
+                              className='h-16 w-full object-cover bg-black'
                               loading='lazy'
                             />
                           ) : (
-                            <div className='h-20 w-full bg-black' />
+                            <div className='h-16 w-full bg-black' />
                           )}
                           <span className='absolute left-2 top-2 rounded-full bg-black/65 px-2 py-0.5 text-[10px] font-semibold text-white'>
                             Vidéo
                           </span>
                           <span className='absolute inset-0 flex items-center justify-center'>
-                            <span className='flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-gray-900 shadow'>
-                              <span className='ml-0.5 h-0 w-0 border-y-[6px] border-l-[9px] border-y-transparent border-l-current' />
+                            <span className='flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-gray-900 shadow'>
+                              <span className='ml-0.5 h-0 w-0 border-y-[5px] border-l-[8px] border-y-transparent border-l-current' />
                             </span>
                           </span>
                         </>
@@ -211,14 +211,9 @@ export default function MediasDialog({
                         <img
                           src={mediaUrl(media.file)}
                           alt={`Miniature ${index + 1}`}
-                          className='w-full h-20 object-cover'
+                          className='w-full h-16 object-cover'
                           loading='lazy'
                         />
-                      )}
-                      {index === currentIndex && (
-                        <div className='absolute inset-0 bg-orange-500/20 flex items-center justify-center'>
-                          <div className='w-3 h-3 bg-orange-500 rounded-full'></div>
-                        </div>
                       )}
                     </button>
                   ))}
