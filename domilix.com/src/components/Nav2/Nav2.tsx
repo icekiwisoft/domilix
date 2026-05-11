@@ -11,7 +11,7 @@ import ConfirmDialog from '@components/ConfirmDialog/ConfirmDialog';
 import { notificationApi } from '../../services/notificationApi';
 import React, { useState, useEffect, useRef } from 'react';
 import { HiBars3, HiXMark, HiBell, HiHomeModern, HiSparkles } from 'react-icons/hi2';
-import { MdOutlineCampaign } from 'react-icons/md';
+import { MdLandscape, MdOutlineCampaign } from 'react-icons/md';
 import { NavLink, useNavigate } from '@router';
 
 const defaultLinks = [
@@ -24,6 +24,13 @@ const defaultLinks = [
 type Nav2Props = {
   links?: Array<{ name: string; url: string }>;
   highlightBuyLink?: boolean;
+};
+
+const linkIcons: Record<string, React.ReactNode> = {
+  '/subscriptions': <HiSparkles className='h-4 w-4 shrink-0' />,
+  '/houses': <HiHomeModern className='h-4 w-4 shrink-0' />,
+  '/furnitures': <HiSparkles className='h-4 w-4 shrink-0' />,
+  '/terrains': <MdLandscape className='h-4 w-4 shrink-0' />,
 };
 
 export default function Nav2({
@@ -147,15 +154,16 @@ export default function Nav2({
                   to={link.url}
                   className={({ isActive }) =>
                     highlightBuyLink && link.name === 'Acheter'
-                      ? `inline-flex items-center rounded-full border border-pink-500 bg-pink-500 px-3 py-1 font-bold text-white shadow-sm -translate-y-px text-sm xl:text-base whitespace-nowrap transition-all ${isActive
+                      ? `inline-flex items-center gap-1.5 rounded-full border border-pink-500 bg-pink-500 px-3 py-1 font-bold text-white shadow-sm -translate-y-px text-sm xl:text-base whitespace-nowrap transition-all ${isActive
                         ? 'ring-2 ring-pink-200'
                         : 'hover:bg-pink-600 hover:border-pink-600 hover:shadow'
                       }`
                       : isActive
-                        ? 'text-primary border-b-2 border-primary pb-1 text-body-md font-semibold'
-                        : 'text-on-surface-variant hover:text-primary transition-colors text-body-md font-semibold whitespace-nowrap'
+                        ? 'inline-flex items-center gap-1.5 text-primary border-b-2 border-primary pb-1 text-body-md font-semibold'
+                        : 'inline-flex items-center gap-1.5 text-on-surface-variant hover:text-primary transition-colors text-body-md font-semibold whitespace-nowrap'
                   }
                 >
+                  {linkIcons[link.url]}
                   {link.name}
                 </NavLink>
               </li>
