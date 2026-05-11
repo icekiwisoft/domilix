@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import mapboxgl from 'mapbox-gl';
 
-// Set Mapbox access token
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || '';
 
 interface MapboxMapProps {
@@ -28,32 +27,20 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
   const marker = useRef<mapboxgl.Marker | null>(null);
 
   useEffect(() => {
-    if (!mapContainer.current) return;
+    // Ne charge Mapbox que si l'annonce est débloquée
+    if (!isUnlocked || !mapContainer.current) return;
 
-    // Default coordinates (Paris if no location provided)
-    const defaultLng = 2.3522;
-    const defaultLat = 48.8566;
-
-    // Use provided coordinates if unlocked, otherwise use default
-    const mapLng = isUnlocked && longitude ? longitude : defaultLng;
-    const mapLat = isUnlocked && latitude ? latitude : defaultLat;
-
-    // Initialize map
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/streets-v12',
-      center: [mapLng, mapLat],
-      zoom: isUnlocked ? 15 : 10,
+      center: [longitude ?? 2.3522, latitude ?? 48.8566],
+      zoom: 15,
     });
 
-    // Add navigation controls
     map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
-    // Add marker if coordinates are available and unlocked
-    if (isUnlocked && longitude && latitude) {
-      marker.current = new mapboxgl.Marker({
-        color: '#f97316', // Orange color
-      })
+    if (longitude && latitude) {
+      marker.current = new mapboxgl.Marker({ color: '#f97316' })
         .setLngLat([longitude, latitude])
         .setPopup(
           new mapboxgl.Popup({ offset: 25 }).setHTML(
@@ -66,54 +53,53 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
         .addTo(map.current);
     }
 
-    // Cleanup function
     return () => {
-      if (marker.current) {
-        marker.current.remove();
-      }
-      if (map.current) {
-        map.current.remove();
-      }
+      marker.current?.remove();
+      map.current?.remove();
     };
   }, [longitude, latitude, address, city, country, isUnlocked]);
 
-  return (
-    <div className='relative'>
-      <div ref={mapContainer} className={className} />
-
-      {/* Overlay for locked state */}
-      {!isUnlocked && (
-        <div className='absolute inset-0 bg-gray-900/60 flex items-center justify-center rounded-lg'>
+  // ── Annonce non débloquée : placeholder statique, Mapbox ne charge pas ──
+  if (!isUnlocked) {
+    return (
+      <div className={`relative overflow-hidden ${className}`}>
+        <img
+          src='/map_placeholder.png'
+          alt='Localisation protégée'
+          className='h-full w-full object-cover'
+        />
+        {/* Dark overlay */}
+        <div className='absolute inset-0 bg-gray-900/60' />
+        {/* Lock content */}
+        <div className='absolute inset-0 flex items-center justify-center'>
           <div className='text-center px-6'>
-            <div className='w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4'>
-              <svg
-                className='w-8 h-8 text-white'
-                fill='none'
-                viewBox='0 0 24 24'
-                stroke='currentColor'
-              >
-                <path
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                  strokeWidth={2}
-                  d='M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z'
-                />
+            <div className='mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white/20'>
+              <svg className='h-8 w-8 text-white' fill='none' viewBox='0 0 24 24' stroke='currentColor' strokeWidth={2}>
+                <path strokeLinecap='round' strokeLinejoin='round' d='M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z' />
               </svg>
             </div>
-            <h3 className='text-white font-semibold text-lg mb-2'>
-              Localisation protégée
-            </h3>
+            <h3 className='text-white font-semibold text-lg mb-2'>Localisation protégée</h3>
             <p className='text-white/90 text-sm mb-4'>
               Débloquez cette annonce pour voir la localisation exacte
             </p>
-            <div className='text-white/80 text-sm'>
-              Zone approximative: {city || 'Ville'}, {country || 'Pays'}
-            </div>
+            {(city || country) && (
+              <p className='text-white/80 text-sm'>
+                Zone approximative: {[city, country].filter(Boolean).join(', ')}
+              </p>
+            )}
           </div>
         </div>
-      )}
+      </div>
+    );
+  }
+
+  // ── Annonce débloquée : carte Mapbox réelle ──
+  return (
+    <div className='relative'>
+      <div ref={mapContainer} className={className} />
     </div>
   );
 };
 
 export default MapboxMap;
+

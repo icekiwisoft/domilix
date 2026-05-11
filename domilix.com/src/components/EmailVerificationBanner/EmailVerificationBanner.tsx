@@ -153,16 +153,16 @@ export default function EmailVerificationBanner() {
     <>
       <div
         ref={bannerRef}
-        className='fixed left-0 right-0 top-20 z-40 border-b border-yellow-400/60 bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-400 px-3 py-1 shadow-sm sm:px-4'
+        className='fixed left-0 right-0 top-20 z-40 border-b-2 border-b-orange-500 bg-white px-3 py-1 shadow-sm sm:px-4'
       >
         <div className='mx-auto flex min-h-10 max-w-7xl items-center justify-between gap-2 text-xs sm:text-sm'>
           <div className='flex min-w-0 flex-1 items-center gap-2'>
-            <p className='mb-0 shrink-0 leading-none font-bold text-yellow-950'>Email non vérifié.</p>
-            <p className='mb-0 hidden truncate leading-none text-yellow-900 sm:block'>
+            <p className='mb-0 shrink-0 leading-none font-bold text-gray-900'>Email non vérifié.</p>
+            <p className='mb-0 hidden truncate leading-none text-gray-600 sm:block'>
               Sécurisez votre compte Domilix.
             </p>
-            {message && <p className='mb-0 truncate leading-none font-semibold text-green-800'>{message}</p>}
-            {error && <p className='mb-0 truncate leading-none font-semibold text-red-800'>{error}</p>}
+            {message && <p className='mb-0 truncate leading-none font-semibold text-green-600'>{message}</p>}
+            {error && <p className='mb-0 truncate leading-none font-semibold text-red-600'>{error}</p>}
           </div>
 
           <button
