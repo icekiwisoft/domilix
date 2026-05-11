@@ -621,7 +621,7 @@ export default function Ads(): React.ReactElement {
           L&apos;immobilier à votre image.
         </h1> */}
       {/* ── Promo cards ── */}
-        <section className='mx-auto max-w-container px-gutter pb-xl'>
+        <section className='mx-auto  pb-xl'>
           <Swiper
             modules={[Autoplay, Pagination]}
             loop={true}
