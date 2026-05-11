@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import L from 'leaflet';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   FaBath,
   FaBed,
@@ -18,6 +18,7 @@ import {
 import {
   HiCheckBadge,
   HiCheckCircle,
+  HiChevronLeft,
   HiChevronRight,
   HiExclamationTriangle,
   HiHeart,
@@ -305,6 +306,8 @@ export default function Ad(): React.ReactElement {
   const [modalInitialIndex, setModalInitialIndex] = useState(0);
   const [liked, setLiked] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
+  const [mobileSliderIndex, setMobileSliderIndex] = useState(0);
+  const touchStartX = useRef<number | null>(null);
   const { isAuthenticated, user } = useAuth();
   const hasCredits = Number(user?.credits || 0) > 0;
 
@@ -497,35 +500,80 @@ export default function Ad(): React.ReactElement {
           </motion.div>
 
           {/* ── Gallery ── */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className='grid grid-cols-4 grid-rows-2 gap-2 h-[340px] sm:h-[440px] lg:h-[500px] mb-8 rounded-2xl overflow-hidden'
-          >
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className='mb-8'>
             {adInfo.medias && adInfo.medias.length > 0 ? (
               <>
-                <GalleryMediaPreview
-                  media={adInfo.medias[0]}
-                  className='col-span-2 row-span-2 cursor-pointer hover:brightness-95'
-                  onClick={() => openModalWithImage(0)}
-                />
-                {[1, 2, 3].map(i => (
+                {/* Mobile slider */}
+                <div
+                  className='relative h-[280px] overflow-hidden rounded-2xl sm:hidden'
+                  onTouchStart={e => { touchStartX.current = e.touches[0].clientX; }}
+                  onTouchEnd={e => {
+                    if (touchStartX.current === null) return;
+                    const delta = e.changedTouches[0].clientX - touchStartX.current;
+                    touchStartX.current = null;
+                    const total = adInfo.medias.length;
+                    if (delta < -40) setMobileSliderIndex(i => (i + 1) % total);
+                    else if (delta > 40) setMobileSliderIndex(i => (i - 1 + total) % total);
+                  }}
+                >
                   <GalleryMediaPreview
-                    key={i}
-                    media={adInfo.medias[i]}
-                    className='cursor-pointer'
-                    onClick={() => adInfo.medias[i] && openModalWithImage(i)}
+                    media={adInfo.medias[mobileSliderIndex]}
+                    className='h-full w-full cursor-pointer'
+                    onClick={() => openModalWithImage(mobileSliderIndex)}
                   />
-                ))}
-                <GalleryMediaPreview
-                  media={adInfo.medias[4]}
-                  className='cursor-pointer'
-                  onClick={() => openModalWithImage(0)}
-                  showCount={adInfo.medias.length}
-                />
+                  {/* Prev button */}
+                  {adInfo.medias.length > 1 && (
+                    <button
+                      type='button'
+                      onClick={() => setMobileSliderIndex(i => (i - 1 + adInfo.medias.length) % adInfo.medias.length)}
+                      className='absolute left-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm'
+                      aria-label='Image précédente'
+                    >
+                      <HiChevronLeft className='h-5 w-5' />
+                    </button>
+                  )}
+                  {/* Next button */}
+                  {adInfo.medias.length > 1 && (
+                    <button
+                      type='button'
+                      onClick={() => setMobileSliderIndex(i => (i + 1) % adInfo.medias.length)}
+                      className='absolute right-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm'
+                      aria-label='Image suivante'
+                    >
+                      <HiChevronRight className='h-5 w-5' />
+                    </button>
+                  )}
+                  {/* Counter badge */}
+                  <span className='absolute bottom-3 right-3 rounded-full bg-black/55 px-3 py-1 text-xs font-bold text-white backdrop-blur-sm'>
+                    {mobileSliderIndex + 1} / {adInfo.medias.length}
+                  </span>
+                </div>
+
+                {/* Desktop grid */}
+                <div className='hidden sm:grid grid-cols-4 grid-rows-2 gap-2 h-[440px] lg:h-[500px] rounded-2xl overflow-hidden'>
+                  <GalleryMediaPreview
+                    media={adInfo.medias[0]}
+                    className='col-span-2 row-span-2 cursor-pointer hover:brightness-95'
+                    onClick={() => openModalWithImage(0)}
+                  />
+                  {[1, 2, 3].map(i => (
+                    <GalleryMediaPreview
+                      key={i}
+                      media={adInfo.medias[i]}
+                      className='cursor-pointer'
+                      onClick={() => adInfo.medias[i] && openModalWithImage(i)}
+                    />
+                  ))}
+                  <GalleryMediaPreview
+                    media={adInfo.medias[4]}
+                    className='cursor-pointer'
+                    onClick={() => openModalWithImage(0)}
+                    showCount={adInfo.medias.length}
+                  />
+                </div>
               </>
             ) : (
-              <div className='col-span-4 row-span-2 flex items-center justify-center bg-gray-50 rounded-2xl'>
+              <div className='flex h-[280px] sm:h-[440px] lg:h-[500px] items-center justify-center rounded-2xl bg-gray-50'>
                 <div className='text-center text-gray-400'>
                   <div className='text-4xl mb-2'>📷</div>
                   <p className='text-sm font-medium'>Aucune image disponible</p>
