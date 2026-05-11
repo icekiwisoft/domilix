@@ -68,7 +68,7 @@ const isSubscriptionUsable = (subscription: Subscription) => {
   if (expiresAt) return expiresAt > now;
   if (endDate) return endDate > now;
 
-  return false;
+  return true;
 };
 
 export const subscriptionApi = {

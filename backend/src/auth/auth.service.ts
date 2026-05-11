@@ -37,7 +37,11 @@ export class AuthService {
       where: {
         userId,
         credits: { gt: 0 },
-        OR: [{ expireAt: { gt: now } }, { AND: [{ expireAt: null }, { endDate: { gt: now } }] }],
+        OR: [
+          { expireAt: { gt: now } },
+          { AND: [{ expireAt: null }, { endDate: { gt: now } }] },
+          { AND: [{ expireAt: null }, { endDate: null }] },
+        ],
       },
       select: { credits: true },
     });
@@ -51,6 +55,13 @@ export class AuthService {
 
   private emailVerificationKey(userId: bigint) {
     return `email_verification_code_${userId}`;
+  }
+
+  private async ensureSignupGiftPlan() {
+    const existing = await this.prisma.subscriptionPlan.findFirst({ where: { name: 'Signup Gift' } });
+    if (existing) return existing;
+
+    return this.prisma.subscriptionPlan.create({ data: { name: 'Signup Gift' } });
   }
 
   private async createUserNotification(userId: bigint, data: {
@@ -254,16 +265,35 @@ export class AuthService {
     }
 
     const password = await bcrypt.hash(dto.password, 10);
-    const user = await this.prisma.user.create({
-      data: {
-        name: dto.name,
-        email: dto.email || `temp_${crypto.randomUUID()}@domilix.local`,
-        phoneNumber: dto.phone_number || crypto.randomUUID().replace(/-/g, '').slice(0, 12),
-        password,
-        phoneVerified: false,
-        emailVerified: false,
-        emailVerifiedAt: null,
-      },
+    const signupGiftPlan = await this.ensureSignupGiftPlan();
+    const user = await this.prisma.$transaction(async (tx) => {
+      const created = await tx.user.create({
+        data: {
+          name: dto.name,
+          email: dto.email || `temp_${crypto.randomUUID()}@domilix.local`,
+          phoneNumber: dto.phone_number || crypto.randomUUID().replace(/-/g, '').slice(0, 12),
+          password,
+          phoneVerified: false,
+          emailVerified: false,
+          emailVerifiedAt: null,
+        },
+      });
+
+      await tx.subscription.create({
+        data: {
+          userId: created.id,
+          subscriptionPlanId: String(signupGiftPlan.id),
+          initialCredits: 20,
+          credits: 20,
+          price: 0,
+          duration: 0,
+          startDate: new Date(),
+          endDate: null,
+          expireAt: null,
+        },
+      });
+
+      return created;
     });
 
     const code = this.verificationCodes.generate(
@@ -281,6 +311,13 @@ export class AuthService {
       title: 'Bienvenue sur Domilix',
       message: 'Votre compte a ete cree avec succes. Vous pouvez maintenant rechercher des annonces, sauvegarder vos favoris et configurer votre profil.',
       link: '/settings',
+    });
+
+    await this.createUserNotification(user.id, {
+      type: 'signup_gift_received',
+      title: '20 Domicoins offerts',
+      message: 'Bienvenue sur Domilix ! Vous recevez 20 Domicoins valables sans date d expiration pour debloquer vos premiers contacts.',
+      link: '/settings?tab=packs',
     });
 
     const message = dto.phone_number

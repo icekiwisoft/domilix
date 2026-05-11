@@ -592,7 +592,11 @@ export class AdsService {
       where: {
         userId,
         credits: { gt: 0 },
-        OR: [{ expireAt: { gt: now } }, { AND: [{ expireAt: null }, { endDate: { gt: now } }] }],
+        OR: [
+          { expireAt: { gt: now } },
+          { AND: [{ expireAt: null }, { endDate: { gt: now } }] },
+          { AND: [{ expireAt: null }, { endDate: null }] },
+        ],
       },
       select: { credits: true },
     });
@@ -617,7 +621,11 @@ export class AdsService {
       where: {
         userId,
         credits: { gt: 0 },
-        OR: [{ expireAt: { gt: now } }, { AND: [{ expireAt: null }, { endDate: { gt: now } }] }],
+        OR: [
+          { expireAt: { gt: now } },
+          { AND: [{ expireAt: null }, { endDate: { gt: now } }] },
+          { AND: [{ expireAt: null }, { endDate: null }] },
+        ],
       },
       orderBy: [{ startDate: 'desc' }, { createdAt: 'desc' }],
     });
