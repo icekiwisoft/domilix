@@ -2,30 +2,30 @@ import Nav2 from '@components/Nav2/Nav2';
 import Timer from '@components/Timer/Timer';
 import React from 'react';
 
-export default function Furnitures(): React.ReactElement {
-  const targetDate = new Date('2026-09-01T23:59:59');
+export default function Terrains(): React.ReactElement {
+  const targetDate = new Date('2026-12-01T23:59:59');
 
   return (
     <>
       <Nav2 />
 
-      <section className='relative flex min-h-screen items-center justify-center overflow-hidden'>
+      <section className='relative flex min-h-screen items-center justify-center overflow-hidden pt-20'>
 
         {/* ── Background image ── */}
         <div className='absolute inset-0'>
           <img
-            src='https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1600'
-            alt='Mobilier design'
-            className='h-full w-full object-cover'
+            src='https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1600'
+            alt='Terrain au Cameroun'
+            className='h-full w-full object-cover object-center'
           />
-          {/* Dark overlay with warm tint */}
-          <div className='absolute inset-0 bg-gradient-to-br from-black/80 via-black/70 to-[#1a0a00]/80' />
+          {/* Dark overlay with green-earth tint */}
+          <div className='absolute inset-0 bg-gradient-to-br from-black/80 via-black/65 to-[#0a1a00]/80' />
         </div>
 
         {/* ── Decorative blobs ── */}
         <div className='pointer-events-none absolute inset-0 overflow-hidden' aria-hidden='true'>
-          <div className='absolute -right-32 top-1/4 h-96 w-96 rounded-full bg-[#E8921A]/20 blur-3xl' />
-          <div className='absolute -left-32 bottom-1/4 h-96 w-96 rounded-full bg-amber-500/15 blur-3xl' />
+          <div className='absolute -right-32 top-1/4 h-96 w-96 rounded-full bg-green-600/15 blur-3xl' />
+          <div className='absolute -left-32 bottom-1/4 h-96 w-96 rounded-full bg-[#E8921A]/15 blur-3xl' />
         </div>
 
         {/* ── Content ── */}
@@ -33,15 +33,15 @@ export default function Furnitures(): React.ReactElement {
 
           {/* Heading */}
           <h1 className='text-5xl font-black leading-[1.05] tracking-tight text-white sm:text-7xl lg:text-8xl'>
-            Le mobilier arrive
+            Les terrains arrivent
             <br />
             <span className='text-[#E8921A]'>très bientôt.</span>
           </h1>
 
           {/* Subtext */}
           <p className='mx-auto mt-6 max-w-xl text-lg font-light leading-relaxed text-white/65 sm:text-xl'>
-            Nous préparons une expérience unique pour trouver meubles et accessoires
-            neufs ou d'occasion partout au Cameroun.
+            Trouvez et publiez des terrains à vendre ou à louer partout au Cameroun —
+            constructibles, agricoles ou commerciaux.
           </p>
 
           {/* Timer */}

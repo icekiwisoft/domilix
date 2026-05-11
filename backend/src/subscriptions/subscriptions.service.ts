@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import crypto from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
@@ -20,16 +20,103 @@ export class SubscriptionsService {
     const normalized = this.normalizePlanName(planName);
     switch (normalized) {
       case 'Standart':
-        return { price: 5, duration: 3, credits: 20 };
+        return { price: 50, duration: 7, credits: 20 };
       case 'Advantage':
-        return { price: 10, duration: 7, credits: 50 };
+        return { price: 100, duration: 14, credits: 50 };
       case 'Premium':
-        return { price: 20, duration: 14, credits: 100 };
+        return { price: 200, duration: 21, credits: 100 };
       case 'Ultimate':
-        return { price: 25, duration: 30, credits: 250 };
+        return { price: 250, duration: 28, credits: 150 };
       default:
         return { price: 0, duration: 0, credits: 0 };
     }
+  }
+
+  private addDays(date: Date, days: number) {
+    return new Date(date.getTime() + days * 24 * 60 * 60 * 1000);
+  }
+
+  private async createUserNotification(userId: bigint, data: {
+    type: string;
+    title: string;
+    message: string;
+    link?: string;
+  }) {
+    try {
+      await this.prisma.notification.create({
+        data: {
+          userId,
+          type: data.type,
+          title: data.title,
+          message: data.message,
+          link: data.link,
+        },
+      });
+    } catch {
+      // Notifications must not block payment confirmation.
+    }
+  }
+
+  private getCampayConfig() {
+    const token = process.env.CAMPAY_TOKEN;
+    const endpoint = process.env.CAMPAY_ENDPOINT || 'https://demo.campay.net/api/collect/';
+
+    if (!token) {
+      throw new InternalServerErrorException('CAMPAY_TOKEN is not configured.');
+    }
+
+    return { token, endpoint };
+  }
+
+  private normalizePaymentInfo(paymentInfo: unknown) {
+    if (typeof paymentInfo === 'string') return paymentInfo;
+    if (paymentInfo && typeof paymentInfo === 'object') {
+      const info = paymentInfo as Record<string, unknown>;
+      const phone = info.phone_number || info.phone || info.msisdn || info.from;
+      if (typeof phone === 'string') return phone;
+      if (typeof phone === 'number') return String(phone);
+    }
+    throw new BadRequestException('payment_info must contain a phone number.');
+  }
+
+  private async collectCampayPayment(data: {
+    amount: number;
+    from: string;
+    externalReference: string;
+    description: string;
+  }) {
+    const { token, endpoint } = this.getCampayConfig();
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        Authorization: `Token ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        amount: data.amount,
+        from: data.from,
+        description: data.description,
+        external_reference: data.externalReference,
+      }),
+    });
+
+    const text = await response.text();
+    let payload: unknown = text;
+    try {
+      payload = text ? JSON.parse(text) : null;
+    } catch {
+      payload = text;
+    }
+
+    if (!response.ok) {
+      throw new BadRequestException({
+        message: 'Campay payment request failed.',
+        status: response.status,
+        response: payload,
+      });
+    }
+
+    return payload;
   }
 
   private serialize(subscription: any, planName: string, user?: any) {
@@ -49,6 +136,8 @@ export class SubscriptionsService {
       credits: subscription.credits,
       price: Number(subscription.price),
       duration: subscription.duration,
+      start_date: subscription.startDate,
+      end_date: subscription.endDate,
       expires_at: subscription.expireAt,
       created_at: subscription.createdAt,
       updated_at: subscription.updatedAt,
@@ -76,7 +165,6 @@ export class SubscriptionsService {
   async create(userId: bigint, dto: CreateSubscriptionDto) {
     const normalizedMethod = dto.method.toLowerCase();
     const methodMap: Record<string, string> = {
-      campay: 'campay',
       orange_money: 'orange',
       mtn_money: 'mtn',
       orange: 'orange',
@@ -84,13 +172,16 @@ export class SubscriptionsService {
     };
     const paymentMethod = methodMap[normalizedMethod];
     if (!paymentMethod) {
-      return { code: 403, message: 'unsupported payment method' };
+      throw new BadRequestException('Unsupported payment method.');
     }
 
     const planName = this.normalizePlanName(dto.plan_name);
     const config = this.getPlanConfig(planName);
-    const paymentInfo =
-      typeof dto.payment_info === 'string' ? dto.payment_info : JSON.stringify(dto.payment_info);
+    if (config.price <= 0) {
+      throw new BadRequestException('Unsupported subscription plan.');
+    }
+
+    const paymentInfo = this.normalizePaymentInfo(dto.payment_info);
 
     const payment = await this.prisma.payment.create({
       data: {
@@ -106,13 +197,18 @@ export class SubscriptionsService {
       },
     });
 
-    return {
-      reference: payment.id,
-      ussd_code: '*126#',
-      operator: paymentMethod,
+    const campayResponse = await this.collectCampayPayment({
       amount: config.price,
-      status: 'success',
-      message: 'valid the transaction',
+      from: paymentInfo,
+      description: `Domilix ${planName}`,
+      externalReference: payment.id,
+    });
+
+    return {
+      message: 'Campay payment request sent.',
+      payment_id: payment.id,
+      provider: 'campay',
+      campay: campayResponse,
     };
   }
 
@@ -128,28 +224,60 @@ export class SubscriptionsService {
     const payment = await this.prisma.payment.findUnique({ where: { id: externalReference } });
     if (!payment) throw new NotFoundException('Payment not found');
 
+    if (payment.status === 'completed' && payment.referenceId) {
+      const subscription = await this.prisma.subscription.findUnique({ where: { id: payment.referenceId } });
+      if (subscription) return this.serialize(subscription, payment.paymentTypeInfo);
+    }
+    if (payment.status === 'completed') {
+      return { message: 'Payment already processed.' };
+    }
+
     const planName = this.normalizePlanName(payment.paymentTypeInfo);
     const config = this.getPlanConfig(planName);
     const plan = await this.prisma.subscriptionPlan.findFirst({ where: { name: planName } });
     if (!plan) throw new NotFoundException('Subscription plan not found');
 
-    await this.prisma.payment.update({
-      where: { id: payment.id },
-      data: { status: 'completed' },
+    const startDate = new Date();
+    const endDate = this.addDays(startDate, config.duration);
+
+    const subscription = await this.prisma.$transaction(async (tx) => {
+      const created = await tx.subscription.create({
+        data: {
+          userId: payment.userId,
+          subscriptionPlanId: String(plan.id),
+          initialCredits: config.credits,
+          credits: config.credits,
+          price: config.price,
+          duration: config.duration,
+          startDate,
+          endDate,
+          expireAt: endDate,
+        },
+      });
+
+      await tx.payment.update({
+        where: { id: payment.id },
+        data: { status: 'completed', referenceId: created.id },
+      });
+
+      return created;
     });
 
-    await this.prisma.subscription.create({
-      data: {
-        userId: payment.userId,
-        subscriptionPlanId: String(plan.id),
-        initialCredits: config.credits,
-        credits: config.credits,
-        price: config.price,
-        duration: config.duration,
-        expireAt: new Date(Date.now() + config.duration * 24 * 60 * 60 * 1000),
-      },
-    });
+    await Promise.all([
+      this.createUserNotification(payment.userId, {
+        type: 'payment_success',
+        title: 'Paiement effectue avec succes',
+        message: `Votre paiement de ${Number(payment.amount).toLocaleString('fr-FR')} FCFA pour le pack ${planName} a ete confirme.`,
+        link: '/settings?tab=packs',
+      }),
+      this.createUserNotification(payment.userId, {
+        type: 'credits_received',
+        title: 'Domicoins recus',
+        message: `${config.credits} ${config.credits > 1 ? 'Domicoins ont ete ajoutes' : 'Domicoin a ete ajoute'} a votre compte Domilix. Ils sont valables jusqu'au ${endDate.toLocaleDateString('fr-FR')}.`,
+        link: '/settings?tab=packs',
+      }),
+    ]);
 
-    return null;
+    return this.serialize(subscription, planName);
   }
 }

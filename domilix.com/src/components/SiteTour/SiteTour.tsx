@@ -30,7 +30,7 @@ const tourSteps: TourStep[] = [
   {
     selector: '[data-tour="user-credits"]',
     title: 'Vos Domicoins',
-    description: 'Consultez vos credits et choisissez un pack pour debloquer des contacts.',
+    description: 'Consultez vos Domicoins et choisissez un pack pour debloquer des contacts.',
   },
   {
     selector: '[data-tour="houses-filters"]',

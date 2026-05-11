@@ -9,13 +9,13 @@ import homePromoImg from '@assets/img/home.jpg';
 import { Checkbox, RadioGroup } from '@headlessui/react';
 import { getAds, getBroadcasts, getCategories, getCities, CityItem, BroadcastItem } from '@services/announceApi';
 import { Ad } from '@utils/types';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination } from 'swiper/modules';
 import 'swiper/css';
 import { MdSearch } from 'react-icons/md';
 import { HiMapPin, HiAdjustmentsHorizontal, HiCurrencyDollar, HiBuildingOffice2, HiStar } from 'react-icons/hi2';
-import { useSearchParams, useNavigate } from '@router';
+import { useNavigate } from '@router';
 
 type PromoSlide = {
   id: string;
@@ -183,7 +183,6 @@ export default function Ads(): React.ReactElement {
     ad_type: '',
     amenities: [] as string[],
   });
-  const [UrlSearchParam] = useSearchParams();
   const navigate = useNavigate();
 
   const budgetSummary =
@@ -483,22 +482,6 @@ export default function Ads(): React.ReactElement {
     loadBroadcasts();
   }, [coverAnnonceurSrc]);
 
-  useEffect(() => {
-    const searchParam = UrlSearchParam.get('search');
-    if (searchParam) setSearchLocation(searchParam);
-
-    setFilters({
-      budget_min: UrlSearchParam.get('budget_min') || '',
-      budget_max: UrlSearchParam.get('budget_max') || '',
-      category_id: UrlSearchParam.getAll('category_id'),
-      standing: UrlSearchParam.get('standing') || '',
-      bedroom_min: UrlSearchParam.get('bedroom_min') || '',
-      bedroom_max: UrlSearchParam.get('bedroom_max') || '',
-      ad_type: UrlSearchParam.get('ad_type') || '',
-      amenities: UrlSearchParam.getAll('amenities'),
-    });
-  }, [UrlSearchParam]);
-
   const handleLocationSelect = (location: {
     coordinates: [number, number];
     address: string;
@@ -509,10 +492,6 @@ export default function Ads(): React.ReactElement {
   }) => {
     const searchQuery = location.city || location.address;
     setSearchLocation(searchQuery);
-
-    const newSearchParams = new URLSearchParams(UrlSearchParam);
-    newSearchParams.set('search', searchQuery);
-    navigate(`?${newSearchParams.toString()}`, { replace: true });
   };
 
   const handleSearchChange = (value: string) => {
@@ -542,26 +521,6 @@ export default function Ads(): React.ReactElement {
   };
 
   const applyFilters = () => {
-    const newSearchParams = new URLSearchParams(UrlSearchParam);
-
-    if (searchLocation.trim()) {
-      newSearchParams.set('search', searchLocation.trim());
-    } else {
-      newSearchParams.delete('search');
-    }
-
-    ['budget_min', 'budget_max', 'standing', 'bedroom_min', 'bedroom_max', 'ad_type', 'category_id', 'amenities']
-      .forEach(param => newSearchParams.delete(param));
-
-    Object.entries(filters).forEach(([key, value]) => {
-      if (Array.isArray(value)) {
-        if (value.length > 0) value.forEach(v => newSearchParams.append(key, v));
-      } else if (value && value.toString().trim()) {
-        newSearchParams.set(key, value.toString());
-      }
-    });
-
-    navigate(`?${newSearchParams.toString()}`, { replace: true });
     setOpenFilterPopup(null);
   };
 
@@ -583,7 +542,8 @@ export default function Ads(): React.ReactElement {
 
   const handleSearchSubmit = () => {
     const params = buildSearchParams();
-    navigate(`/search?${params.toString()}`);
+    const query = params.toString();
+    navigate(query ? `/search?${query}` : '/search');
   };
 
   const resetFilters = () => {
@@ -597,25 +557,7 @@ export default function Ads(): React.ReactElement {
       ad_type: '',
       amenities: [],
     });
-    const newSearchParams = new URLSearchParams();
-    if (searchLocation) newSearchParams.set('search', searchLocation);
-    navigate(`?${newSearchParams.toString()}`, { replace: true });
   };
-
-  const buildParamsFromUrl = useCallback(() => {
-    const params: Record<string, any> = {};
-
-    UrlSearchParam.forEach((value, key) => {
-      if (key === 'category_id' || key === 'amenities') {
-        if (!params[key]) params[key] = [];
-        params[key].push(value);
-      } else {
-        params[key] = value;
-      }
-    });
-
-    return params;
-  }, [UrlSearchParam]);
 
   useEffect(() => {
     let cancelled = false;
@@ -626,9 +568,7 @@ export default function Ads(): React.ReactElement {
       setCitySections([]);
 
       try {
-        const baseParams = buildParamsFromUrl();
         const cityParams: Record<string, any> = {
-          ...baseParams,
           limit: 8,
           with_count: true,
           order_by: 'count',
@@ -644,7 +584,7 @@ export default function Ads(): React.ReactElement {
 
         const sections = await Promise.all(
           cities.map(async (cityItem: CityItem) => {
-            const response: any = await getAds({ ...baseParams, city: cityItem.city, page: 1 });
+            const response: any = await getAds({ city: cityItem.city, page: 1 });
             const responseData = Array.isArray(response) ? response : response.data || [];
             return {
               city: cityItem.city,
@@ -670,7 +610,7 @@ export default function Ads(): React.ReactElement {
 
     loadAdsByCity();
     return () => { cancelled = true; };
-  }, [buildParamsFromUrl]);
+  }, []);
 
   return (
     <>

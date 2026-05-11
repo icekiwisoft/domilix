@@ -14,69 +14,158 @@ export default function LegalLayout({
         <div className='pointer-events-none fixed inset-0 z-0 overflow-hidden'>
           <div className='absolute -left-28 top-24 h-80 w-80 rounded-full bg-orange-200/30 blur-3xl' />
           <div className='absolute right-[-8rem] top-44 h-96 w-96 rounded-full bg-slate-300/35 blur-3xl' />
+
+          {/* ── Maison moderne — bas droite ── */}
           <svg
-            className='absolute -right-24 bottom-[-8rem] h-[620px] w-[620px] text-white/70'
+            className='absolute -right-16 bottom-[-4rem] h-[580px] w-[580px] text-white/60'
             viewBox='0 0 520 520'
             fill='none'
             aria-hidden='true'
           >
-            <path d='M74 424V176l93-54 93 54 93-54 93 54v248H74Z' fill='currentColor' />
-            <path d='M167 122V68h186v54M126 424V226h82v198M312 424V226h82v198' stroke='#fed7aa' strokeWidth='20' strokeLinejoin='round' />
-            <path d='M47 186 167 116l93 54 93-54 120 70' stroke='#fb923c' strokeWidth='18' strokeLinecap='round' strokeLinejoin='round' />
-            <path d='M238 244h44M238 296h44M238 348h44' stroke='#0d3556' strokeWidth='16' strokeLinecap='round' />
+            {/* Corps principal */}
+            <path d='M80 460V230l180-120 180 120v230H80Z' fill='currentColor' />
+            {/* Toit */}
+            <path d='M50 240 260 100l210 140' stroke='#fed7aa' strokeWidth='18' strokeLinecap='round' strokeLinejoin='round' />
+            {/* Porte */}
+            <rect x='215' y='340' width='90' height='120' rx='45' fill='#fde8cc' />
+            {/* Fenêtres gauche */}
+            <rect x='110' y='270' width='70' height='60' rx='10' fill='#dbeafe' opacity='.9' />
+            <line x1='145' y1='270' x2='145' y2='330' stroke='#93c5fd' strokeWidth='6' />
+            <line x1='110' y1='300' x2='180' y2='300' stroke='#93c5fd' strokeWidth='6' />
+            {/* Fenêtres droite */}
+            <rect x='340' y='270' width='70' height='60' rx='10' fill='#dbeafe' opacity='.9' />
+            <line x1='375' y1='270' x2='375' y2='330' stroke='#93c5fd' strokeWidth='6' />
+            <line x1='340' y1='300' x2='410' y2='300' stroke='#93c5fd' strokeWidth='6' />
+            {/* Cheminée */}
+            <rect x='340' y='130' width='30' height='60' rx='4' fill='#fed7aa' />
+            {/* Chemin */}
+            <path d='M215 460 200 520M305 460 320 520' stroke='#f97316' strokeWidth='10' strokeLinecap='round' />
+            {/* Arbres */}
+            <circle cx='60' cy='400' r='28' fill='#bbf7d0' opacity='.7' />
+            <line x1='60' y1='428' x2='60' y2='460' stroke='#86efac' strokeWidth='8' strokeLinecap='round' />
+            <circle cx='460' cy='390' r='24' fill='#bbf7d0' opacity='.7' />
+            <line x1='460' y1='414' x2='460' y2='460' stroke='#86efac' strokeWidth='8' strokeLinecap='round' />
           </svg>
+
+          {/* ── Clé — haut gauche ── */}
           <svg
-            className='absolute left-[3%] top-28 h-52 w-52 -rotate-12 text-orange-100/90'
+            className='absolute left-[3%] top-24 h-52 w-52 -rotate-12 text-orange-100/90'
             viewBox='0 0 220 220'
             fill='none'
             aria-hidden='true'
           >
-            <path d='M55 44h92c20 0 36 16 36 36v82H19V80c0-20 16-36 36-36Z' fill='currentColor' />
-            <path d='M48 162v26M154 162v26M37 106h156' stroke='#fb923c' strokeWidth='14' strokeLinecap='round' strokeLinejoin='round' />
-            <path d='M56 92c12-20 36-20 48 0 12-20 36-20 48 0' stroke='#fff7ed' strokeWidth='16' strokeLinecap='round' />
-            <path d='M55 44c15 0 24-12 41-12s26 12 41 12' stroke='#f97316' strokeWidth='10' strokeLinecap='round' />
+            {/* Anneau de la clé */}
+            <circle cx='80' cy='90' r='48' fill='currentColor' />
+            <circle cx='80' cy='90' r='28' fill='#fff7ed' />
+            {/* Tige */}
+            <path d='M120 90h80' stroke='#f97316' strokeWidth='16' strokeLinecap='round' />
+            {/* Dents */}
+            <path d='M160 90v22M180 90v16' stroke='#f97316' strokeWidth='12' strokeLinecap='round' />
+            {/* Brillance */}
+            <circle cx='68' cy='78' r='8' fill='white' opacity='.6' />
           </svg>
+
+          {/* ── Localisation / pin — bas gauche ── */}
           <svg
-            className='absolute bottom-20 left-[9%] h-60 w-60 rotate-6 text-orange-200/75'
-            viewBox='0 0 260 260'
-            fill='none'
-            aria-hidden='true'
-          >
-            <path d='M130 24c-43 0-78 35-78 78 0 61 78 134 78 134s78-73 78-134c0-43-35-78-78-78Z' fill='currentColor' />
-            <path d='M82 104h96M98 104V76h64v28M104 104v72M156 104v72M88 176h84' stroke='#f97316' strokeWidth='14' strokeLinecap='round' strokeLinejoin='round' />
-            <path d='M110 130h40' stroke='#fff7ed' strokeWidth='14' strokeLinecap='round' />
-            <circle cx='130' cy='92' r='52' stroke='#fff7ed' strokeWidth='12' />
-          </svg>
-          <svg
-            className='absolute right-[8%] top-24 h-56 w-56 rotate-12 text-slate-200/80'
+            className='absolute bottom-16 left-[8%] h-56 w-56 rotate-6 text-orange-200/75'
             viewBox='0 0 240 240'
             fill='none'
             aria-hidden='true'
           >
-            <path d='M46 182V64h42v118H46Zm58 0V38h42v144h-42Zm58 0V82h42v100h-42Z' fill='currentColor' />
-            <path d='M62 88h10M62 120h10M62 152h10M120 64h10M120 96h10M120 128h10M120 160h10M178 108h10M178 140h10' stroke='#0d3556' strokeWidth='10' strokeLinecap='round' />
-            <path d='M30 182h186M104 38l21-24 21 24M162 82l21-24 21 24' stroke='#fb923c' strokeWidth='12' strokeLinecap='round' strokeLinejoin='round' />
+            {/* Pin */}
+            <path d='M120 20c-35 0-64 29-64 64 0 48 64 136 64 136s64-88 64-136c0-35-29-64-64-64Z' fill='currentColor' />
+            {/* Cercle intérieur */}
+            <circle cx='120' cy='84' r='26' fill='white' opacity='.85' />
+            {/* Maison miniature dans le pin */}
+            <path d='M108 92V80l12-8 12 8v12h-24Z' fill='#f97316' />
+            <rect x='114' y='86' width='12' height='6' rx='1' fill='white' opacity='.7' />
+            {/* Ombre portée */}
+            <ellipse cx='120' cy='218' rx='30' ry='8' fill='#f97316' opacity='.2' />
           </svg>
+
+          {/* ── Immeuble — haut droite ── */}
           <svg
-            className='absolute bottom-24 right-[28%] h-48 w-48 -rotate-6 text-orange-100/80'
-            viewBox='0 0 220 220'
+            className='absolute right-[7%] top-20 h-60 w-60 rotate-6 text-slate-200/80'
+            viewBox='0 0 240 240'
             fill='none'
             aria-hidden='true'
           >
-            <path d='M38 164h144v-60H38v60Z' fill='currentColor' />
-            <path d='M56 104V72c0-18 14-32 32-32h44c18 0 32 14 32 32v32M62 164v26M158 164v26' stroke='#f97316' strokeWidth='14' strokeLinecap='round' strokeLinejoin='round' />
-            <path d='M68 128h84M164 128h18M38 128h18' stroke='#fff7ed' strokeWidth='18' strokeLinecap='round' />
-            <path d='M82 70c10-12 20-12 30 0 10-12 20-12 30 0' stroke='#fb923c' strokeWidth='10' strokeLinecap='round' />
+            {/* Tour gauche */}
+            <rect x='20' y='80' width='60' height='150' rx='4' fill='currentColor' />
+            {/* Tour centrale (plus haute) */}
+            <rect x='90' y='40' width='60' height='190' rx='4' fill='currentColor' />
+            {/* Tour droite */}
+            <rect x='160' y='100' width='60' height='130' rx='4' fill='currentColor' />
+            {/* Fenêtres tour gauche */}
+            <rect x='32' y='100' width='16' height='16' rx='3' fill='#bfdbfe' opacity='.9' />
+            <rect x='54' y='100' width='16' height='16' rx='3' fill='#bfdbfe' opacity='.9' />
+            <rect x='32' y='130' width='16' height='16' rx='3' fill='#bfdbfe' opacity='.9' />
+            <rect x='54' y='130' width='16' height='16' rx='3' fill='#bfdbfe' opacity='.9' />
+            <rect x='32' y='160' width='16' height='16' rx='3' fill='#bfdbfe' opacity='.9' />
+            <rect x='54' y='160' width='16' height='16' rx='3' fill='#bfdbfe' opacity='.9' />
+            {/* Fenêtres tour centrale */}
+            <rect x='102' y='60' width='16' height='16' rx='3' fill='#bfdbfe' opacity='.9' />
+            <rect x='124' y='60' width='16' height='16' rx='3' fill='#bfdbfe' opacity='.9' />
+            <rect x='102' y='92' width='16' height='16' rx='3' fill='#bfdbfe' opacity='.9' />
+            <rect x='124' y='92' width='16' height='16' rx='3' fill='#bfdbfe' opacity='.9' />
+            <rect x='102' y='124' width='16' height='16' rx='3' fill='#bfdbfe' opacity='.9' />
+            <rect x='124' y='124' width='16' height='16' rx='3' fill='#bfdbfe' opacity='.9' />
+            <rect x='102' y='156' width='16' height='16' rx='3' fill='#bfdbfe' opacity='.9' />
+            <rect x='124' y='156' width='16' height='16' rx='3' fill='#bfdbfe' opacity='.9' />
+            {/* Fenêtres tour droite */}
+            <rect x='172' y='118' width='16' height='16' rx='3' fill='#bfdbfe' opacity='.9' />
+            <rect x='194' y='118' width='16' height='16' rx='3' fill='#bfdbfe' opacity='.9' />
+            <rect x='172' y='148' width='16' height='16' rx='3' fill='#bfdbfe' opacity='.9' />
+            <rect x='194' y='148' width='16' height='16' rx='3' fill='#bfdbfe' opacity='.9' />
+            {/* Antenne tour centrale */}
+            <line x1='120' y1='40' x2='120' y2='16' stroke='#fb923c' strokeWidth='6' strokeLinecap='round' />
+            <circle cx='120' cy='14' r='5' fill='#fb923c' />
+            {/* Sol */}
+            <line x1='10' y1='230' x2='230' y2='230' stroke='#fb923c' strokeWidth='8' strokeLinecap='round' />
           </svg>
+
+          {/* ── Canapé — bas centre-droite ── */}
           <svg
-            className='absolute left-[42%] top-36 h-40 w-40 text-slate-300/50'
-            viewBox='0 0 200 200'
+            className='absolute bottom-20 right-[26%] h-44 w-44 -rotate-3 text-orange-100/80'
+            viewBox='0 0 200 160'
             fill='none'
             aria-hidden='true'
           >
-            <path d='M54 78c0-25 20-45 45-45s45 20 45 45-20 45-45 45H54V78Z' fill='currentColor' />
-            <path d='M98 124v45M72 169h52M88 76c8-14 22-14 30 0M78 96h42' stroke='#fb923c' strokeWidth='12' strokeLinecap='round' strokeLinejoin='round' />
-            <path d='M54 124 30 148M144 78l26-26' stroke='#fff7ed' strokeWidth='14' strokeLinecap='round' />
+            {/* Assise */}
+            <rect x='20' y='80' width='160' height='50' rx='14' fill='currentColor' />
+            {/* Dossier */}
+            <rect x='20' y='44' width='160' height='44' rx='14' fill='#fde8cc' />
+            {/* Accoudoir gauche */}
+            <rect x='8' y='60' width='28' height='70' rx='12' fill='currentColor' />
+            {/* Accoudoir droit */}
+            <rect x='164' y='60' width='28' height='70' rx='12' fill='currentColor' />
+            {/* Pieds */}
+            <rect x='30' y='128' width='12' height='20' rx='4' fill='#f97316' />
+            <rect x='158' y='128' width='12' height='20' rx='4' fill='#f97316' />
+            {/* Coussin gauche */}
+            <rect x='28' y='86' width='64' height='36' rx='10' fill='#fde8cc' opacity='.8' />
+            {/* Coussin droit */}
+            <rect x='108' y='86' width='64' height='36' rx='10' fill='#fde8cc' opacity='.8' />
+          </svg>
+
+          {/* ── Contrat / document — centre haut ── */}
+          <svg
+            className='absolute left-[42%] top-32 h-36 w-36 text-slate-300/50'
+            viewBox='0 0 160 180'
+            fill='none'
+            aria-hidden='true'
+          >
+            {/* Feuille */}
+            <path d='M20 20h88l32 32v108H20V20Z' fill='currentColor' />
+            {/* Coin plié */}
+            <path d='M108 20v32h32' fill='#e2e8f0' />
+            <path d='M108 20l32 32' stroke='#94a3b8' strokeWidth='4' />
+            {/* Lignes de texte */}
+            <line x1='38' y1='80' x2='122' y2='80' stroke='#f97316' strokeWidth='7' strokeLinecap='round' />
+            <line x1='38' y1='104' x2='122' y2='104' stroke='#cbd5e1' strokeWidth='7' strokeLinecap='round' />
+            <line x1='38' y1='128' x2='90' y2='128' stroke='#cbd5e1' strokeWidth='7' strokeLinecap='round' />
+            {/* Signature */}
+            <path d='M38 150 q10-14 20 0 q10-14 20 0' stroke='#f97316' strokeWidth='5' strokeLinecap='round' fill='none' />
           </svg>
         </div>
 

@@ -22,6 +22,8 @@ class UserDetailedResource extends JsonResource
             "phone_number" => $this->phone_number,
             "email" => $this->email,
             "phone_verified" => $this->phone_verified,
+            "email_verified" => $this->email_verified,
+            "is_admin" => (bool) $this->is_admin,
             "liked" => $this->favorites()->count(),
             "announcer" => $this->announcer ? $this->announcer->id : null,
             "credits" => $this->subscriptions()

@@ -1,9 +1,10 @@
 'use client';
 
+import AddressAutocomplete from '@components/AddressAutocomplete/AddressAutocomplete';
 import { updateAd } from '@services/announceApi';
 import { Ad } from '@utils/types';
 import { FormEvent, useState } from 'react';
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import { MapPinIcon, SparklesIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 interface EditAdModalProps {
   ad: Ad;
@@ -44,6 +45,7 @@ export default function EditAdModal({ ad, onClose, onUpdated }: EditAdModalProps
     width: ad.width ? String(ad.width) : '',
     length: ad.length ? String(ad.length) : '',
     weight: ad.weight ? String(ad.weight) : '',
+    localization: [ad.longitude || 0, ad.latitude || 0] as [number, number],
   });
   const isRealestate = ad.type === 'realestate';
 
@@ -61,6 +63,7 @@ export default function EditAdModal({ ad, onClose, onUpdated }: EditAdModalProps
         zip: formData.zip,
         period: formData.period,
         devise: formData.devise,
+        localization: formData.localization.map(value => String(value)),
         ...(isRealestate
           ? {
               bedroom: Number(formData.bedroom || 0),
@@ -94,36 +97,74 @@ export default function EditAdModal({ ad, onClose, onUpdated }: EditAdModalProps
   };
 
   return (
-    <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 backdrop-blur-sm'>
-      <form onSubmit={handleSubmit} className='w-full max-w-3xl rounded-2xl bg-white p-6 shadow-2xl'>
-        <div className='mb-5 flex items-center justify-between'>
-          <div>
-            <h3 className='text-xl font-black text-gray-900'>Modifier l'annonce</h3>
-            <p className='text-sm text-gray-500'>Mettez à jour les champs acceptés par l'API.</p>
+    <div className='fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 px-4 backdrop-blur-md'>
+      <form onSubmit={handleSubmit} className='relative w-full max-w-4xl overflow-hidden rounded-[2rem] bg-white shadow-2xl shadow-slate-950/30'>
+        <div className='absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-primary via-orange-400 to-amber-300' />
+        <div className='flex items-center justify-between border-b border-orange-100 bg-gradient-to-br from-orange-50 via-white to-amber-50 px-6 py-5'>
+          <div className='flex items-center gap-4'>
+            <span className='flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-white shadow-lg shadow-orange-500/20'>
+              <SparklesIcon className='h-6 w-6' />
+            </span>
+            <div>
+              <p className='text-xs font-black uppercase tracking-[0.22em] text-primary'>Domilix Studio</p>
+              <h3 className='text-2xl font-black tracking-tight text-gray-950'>Modifier l'annonce</h3>
+              <p className='text-sm text-gray-500'>Mettez vos informations à jour comme lors de la publication.</p>
+            </div>
           </div>
           <button type='button' onClick={onClose} className='rounded-full p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700' aria-label='Fermer'>
             <XMarkIcon className='h-5 w-5' />
           </button>
         </div>
 
-        <div className='max-h-[70vh] space-y-4 overflow-y-auto pr-1'>
-          <Field label='Description' textarea value={formData.description} onChange={value => setFormData(current => ({ ...current, description: value }))} />
-          <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
+        <div className='max-h-[72vh] space-y-5 overflow-y-auto px-6 py-6'>
+          <section className='rounded-[1.5rem] border border-orange-100 bg-white p-4 shadow-sm shadow-orange-100/60'>
+            <h4 className='mb-4 text-sm font-black uppercase tracking-[0.16em] text-primary'>Essentiel</h4>
+            <Field label='Description' textarea value={formData.description} onChange={value => setFormData(current => ({ ...current, description: value }))} />
+          </section>
+
+          <section className='rounded-[1.5rem] border border-orange-100 bg-white p-4 shadow-sm shadow-orange-100/60'>
+            <h4 className='mb-4 text-sm font-black uppercase tracking-[0.16em] text-primary'>Prix et disponibilité</h4>
+            <div className='grid grid-cols-1 gap-4 sm:grid-cols-3'>
             <Field label='Prix' type='number' value={formData.price} onChange={value => setFormData(current => ({ ...current, price: value }))} />
             <Select label='Devise' value={formData.devise} onChange={value => setFormData(current => ({ ...current, devise: value }))} options={[['XAF', 'FCFA'], ['EUR', 'EUR'], ['USD', 'USD']]} />
             <Select label='Période' value={formData.period} onChange={value => setFormData(current => ({ ...current, period: value }))} options={[['', 'Non précisée'], ['hour', 'Heure'], ['day', 'Jour'], ['night', 'Nuit'], ['month', 'Mois'], ['year', 'Année']]} />
-            <Field label='Ville' value={formData.city} onChange={value => setFormData(current => ({ ...current, city: value }))} />
-          </div>
-          <Field label='Adresse' value={formData.address} onChange={value => setFormData(current => ({ ...current, address: value }))} />
-          <div className='grid grid-cols-1 gap-4 sm:grid-cols-3'>
-            {(['state', 'country', 'zip'] as const).map((key, index) => (
-              <Field key={key} label={['Région', 'Pays', 'Code postal'][index]} value={formData[key]} onChange={value => setFormData(current => ({ ...current, [key]: value }))} />
-            ))}
-          </div>
+            </div>
+          </section>
+
+          <section className='rounded-[1.5rem] border border-orange-100 bg-orange-50/35 p-4 shadow-sm shadow-orange-100/60'>
+            <div className='mb-4 flex items-center gap-2'>
+              <MapPinIcon className='h-5 w-5 text-primary' />
+              <h4 className='text-sm font-black uppercase tracking-[0.16em] text-primary'>Localisation</h4>
+            </div>
+            <AddressAutocomplete
+              value={formData.address}
+              onChange={value => setFormData(current => ({ ...current, address: value }))}
+              onLocationSelect={location => setFormData(current => ({
+                ...current,
+                address: location.address,
+                city: location.city,
+                state: location.state,
+                country: location.country,
+                zip: location.zip,
+                localization: location.coordinates,
+              }))}
+              placeholder='Rechercher la nouvelle adresse de l’annonce...'
+            />
+            <div className='mt-4 grid grid-cols-1 gap-4 sm:grid-cols-4'>
+              <Field label='Ville' value={formData.city} onChange={value => setFormData(current => ({ ...current, city: value }))} />
+              {(['state', 'country', 'zip'] as const).map((key, index) => (
+                <Field key={key} label={['Région', 'Pays', 'Code postal'][index]} value={formData[key]} onChange={value => setFormData(current => ({ ...current, [key]: value }))} />
+              ))}
+            </div>
+            <div className='mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2'>
+              <Field label='Longitude' type='number' value={String(formData.localization[0] || '')} onChange={value => setFormData(current => ({ ...current, localization: [Number(value || 0), current.localization[1]] }))} />
+              <Field label='Latitude' type='number' value={String(formData.localization[1] || '')} onChange={value => setFormData(current => ({ ...current, localization: [current.localization[0], Number(value || 0)] }))} />
+            </div>
+          </section>
 
           {isRealestate ? (
-            <div className='space-y-4 rounded-2xl border border-orange-100 bg-orange-50/40 p-4'>
-              <h4 className='font-black text-gray-900'>Caractéristiques immobilier</h4>
+            <section className='space-y-4 rounded-[1.5rem] border border-orange-100 bg-white p-4 shadow-sm shadow-orange-100/60'>
+              <h4 className='text-sm font-black uppercase tracking-[0.16em] text-primary'>Caractéristiques immobilier</h4>
               <div className='grid grid-cols-2 gap-4 sm:grid-cols-5'>
                 {(['bedroom', 'mainroom', 'toilet', 'kitchen', 'caution'] as const).map((key, index) => (
                   <Field key={key} label={['Chambres', 'Salons', 'Toilettes', 'Cuisines', 'Caution'][index]} type='number' value={formData[key]} onChange={value => setFormData(current => ({ ...current, [key]: value }))} />
@@ -144,20 +185,20 @@ export default function EditAdModal({ ad, onClose, onUpdated }: EditAdModalProps
                   </label>
                 ))}
               </div>
-            </div>
+            </section>
           ) : (
-            <div className='space-y-4 rounded-2xl border border-orange-100 bg-orange-50/40 p-4'>
-              <h4 className='font-black text-gray-900'>Dimensions mobilier</h4>
+            <section className='space-y-4 rounded-[1.5rem] border border-orange-100 bg-white p-4 shadow-sm shadow-orange-100/60'>
+              <h4 className='text-sm font-black uppercase tracking-[0.16em] text-primary'>Dimensions mobilier</h4>
               <div className='grid grid-cols-2 gap-4 sm:grid-cols-4'>
                 {(['height', 'width', 'length', 'weight'] as const).map((key, index) => (
                   <Field key={key} label={['Hauteur', 'Largeur', 'Longueur', 'Poids'][index]} type='number' value={formData[key]} onChange={value => setFormData(current => ({ ...current, [key]: value }))} />
                 ))}
               </div>
-            </div>
+            </section>
           )}
         </div>
 
-        <div className='mt-6 flex justify-end gap-3'>
+        <div className='flex justify-end gap-3 border-t border-orange-100 bg-white px-6 py-5'>
           <button type='button' onClick={onClose} className='rounded-xl px-5 py-3 text-sm font-bold text-gray-600 hover:bg-gray-100'>Annuler</button>
           <button type='submit' disabled={isSaving} className='rounded-xl bg-orange-500 px-5 py-3 text-sm font-black text-white shadow-lg shadow-orange-500/20 hover:bg-orange-600 disabled:opacity-50'>
             {isSaving ? 'Enregistrement...' : 'Enregistrer'}

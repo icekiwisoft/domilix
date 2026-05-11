@@ -25,9 +25,16 @@ const ChoiseMode: React.FC<OfferDetailsProps> = ({
   const [phone, setPhone] = useState('+237');
 
   const paymentMethods = [
-    { name: 'MTN Mobile Money', image: mtnMoneySrc },
-    { name: 'Orange Money', image: orangeMoneySrc },
+    { name: 'MTN Mobile Money', value: 'mtn', image: mtnMoneySrc },
+    { name: 'Orange Money', value: 'orange', image: orangeMoneySrc },
   ];
+
+  const planNames: Record<string, string> = {
+    'Pack Standard': 'Standart',
+    'Pack Avantage': 'Advantage',
+    'Pack Premium': 'Premium',
+    'Pack Ultime': 'Ultimate',
+  };
 
   const paymentImages: Record<string, string> = {
     'MTN Mobile Money': mtnMoneySrc,
@@ -39,7 +46,11 @@ const ChoiseMode: React.FC<OfferDetailsProps> = ({
 
     setIsFetching(true);
     try {
-      await subscriptionApi.startCreditPurchase(title, phone, selectedPayment);
+      await subscriptionApi.startCreditPurchase(
+        planNames[title] || title,
+        { phone_number: phone },
+        selectedPayment,
+      );
       setShowSuccessAlert(true);
       setTimeout(() => setShowSuccessAlert(false), 3000);
     } catch (error) {
@@ -64,7 +75,7 @@ const ChoiseMode: React.FC<OfferDetailsProps> = ({
       {showSuccessAlert && (
         <Alert
           type='success'
-          message='Votre paiement a été effectué avec succès !'
+            message='Demande de paiement envoyée. Validez la transaction sur votre téléphone.'
         />
       )}
       {showErrorAlert && (
@@ -107,8 +118,8 @@ const ChoiseMode: React.FC<OfferDetailsProps> = ({
                 <div className='flex flex-row lg:flex-col gap-6'>
                   {paymentMethods.map(method => (
                     <button
-                      key={method.name}
-                      onClick={() => handlePaymentSelect(method.name)}
+                      key={method.value}
+                      onClick={() => handlePaymentSelect(method.value)}
                       className='p-4 border-2 border-gray-200 rounded-lg hover:border-orange-400 hover:shadow-md transition-all duration-200 group'
                     >
                       <img
@@ -196,12 +207,12 @@ const ChoiseMode: React.FC<OfferDetailsProps> = ({
                 </h3>
                 <div className='flex items-center gap-3'>
                   <img
-                    src={paymentImages[selectedPayment]}
+                    src={paymentImages[selectedPayment === 'mtn' ? 'MTN Mobile Money' : 'Orange Money']}
                     alt={selectedPayment || ''}
                     className='h-8'
                   />
                   <span className='font-semibold text-orange-600'>
-                    {selectedPayment}
+                    {selectedPayment === 'mtn' ? 'MTN Mobile Money' : 'Orange Money'}
                   </span>
                 </div>
               </div>

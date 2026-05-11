@@ -452,7 +452,7 @@ export default function Ad(): React.ReactElement {
                 {!adInfo.unlocked && (
                   <span className='flex items-center gap-1 px-2.5 py-1 bg-gray-100 text-gray-500 rounded-full text-[11px] font-semibold'>
                     <HiLockClosed className='text-xs' />
-                    Accès par crédits
+                    Accès par Domicoins
                   </span>
                 )}
               </div>

@@ -86,66 +86,80 @@ export default function NotificationPopup({
   const getIcon = (type: Notification['type']) => {
     switch (type) {
       case 'success':
-        return <HiCheckCircle className='w-5 h-5 text-green-500' />;
+        return <HiCheckCircle className='w-5 h-5' />;
       case 'error':
-        return <HiXCircle className='w-5 h-5 text-red-500' />;
+        return <HiXCircle className='w-5 h-5' />;
       case 'warning':
-        return <HiExclamationCircle className='w-5 h-5 text-orange-500' />;
+        return <HiExclamationCircle className='w-5 h-5' />;
       default:
-        return <HiInformationCircle className='w-5 h-5 text-blue-500' />;
+        return <HiInformationCircle className='w-5 h-5' />;
     }
   };
 
-  const getBgColor = (type: Notification['type'], read: boolean) => {
-    if (read) return 'bg-gray-50';
+  const getTypeStyles = (type: Notification['type'], read: boolean) => {
+    const opacity = read ? 'opacity-40' : '';
     switch (type) {
       case 'success':
-        return 'bg-green-50';
+        return { icon: `text-emerald-600 bg-emerald-50 ${opacity}`, dot: 'bg-emerald-500' };
       case 'error':
-        return 'bg-red-50';
+        return { icon: `text-red-600 bg-red-50 ${opacity}`, dot: 'bg-red-500' };
       case 'warning':
-        return 'bg-orange-50';
+        return { icon: `text-orange-600 bg-orange-50 ${opacity}`, dot: 'bg-orange-500' };
       default:
-        return 'bg-blue-50';
+        return { icon: `text-blue-600 bg-blue-50 ${opacity}`, dot: 'bg-blue-500' };
     }
+  };
+
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffMins < 1) return "À l'instant";
+    if (diffMins < 60) return `Il y a ${diffMins} min`;
+    if (diffHours < 24) return `Il y a ${diffHours}h`;
+    if (diffDays === 1) return 'Hier';
+    return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
   };
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
-  if (!isOpen) return null;
-
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -10 }}
-        className='fixed right-4 top-20 w-96 max-w-[calc(100vw-2rem)] bg-white border rounded-xl shadow-xl z-[60] max-h-[80vh] flex flex-col'
+        initial={{ opacity: 0, y: -8, scale: 0.97 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: -8, scale: 0.97 }}
+        transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+        className='fixed right-4 top-20 w-96 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-[#eee0d2] bg-white shadow-2xl shadow-slate-900/10 z-[60] max-h-[80vh] flex flex-col'
       >
         {/* Header */}
-        <div className='flex items-center justify-between p-4 border-b'>
-          <div className='flex items-center gap-2'>
-            <h3 className='font-semibold text-gray-900'>Notifications</h3>
+        <div className='flex items-center justify-between px-5 py-4 border-b border-[#eee0d2] bg-white'>
+          <div className='flex items-center gap-2.5'>
+            <h3 className='font-black text-gray-950 text-base'>Notifications</h3>
             {unreadCount > 0 && (
-              <span className='bg-orange-500 text-white text-xs font-bold px-2 py-0.5 rounded-full'>
+              <span className='inline-flex items-center justify-center min-w-[1.25rem] h-5 rounded-full bg-[#E8921A] px-1.5 text-[11px] font-black text-white'>
                 {unreadCount}
               </span>
             )}
           </div>
-          <div className='flex items-center gap-2'>
+          <div className='flex items-center gap-1'>
             {unreadCount > 0 && (
               <button
                 onClick={handleMarkAllAsRead}
-                className='text-xs text-orange-600 hover:text-orange-700 font-medium'
+                className='rounded-full px-3 py-1.5 text-xs font-bold text-[#E8921A] transition hover:bg-orange-50'
               >
-                Tout marquer comme lu
+                Tout lire
               </button>
             )}
             <button
               onClick={onClose}
-              className='p-1 hover:bg-gray-100 rounded-lg transition-colors'
+              className='flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700'
             >
-              <HiX className='w-5 h-5 text-gray-400' />
+              <HiX className='w-4 h-4' />
             </button>
           </div>
         </div>
@@ -153,94 +167,93 @@ export default function NotificationPopup({
         {/* Content */}
         <div className='overflow-y-auto flex-1'>
           {loading ? (
-            <div className='flex items-center justify-center py-12'>
-              <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600'></div>
+            <div className='flex items-center justify-center py-14'>
+              <div className='h-7 w-7 animate-spin rounded-full border-2 border-[#eee0d2] border-t-[#E8921A]' />
             </div>
           ) : notifications.length === 0 ? (
-            <div className='flex flex-col items-center justify-center py-12 px-4'>
-              <HiInformationCircle className='w-12 h-12 text-gray-300 mb-3' />
-              <p className='text-gray-500 text-sm'>Aucune notification</p>
+            <div className='flex flex-col items-center justify-center py-14 px-4'>
+              <div className='mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-100'>
+                <HiInformationCircle className='h-7 w-7 text-gray-400' />
+              </div>
+              <p className='font-semibold text-gray-700 text-sm'>Aucune notification</p>
+              <p className='mt-1 text-xs text-gray-400'>Vous êtes à jour !</p>
             </div>
           ) : (
-            <div className='divide-y'>
-              {notifications.map(notification => (
-                <motion.div
-                  key={notification.id}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className={`p-4 hover:bg-gray-50 transition-colors cursor-pointer ${getBgColor(notification.type, notification.read)}`}
-                  onClick={() => handleNotificationClick(notification)}
-                >
-                  <div className='flex gap-3'>
-                    <div className='flex-shrink-0 mt-0.5'>
+            <div className='flex flex-col gap-0'>
+              {notifications.map((notification, index) => {
+                const styles = getTypeStyles(notification.type, notification.read);
+                return (
+                  <motion.div
+                    key={notification.id}
+                    initial={{ opacity: 0, x: -6 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.04 }}
+                    onClick={() => handleNotificationClick(notification)}
+                    className={`group relative flex cursor-pointer gap-3 px-4 py-3 transition-colors duration-150
+                      ${notification.read ? 'bg-white hover:bg-gray-50' : 'bg-white hover:bg-gray-50'}
+                      ${index !== 0 ? 'border-t border-t-[#f0ebe4]' : ''}
+                    `}
+                  >
+                    {/* Icon */}
+                    <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${styles.icon}`}>
                       {getIcon(notification.type)}
                     </div>
-                    <div className='flex-1 min-w-0'>
+
+                    {/* Body */}
+                    <div className='min-w-0 flex-1'>
                       <div className='flex items-start justify-between gap-2'>
-                        <h4
-                          className={`text-sm font-medium ${notification.read ? 'text-gray-600' : 'text-gray-900'}`}
-                        >
+                        <p className={`text-sm leading-snug ${notification.read ? 'font-medium text-gray-500' : 'font-black text-gray-950'}`}>
                           {notification.title}
-                        </h4>
-                        <div className='flex items-center gap-1 flex-shrink-0'>
-                          {!notification.read && (
-                            <button
-                              onClick={e => {
-                                e.stopPropagation();
-                                handleMarkAsRead(notification.id);
-                              }}
-                              className='p-1 hover:bg-white rounded transition-colors'
-                              title='Marquer comme lu'
-                            >
-                              <HiCheck className='w-4 h-4 text-gray-400 hover:text-green-600' />
-                            </button>
-                          )}
-                          <button
-                            onClick={e => {
-                              e.stopPropagation();
-                              handleDelete(notification.id);
-                            }}
-                            className='p-1 hover:bg-white rounded transition-colors'
-                            title='Supprimer'
-                          >
-                            <HiX className='w-4 h-4 text-gray-400 hover:text-red-600' />
-                          </button>
-                        </div>
+                        </p>
+                        {/* Unread dot */}
+                        {!notification.read && (
+                          <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${styles.dot}`} />
+                        )}
                       </div>
-                      <p
-                        className={`text-xs mt-1 ${notification.read ? 'text-gray-500' : 'text-gray-700'}`}
-                      >
+
+                      <p className={`mt-0.5 text-xs leading-relaxed ${notification.read ? 'text-gray-400' : 'text-gray-600'}`}>
                         {notification.message}
                       </p>
-                      <p className='text-xs text-gray-400 mt-2'>
-                        {new Date(notification.created_at).toLocaleDateString(
-                          'fr-FR',
-                          {
-                            day: 'numeric',
-                            month: 'short',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          }
-                        )}
+
+                      <p className='mt-1.5 text-[11px] font-semibold text-gray-400'>
+                        {formatDate(notification.created_at)}
                       </p>
                     </div>
-                  </div>
-                </motion.div>
-              ))}
+
+                    {/* Actions — visible on hover */}
+                    <div className='absolute right-3 top-3 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100'>
+                      {!notification.read && (
+                        <button
+                          onClick={e => { e.stopPropagation(); handleMarkAsRead(notification.id); }}
+                          title='Marquer comme lu'
+                          className='flex h-7 w-7 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-gray-200 transition hover:bg-emerald-50 hover:ring-emerald-300'
+                        >
+                          <HiCheck className='h-3.5 w-3.5 text-gray-400 hover:text-emerald-600' />
+                        </button>
+                      )}
+                      <button
+                        onClick={e => { e.stopPropagation(); handleDelete(notification.id); }}
+                        title='Supprimer'
+                        className='flex h-7 w-7 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-gray-200 transition hover:bg-red-50 hover:ring-red-300'
+                      >
+                        <HiX className='h-3.5 w-3.5 text-gray-400 hover:text-red-500' />
+                      </button>
+                    </div>
+                  </motion.div>
+                );
+              })}
             </div>
           )}
         </div>
 
-        <div className='border-t bg-white p-3'>
+        {/* Footer */}
+        <div className='border-t border-[#eee0d2] bg-white p-3'>
           <button
             type='button'
-            onClick={() => {
-              onClose();
-              navigate('/notifications');
-            }}
-            className='w-full rounded-lg bg-orange-50 px-4 py-2.5 text-sm font-semibold text-orange-600 transition-colors hover:bg-orange-100 hover:text-orange-700'
+            onClick={() => { onClose(); navigate('/notifications'); }}
+            className='w-full rounded-xl bg-[#fff8f4] px-4 py-2.5 text-sm font-black text-[#E8921A] transition hover:bg-orange-100'
           >
-            Voir plus
+            Voir toutes les notifications
           </button>
         </div>
       </motion.div>

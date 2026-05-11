@@ -465,6 +465,7 @@ export class AdsService {
           this.prisma.favorite.findFirst({ where: { userId: currentUserId, adId: id } }),
           this.prisma.unlocking.findFirst({
             where: { userId: currentUserId, adId: id, expiresAt: { gt: new Date() } },
+            orderBy: [{ unlockedAt: 'desc' }, { createdAt: 'desc' }],
           }),
         ])
       : [null, null];
@@ -507,6 +508,8 @@ export class AdsService {
         equipped_kitchen: realEstate ? boolFromUnknown(realEstate.equippedKitchen) : false,
         pool: realEstate ? boolFromUnknown(realEstate.pool) : false,
         caution: realEstate ? toNumber(realEstate.caution) : null,
+        longitude: realEstate ? toNumber(realEstate.lng) : null,
+        latitude: realEstate ? toNumber(realEstate.lat) : null,
       });
     }
 
@@ -583,8 +586,18 @@ export class AdsService {
   }
 
   private async totalCreditsForUser(userId: bigint) {
+    const now = new Date();
+
     const subscriptions = await this.prisma.subscription.findMany({
-      where: { userId, credits: { gt: 0 }, expireAt: { gt: new Date() } },
+      where: {
+        userId,
+        credits: { gt: 0 },
+        OR: [
+          { expireAt: { gt: now } },
+          { AND: [{ expireAt: null }, { endDate: { gt: now } }] },
+          { AND: [{ expireAt: null }, { endDate: null }] },
+        ],
+      },
       select: { credits: true },
     });
     return subscriptions.reduce((sum, item) => sum + item.credits, 0);
@@ -596,17 +609,28 @@ export class AdsService {
 
     const existing = await this.prisma.unlocking.findFirst({
       where: { userId, adId, expiresAt: { gt: new Date() } },
+      orderBy: [{ unlockedAt: 'desc' }, { createdAt: 'desc' }],
     });
     if (existing) {
       return { message: 'Annonce deja debloquee' };
     }
 
+    const now = new Date();
+
     const subscription = await this.prisma.subscription.findFirst({
-      where: { userId, credits: { gt: 0 }, expireAt: { gt: new Date() } },
-      orderBy: { expireAt: 'asc' },
+      where: {
+        userId,
+        credits: { gt: 0 },
+        OR: [
+          { expireAt: { gt: now } },
+          { AND: [{ expireAt: null }, { endDate: { gt: now } }] },
+          { AND: [{ expireAt: null }, { endDate: null }] },
+        ],
+      },
+      orderBy: [{ startDate: 'desc' }, { createdAt: 'desc' }],
     });
     if (!subscription) {
-      return { message: 'Crédits insuffisants' };
+      return { message: 'Domicoins insuffisants' };
     }
 
     await this.prisma.subscription.update({
@@ -622,6 +646,16 @@ export class AdsService {
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       },
     });
+
+    await this.prisma.notification.create({
+      data: {
+        userId,
+        type: 'ad_unlocked',
+        title: 'Annonce debloquee',
+        message: 'Vous pouvez maintenant consulter les informations de contact de cette annonce pendant 7 jours.',
+        link: `/houses/${ad.id}`,
+      },
+    }).catch(() => undefined);
 
     return {
       message: 'Annonce debloquee avec succes',
@@ -857,6 +891,15 @@ export class AdsService {
         },
       });
     } else {
+      const localization = Array.isArray(body.localization)
+        ? body.localization
+        : body['localization[]']
+          ? [body['localization[]']]
+          : undefined;
+      const localizationValues = Array.isArray(localization)
+        ? localization.map((value) => Number(value))
+        : [];
+
       await this.prisma.realEstate.update({
         where: { id: ad.adId },
         data: {
@@ -886,6 +929,7 @@ export class AdsService {
             : {}),
           ...(body.garden !== undefined ? { garden: ['1', 'true', true].includes(body.garden) } : {}),
           ...(body.caution !== undefined ? { caution: Number(body.caution) } : {}),
+          ...(localizationValues.length >= 2 ? { lng: localizationValues[0], lat: localizationValues[1] } : {}),
         },
       });
     }

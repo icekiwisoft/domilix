@@ -3,6 +3,7 @@
 import CookieConsent from '@components/CookieConsent/CookieConsent';
 import EmailVerificationBanner from '@components/EmailVerificationBanner/EmailVerificationBanner';
 import SigninDialog from '@components/SigninDialog/SigninDialog';
+import SignupDialog from '@components/SignupDialog/SignupDialog';
 import SiteTour from '@components/SiteTour/SiteTour';
 import { useAuth } from '@hooks/useAuth';
 import { useAuthStore, useUiStore } from '@stores/defineStore';
@@ -14,6 +15,7 @@ export default function AppBootstrap({
   children: React.ReactNode;
 }): React.ReactElement | null {
   const signinModal = useUiStore(state => state.signinModal);
+  const signupModal = useUiStore(state => state.signupModal);
   const authData = useAuthStore(state => state.authData);
   const hasHydrated = useAuthStore(state => state.hasHydrated);
   const authChecked = useAuthStore(state => state.authChecked);
@@ -42,6 +44,7 @@ export default function AppBootstrap({
       <EmailVerificationBanner />
       {children}
       {signinModal && <SigninDialog />}
+      {signupModal && <SignupDialog />}
       <CookieConsent />
       <SiteTour />
     </>

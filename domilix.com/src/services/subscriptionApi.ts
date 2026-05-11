@@ -10,22 +10,66 @@ export interface Subscription {
   plan_name: string;
   credits: number;
   price: number;
-  duration: string;
-  expires_at: string;
+  duration: number | string;
+  start_date?: string | null;
+  end_date?: string | null;
+  expires_at?: string | null;
   created_at: string;
   updated_at: string;
 }
 
 export interface CreateSubscriptionRequest {
-  payment_info: {
-    amount: number;
+  payment_info: string | {
+    amount?: number;
     currency?: string;
     phone_number?: string;
     email?: string;
   };
   plan_name: string;
-  method: 'campay' | 'orange_money' | 'mtn_money';
+  method: 'orange' | 'mtn' | 'orange_money' | 'mtn_money';
 }
+
+const assertPaymentRequestAccepted = (data: any) => {
+  if (!data) {
+    throw new Error('La demande de paiement n’a pas été acceptée.');
+  }
+
+  if (typeof data === 'object') {
+    const code = Number(data.code ?? data.statusCode);
+    const status = String(data.status ?? '').toLowerCase();
+    const message = String(data.message ?? data.error ?? '').toLowerCase();
+
+    if (
+      code >= 400 ||
+      ['failed', 'failure', 'error', 'cancelled', 'canceled'].includes(status) ||
+      message.includes('unsupported') ||
+      message.includes('failed') ||
+      message.includes('error')
+    ) {
+      throw new Error('La demande de paiement a été refusée.');
+    }
+  }
+};
+
+const parseDate = (date?: string | null) => {
+  if (!date) return null;
+
+  const parsed = new Date(date);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
+const isSubscriptionUsable = (subscription: Subscription) => {
+  if (subscription.credits <= 0) return false;
+
+  const now = new Date();
+  const endDate = parseDate(subscription.end_date);
+  const expiresAt = parseDate(subscription.expires_at);
+
+  if (expiresAt) return expiresAt > now;
+  if (endDate) return endDate > now;
+
+  return true;
+};
 
 export const subscriptionApi = {
   // Récupérer les packs de l'utilisateur connecté
@@ -52,11 +96,11 @@ export const subscriptionApi = {
     return response.data;
   },
 
-  // Fonction pour démarrer l'achat de crédits
+  // Fonction pour démarrer l'achat de Domicoins
   startCreditPurchase: async (
     plan_name: string,
-    payment_info: any,
-    method: string
+    payment_info: CreateSubscriptionRequest['payment_info'],
+    method: CreateSubscriptionRequest['method']
   ): Promise<any> => {
     try {
       const response = await api.post('/subscriptions', {
@@ -65,10 +109,7 @@ export const subscriptionApi = {
         method: method,
       });
 
-      console.log(
-        'Credit purchase initiated, follow mobile payment instructions',
-        response
-      );
+      assertPaymentRequestAccepted(response.data);
       return response.data;
     } catch (error) {
       console.error('Credit purchase error:', error);
@@ -86,14 +127,13 @@ export const subscriptionApi = {
     try {
       const subscriptions = await subscriptionApi.getUserSubscriptions();
 
-      const now = new Date();
       const activeSubscriptions = subscriptions.filter(
-        sub => new Date(sub.expires_at) > now && sub.credits > 0
+        sub => isSubscriptionUsable(sub)
       );
 
       // Calculer les statistiques basées sur les données réelles
       const totalCredits = subscriptions.reduce((sum, sub) => {
-        // Supposer que les crédits initiaux étaient stockés ou calculés
+        // Supposer que les Domicoins initiaux étaient stockés ou calculés
         return sum + sub.credits;
       }, 0);
 
@@ -120,7 +160,7 @@ export const subscriptionApi = {
     }
   },
 
-  // Vérifier si l'utilisateur a des crédits disponibles
+  // Vérifier si l'utilisateur a des Domicoins disponibles
   hasAvailableCredits: async (): Promise<boolean> => {
     const stats = await subscriptionApi.getUsageStats();
     return stats.remaining_credits > 0;
@@ -131,11 +171,14 @@ export const subscriptionApi = {
     subscription: Subscription
   ): 'active' | 'expired' | 'low_credits' => {
     const now = new Date();
-    const expiresAt = new Date(subscription.expires_at);
+    const expiresAt = parseDate(subscription.expires_at);
+    const endDate = parseDate(subscription.end_date);
 
-    if (expiresAt <= now) {
+    if ((expiresAt && expiresAt <= now) || (!expiresAt && endDate && endDate <= now)) {
       return 'expired';
     }
+
+    if (!isSubscriptionUsable(subscription)) return 'expired';
 
     if (subscription.credits <= 5) {
       return 'low_credits';

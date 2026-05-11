@@ -13,6 +13,7 @@ import { mediaUrl } from '@utils/mediaUrl';
 import { Ad } from '@utils/types';
 
 import defaultHouseImg from '@assets/default-img/houses.jpg';
+import ConfirmDialog from '@components/ConfirmDialog/ConfirmDialog';
 import EditAdModal from './EditAdModal';
 
 interface AnnouncerAdCardProps {
@@ -35,6 +36,7 @@ export default function AnnouncerAdCard({
 }: AnnouncerAdCardProps): React.ReactElement {
   const [menuOpen, setMenuOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const image = ad.medias?.[0]?.file ? mediaUrl(ad.medias[0].file) : defaultHouseImg.src;
@@ -52,16 +54,18 @@ export default function AnnouncerAdCard({
   const handleDelete = async (event: React.MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
+    setMenuOpen(false);
+    setDeleteConfirmOpen(true);
+  };
 
-    if (!window.confirm('Supprimer définitivement cette annonce ?')) return;
-
+  const confirmDelete = async () => {
     try {
       setIsDeleting(true);
       await deleteAd(ad.id);
       onDeleted?.(ad.id);
     } finally {
       setIsDeleting(false);
-      setMenuOpen(false);
+      setDeleteConfirmOpen(false);
     }
   };
 
@@ -155,6 +159,16 @@ export default function AnnouncerAdCard({
       {editOpen && (
         <EditAdModal ad={ad} onClose={() => setEditOpen(false)} onUpdated={onUpdated} />
       )}
+      <ConfirmDialog
+        open={deleteConfirmOpen}
+        title='Supprimer cette annonce ?'
+        description='Cette action retirera définitivement l’annonce de Domilix. Les visiteurs ne pourront plus la consulter.'
+        confirmLabel='Supprimer'
+        tone='danger'
+        loading={isDeleting}
+        onCancel={() => setDeleteConfirmOpen(false)}
+        onConfirm={confirmDelete}
+      />
     </>
   );
 }

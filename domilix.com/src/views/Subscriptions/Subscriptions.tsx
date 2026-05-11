@@ -73,7 +73,7 @@ const PricingCard: React.FC<PricingProps> = ({
 
     <div className='space-y-4 mb-8'>
       <div className='flex items-center gap-3'>
-        <img className='w-6 h-6' src='dom.png' alt='Credits' />
+        <img className='w-6 h-6' src='dom.png' alt='Domicoins' />
         <span className='text-lg font-black'>{credits}</span>
       </div>
 
@@ -196,10 +196,10 @@ export default function Subscriptions() {
           <div data-tour='packs-grid' className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto'>
             <PricingCard
               title='Pack Standard'
-              credits='20 credits'
+              credits='20 Domicoins'
               validity='1 semaine de validité'
               mobileValidity='1 semaine'
-              price='1000'
+              price='50'
               benefit='Idéal pour tester Domilix et contacter quelques annonceurs ciblés.'
               mobileBenefit='Pour tester Domilix.'
               features={["Voir les informations de base d'une annonce."]}
@@ -207,9 +207,9 @@ export default function Subscriptions() {
               onChoose={() =>
                 handleChooseOffer({
                   title: 'Pack Standard',
-                  credits: '20 credits',
+                  credits: '20 Domicoins',
                   validity: '1 semaine de validité',
-                  price: '1000 ',
+                  price: '50 ',
                   benefit: 'Idéal pour tester Domilix et contacter quelques annonceurs ciblés.',
                   features: ["Voir les informations de base d'une annonce."],
                 })
@@ -217,10 +217,10 @@ export default function Subscriptions() {
             />
             <PricingCard
               title='Pack Avantage'
-              credits='50 credits'
+              credits='50 Domicoins'
               validity='2 semaines de validité'
               mobileValidity='2 semaines'
-              price='2000'
+              price='100'
               benefit='Pour comparer plusieurs logements sans bloquer votre recherche.'
               mobileBenefit='Pour comparer plusieurs logements.'
               features={["Voir les informations de base d'une annonce."]}
@@ -228,9 +228,9 @@ export default function Subscriptions() {
               onChoose={() =>
                 handleChooseOffer({
                   title: 'Pack Avantage',
-                  credits: '50 credits',
+                  credits: '50 Domicoins',
                   validity: '2 semaines de validité',
-                  price: '2000',
+                  price: '100',
                   benefit: 'Pour comparer plusieurs logements sans bloquer votre recherche.',
                   features: ["Voir les informations de base d'une annonce."],
                 })
@@ -238,10 +238,10 @@ export default function Subscriptions() {
             />
             <PricingCard
               title='Pack Premium'
-              credits='100 credits'
+              credits='100 Domicoins'
               validity='3 semaines de validité'
               mobileValidity='3 semaines'
-              price='3500'
+              price='200'
               benefit='Le meilleur choix pour chercher activement et ne pas rater les bonnes annonces.'
               mobileBenefit='Pour chercher activement.'
               badge='Recommandé'
@@ -253,9 +253,9 @@ export default function Subscriptions() {
               onChoose={() =>
                 handleChooseOffer({
                   title: 'Pack Premium',
-                  credits: '100 credits',
+                  credits: '100 Domicoins',
                   validity: '3 semaines de validité',
-                  price: '3500',
+                  price: '200',
                   benefit: 'Le meilleur choix pour chercher activement et ne pas rater les bonnes annonces.',
                   badge: 'Recommandé',
                   features: [
@@ -267,10 +267,10 @@ export default function Subscriptions() {
             />
             <PricingCard
               title='Pack Ultime'
-              credits='150 credits'
+              credits='150 Domicoins'
               validity='4 semaines de validité'
               mobileValidity='4 semaines'
-              price='5000'
+              price='250'
               benefit='Pour une recherche intensive avec un maximum d’opportunités de contact.'
               mobileBenefit='Pour une recherche intensive.'
               features={[
@@ -281,9 +281,9 @@ export default function Subscriptions() {
               onChoose={() =>
                 handleChooseOffer({
                   title: 'Pack Ultime',
-                  credits: '150 credits',
+                  credits: '150 Domicoins',
                   validity: '4 semaines de validité',
-                  price: '5000',
+                  price: '250',
                   benefit: 'Pour une recherche intensive avec un maximum d’opportunités de contact.',
                   features: [
                     "Voir les informations de base d'une annonce.",

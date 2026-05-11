@@ -24,6 +24,18 @@ interface ProfileDialogProps {
 
 type TabType = 'profile' | 'security' | 'announcer' | 'subscriptions';
 
+const formatSubscriptionDate = (date?: string | null) => {
+  if (!date) return '-';
+
+  const parsed = new Date(date);
+  if (Number.isNaN(parsed.getTime())) return '-';
+
+  return parsed.toLocaleDateString('fr-FR');
+};
+
+const isSubscriptionUsable = (subscription: Subscription) =>
+  subscriptionApi.getSubscriptionStatus(subscription) !== 'expired';
+
 export default function ProfileDialog({
   isOpen,
   onClose,
@@ -552,7 +564,7 @@ export default function ProfileDialog({
 
       case 'subscriptions':
         const usableCredits = subscriptions
-          .filter(subscription => new Date(subscription.expires_at) > new Date())
+          .filter(isSubscriptionUsable)
           .reduce((sum, subscription) => sum + subscription.credits, 0);
 
         return (
@@ -576,9 +588,9 @@ export default function ProfileDialog({
                 <div className='mb-5 rounded-2xl border border-orange-200 bg-orange-50 p-4'>
                   <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
                     <div>
-                      <h4 className='font-black text-orange-900'>Aucun crédit utilisable</h4>
+                      <h4 className='font-black text-orange-900'>Aucun Domicoin utilisable</h4>
                       <p className='mt-1 text-sm text-orange-800'>
-                        Vos packs sont expirés ou ne contiennent plus de crédits. Achetez un nouveau pack pour continuer à débloquer des annonces.
+                        Vos packs sont expirés ou ne contiennent plus de Domicoins. Achetez un nouveau pack pour continuer à débloquer des annonces.
                       </p>
                     </div>
                     <button
@@ -653,13 +665,13 @@ export default function ProfileDialog({
                                       subscription
                                     ) === 'expired'
                                   ? 'Expiré'
-                                  : 'Crédits faibles'}
+                                  : 'Domicoins faibles'}
                             </span>
                           </div>
 
                           <div className='grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600'>
                             <div>
-                              <span className='font-medium'>Crédits:</span>
+                              <span className='font-medium'>Domicoins restants:</span>
                               <div>{subscription.credits}</div>
                             </div>
                             <div>
@@ -670,19 +682,11 @@ export default function ProfileDialog({
                             </div>
                             <div>
                               <span className='font-medium'>Début:</span>
-                              <div>
-                                {new Date(
-                                  subscription.start_date
-                                ).toLocaleDateString('fr-FR')}
-                              </div>
+                              <div>{formatSubscriptionDate(subscription.start_date)}</div>
                             </div>
                             <div>
                               <span className='font-medium'>Fin:</span>
-                              <div>
-                                {new Date(
-                                  subscription.end_date
-                                ).toLocaleDateString('fr-FR')}
-                              </div>
+                              <div>{formatSubscriptionDate(subscription.end_date || subscription.expires_at)}</div>
                             </div>
                           </div>
                         </div>

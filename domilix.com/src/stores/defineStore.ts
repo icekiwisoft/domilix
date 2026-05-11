@@ -36,10 +36,13 @@ type AuthStore = {
 
 type UiStore = {
   signinModal: boolean;
+  signupModal: boolean;
   message: MessageDialog | null;
   theme: string;
   setSigninModal: (value: boolean) => void;
   toggleSigninModal: () => void;
+  setSignupModal: (value: boolean) => void;
+  toggleSignupModal: () => void;
   setMessage: (message: MessageDialog | null) => void;
   setTheme: (theme: string) => void;
 };
@@ -139,10 +142,13 @@ export const useUiStore = create<UiStore>()(
   persist(
     set => ({
       signinModal: false,
+      signupModal: false,
       message: null,
       theme: 'ligth',
       setSigninModal: signinModal => set({ signinModal }),
       toggleSigninModal: () => set(state => ({ signinModal: !state.signinModal })),
+      setSignupModal: signupModal => set({ signupModal }),
+      toggleSignupModal: () => set(state => ({ signupModal: !state.signupModal })),
       setMessage: message => set({ message }),
       setTheme: theme => set({ theme }),
     }),
@@ -158,6 +164,10 @@ export const useUiStore = create<UiStore>()(
 
 export const signinDialogActions = {
   toggle: () => useUiStore.getState().toggleSigninModal(),
+};
+
+export const signupDialogActions = {
+  toggle: () => useUiStore.getState().toggleSignupModal(),
 };
 
 export const authDataActions = {
