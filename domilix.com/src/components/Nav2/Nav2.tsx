@@ -10,7 +10,7 @@ import ArticlePostDialog from '@components/ArticlePostDialog/ArticlePostDialog';
 import ConfirmDialog from '@components/ConfirmDialog/ConfirmDialog';
 import { notificationApi } from '../../services/notificationApi';
 import React, { useState, useEffect, useRef } from 'react';
-import { HiBars3, HiXMark, HiBell, HiHomeModern, HiSparkles } from 'react-icons/hi2';
+import { HiBars3, HiXMark, HiBell, HiHomeModern, HiSparkles, HiChevronDown } from 'react-icons/hi2';
 import { MdOutlineCampaign } from 'react-icons/md';
 import { NavLink, useNavigate } from '@router';
 
@@ -117,24 +117,12 @@ export default function Nav2({
     }
   };
 
-  const mobileNavLinkClass = ({ isActive }: { isActive: boolean }) =>
-    `block py-3.5 px-4 rounded-xl text-sm font-medium transition-colors ${
-      isActive
-        ? 'bg-surface-container text-primary font-semibold border-l-2 border-primary'
-        : 'text-on-surface hover:bg-surface-container-low'
-    }`;
-
-  const mobileBuyLinkClass = ({ isActive }: { isActive: boolean }) =>
-    `block py-3.5 px-4 rounded-xl text-sm font-bold text-white bg-primary border border-primary transition-colors ${
-      isActive ? 'ring-2 ring-primary/30' : 'hover:opacity-90'
-    }`;
-
   return (
-    <nav className='bg-surface navbar top-0 left-0 fixed w-full px-4 sm:px-6 lg:px-10 z-50 shadow-sm border-b border-outline-variant'>
-      <div className='h-20 flex justify-between items-center text-on-surface max-w-container mx-auto'>
+    <nav className='bg-surface navbar top-0 left-0 fixed w-full px-3 sm:px-6 lg:px-10 z-50 shadow-sm border-b border-outline-variant'>
+      <div className='flex h-16 items-center justify-between text-on-surface max-w-container mx-auto sm:h-20'>
         <div className='flex items-center flex-shrink-0'>
           <NavLink className='text-2xl font-bold flex' to='/' data-tour='nav-logo'>
-            <img src={logoSrc} alt='logo' className='h-6 sm:h-7' />
+            <img src={logoSrc} alt='logo' className='h-5 sm:h-7 lg:h-8' />
           </NavLink>
         </div>
 
@@ -170,90 +158,41 @@ export default function Nav2({
               Se connecter
             </button>
           ) : (
-          <>
-            {/* Domicoins */}
-            <NavLink
-              to='/subscriptions'
-              data-tour='user-credits'
-              className={({ isActive }) =>
-                `flex items-center gap-1.5 px-2 py-1 rounded-lg transition-colors ${isActive ? 'bg-yellow-50' : 'hover:bg-gray-100'
-                }`
-              }
-            >
-              <img src='/dom.png' alt='coin' className='w-5 h-5' />
-              <span className='text-sm font-semibold text-primary'>{userCredits}</span>
-            </NavLink>
-
-            {/* Publier CTA */}
-            <button
-              onClick={handlePublishClick}
-              data-tour='publish-ad'
-              className='inline-flex items-center gap-1.5 rounded-full bg-primary-container px-4 py-2 text-sm font-semibold text-on-primary-container transition-opacity hover:opacity-90'
-              aria-label='Publier une annonce'
-            >
-              <MdOutlineCampaign className='-rotate-12 text-base' />
-              Publier
-            </button>
-
-            {/* Bell */}
-            <div className='relative'>
-              <button
-                onClick={() => { setShowNotifications(prev => !prev); setShowProfileMenu(false); }}
-                className='relative flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-surface-container-low'
-                aria-label='Notifications'
-              >
-                <HiBell className='h-5 w-5 text-on-surface-variant' />
-                {unreadCount > 0 && (
-                  <span className='absolute -right-0.5 -top-0.5 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white'>
-                    {unreadCount > 9 ? '9+' : unreadCount}
-                  </span>
-                )}
-              </button>
-              {showNotifications && (
-                <NotificationPopup isOpen={showNotifications} onClose={() => setShowNotifications(false)} />
-              )}
-            </div>
-
-            {/* Avatar */}
-            <div className='relative'>
-              <button
-                ref={profileButtonDesktopRef}
-                onClick={e => { e.stopPropagation(); setShowProfileMenu(prev => !prev); setShowNotifications(false); }}
-                className='flex h-9 w-9 items-center justify-center rounded-full bg-primary/15 text-sm font-semibold text-primary transition-colors hover:bg-primary/25'
-              >
-                {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
-              </button>
-              {showProfileMenu && (
-                <ProfilePopup
-                  ref={profileMenuRef}
-                  user={user}
-                  onClose={() => setShowProfileMenu(false)}
-                  dashboardHref='/dashboard'
-                  announcerHref={user?.announcer ? `/announcers/${user.announcer}` : undefined}
-                  favoritesHref='/favorite'
-                  subscriptionsHref='/settings?tab=packs'
-                  onOpenSettings={() => { navigate('/settings'); setShowProfileMenu(false); }}
-                  onLogout={requestLogout}
-                />
-              )}
-            </div>
-          </>
-          )}
-        </div>
-
-        {/* ── Mobile right cluster ── */}
-        <div className='flex lg:hidden items-center gap-3'>
-          {isAuthenticated && (
             <>
+              {/* Domicoins */}
+              <NavLink
+                to='/subscriptions'
+                data-tour='user-credits'
+                className={({ isActive }) =>
+                  `flex items-center gap-1.5 px-2 py-1 rounded-lg transition-colors ${isActive ? 'bg-yellow-50' : 'hover:bg-gray-100'
+                  }`
+                }
+              >
+                <img src='/dom.png' alt='coin' className='w-5 h-5' />
+                <span className='text-sm font-semibold text-primary'>{userCredits}</span>
+              </NavLink>
+
+              {/* Publier CTA */}
+              <button
+                onClick={handlePublishClick}
+                data-tour='publish-ad'
+                className='inline-flex items-center gap-1.5 rounded-full bg-primary-container px-4 py-2 text-sm font-semibold text-on-primary-container transition-opacity hover:opacity-90'
+                aria-label='Publier une annonce'
+              >
+                <MdOutlineCampaign className='-rotate-12 text-base' />
+                Publier
+              </button>
+
+              {/* Bell */}
               <div className='relative'>
                 <button
                   onClick={() => { setShowNotifications(prev => !prev); setShowProfileMenu(false); }}
                   className='relative flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-surface-container-low'
                   aria-label='Notifications'
                 >
-                  <HiBell className='h-6 w-6 text-slate-700' />
+                  <HiBell className='h-5 w-5 text-on-surface-variant' />
                   {unreadCount > 0 && (
-                    <span className='absolute -right-0.5 -top-0.5 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-primary text-[9px] font-bold text-white'>
+                    <span className='absolute -right-0.5 -top-0.5 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white'>
                       {unreadCount > 9 ? '9+' : unreadCount}
                     </span>
                   )}
@@ -263,20 +202,12 @@ export default function Nav2({
                 )}
               </div>
 
-              <NavLink
-                to='/subscriptions'
-                className='inline-flex items-center gap-1.5 text-sm font-semibold text-slate-800'
-              >
-                <img src='/dom.png' alt='Domicoins' className='h-5 w-5' />
-                <span>{userCredits}</span>
-              </NavLink>
-
-              {/* Avatar mobile */}
+              {/* Avatar */}
               <div className='relative'>
                 <button
-                  ref={profileButtonMobileRef}
+                  ref={profileButtonDesktopRef}
                   onClick={e => { e.stopPropagation(); setShowProfileMenu(prev => !prev); setShowNotifications(false); }}
-                  className='flex h-10 w-10 items-center justify-center rounded-full border-2 border-slate-200 bg-white text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50'
+                  className='flex h-9 w-9 items-center justify-center rounded-full bg-primary/15 text-sm font-semibold text-primary transition-colors hover:bg-primary/25'
                 >
                   {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
                 </button>
@@ -296,16 +227,89 @@ export default function Nav2({
               </div>
             </>
           )}
+        </div>
 
+        {/* ── Mobile right cluster ── */}
+        <div className='flex lg:hidden items-center gap-1.5 sm:gap-2'>
+          {isAuthenticated && (
+            <>
+
+              {/* Domicoins pill icon+count */}
+              <NavLink
+                to='/subscriptions'
+                data-tour='user-credits'
+                className={({ isActive }) =>
+                  `flex items-center gap-1 rounded-full border border-outline-variant bg-surface-container-lowest py-1 pl-1.5 pr-1.5 transition-colors hover:bg-surface-container-low sm:gap-1.5 sm:pl-2 sm:pr-3 ${isActive ? 'border-primary/30 bg-primary/5' : ''}`
+                }
+              >
+                <img src='/dom.png' alt='coin' className='h-4 w-4' />
+                <span className=' text-xs font-bold text-primary'>{userCredits}</span>
+              </NavLink>
+
+
+              {/* Bell */}
+              <div className='relative'>
+                <button
+                  type='button'
+                  onClick={() => { setShowNotifications(prev => !prev); setShowProfileMenu(false); }}
+                  className='relative flex h-8 w-8 items-center justify-center rounded-full border border-outline-variant bg-surface-container-lowest transition-colors hover:bg-surface-container-low sm:h-9 sm:w-9'
+                  aria-label='Notifications'
+                >
+                  <HiBell className='h-4 w-4 text-on-surface sm:h-5 sm:w-5' />
+                  {unreadCount > 0 && (
+                    <span className='absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-error text-[8px] font-bold text-white sm:h-[18px] sm:w-[18px] sm:text-[9px]'>
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                </button>
+                {showNotifications && (
+                  <NotificationPopup isOpen={showNotifications} onClose={() => setShowNotifications(false)} />
+                )}
+              </div>
+
+
+
+              {/* Avatar pill + chevron */}
+              <div className='relative'>
+                <button
+                  type='button'
+                  ref={profileButtonMobileRef}
+                  onClick={e => { e.stopPropagation(); setShowProfileMenu(prev => !prev); setShowNotifications(false); }}
+                  className='flex items-center gap-1 rounded-full border border-outline-variant bg-surface-container-lowest p-0.5 transition-colors hover:bg-surface-container-low sm:gap-1.5 sm:p-1'
+                >
+                  <span className='flex h-7 w-7 items-center justify-center rounded-full bg-primary/15 text-xs font-bold text-primary'>
+                    {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                  </span>
+                  {/* <HiChevronDown className={`h-3 w-3 text-on-surface-variant transition-transform duration-200 sm:h-3.5 sm:w-3.5 ${showProfileMenu ? 'rotate-180' : ''}`} /> */}
+                </button>
+                {showProfileMenu && (
+                  <ProfilePopup
+                    ref={profileMenuRef}
+                    user={user}
+                    onClose={() => setShowProfileMenu(false)}
+                    dashboardHref='/dashboard'
+                    announcerHref={user?.announcer ? `/announcers/${user.announcer}` : undefined}
+                    favoritesHref='/favorite'
+                    subscriptionsHref='/settings?tab=packs'
+                    onOpenSettings={() => { navigate('/settings'); setShowProfileMenu(false); }}
+                    onLogout={requestLogout}
+                  />
+                )}
+              </div>
+            </>
+          )}
+
+          {/* Hamburger / X */}
           <button
-            className='flex h-9 w-9 items-center justify-center rounded-lg transition-colors hover:bg-surface-container-low'
+            type='button'
+            className='flex h-8 w-8 items-center justify-center rounded-full border border-outline-variant bg-surface-container-lowest transition-colors hover:bg-surface-container-low sm:h-9 sm:w-9'
             onClick={() => setClick(c => !c)}
             aria-label={click ? 'Fermer le menu' : 'Ouvrir le menu'}
           >
             {click ? (
-              <HiXMark className='h-7 w-7 text-slate-700' />
+              <HiXMark className='h-4 w-4 text-on-surface sm:h-5 sm:w-5' />
             ) : (
-              <HiBars3 className='h-7 w-7 text-slate-700' />
+              <HiBars3 className='h-4 w-4 text-on-surface sm:h-5 sm:w-5' />
             )}
           </button>
         </div>
@@ -314,7 +318,7 @@ export default function Nav2({
       {click && (
         <button
           type='button'
-          className='fixed inset-x-0 bottom-0 top-20 z-30 bg-white/45 backdrop-blur-md lg:hidden'
+          className='fixed inset-x-0 bottom-0 top-16 z-30 bg-white/45 backdrop-blur-md lg:hidden sm:top-20'
           aria-label='Fermer le menu mobile'
           onClick={() => setClick(false)}
         />
@@ -322,14 +326,14 @@ export default function Nav2({
 
       {/* ── Mobile drawer ── */}
       {click && (
-        <div className='absolute left-0 right-0 top-20 z-40 bg-white shadow-xl lg:hidden'>
-          <div className='mx-auto max-w-container px-6 py-7'>
-            <ul className='space-y-8 text-[20px] font-bold text-primary'>
+        <div className='absolute left-0 right-0 top-16 z-40 max-h-[calc(100vh-4rem)] overflow-y-auto bg-white shadow-xl lg:hidden sm:top-20 sm:max-h-[calc(100vh-5rem)]'>
+          <div className='mx-auto max-w-container px-5 py-5 sm:px-6 sm:py-7'>
+            <ul className='space-y-5 text-[18px] font-bold text-primary sm:space-y-8 sm:text-[20px]'>
               <li>
                 <button
                   type='button'
                   onClick={() => { handlePublishClick(); setClick(false); }}
-                  className='flex items-center gap-4 text-left'
+                  className='flex items-center gap-3 text-left sm:gap-4'
                 >
                   <MdOutlineCampaign className='h-5 w-5 shrink-0 -rotate-12' />
                   Je publie une annonce
@@ -338,7 +342,7 @@ export default function Nav2({
               <li>
                 <NavLink
                   to='/houses'
-                  className='flex items-center gap-4'
+                  className='flex items-center gap-3 sm:gap-4'
                   onClick={() => setClick(false)}
                 >
                   <HiHomeModern className='h-5 w-5 shrink-0' />
@@ -348,7 +352,7 @@ export default function Nav2({
               <li>
                 <NavLink
                   to='/furnitures'
-                  className='flex items-center gap-4'
+                  className='flex items-center gap-3 sm:gap-4'
                   onClick={() => setClick(false)}
                 >
                   <HiSparkles className='h-5 w-5 shrink-0' />
@@ -358,7 +362,7 @@ export default function Nav2({
               <li>
                 <NavLink
                   to='/terrains'
-                  className='flex items-center gap-4'
+                  className='flex items-center gap-3 sm:gap-4'
                   onClick={() => setClick(false)}
                 >
                   <svg className='h-5 w-5 shrink-0' fill='none' viewBox='0 0 24 24' stroke='currentColor' strokeWidth={2}>
@@ -370,7 +374,7 @@ export default function Nav2({
               <li>
                 <NavLink
                   to='/subscriptions'
-                  className='flex items-center gap-4'
+                  className='flex items-center gap-3 sm:gap-4'
                   onClick={() => setClick(false)}
                 >
                   <HiSparkles className='h-5 w-5 shrink-0' />
@@ -379,17 +383,19 @@ export default function Nav2({
               </li>
             </ul>
 
-            <div className='mt-8 border-t border-slate-100 pt-5'>
+            <div className='mt-6 border-t border-slate-100 pt-5 sm:mt-8'>
               {!isAuthenticated ? (
                 <button
+                  type='button'
                   onClick={() => { signinDialogActions.toggle(); setClick(false); }}
-                  className='text-base font-bold text-primary'
+                  className='w-full rounded-xl border border-primary bg-surface-container-lowest px-6 py-3 text-sm font-bold text-primary transition-colors hover:bg-primary/5'
                 >
                   Se connecter
                 </button>
               ) : (
                 <div className='flex items-center justify-between gap-4'>
                   <button
+                    type='button'
                     onClick={() => { navigate('/settings'); setClick(false); }}
                     className='text-base font-bold text-primary'
                   >

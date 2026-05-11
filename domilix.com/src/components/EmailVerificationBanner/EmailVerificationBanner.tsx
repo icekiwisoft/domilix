@@ -153,7 +153,7 @@ export default function EmailVerificationBanner() {
     <>
       <div
         ref={bannerRef}
-        className='fixed left-0 right-0 top-20 z-40 border-b-2 border-b-orange-500 bg-white px-3 py-1 shadow-sm sm:px-4'
+        className='fixed left-0 right-0 top-16 z-40 border-b-2 border-b-orange-500 bg-white px-3 py-1 shadow-sm sm:top-20 sm:px-4'
       >
         <div className='mx-auto flex min-h-10 max-w-7xl items-center justify-between gap-2 text-xs sm:text-sm'>
           <div className='flex min-w-0 flex-1 items-center gap-2'>
