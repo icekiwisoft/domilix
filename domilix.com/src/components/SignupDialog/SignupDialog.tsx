@@ -106,7 +106,7 @@ export default function SignupDialog() {
       onClick={signupDialogActions.toggle}
     >
       <div
-        className='relative w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl'
+        className='relative w-full max-w-md overflow-hidden rounded-xl bg-white shadow-2xl'
         onClick={e => e.stopPropagation()}
       >
         {/* Close */}
