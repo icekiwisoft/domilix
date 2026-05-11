@@ -1,6 +1,6 @@
 'use client';
 
-import { HeartIcon, MapPinIcon } from '@heroicons/react/24/outline';
+import { HeartIcon, MapPinIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from '@router';
 
@@ -83,6 +83,18 @@ export default function ProductCard(props: Ad): React.ReactElement {
   const handleMouseEnter = useCallback(() => setIsHovered(true), []);
   const handleMouseLeave = useCallback(() => setIsHovered(false), []);
 
+  const handlePrev = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentImageIndex(prev => (prev - 1 + medias!.length) % medias!.length);
+  }, [medias]);
+
+  const handleNext = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentImageIndex(prev => (prev + 1) % medias!.length);
+  }, [medias]);
+
   return (
     <article
       className='group relative overflow-hidden rounded-lg bg-surface-container-lowest shadow-card'
@@ -116,6 +128,28 @@ export default function ProductCard(props: Ad): React.ReactElement {
         >
           <HeartIcon className={`size-[18px] ${liked ? 'fill-current' : ''}`} />
         </button>
+
+        {/* Prev / Next buttons */}
+        {hasMultipleImages && (
+          <>
+            <button
+              type='button'
+              onClick={handlePrev}
+              aria-label='Image précédente'
+              className='absolute left-2 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-surface-container-lowest/80 shadow-sm backdrop-blur-sm transition-opacity duration-200 opacity-0 group-hover:opacity-100 hover:bg-surface-container-lowest'
+            >
+              <ChevronLeftIcon className='size-4 text-on-surface' />
+            </button>
+            <button
+              type='button'
+              onClick={handleNext}
+              aria-label='Image suivante'
+              className='absolute right-2 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-surface-container-lowest/80 shadow-sm backdrop-blur-sm transition-opacity duration-200 opacity-0 group-hover:opacity-100 hover:bg-surface-container-lowest'
+            >
+              <ChevronRightIcon className='size-4 text-on-surface' />
+            </button>
+          </>
+        )}
 
         {/* Status badge */}
         <div className='absolute bottom-sm left-sm rounded bg-surface-container-lowest/90 px-sm py-xs text-label-md text-on-surface shadow-sm backdrop-blur-sm'>

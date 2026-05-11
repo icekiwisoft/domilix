@@ -134,7 +134,7 @@ export default function NotificationPopup({
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: -8, scale: 0.97 }}
         transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
-        className='absolute right-0 mt-2 w-96 max-w-[95vw] overflow-hidden rounded-2xl border border-[#eee0d2] bg-white shadow-2xl shadow-slate-900/10 z-[60] max-h-[80vh] flex flex-col'
+        className='fixed right-4 top-16 w-96 max-w-[calc(100vw-2rem)] sm:top-20 overflow-hidden rounded-2xl border border-[#eee0d2] bg-white shadow-2xl shadow-slate-900/10 z-[60] max-h-[80vh] flex flex-col'
       >
         {/* Header */}
         <div className='flex items-center justify-between px-5 py-4 border-b border-[#eee0d2] bg-white'>

@@ -47,7 +47,7 @@ const ProfilePopup = React.forwardRef<HTMLDivElement, ProfilePopupProps>(
     return (
       <div
         ref={ref}
-        className='absolute right-0 mt-2 z-[60] w-80 max-w-[90vw] rounded-xl border bg-white p-4 shadow-xl animate-in slide-in-from-top-2 duration-200'
+        className='fixed right-4 top-16 z-[60] w-80 max-w-[calc(100vw-2rem)] rounded-xl border bg-white p-4 shadow-xl animate-in slide-in-from-top-2 duration-200 sm:top-20'
         onClick={e => e.stopPropagation()}
         onMouseDown={e => e.stopPropagation()}
         onPointerDown={e => e.stopPropagation()}
