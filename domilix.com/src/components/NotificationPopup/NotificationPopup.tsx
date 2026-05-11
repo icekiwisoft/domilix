@@ -120,7 +120,7 @@ export default function NotificationPopup({
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -10 }}
-        className='absolute right-0 mt-2 w-96 max-w-[95vw] bg-white border rounded-xl shadow-xl z-[60] max-h-[80vh] flex flex-col'
+        className='fixed right-4 top-20 w-96 max-w-[calc(100vw-2rem)] bg-white border rounded-xl shadow-xl z-[60] max-h-[80vh] flex flex-col'
       >
         {/* Header */}
         <div className='flex items-center justify-between p-4 border-b'>
