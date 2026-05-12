@@ -13,6 +13,7 @@ import { CreateNewsletterDto } from './dto/create-newsletter.dto';
 import { UpdateNewsletterDto } from './dto/update-newsletter.dto';
 import { NewslettersService } from './newsletters.service';
 
+/**licorne pour la newsletter */
 @ApiTags('Newsletters')
 @Controller()
 export class NewslettersController {
