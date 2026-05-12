@@ -11,6 +11,7 @@ export interface RegisterData {
   email?: string;
   phone_number?: string;
   password: string;
+  website?: string;
 }
 
 export interface AuthResponse {
@@ -60,8 +61,8 @@ export const authApi = {
     return response.data;
   },
 
-  sendResetEmail: async (email: string): Promise<ResetEmailResponse> => {
-    const response = await api.post('/auth/sendEmail', { email });
+  sendResetEmail: async (email: string, website = ''): Promise<ResetEmailResponse> => {
+    const response = await api.post('/auth/sendEmail', { email, website });
     return response.data;
   },
 

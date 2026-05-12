@@ -8,6 +8,7 @@ import {
   toNumber,
 } from '../common/http/formatters';
 import { generateMediaThumbnailBuffer, MAX_AD_MEDIAS } from '../common/media/thumbnails';
+import { validateUploadedFile } from '../common/media/validate-upload';
 import { ObjectStorageService } from '../common/object-storage/object-storage.service';
 import { buildLaravelPagination } from '../common/http/pagination';
 import { PrismaService } from '../prisma/prisma.service';
@@ -817,6 +818,12 @@ export class AdsService {
     }
 
     for (const file of files) {
+      await validateUploadedFile(file, {
+        allowImages: true,
+        allowVideos: true,
+        maxSize: 50 * 1024 * 1024,
+        context: 'ads.create',
+      });
       const uploaded = await this.objectStorage.uploadFile(file, 'medias');
       const thumbnailBuffer = await generateMediaThumbnailBuffer(file).catch(() => null);
       const thumbnail = thumbnailBuffer

@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -10,6 +11,7 @@ import bcrypt from 'bcryptjs';
 import crypto from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { ObjectStorageService } from '../common/object-storage/object-storage.service';
+import { assertHoneypotClear } from '../common/honeypot';
 import { MailService } from '../mail/mail.service';
 import { AuthTokenService } from './auth-token.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
@@ -23,6 +25,8 @@ import { VerificationCodeService } from './verification-code.service';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly tokens: AuthTokenService,
@@ -181,6 +185,8 @@ export class AuthService {
   }
 
   async register(dto: RegisterDto) {
+    assertHoneypotClear(dto.website, 'auth.register');
+
     if (!dto.email && !dto.phone_number) {
       throw new BadRequestException('Email ou numero de telephone requis.');
     }
@@ -280,6 +286,7 @@ export class AuthService {
     });
 
     if (!user || !(await bcrypt.compare(dto.password, user.password))) {
+      this.logger.warn(`Failed login attempt for ${dto.email || dto.phone_number || 'unknown'}`);
       throw new UnauthorizedException('Les informations de connexion sont incorrectes.');
     }
 
@@ -459,16 +466,22 @@ export class AuthService {
   }
 
   async sendResetLinkEmail(dto: SendResetLinkDto) {
+    assertHoneypotClear(dto.website, 'auth.sendResetEmail');
+
     const user = await this.prisma.user.findFirst({ where: { email: dto.email } });
     if (!user) {
-      throw new NotFoundException('Aucun utilisateur trouve avec cet email.');
+      this.logger.warn(`Password reset requested for unknown email ${dto.email}`);
+      return {
+        message: 'Si cet email existe, un code de verification a ete envoye.',
+        verification_code: undefined,
+      };
     }
 
     const code = this.verificationCodes.generate(this.verificationCodeKey(user.id));
     await this.mail.sendPasswordResetCode(user.email, code);
 
     return {
-      message: 'Un code de verification a ete envoye a votre email.',
+      message: 'Si cet email existe, un code de verification a ete envoye.',
       verification_code: process.env.NODE_ENV !== 'production' ? code : undefined,
     };
   }
@@ -480,7 +493,8 @@ export class AuthService {
 
     const user = await this.prisma.user.findFirst({ where: { email: dto.email } });
     if (!user) {
-      throw new NotFoundException('Aucun utilisateur trouve avec cet email.');
+      this.logger.warn(`Password reset completion attempted for unknown email ${dto.email}`);
+      throw new BadRequestException('Code de verification invalide.');
     }
 
     const code = this.verificationCodes.get(this.verificationCodeKey(user.id));

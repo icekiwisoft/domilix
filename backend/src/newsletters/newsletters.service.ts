@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import crypto from 'node:crypto';
+import { assertHoneypotClear } from '../common/honeypot';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateNewsletterDto } from './dto/create-newsletter.dto';
 import { UpdateNewsletterDto } from './dto/update-newsletter.dto';
@@ -33,6 +34,8 @@ export class NewslettersService {
   }
 
   async store(dto: CreateNewsletterDto) {
+    assertHoneypotClear(dto.website, 'newsletters.store');
+
     const existing = await this.prisma.newsletter.findFirst({
       where: { email: dto.email },
     });

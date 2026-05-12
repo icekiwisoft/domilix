@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 
+import HoneypotInput from '@components/HoneypotInput/HoneypotInput';
 import { authApi } from '@services/authApi';
 
 export default function ResetPassword() {
@@ -14,6 +15,7 @@ export default function ResetPassword() {
   const [code, setCode] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirmation, setPasswordConfirmation] = useState('');
+  const [website, setWebsite] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
@@ -72,7 +74,7 @@ export default function ResetPassword() {
 
     try {
       setLoading(true);
-      await authApi.sendResetEmail(trimmedEmail);
+      await authApi.sendResetEmail(trimmedEmail, website);
       setSuccess('Un nouveau code a ete envoye a votre email.');
     } catch (error: any) {
       setError(error.response?.data?.message || "Impossible d'envoyer un nouveau code.");
@@ -108,6 +110,7 @@ export default function ResetPassword() {
         )}
 
         <form onSubmit={handleSubmit} className='space-y-4'>
+          <HoneypotInput value={website} onChange={setWebsite} />
           <label className='block text-sm font-semibold text-gray-700'>
             Email
             <input

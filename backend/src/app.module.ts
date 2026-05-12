@@ -1,5 +1,7 @@
 import { CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AdsModule } from './ads/ads.module';
 import { AddressesModule } from './addresses/addresses.module';
 import { AnnouncerRequestsModule } from './announcer-requests/announcer-requests.module';
@@ -25,6 +27,12 @@ import { UsersModule } from './users/users.module';
       ttl: 60_000,
       max: 500,
     }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60_000,
+        limit: 120,
+      },
+    ]),
     ObjectStorageModule,
     PrismaModule,
     AuthModule,
@@ -42,6 +50,12 @@ import { UsersModule } from './users/users.module';
     UploadsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}

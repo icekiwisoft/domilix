@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { FaCheckCircle, FaEye, FaEyeSlash, FaFacebook, FaGoogle, FaTimesCircle } from 'react-icons/fa';
 
+import HoneypotInput from '@components/HoneypotInput/HoneypotInput';
 import BlockInputs from '@components/OTP/BlockInputs';
 import { signupDialogActions, signinDialogActions } from '@stores/defineStore';
 import { useAuth } from '../../hooks/useAuth';
@@ -25,6 +26,7 @@ export default function SignupDialog() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [website, setWebsite] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
@@ -62,6 +64,7 @@ export default function SignupDialog() {
     const registerData: RegisterData = {
       name: username,
       password,
+      website,
       ...(registrationType === 'phone' ? { phone_number: norm } : { email: norm }),
     };
 
@@ -258,6 +261,7 @@ export default function SignupDialog() {
               </div>
 
               <form onSubmit={handleRegister} className='space-y-4'>
+                <HoneypotInput value={website} onChange={setWebsite} />
                 <div>
                   <label className='mb-1 block text-sm font-semibold text-gray-700'>Nom d'utilisateur</label>
                   <input type='text' value={username} onChange={e => setUsername(e.target.value)} required className={inputCls} placeholder='Votre prénom ou pseudo' />

@@ -9,6 +9,7 @@ import { FormEvent, Fragment, useEffect, useState } from 'react';
 import { HiChevronUpDown, HiRocketLaunch } from 'react-icons/hi2';
 import { MdMyLocation } from 'react-icons/md';
 import AddressAutocomplete from '@components/AddressAutocomplete/AddressAutocomplete';
+import HoneypotInput from '@components/HoneypotInput/HoneypotInput';
 
 interface SelectData {
   key: string;
@@ -37,6 +38,7 @@ export default function ArticlePostDialog({
   ); // Devise par défaut
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [mediaError, setMediaError] = useState('');
+  const [website, setWebsite] = useState('');
 
   const [formData, setFormData] = useState({
     category_id: '',
@@ -304,6 +306,7 @@ export default function ArticlePostDialog({
         state: formData.state,
         country: formData.country,
         zip: formData.zip,
+        website,
         media_ids: uploadedMedias.map(media => media.id),
         media_types: uploadedMedias.map(media => media.mime_type),
       };
@@ -1389,6 +1392,7 @@ export default function ArticlePostDialog({
               onSubmit={handleSubmit}
               className='mt-3 flex min-h-0 flex-1 flex-col sm:mt-4'
             >
+              <HoneypotInput value={website} onChange={setWebsite} />
               <div className='flex min-h-0 flex-1 flex-col gap-4 sm:flex-row sm:gap-8'>
                 {/* Stepper vertical à gauche */}
                 <div className='shrink-0 sm:w-64'>{renderSteppers()}</div>

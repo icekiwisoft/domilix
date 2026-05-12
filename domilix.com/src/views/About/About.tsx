@@ -6,6 +6,7 @@ import Nav2 from '@components/Nav2/Nav2';
 import Footer2 from '@components/Footer2/Footer2';
 import { Link } from '@router';
 import { newsletterApi } from '@services/newsletterApi';
+import HoneypotInput from '@components/HoneypotInput/HoneypotInput';
 
 /* ─── Animation variants ─────────────────────────────────────── */
 const fadeUp = {
@@ -63,6 +64,7 @@ const VALUES = [
 /* ─── Component ──────────────────────────────────────────────── */
 export default function About(): React.ReactElement {
   const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterWebsite, setNewsletterWebsite] = useState('');
   const [newsletterMessage, setNewsletterMessage] = useState('');
   const [newsletterError, setNewsletterError] = useState('');
   const [newsletterLoading, setNewsletterLoading] = useState(false);
@@ -80,9 +82,10 @@ export default function About(): React.ReactElement {
 
     try {
       setNewsletterLoading(true);
-      const response = await newsletterApi.subscribe(email);
+      const response = await newsletterApi.subscribe(email, newsletterWebsite);
       setNewsletterMessage(response.message || 'Inscription à la newsletter réussie.');
       setNewsletterEmail('');
+      setNewsletterWebsite('');
     } catch (error: any) {
       setNewsletterError(
         error.response?.data?.message ||
@@ -535,6 +538,7 @@ export default function About(): React.ReactElement {
               </p>
 
               <form onSubmit={handleNewsletterSubmit} className='mx-auto mt-8 max-w-xl'>
+                <HoneypotInput value={newsletterWebsite} onChange={setNewsletterWebsite} />
                 <div className='flex min-h-14 overflow-hidden rounded-full bg-white/90 p-1.5 shadow-inner backdrop-blur sm:min-h-16'>
                   <input
                     type='email'

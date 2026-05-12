@@ -3,11 +3,13 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
+import HoneypotInput from '@components/HoneypotInput/HoneypotInput';
 import { authApi } from '@services/authApi';
 
 export default function Forgot() {
   const router = useRouter();
   const [email, setEmail] = useState('');
+  const [website, setWebsite] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -23,7 +25,7 @@ export default function Forgot() {
 
     try {
       setLoading(true);
-      await authApi.sendResetEmail(trimmedEmail);
+      await authApi.sendResetEmail(trimmedEmail, website);
       router.push(`/reset-password?email=${encodeURIComponent(trimmedEmail)}`);
     } catch (error: any) {
       setError(error.response?.data?.message || "Impossible d'envoyer le code de reinitialisation.");
@@ -54,6 +56,7 @@ export default function Forgot() {
         )}
 
         <form onSubmit={handleSubmit} className='space-y-4'>
+          <HoneypotInput value={website} onChange={setWebsite} />
           <label className='block text-sm font-semibold text-gray-700'>
             Email
             <input

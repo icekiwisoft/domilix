@@ -7,6 +7,7 @@ import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { signinDialogActions, signupDialogActions } from '@stores/defineStore';
 import { useAuth } from '../../hooks/useAuth';
 import { authApi } from '../../services/authApi';
+import HoneypotInput from '@components/HoneypotInput/HoneypotInput';
 import BlockInputs from '@components/OTP/BlockInputs';
 
 const inputCls = 'w-full p-2.5 rounded-lg bg-white border border-gray-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-100 transition outline-none text-gray-800 text-sm';
@@ -21,6 +22,7 @@ export default function SigninDialog() {
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [website, setWebsite] = useState('');
   const [resetEmailLoading, setResetEmailLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -62,7 +64,7 @@ export default function SigninDialog() {
     if (!email || !isEmail(email)) { setError('Veuillez saisir une adresse email valide'); return; }
     try {
       setResetEmailLoading(true);
-      await authApi.sendResetEmail(email);
+      await authApi.sendResetEmail(email, website);
       signinDialogActions.toggle();
       router.push(`/reset-password?email=${encodeURIComponent(email)}`);
     } catch (err: any) {
@@ -150,6 +152,7 @@ export default function SigninDialog() {
                 <p className='mt-1 text-sm text-gray-500'>Entrez votre email pour recevoir le lien de réinitialisation.</p>
               </div>
               <form onSubmit={handleForgotPassword} className='space-y-4'>
+                <HoneypotInput value={website} onChange={setWebsite} />
                 <div>
                   <label className='mb-1 block text-sm font-semibold text-gray-700'>Email</label>
                   <input type='email' value={identifier} onChange={e => setIdentifier(e.target.value)} required className={inputCls} placeholder='john@example.com' />
