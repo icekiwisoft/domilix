@@ -1,6 +1,5 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
@@ -13,7 +12,6 @@ import BlockInputs from '@components/OTP/BlockInputs';
 const inputCls = 'w-full p-2.5 rounded-lg bg-white border border-gray-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-100 transition outline-none text-gray-800 text-sm';
 
 export default function SigninDialog() {
-  const router = useRouter();
   const { login, verifyPhone, resendVerificationCode, isLoading, user } = useAuth();
 
   const [isForgotPassword, setIsForgotPassword] = useState(false);
@@ -64,9 +62,8 @@ export default function SigninDialog() {
     if (!email || !isEmail(email)) { setError('Veuillez saisir une adresse email valide'); return; }
     try {
       setResetEmailLoading(true);
-      await authApi.sendResetEmail(email, website);
-      signinDialogActions.toggle();
-      router.push(`/reset-password?email=${encodeURIComponent(email)}`);
+      const response = await authApi.sendResetEmail(email, website);
+      setSuccess(response.message || 'Si cet email existe, un lien de reinitialisation a ete envoye.');
     } catch (err: any) {
       setError(err.response?.data?.message || "Impossible d'envoyer le lien de réinitialisation");
     } finally {

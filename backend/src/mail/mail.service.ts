@@ -59,12 +59,17 @@ export class MailService {
     });
   }
 
-  async sendPasswordResetCode(email: string, code: string) {
+  async sendPasswordResetLink(email: string, resetUrl: string) {
     await this.send({
       to: email,
-      subject: 'Code de reinitialisation de votre mot de passe Domilix',
-      text: `Votre code de reinitialisation Domilix est : ${code}`,
-      html: `<p>Votre code de reinitialisation Domilix est :</p><p><strong>${code}</strong></p>`,
+      subject: 'Lien de reinitialisation de votre mot de passe Domilix',
+      text: `Cliquez sur ce lien pour reinitialiser votre mot de passe Domilix : ${resetUrl}`,
+      html: `
+        <p>Vous avez demande la reinitialisation de votre mot de passe Domilix.</p>
+        <p><a href="${resetUrl}" style="display:inline-block;padding:12px 18px;border-radius:10px;background:#f97316;color:#ffffff;text-decoration:none;font-weight:700;">Reinitialiser mon mot de passe</a></p>
+        <p>Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :</p>
+        <p><a href="${resetUrl}">${resetUrl}</a></p>
+      `,
     });
   }
 

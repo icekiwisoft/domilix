@@ -467,21 +467,24 @@ export class AuthService {
 
   async sendResetLinkEmail(dto: SendResetLinkDto) {
     assertHoneypotClear(dto.website, 'auth.sendResetEmail');
+    const resetMessage = 'Si cet email existe, un lien de reinitialisation a ete envoye.';
 
     const user = await this.prisma.user.findFirst({ where: { email: dto.email } });
     if (!user) {
       this.logger.warn(`Password reset requested for unknown email ${dto.email}`);
       return {
-        message: 'Si cet email existe, un code de verification a ete envoye.',
+        message: resetMessage,
         verification_code: undefined,
       };
     }
 
     const code = this.verificationCodes.generate(this.verificationCodeKey(user.id));
-    await this.mail.sendPasswordResetCode(user.email, code);
+    const frontendUrl = process.env.FRONTEND_URL || process.env.APP_URL || 'https://domilix.com';
+    const resetUrl = `${frontendUrl.replace(/\/$/, '')}/reset-password?email=${encodeURIComponent(user.email)}&token=${encodeURIComponent(code)}`;
+    await this.mail.sendPasswordResetLink(user.email, resetUrl);
 
     return {
-      message: 'Si cet email existe, un code de verification a ete envoye.',
+      message: resetMessage,
       verification_code: process.env.NODE_ENV !== 'production' ? code : undefined,
     };
   }
@@ -494,12 +497,12 @@ export class AuthService {
     const user = await this.prisma.user.findFirst({ where: { email: dto.email } });
     if (!user) {
       this.logger.warn(`Password reset completion attempted for unknown email ${dto.email}`);
-      throw new BadRequestException('Code de verification invalide.');
+      throw new BadRequestException('Lien de reinitialisation invalide.');
     }
 
     const code = this.verificationCodes.get(this.verificationCodeKey(user.id));
-    if (code !== String(dto.code)) {
-      throw new BadRequestException('Code de verification invalide.');
+    if (code !== String(dto.token || dto.code || '')) {
+      throw new BadRequestException('Lien de reinitialisation invalide.');
     }
 
     await this.prisma.user.update({

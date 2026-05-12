@@ -9,7 +9,7 @@ export default function PrivateRoute({ children }: React.PropsWithChildren) {
 
   if (authData.status == 'unknow') return null;
   if (authData.status !== 'logged') {
-    return <Navigate to='/login' state={{ from: location }} />;
+    return <Navigate to='/401' state={{ from: location }} />;
   }
   return <>{children}</>;
 }

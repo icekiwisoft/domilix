@@ -31,7 +31,8 @@ export interface ResetEmailResponse {
 
 export interface ResetPasswordData {
   email: string;
-  code: string;
+  token?: string;
+  code?: string;
   password: string;
   password_confirmation: string;
 }

@@ -3,16 +3,18 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 
+import FooterMinimal from '@components/FooterMinimal/FooterMinimal';
 import HoneypotInput from '@components/HoneypotInput/HoneypotInput';
+import Nav2 from '@components/Nav2/Nav2';
 import { authApi } from '@services/authApi';
 
 export default function ResetPassword() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialEmail = searchParams.get('email') || '';
+  const resetToken = searchParams.get('token') || '';
 
   const [email, setEmail] = useState(initialEmail);
-  const [code, setCode] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirmation, setPasswordConfirmation] = useState('');
   const [website, setWebsite] = useState('');
@@ -30,8 +32,8 @@ export default function ResetPassword() {
       return;
     }
 
-    if (!code.trim()) {
-      setError('Veuillez saisir le code reçu par email.');
+    if (!resetToken) {
+      setError('Lien de reinitialisation invalide ou incomplet. Demandez un nouveau lien.');
       return;
     }
 
@@ -49,14 +51,14 @@ export default function ResetPassword() {
       setLoading(true);
       const response = await authApi.resetPassword({
         email: email.trim(),
-        code: code.trim(),
+        token: resetToken,
         password,
         password_confirmation: passwordConfirmation,
       });
       setSuccess(response.message || 'Mot de passe reinitialise avec succes.');
-      setTimeout(() => router.push('/login'), 1200);
+      setTimeout(() => router.push('/'), 1200);
     } catch (error: any) {
-      setError(error.response?.data?.message || 'Code invalide ou mot de passe incorrect.');
+      setError(error.response?.data?.message || 'Lien invalide ou mot de passe incorrect.');
     } finally {
       setLoading(false);
     }
@@ -68,24 +70,26 @@ export default function ResetPassword() {
 
     const trimmedEmail = email.trim();
     if (!trimmedEmail || !trimmedEmail.includes('@')) {
-      setError('Veuillez saisir une adresse email valide avant de renvoyer le code.');
+      setError('Veuillez saisir une adresse email valide avant de renvoyer le lien.');
       return;
     }
 
     try {
       setLoading(true);
       await authApi.sendResetEmail(trimmedEmail, website);
-      setSuccess('Un nouveau code a ete envoye a votre email.');
+      setSuccess('Un nouveau lien de reinitialisation a ete envoye a votre email.');
     } catch (error: any) {
-      setError(error.response?.data?.message || "Impossible d'envoyer un nouveau code.");
+      setError(error.response?.data?.message || "Impossible d'envoyer un nouveau lien.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <section className='min-h-screen bg-gradient-to-br from-orange-50 via-white to-slate-100 px-4 py-24'>
-      <div className='mx-auto max-w-lg rounded-3xl border border-orange-100 bg-white/90 p-8 shadow-xl shadow-orange-100/40 backdrop-blur'>
+    <>
+      <Nav2 />
+      <section className='min-h-screen bg-gradient-to-br from-orange-50 via-white to-slate-100 px-4 pb-24 pt-28 sm:pt-32'>
+        <div className='mx-auto max-w-lg rounded-3xl border border-orange-100 bg-white/90 p-8 shadow-xl shadow-orange-100/40 backdrop-blur'>
         <div className='mb-8 text-center'>
           <p className='text-xs font-bold uppercase tracking-[0.24em] text-orange-500'>
             Sécurité Domilix
@@ -94,7 +98,7 @@ export default function ResetPassword() {
             Réinitialiser le mot de passe
           </h1>
           <p className='mt-3 text-sm leading-6 text-gray-600'>
-            Saisissez le code reçu par email, puis choisissez un nouveau mot de passe.
+            Choisissez un nouveau mot de passe pour finaliser la reinitialisation.
           </p>
         </div>
 
@@ -119,19 +123,6 @@ export default function ResetPassword() {
               onChange={event => setEmail(event.target.value)}
               className='mt-2 w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 outline-none transition focus:border-orange-500 focus:ring-4 focus:ring-orange-100'
               placeholder='john@example.com'
-              required
-            />
-          </label>
-
-          <label className='block text-sm font-semibold text-gray-700'>
-            Code reçu par email
-            <input
-              type='text'
-              inputMode='numeric'
-              value={code}
-              onChange={event => setCode(event.target.value)}
-              className='mt-2 w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 outline-none transition focus:border-orange-500 focus:ring-4 focus:ring-orange-100'
-              placeholder='123456'
               required
             />
           </label>
@@ -174,10 +165,12 @@ export default function ResetPassword() {
             disabled={loading}
             className='w-full rounded-xl border border-orange-200 px-4 py-3 text-sm font-bold text-orange-600 transition hover:bg-orange-50 disabled:text-gray-400'
           >
-            Renvoyer le code
+            Renvoyer le lien
           </button>
         </form>
-      </div>
-    </section>
+        </div>
+      </section>
+      <FooterMinimal />
+    </>
   );
 }

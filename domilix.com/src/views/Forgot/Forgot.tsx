@@ -1,21 +1,21 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 import HoneypotInput from '@components/HoneypotInput/HoneypotInput';
 import { authApi } from '@services/authApi';
 
 export default function Forgot() {
-  const router = useRouter();
   const [email, setEmail] = useState('');
   const [website, setWebsite] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setError('');
+    setSuccess('');
 
     const trimmedEmail = email.trim();
     if (!trimmedEmail || !trimmedEmail.includes('@')) {
@@ -25,10 +25,10 @@ export default function Forgot() {
 
     try {
       setLoading(true);
-      await authApi.sendResetEmail(trimmedEmail, website);
-      router.push(`/reset-password?email=${encodeURIComponent(trimmedEmail)}`);
+      const response = await authApi.sendResetEmail(trimmedEmail, website);
+      setSuccess(response.message || 'Si cet email existe, un lien de reinitialisation a ete envoye.');
     } catch (error: any) {
-      setError(error.response?.data?.message || "Impossible d'envoyer le code de reinitialisation.");
+      setError(error.response?.data?.message || "Impossible d'envoyer le lien de reinitialisation.");
     } finally {
       setLoading(false);
     }
@@ -45,13 +45,18 @@ export default function Forgot() {
             Mot de passe oublié
           </h1>
           <p className='mt-3 text-sm leading-6 text-gray-600'>
-            Entrez votre email. Nous vous enverrons un code pour reinitialiser votre mot de passe.
+            Entrez votre email. Nous vous enverrons un lien pour reinitialiser votre mot de passe.
           </p>
         </div>
 
         {error && (
           <div className='mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700'>
             {error}
+          </div>
+        )}
+        {success && (
+          <div className='mb-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700'>
+            {success}
           </div>
         )}
 
@@ -74,7 +79,7 @@ export default function Forgot() {
             disabled={loading}
             className='w-full rounded-xl bg-orange-500 px-4 py-3 text-sm font-bold text-white transition hover:bg-orange-600 disabled:bg-gray-400'
           >
-            {loading ? 'Envoi...' : 'Recevoir le code'}
+            {loading ? 'Envoi...' : 'Recevoir le lien'}
           </button>
         </form>
       </div>

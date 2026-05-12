@@ -2,6 +2,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import express from 'express';
+import helmet from 'helmet';
 import path from 'node:path';
 import { AppModule } from './app.module';
 
@@ -12,6 +13,30 @@ async function bootstrap() {
 
   server.requestTimeout = requestTimeout;
   server.headersTimeout = requestTimeout + 60 * 1000;
+
+  app.use(
+    helmet({
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+      contentSecurityPolicy: process.env.NODE_ENV === 'production'
+        ? {
+            directives: {
+              defaultSrc: ["'self'"],
+              baseUri: ["'self'"],
+              fontSrc: ["'self'", 'https:', 'data:'],
+              formAction: ["'self'"],
+              frameAncestors: ["'self'"],
+              imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
+              objectSrc: ["'none'"],
+              scriptSrc: ["'self'", "'unsafe-inline'"],
+              scriptSrcAttr: ["'none'"],
+              styleSrc: ["'self'", "'unsafe-inline'", 'https:'],
+              connectSrc: ["'self'", 'https:'],
+              upgradeInsecureRequests: [],
+            },
+          }
+        : false,
+    }),
+  );
 
   app.enableCors({
     origin: true,
