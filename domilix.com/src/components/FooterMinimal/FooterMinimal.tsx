@@ -7,47 +7,47 @@ export default function FooterMinimal() {
   const logoSrc = typeof Logo === 'string' ? Logo : Logo.src;
 
   return (
-    <footer className='bg-inverse-surface border-t border-outline-variant/20'>
-      <div className='mx-auto flex max-w-[1280px] flex-col items-center justify-between gap-4 px-6 py-12 md:flex-row md:gap-6 lg:px-10'>
+    <footer className='border-t border-outline-variant/40 bg-white'>
+      <div className='mx-auto flex max-w-[1280px] flex-col items-center justify-between gap-3 px-6 py-6 md:flex-row md:gap-6 lg:px-10'>
 
         {/* Logo */}
         <Link to='/' className='flex-shrink-0 opacity-90 hover:opacity-100 transition-opacity'>
-          <img src={logoSrc} alt='Domilix' className='h-6 brightness-0 invert' />
+          <img src={logoSrc} alt='Domilix' className='h-6' />
         </Link>
 
         {/* Nav links */}
         <div className='flex flex-wrap items-center justify-center gap-x-6 gap-y-2'>
           <Link
             to='/about'
-            className='text-sm text-surface-variant transition-colors hover:text-inverse-primary'
+            className='text-sm text-on-surface-variant transition-colors hover:text-primary'
           >
             Qui sommes-nous
           </Link>
-          <span className='text-outline/40 hidden md:inline'>·</span>
+          <span className='hidden text-outline/60 md:inline'>·</span>
           <Link
             to='/privacy-policy'
-            className='text-sm text-surface-variant transition-colors hover:text-inverse-primary'
+            className='text-sm text-on-surface-variant transition-colors hover:text-primary'
           >
             Confidentialité
           </Link>
-          <span className='text-outline/40 hidden md:inline'>·</span>
+          <span className='hidden text-outline/60 md:inline'>·</span>
           <Link
             to='/cgu'
-            className='text-sm text-surface-variant transition-colors hover:text-inverse-primary'
+            className='text-sm text-on-surface-variant transition-colors hover:text-primary'
           >
             CGU
           </Link>
-          <span className='text-outline/40 hidden md:inline'>·</span>
+          <span className='hidden text-outline/60 md:inline'>·</span>
           <Link
             to='/mentions-legales'
-            className='text-sm text-surface-variant transition-colors hover:text-inverse-primary'
+            className='text-sm text-on-surface-variant transition-colors hover:text-primary'
           >
             Mentions légales
           </Link>
         </div>
 
         {/* Copyright */}
-        <p className='text-sm text-inverse-on-surface/70 flex-shrink-0'>
+        <p className='flex-shrink-0 text-sm text-on-surface-variant'>
           © {new Date().getFullYear()} Domilix. Tous droits réservés.
         </p>
       </div>

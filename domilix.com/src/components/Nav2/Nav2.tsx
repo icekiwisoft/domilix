@@ -11,7 +11,7 @@ import ConfirmDialog from '@components/ConfirmDialog/ConfirmDialog';
 import { notificationApi } from '../../services/notificationApi';
 import React, { useState, useEffect, useRef } from 'react';
 import { HiBars3, HiXMark, HiBell, HiHomeModern, HiSparkles, HiChevronDown } from 'react-icons/hi2';
-import { MdLandscape, MdOutlineCampaign } from 'react-icons/md';
+import { MdChair, MdLandscape, MdOutlineCampaign } from 'react-icons/md';
 import { NavLink, useNavigate } from '@router';
 
 const defaultLinks = [
@@ -29,7 +29,7 @@ type Nav2Props = {
 const linkIcons: Record<string, React.ReactNode> = {
   '/subscriptions': <HiSparkles className='h-4 w-4 shrink-0' />,
   '/houses': <HiHomeModern className='h-4 w-4 shrink-0' />,
-  '/furnitures': <HiSparkles className='h-4 w-4 shrink-0' />,
+  '/furnitures': <MdChair className='h-4 w-4 shrink-0' />,
   '/terrains': <MdLandscape className='h-4 w-4 shrink-0' />,
 };
 

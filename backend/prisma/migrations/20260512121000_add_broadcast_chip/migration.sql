@@ -1,0 +1,2 @@
+ALTER TABLE `broadcasts`
+  ADD COLUMN `chip` VARCHAR(100) NULL;

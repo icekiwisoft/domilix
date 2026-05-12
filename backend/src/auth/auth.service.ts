@@ -8,9 +8,9 @@ import {
 import { User } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import crypto from 'node:crypto';
-import nodemailer from 'nodemailer';
 import { PrismaService } from '../prisma/prisma.service';
 import { ObjectStorageService } from '../common/object-storage/object-storage.service';
+import { MailService } from '../mail/mail.service';
 import { AuthTokenService } from './auth-token.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { LoginDto } from './dto/login.dto';
@@ -28,6 +28,7 @@ export class AuthService {
     private readonly tokens: AuthTokenService,
     private readonly verificationCodes: VerificationCodeService,
     private readonly objectStorage: ObjectStorageService,
+    private readonly mail: MailService,
   ) {}
 
   private async totalCreditsForUser(userId: bigint) {
@@ -82,12 +83,6 @@ export class AuthService {
       });
     } catch {
       // Notifications should never block authentication flows.
-    }
-  }
-
-  private ensureMailConfigured() {
-    if (!process.env.MAIL_HOST && process.env.NODE_ENV === 'production') {
-      throw new BadRequestException('Configuration email manquante.');
     }
   }
 
@@ -147,62 +142,6 @@ export class AuthService {
     }));
   }
 
-  private async sendResetPasswordEmail(email: string, code: string) {
-    this.ensureMailConfigured();
-
-    if (!process.env.MAIL_HOST) {
-      return;
-    }
-
-    const transporter = nodemailer.createTransport({
-      host: process.env.MAIL_HOST,
-      port: Number(process.env.MAIL_PORT || 587),
-      secure: process.env.MAIL_SECURE === 'true',
-      auth: process.env.MAIL_USERNAME
-        ? {
-            user: process.env.MAIL_USERNAME,
-            pass: process.env.MAIL_PASSWORD,
-          }
-        : undefined,
-    });
-
-    await transporter.sendMail({
-      from: `"${process.env.MAIL_FROM_NAME || 'Domilix'}" <${process.env.MAIL_FROM_ADDRESS || 'noreply@domilix.com'}>`,
-      to: email,
-      subject: 'Code de reinitialisation de votre mot de passe Domilix',
-      text: `Votre code de reinitialisation Domilix est : ${code}`,
-      html: `<p>Votre code de reinitialisation Domilix est :</p><p><strong>${code}</strong></p>`,
-    });
-  }
-
-  private async sendEmailVerificationCode(email: string, code: string) {
-    this.ensureMailConfigured();
-
-    if (!process.env.MAIL_HOST) {
-      return;
-    }
-
-    const transporter = nodemailer.createTransport({
-      host: process.env.MAIL_HOST,
-      port: Number(process.env.MAIL_PORT || 587),
-      secure: process.env.MAIL_SECURE === 'true',
-      auth: process.env.MAIL_USERNAME
-        ? {
-            user: process.env.MAIL_USERNAME,
-            pass: process.env.MAIL_PASSWORD,
-          }
-        : undefined,
-    });
-
-    await transporter.sendMail({
-      from: `"${process.env.MAIL_FROM_NAME || 'Domilix'}" <${process.env.MAIL_FROM_ADDRESS || 'noreply@domilix.com'}>`,
-      to: email,
-      subject: 'Code de verification de votre email Domilix',
-      text: `Votre code de verification Domilix est : ${code}`,
-      html: `<p>Votre code de verification Domilix est :</p><p><strong>${code}</strong></p>`,
-    });
-  }
-
   async sendEmailVerification(user: User) {
     if (user.emailVerified) {
       return { message: 'Email deja verifie.' };
@@ -212,7 +151,7 @@ export class AuthService {
     }
 
     const code = this.verificationCodes.generate(this.emailVerificationKey(user.id));
-    await this.sendEmailVerificationCode(user.email, code);
+    await this.mail.sendEmailVerificationCode(user.email, code);
 
     return {
       message: 'Un code de verification a ete envoye a votre email.',
@@ -261,7 +200,7 @@ export class AuthService {
     }
 
     if (dto.email && !dto.phone_number) {
-      this.ensureMailConfigured();
+      this.mail.ensureConfigured();
     }
 
     const password = await bcrypt.hash(dto.password, 10);
@@ -303,7 +242,7 @@ export class AuthService {
     );
 
     if (!dto.phone_number) {
-      await this.sendEmailVerificationCode(user.email, code);
+      await this.mail.sendEmailVerificationCode(user.email, code);
     }
 
     await this.createUserNotification(user.id, {
@@ -526,7 +465,7 @@ export class AuthService {
     }
 
     const code = this.verificationCodes.generate(this.verificationCodeKey(user.id));
-    await this.sendResetPasswordEmail(user.email, code);
+    await this.mail.sendPasswordResetCode(user.email, code);
 
     return {
       message: 'Un code de verification a ete envoye a votre email.',

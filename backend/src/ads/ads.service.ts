@@ -51,6 +51,12 @@ export class AdsService {
       : undefined;
   }
 
+  private optionalString(value: unknown) {
+    if (typeof value !== 'string') return null;
+    const trimmed = value.trim();
+    return trimmed || null;
+  }
+
   private buildAdWhere(
     query: QueryAdsDto,
     realEstateIds?: bigint[],
@@ -439,6 +445,8 @@ export class AdsService {
         city: ad.city,
         country: ad.country,
         postal_code: ad.zip,
+        contact_phone: ad.contactPhone,
+        contact_email: ad.contactEmail,
         category: this.serializeCategory(category, category ? categoryItemCounts.get(ad.categoryId) || 0 : 0),
         creation_date: ad.createdAt,
         liked: favoriteIds.has(ad.id.toString()),
@@ -483,6 +491,8 @@ export class AdsService {
       city: ad.city,
       country: ad.country,
       postal_code: ad.zip,
+      contact_phone: ad.contactPhone,
+      contact_email: ad.contactEmail,
       category: this.serializeCategory(category),
       announcer: announcer ? await this.serializeAnnouncer(announcer) : null,
       creation_date: ad.createdAt,
@@ -769,6 +779,8 @@ export class AdsService {
           : null,
         period: this.normalizePeriod(body.period) || 'month',
         description: body.description || null,
+        contactPhone: this.optionalString(body.contact_phone),
+        contactEmail: this.optionalString(body.contact_email),
       },
     });
 
@@ -865,6 +877,8 @@ export class AdsService {
       where: { id: ad.id },
       data: {
         ...(body.description !== undefined ? { description: body.description } : {}),
+        ...(body.contact_phone !== undefined ? { contactPhone: this.optionalString(body.contact_phone) } : {}),
+        ...(body.contact_email !== undefined ? { contactEmail: this.optionalString(body.contact_email) } : {}),
         ...(body.price !== undefined ? { price: Number(body.price) } : {}),
         ...(body.address !== undefined ? { adress: body.address } : {}),
         ...(body.city !== undefined ? { city: body.city } : {}),

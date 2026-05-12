@@ -20,6 +20,12 @@ export class CreateBroadcastDto {
   @IsString()
   subtitle?: string;
 
+  @ApiPropertyOptional({ example: 'Agences' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  chip?: string;
+
   @ApiPropertyOptional({ example: '35% OFF' })
   @IsOptional()
   @IsString()

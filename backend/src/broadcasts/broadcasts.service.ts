@@ -22,6 +22,7 @@ export class BroadcastsService {
       id: Number(item.id),
       title: item.title,
       subtitle: item.subtitle,
+      chip: item.chip,
       badge: item.badge,
       cta: item.cta,
       image: item.image,
@@ -68,6 +69,7 @@ export class BroadcastsService {
       data: {
         title: dto.title,
         subtitle: dto.subtitle,
+        chip: dto.chip,
         badge: dto.badge,
         cta: dto.cta,
         image: dto.image,
@@ -94,6 +96,7 @@ export class BroadcastsService {
       data: {
         ...(dto.title !== undefined ? { title: dto.title } : {}),
         ...(dto.subtitle !== undefined ? { subtitle: dto.subtitle } : {}),
+        ...(dto.chip !== undefined ? { chip: dto.chip } : {}),
         ...(dto.badge !== undefined ? { badge: dto.badge } : {}),
         ...(dto.cta !== undefined ? { cta: dto.cta } : {}),
         ...(dto.image !== undefined ? { image: dto.image } : {}),

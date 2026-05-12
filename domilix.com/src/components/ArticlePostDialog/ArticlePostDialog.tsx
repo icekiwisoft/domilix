@@ -61,6 +61,8 @@ export default function ArticlePostDialog({
     localization: [0, 0] as [number, number],
     period: '',
     description: '',
+    contact_phone: '',
+    contact_email: '',
     devise: '',
     // Nouveaux champs d'adresse
     address: '',
@@ -293,6 +295,8 @@ export default function ArticlePostDialog({
         furnitured: formData.furnitured ? '1' : '0',
         period: formData.period,
         description: formData.description,
+        contact_phone: formData.contact_phone,
+        contact_email: formData.contact_email,
         devise: formData.devise,
         localization: [formData.localization[0].toString(), formData.localization[1].toString()],
         address: formData.address,
@@ -1199,6 +1203,36 @@ export default function ArticlePostDialog({
                 className='w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-0 transition-all duration-200 min-h-[100px] resize-none text-sm'
                 placeholder='Décrivez votre bien...'
               />
+            </div>
+
+            <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
+              <div className='space-y-1.5'>
+                <label className='block text-sm font-medium text-gray-700'>
+                  Téléphone à afficher
+                </label>
+                <input
+                  type='tel'
+                  name='contact_phone'
+                  value={formData.contact_phone}
+                  onChange={handleChange}
+                  className='w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-0 transition-all duration-200 text-sm'
+                  placeholder='Optionnel, sinon téléphone pro'
+                />
+              </div>
+
+              <div className='space-y-1.5'>
+                <label className='block text-sm font-medium text-gray-700'>
+                  Email à afficher
+                </label>
+                <input
+                  type='email'
+                  name='contact_email'
+                  value={formData.contact_email}
+                  onChange={handleChange}
+                  className='w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-0 transition-all duration-200 text-sm'
+                  placeholder='Optionnel, sinon email du profil'
+                />
+              </div>
             </div>
 
             {/* Prix et période */}

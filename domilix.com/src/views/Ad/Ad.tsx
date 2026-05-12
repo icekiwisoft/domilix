@@ -310,6 +310,8 @@ export default function Ad(): React.ReactElement {
   const touchStartX = useRef<number | null>(null);
   const { isAuthenticated, user } = useAuth();
   const hasCredits = Number(user?.credits || 0) > 0;
+  const displayContactPhone = adInfo?.contact_phone || adInfo?.announcer?.contact;
+  const displayContactEmail = adInfo?.contact_email || adInfo?.announcer?.email;
 
   const openModalWithImage = (index: number) => {
     setModalInitialIndex(index);
@@ -820,20 +822,20 @@ export default function Ad(): React.ReactElement {
                           {adInfo.exact_address}
                         </p>
                       )}
-                      {adInfo.announcer?.contact && (
+                      {displayContactPhone && (
                         <a
-                          href={`tel:${adInfo.announcer.contact}`}
+                          href={`tel:${displayContactPhone}`}
                           className='block mt-2 text-green-700 font-black text-base hover:text-green-900'
                         >
-                          {adInfo.announcer.contact}
+                          {displayContactPhone}
                         </a>
                       )}
-                      {adInfo.announcer?.email && (
+                      {displayContactEmail && (
                         <a
-                          href={`mailto:${adInfo.announcer.email}`}
+                          href={`mailto:${displayContactEmail}`}
                           className='block mt-1 text-green-700 font-semibold text-sm hover:text-green-900'
                         >
-                          {adInfo.announcer.email}
+                          {displayContactEmail}
                         </a>
                       )}
                     </div>
