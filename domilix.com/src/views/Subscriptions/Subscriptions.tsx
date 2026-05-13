@@ -202,7 +202,10 @@ export default function Subscriptions() {
               price='50'
               benefit='Idéal pour tester Domilix et contacter quelques annonceurs ciblés.'
               mobileBenefit='Pour tester Domilix.'
-              features={["Voir les informations de base d'une annonce."]}
+              features={[
+                "Voir les informations de base d'une annonce.",
+                'Partagez les annonces avec vos contacts.',
+              ]}
               isActive={false}
               onChoose={() =>
                 handleChooseOffer({
@@ -211,7 +214,10 @@ export default function Subscriptions() {
                   validity: '1 semaine de validité',
                   price: '50 ',
                   benefit: 'Idéal pour tester Domilix et contacter quelques annonceurs ciblés.',
-                  features: ["Voir les informations de base d'une annonce."],
+                  features: [
+                    "Voir les informations de base d'une annonce.",
+                    'Partagez les annonces avec vos contacts.',
+                  ],
                 })
               }
             />
@@ -223,7 +229,10 @@ export default function Subscriptions() {
               price='100'
               benefit='Pour comparer plusieurs logements sans bloquer votre recherche.'
               mobileBenefit='Pour comparer plusieurs logements.'
-              features={["Voir les informations de base d'une annonce."]}
+              features={[
+                "Voir les informations de base d'une annonce.",
+                'Partagez les annonces avec vos contacts.',
+              ]}
               isActive={false}
               onChoose={() =>
                 handleChooseOffer({
@@ -232,7 +241,10 @@ export default function Subscriptions() {
                   validity: '2 semaines de validité',
                   price: '100',
                   benefit: 'Pour comparer plusieurs logements sans bloquer votre recherche.',
-                  features: ["Voir les informations de base d'une annonce."],
+                  features: [
+                    "Voir les informations de base d'une annonce.",
+                    'Partagez les annonces avec vos contacts.',
+                  ],
                 })
               }
             />
