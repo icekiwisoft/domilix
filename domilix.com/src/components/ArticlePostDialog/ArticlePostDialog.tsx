@@ -42,6 +42,8 @@ export default function ArticlePostDialog({
   const [detectedLocation, setDetectedLocation] = useState<ReverseGeocodeResult | null>(null);
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
   const [isGettingCurrentLocation, setIsGettingCurrentLocation] = useState(false);
+  const [longitudeInput, setLongitudeInput] = useState('');
+  const [latitudeInput, setLatitudeInput] = useState('');
   const [website, setWebsite] = useState('');
   const [useManualCoordinates, setUseManualCoordinates] = useState(false);
 
@@ -175,6 +177,8 @@ export default function ArticlePostDialog({
             ...prev,
             localization: [longitude, latitude],
           }));
+          setLongitudeInput(String(longitude));
+          setLatitudeInput(String(latitude));
           setUseManualCoordinates(true);
           setLocationError('');
           setIsGettingCurrentLocation(false);
@@ -194,7 +198,12 @@ export default function ArticlePostDialog({
     e: React.ChangeEvent<HTMLInputElement>,
     index: number
   ) => {
-    const value = parseFloat(e.target.value) || 0; // Convert input to a number
+    const rawValue = (e.target as HTMLInputElement).value;
+    const value = rawValue === '' ? 0 : Number(rawValue.replace(',', '.'));
+    if (index === 0) setLongitudeInput(rawValue);
+    else setLatitudeInput(rawValue);
+
+    if (rawValue !== '' && Number.isNaN(value)) return;
     setLocationError('');
     setFormData(prev => ({
       ...prev,
@@ -1059,9 +1068,9 @@ export default function ArticlePostDialog({
                         Longitude
                       </label>
                       <input
-                        type='number'
-                        step='any'
-                        value={formData.localization[0] || ''}
+                        type='text'
+                        inputMode='decimal'
+                        value={longitudeInput || (formData.localization[0] ? String(formData.localization[0]) : '')}
                         onChange={event => handleLocalizationChange(event, 0)}
                         readOnly={!useManualCoordinates}
                         className={`w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100 ${useManualCoordinates ? 'bg-white' : 'bg-gray-100'}`}
@@ -1073,9 +1082,9 @@ export default function ArticlePostDialog({
                         Latitude
                       </label>
                       <input
-                        type='number'
-                        step='any'
-                        value={formData.localization[1] || ''}
+                        type='text'
+                        inputMode='decimal'
+                        value={latitudeInput || (formData.localization[1] ? String(formData.localization[1]) : '')}
                         onChange={event => handleLocalizationChange(event, 1)}
                         readOnly={!useManualCoordinates}
                         className={`w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100 ${useManualCoordinates ? 'bg-white' : 'bg-gray-100'}`}
