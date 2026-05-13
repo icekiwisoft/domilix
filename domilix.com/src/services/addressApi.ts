@@ -12,9 +12,13 @@ export type ReverseGeocodeResult = {
 
 export const addressApi = {
   reverseGeocode: async (longitude: number, latitude: number): Promise<ReverseGeocodeResult | null> => {
-    const response = await api.get('/addresses/reverse-geocode', {
-      params: { longitude, latitude },
-    });
-    return response.data?.data || null;
+    try {
+      const response = await api.get('/addresses/reverse-geocode', {
+        params: { longitude, latitude },
+      });
+      return response.data?.data || null;
+    } catch {
+      return null;
+    }
   },
 };

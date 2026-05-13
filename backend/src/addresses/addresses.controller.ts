@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Res } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AddressesService } from './addresses.service';
 import { ReverseGeocodeDto } from './dto/reverse-geocode.dto';
@@ -18,11 +18,11 @@ export class AddressesController {
 
   @Get('reverse-geocode')
   @ApiOperation({ summary: 'Resolve address from coordinates' })
-  async reverseGeocode(@Query() dto: ReverseGeocodeDto, @Res() res: any) {
+  async reverseGeocode(@Query() dto: ReverseGeocodeDto) {
     const result = await this.addressesService.reverseGeocode(dto);
     if (!result.success) {
-      return res.status(404).json(result);
+      return { ...result, data: null };
     }
-    return res.json(result);
+    return result;
   }
 }
