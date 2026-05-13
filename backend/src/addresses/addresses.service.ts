@@ -40,6 +40,61 @@ export class AddressesService {
     return components;
   }
 
+  private parseReverseAddressComponents(features: any[]) {
+    const primaryFeature = features.find(feature => feature?.place_type?.includes('address')) || features[0];
+    const components = {
+      address: primaryFeature?.place_name || '',
+      city: '',
+      state: '',
+      country: '',
+      zip: '',
+      coordinates: primaryFeature?.center || primaryFeature?.geometry?.coordinates || [0, 0],
+      text: primaryFeature?.text || '',
+    };
+
+    const candidates = [
+      ...features,
+      ...features.flatMap(feature => Array.isArray(feature?.context) ? feature.context : []),
+    ];
+
+    const readType = (item: any) => {
+      const id = item?.id || '';
+      const placeTypes = Array.isArray(item?.place_type) ? item.place_type : [];
+      return {
+        isPostcode: id.startsWith('postcode') || placeTypes.includes('postcode'),
+        isPlace: id.startsWith('place') || placeTypes.includes('place'),
+        isLocality: id.startsWith('locality') || placeTypes.includes('locality'),
+        isDistrict: id.startsWith('district') || placeTypes.includes('district'),
+        isNeighborhood: id.startsWith('neighborhood') || placeTypes.includes('neighborhood'),
+        isRegion: id.startsWith('region') || placeTypes.includes('region'),
+        isCountry: id.startsWith('country') || placeTypes.includes('country'),
+      };
+    };
+
+    for (const item of candidates) {
+      const text = item?.text || '';
+      if (!text) continue;
+
+      const type = readType(item);
+      if (!components.zip && type.isPostcode) components.zip = text;
+      if (!components.city && type.isPlace) components.city = text;
+      if (!components.city && type.isLocality) components.city = text;
+      if (!components.city && type.isDistrict) components.city = text;
+      if (!components.state && type.isRegion) components.state = text;
+      if (!components.country && type.isCountry) components.country = text;
+    }
+
+    if (!components.city) {
+      const fallback = candidates.find(item => {
+        const type = readType(item);
+        return type.isNeighborhood || type.isLocality || type.isDistrict;
+      });
+      components.city = fallback?.text || '';
+    }
+
+    return components;
+  }
+
   async search(dto: SearchAddressesDto) {
     if (!this.accessToken) {
       return { success: true, data: [] };
@@ -108,9 +163,9 @@ export class AddressesService {
     }
 
     const payload = await response.json();
-    let feature = payload.features?.[0];
+    let features = Array.isArray(payload.features) ? payload.features : [];
 
-    if (!feature) {
+    if (!features.length) {
       const fallbackParams = new URLSearchParams({
         access_token: this.accessToken,
         language: 'fr',
@@ -118,11 +173,11 @@ export class AddressesService {
       const fallbackResponse = await fetchReverseGeocode(fallbackParams).catch(() => null);
       if (fallbackResponse?.ok) {
         const fallbackPayload = await fallbackResponse.json().catch(() => null);
-        feature = fallbackPayload?.features?.[0];
+        features = Array.isArray(fallbackPayload?.features) ? fallbackPayload.features : [];
       }
     }
 
-    if (!feature) {
+    if (!features.length) {
       this.logger.warn(`Reverse geocoding returned no feature for coordinates ${dto.longitude},${dto.latitude}, including broad fallback`);
       return {
         success: false,
@@ -130,11 +185,12 @@ export class AddressesService {
       };
     }
 
-    this.logger.log(`Reverse geocoding resolved coordinates ${dto.longitude},${dto.latitude} to ${feature.place_name || feature.text || 'unknown place'}`);
+    const components = this.parseReverseAddressComponents(features);
+    this.logger.log(`Reverse geocoding resolved coordinates ${dto.longitude},${dto.latitude} to ${components.address || components.city || components.state || components.country || 'unknown place'}`);
 
     return {
       success: true,
-      data: this.parseAddressComponents(feature),
+      data: components,
     };
   }
 }

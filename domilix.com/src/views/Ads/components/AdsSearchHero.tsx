@@ -287,7 +287,7 @@ export default function AdsSearchHero() {
   const popupPanelClass = 'absolute z-40 rounded-2xl border border-outline-variant bg-white p-4 shadow-card-hover ring-1 ring-black/5';
 
   return (
-    <section className='mx-auto w-full max-w-container px-gutter pb-xl pt-0 text-center'>
+    <section className='sticky top-[calc(4rem+var(--email-verification-banner-offset,0px))] z-30 mx-auto w-full max-w-container bg-background/95 px-gutter pb-4 pt-2 text-center sm:top-[calc(5rem+var(--email-verification-banner-offset,0px))]'>
       <div className='relative mx-auto w-full max-w-[1000px] text-left'>
         <div className='overflow-hidden rounded-2xl border border-outline-variant bg-white shadow-card md:hidden'>
           <div className='flex items-center justify-between gap-3 border-b border-outline-variant px-4 py-3'>
@@ -341,7 +341,13 @@ export default function AdsSearchHero() {
           <button type='button' onClick={submitSearch} className='w-full bg-primary px-4 py-4 text-center text-sm font-bold text-white transition-colors hover:bg-primary-light'>Lancer la recherche</button>
         </div>
 
-        {openFilterPopup && <div className={`${popupPanelClass} left-0 right-0 top-[calc(100%+8px)] mx-auto w-[92vw] max-w-sm md:hidden`}>{renderFilterPopupContent(openFilterPopup)}</div>}
+        {openFilterPopup && (
+          <div className='fixed inset-0 z-[80] flex items-center justify-center bg-black/35 px-4 backdrop-blur-sm md:hidden' onClick={closePopup}>
+            <div className='max-h-[82vh] w-full max-w-sm overflow-y-auto rounded-2xl border border-outline-variant bg-white p-4 shadow-card-hover ring-1 ring-black/5' onClick={event => event.stopPropagation()}>
+              {renderFilterPopupContent(openFilterPopup)}
+            </div>
+          </div>
+        )}
 
         <div className='hidden items-center rounded-full border border-outline-variant bg-white px-3 py-1 shadow-card transition-shadow hover:shadow-card-hover md:flex'>
           <div className='flex h-[52px] min-w-0 flex-1 flex-col justify-center rounded-full px-5'>

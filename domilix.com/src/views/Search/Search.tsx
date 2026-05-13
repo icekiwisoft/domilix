@@ -419,7 +419,7 @@ export default function Search(): React.ReactElement {
       />
 
       {/* ── Filter bar ── */}
-      <div className='sticky top-[calc(5rem+var(--email-verification-banner-offset,0px))] z-20 w-screen px-4 py-3 backdrop-blur-sm sm:px-6 md:fixed md:top-[calc(5rem+var(--email-verification-banner-offset,0px))] lg:px-8'>
+      <div className='sticky top-[calc(4rem+var(--email-verification-banner-offset,0px))] z-30 w-screen bg-background/95 px-4 py-3 sm:top-[calc(5rem+var(--email-verification-banner-offset,0px))] sm:px-6 lg:px-8'>
         <div className='mx-auto w-full max-w-6xl'>
           <div className='relative'>
 
@@ -532,8 +532,10 @@ export default function Search(): React.ReactElement {
 
             {/* Mobile popup */}
             {openFilterPopup && (
-              <div className={`${popupPanelClass} left-0 right-0 top-[calc(100%+8px)] mx-auto w-[92vw] max-w-sm md:hidden`}>
-                {renderFilterPopupContent(openFilterPopup)}
+              <div className='fixed inset-0 z-[80] flex items-center justify-center bg-black/35 px-4 backdrop-blur-sm md:hidden' onClick={() => setOpenFilterPopup(null)}>
+                <div className='max-h-[82vh] w-full max-w-sm overflow-y-auto rounded-2xl border border-outline-variant bg-white p-4 shadow-card-hover ring-1 ring-black/5' onClick={event => event.stopPropagation()}>
+                  {renderFilterPopupContent(openFilterPopup)}
+                </div>
               </div>
             )}
 
@@ -661,7 +663,7 @@ export default function Search(): React.ReactElement {
       {/* ── Results ── */}
       <div className='min-h-screen'>
         {(isLoading || ads.length > 0) && (
-          <div className='mt-8 px-5 text-center md:mt-40 sm:px-8 lg:px-12'>
+          <div className='mt-8 px-5 text-center sm:px-8 lg:px-12'>
             <h2 className='text-2xl font-bold leading-tight text-on-surface sm:text-3xl lg:text-4xl'>
               Résultats pour{' '}
               <span className='relative inline-block pb-3 font-bold text-primary'>
