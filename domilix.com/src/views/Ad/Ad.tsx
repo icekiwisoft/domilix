@@ -308,10 +308,12 @@ export default function Ad(): React.ReactElement {
   const [isLiking, setIsLiking] = useState(false);
   const [mobileSliderIndex, setMobileSliderIndex] = useState(0);
   const touchStartX = useRef<number | null>(null);
+  const mountedAt = useRef(Date.now());
   const { isAuthenticated, user } = useAuth();
   const hasCredits = Number(user?.credits || 0) > 0;
 
   const openModalWithImage = (index: number) => {
+    if (Date.now() - mountedAt.current < 600) return;
     setModalInitialIndex(index);
     setShowModal(true);
   };
@@ -518,8 +520,7 @@ export default function Ad(): React.ReactElement {
                 >
                   <GalleryMediaPreview
                     media={adInfo.medias[mobileSliderIndex]}
-                    className='h-full w-full cursor-pointer'
-                    onClick={() => openModalWithImage(mobileSliderIndex)}
+                    className='h-full w-full'
                   />
                   {/* Prev button */}
                   {adInfo.medias.length > 1 && (
