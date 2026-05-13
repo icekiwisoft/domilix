@@ -23,8 +23,10 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { Throttle } from '@nestjs/throttler';
 import { memoryStorage } from 'multer';
 import { ObjectStorageService } from '../common/object-storage/object-storage.service';
+import { validateUploadedFile } from '../common/media/validate-upload';
 import { CurrentUser } from './current-user.decorator';
 import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
@@ -51,6 +53,12 @@ export class AuthController {
     if (!file) return undefined;
 
     try {
+      await validateUploadedFile(file, {
+        allowImages: true,
+        allowVideos: false,
+        maxSize: 10 * 1024 * 1024,
+        context: `auth.${folder}`,
+      });
       return (await this.objectStorage.uploadFile(file, folder)).url;
     } catch {
       throw new InternalServerErrorException('Impossible d uploader le fichier.');
@@ -58,6 +66,7 @@ export class AuthController {
   }
 
   @Post('register')
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @ApiOperation({ summary: 'Register a new user' })
   @ApiCreatedResponse({ description: 'User registered successfully' })
   register(@Body() dto: RegisterDto) {
@@ -65,6 +74,7 @@ export class AuthController {
   }
 
   @Post('login')
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @ApiOperation({ summary: 'Authenticate a user' })
   @ApiOkResponse({ description: 'Authentication successful' })
   login(@Body() dto: LoginDto) {
@@ -90,6 +100,7 @@ export class AuthController {
   }
 
   @Post('resendVerificationCode/:user_id')
+  @Throttle({ default: { limit: 3, ttl: 15 * 60_000 } })
   @ApiOperation({ summary: 'Resend phone verification code' })
   @ApiParam({ name: 'user_id', example: '1' })
   resendVerificationCode(@Param('user_id') userId: string) {
@@ -98,6 +109,7 @@ export class AuthController {
 
   @UseGuards(AuthGuard)
   @Post('sendEmailVerification')
+  @Throttle({ default: { limit: 3, ttl: 15 * 60_000 } })
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Send email verification code to current user' })
   sendEmailVerification(@CurrentUser() user: any) {
@@ -221,12 +233,14 @@ export class AuthController {
   }
 
   @Post('sendEmail')
+  @Throttle({ default: { limit: 3, ttl: 15 * 60_000 } })
   @ApiOperation({ summary: 'Send password reset code by email' })
   sendEmail(@Body() dto: SendResetLinkDto) {
     return this.authService.sendResetLinkEmail(dto);
   }
 
   @Post('resetPassword')
+  @Throttle({ default: { limit: 5, ttl: 15 * 60_000 } })
   @ApiOperation({ summary: 'Reset password using verification code' })
   resetPassword(@Body() dto: ResetPasswordDto) {
     return this.authService.resetPassword(dto);

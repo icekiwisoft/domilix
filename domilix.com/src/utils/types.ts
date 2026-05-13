@@ -64,6 +64,8 @@ export interface Ad {
   country?: string;
   zip?: string;
   postal_code?: string;
+  contact_phone?: string | null;
+  contact_email?: string | null;
   // Position fields (available when unlocked)
   latitude?: number;
   longitude?: number;

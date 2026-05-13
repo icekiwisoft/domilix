@@ -191,6 +191,8 @@ model Ad {
   createdAt       DateTime?  @default(now()) @map("created_at") @db.Timestamp(0)
   updatedAt       DateTime?  @default(now()) @map("updated_at") @db.Timestamp(0)
   description     String?   @db.Text
+  contactPhone    String?   @map("contact_phone") @db.VarChar(255)
+  contactEmail    String?   @map("contact_email") @db.VarChar(255)
 
   @@map("ads")
 }
@@ -386,6 +388,7 @@ model Broadcast {
   id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
   title      String    @db.VarChar(255)
   subtitle   String?   @db.Text
+  chip       String?   @db.VarChar(100)
   badge      String?   @db.VarChar(100)
   cta        String?   @db.VarChar(255)
   image      String?   @db.VarChar(255)

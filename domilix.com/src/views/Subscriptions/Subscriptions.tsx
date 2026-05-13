@@ -1,5 +1,5 @@
 import ChoiseMode from '@components/Cards/Paiement/ChoiseMode';
-import Footer2 from '@components/Footer2/Footer2';
+import FooterMinimal from '@components/FooterMinimal/FooterMinimal';
 import Nav2 from '@components/Nav2/Nav2';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
@@ -306,7 +306,7 @@ export default function Subscriptions() {
           onClose={() => setSelectedOffer(null)}
         />
       )}
-      <Footer2 />
+      <FooterMinimal />
     </>
   );
 }

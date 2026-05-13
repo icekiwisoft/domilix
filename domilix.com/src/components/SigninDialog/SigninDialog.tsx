@@ -1,18 +1,17 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 import { signinDialogActions, signupDialogActions } from '@stores/defineStore';
 import { useAuth } from '../../hooks/useAuth';
 import { authApi } from '../../services/authApi';
+import HoneypotInput from '@components/HoneypotInput/HoneypotInput';
 import BlockInputs from '@components/OTP/BlockInputs';
 
 const inputCls = 'w-full p-2.5 rounded-lg bg-white border border-gray-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-100 transition outline-none text-gray-800 text-sm';
 
 export default function SigninDialog() {
-  const router = useRouter();
   const { login, verifyPhone, resendVerificationCode, isLoading, user } = useAuth();
 
   const [isForgotPassword, setIsForgotPassword] = useState(false);
@@ -21,6 +20,7 @@ export default function SigninDialog() {
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [website, setWebsite] = useState('');
   const [resetEmailLoading, setResetEmailLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -62,9 +62,8 @@ export default function SigninDialog() {
     if (!email || !isEmail(email)) { setError('Veuillez saisir une adresse email valide'); return; }
     try {
       setResetEmailLoading(true);
-      await authApi.sendResetEmail(email);
-      signinDialogActions.toggle();
-      router.push(`/reset-password?email=${encodeURIComponent(email)}`);
+      const response = await authApi.sendResetEmail(email, website);
+      setSuccess(response.message || 'Si cet email existe, un lien de reinitialisation a ete envoye.');
     } catch (err: any) {
       setError(err.response?.data?.message || "Impossible d'envoyer le lien de réinitialisation");
     } finally {
@@ -100,7 +99,7 @@ export default function SigninDialog() {
       onClick={signinDialogActions.toggle}
     >
       <div
-        className='relative w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl'
+        className='relative w-full max-w-md overflow-hidden rounded-xl bg-white shadow-2xl'
         onClick={e => e.stopPropagation()}
       >
         {/* Close */}
@@ -150,6 +149,7 @@ export default function SigninDialog() {
                 <p className='mt-1 text-sm text-gray-500'>Entrez votre email pour recevoir le lien de réinitialisation.</p>
               </div>
               <form onSubmit={handleForgotPassword} className='space-y-4'>
+                <HoneypotInput value={website} onChange={setWebsite} />
                 <div>
                   <label className='mb-1 block text-sm font-semibold text-gray-700'>Email</label>
                   <input type='email' value={identifier} onChange={e => setIdentifier(e.target.value)} required className={inputCls} placeholder='john@example.com' />

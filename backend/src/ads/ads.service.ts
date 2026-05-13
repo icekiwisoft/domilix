@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import crypto from 'node:crypto';
 import { Prisma } from '@prisma/client';
 import {
@@ -8,9 +8,11 @@ import {
   toNumber,
 } from '../common/http/formatters';
 import { generateMediaThumbnailBuffer, MAX_AD_MEDIAS } from '../common/media/thumbnails';
+import { validateUploadedFile } from '../common/media/validate-upload';
 import { ObjectStorageService } from '../common/object-storage/object-storage.service';
 import { buildLaravelPagination } from '../common/http/pagination';
 import { PrismaService } from '../prisma/prisma.service';
+import { AddressesService } from '../addresses/addresses.service';
 import { QueryAdsDto } from './dto/query-ads.dto';
 import { QueryCitiesDto } from './dto/query-cities.dto';
 
@@ -27,7 +29,15 @@ export class AdsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly objectStorage: ObjectStorageService,
+    private readonly addressesService: AddressesService,
   ) {}
+
+  private async resolveAddressFromCoordinates(longitude: number | null, latitude: number | null) {
+    if (longitude === null || latitude === null) return null;
+
+    const result = await this.addressesService.reverseGeocode({ longitude, latitude }).catch(() => null);
+    return result?.success ? result.data : null;
+  }
 
   private async ensureAnnouncerUser(userId: bigint) {
     const announcer = await this.prisma.announcer.findFirst({ where: { userId } });
@@ -49,6 +59,12 @@ export class AdsService {
     return AD_DEVISES.includes(devise as (typeof AD_DEVISES)[number])
       ? (devise as (typeof AD_DEVISES)[number])
       : undefined;
+  }
+
+  private optionalString(value: unknown) {
+    if (typeof value !== 'string') return null;
+    const trimmed = value.trim();
+    return trimmed || null;
   }
 
   private buildAdWhere(
@@ -439,6 +455,8 @@ export class AdsService {
         city: ad.city,
         country: ad.country,
         postal_code: ad.zip,
+        contact_phone: ad.contactPhone,
+        contact_email: ad.contactEmail,
         category: this.serializeCategory(category, category ? categoryItemCounts.get(ad.categoryId) || 0 : 0),
         creation_date: ad.createdAt,
         liked: favoriteIds.has(ad.id.toString()),
@@ -483,6 +501,8 @@ export class AdsService {
       city: ad.city,
       country: ad.country,
       postal_code: ad.zip,
+      contact_phone: ad.contactPhone,
+      contact_email: ad.contactEmail,
       category: this.serializeCategory(category),
       announcer: announcer ? await this.serializeAnnouncer(announcer) : null,
       creation_date: ad.createdAt,
@@ -703,6 +723,24 @@ export class AdsService {
       throw new ForbiddenException('At least one media file is required.');
     }
 
+    const localization = Array.isArray(body.localization)
+      ? body.localization
+      : body['localization[]']
+        ? [body['localization[]']]
+        : undefined;
+    const localizationValues = Array.isArray(localization)
+      ? localization.map((value) => Number(value))
+      : [];
+    const longitude = Number.isFinite(localizationValues[0]) ? localizationValues[0] : null;
+    const latitude = Number.isFinite(localizationValues[1]) ? localizationValues[1] : null;
+    if (
+      (longitude !== null && (longitude < -180 || longitude > 180)) ||
+      (latitude !== null && (latitude < -90 || latitude > 90))
+    ) {
+      throw new BadRequestException('Coordonnees GPS invalides.');
+    }
+    const resolvedAddress = await this.resolveAddressFromCoordinates(longitude, latitude);
+
     let adableId: bigint;
     if (type === 'furniture') {
       const furniture = await this.prisma.furniture.create({
@@ -716,15 +754,6 @@ export class AdsService {
       });
       adableId = furniture.id;
     } else {
-      const localization = Array.isArray(body.localization)
-        ? body.localization
-        : body['localization[]']
-          ? [body['localization[]']]
-          : undefined;
-      const localizationValues = Array.isArray(localization)
-        ? localization.map((value) => Number(value))
-        : [];
-
       const realEstate = await this.prisma.realEstate.create({
         data: {
           bedroom: Number(body.bedroom || 0),
@@ -743,8 +772,8 @@ export class AdsService {
           furnished: ['1', 'true', true].includes(body.furnitured),
           garden: ['1', 'true', true].includes(body.garden),
           caution: body.caution ? Number(body.caution) : null,
-          lng: localizationValues[0] ?? null,
-          lat: localizationValues[1] ?? null,
+          lng: longitude,
+          lat: latitude,
         },
       });
       adableId = realEstate.id;
@@ -753,11 +782,11 @@ export class AdsService {
     const ad = await this.prisma.ad.create({
       data: {
         clientId: crypto.randomUUID(),
-        adress: body.address || '',
-        city: body.city || '',
-        country: body.country || '',
-        state: body.state || '',
-        zip: body.zip || '',
+        adress: resolvedAddress?.address || body.address || '',
+        city: resolvedAddress?.city || body.city || '',
+        country: resolvedAddress?.country || body.country || '',
+        state: resolvedAddress?.state || body.state || '',
+        zip: resolvedAddress?.zip || body.zip || '',
         devise: this.normalizeDevise(body.devise) || 'XOF',
         itemType: type === 'furniture' ? FURNITURE_CLASS : REAL_ESTATE_CLASS,
         price: Number(body.price),
@@ -769,6 +798,8 @@ export class AdsService {
           : null,
         period: this.normalizePeriod(body.period) || 'month',
         description: body.description || null,
+        contactPhone: this.optionalString(body.contact_phone),
+        contactEmail: this.optionalString(body.contact_email),
       },
     });
 
@@ -805,6 +836,12 @@ export class AdsService {
     }
 
     for (const file of files) {
+      await validateUploadedFile(file, {
+        allowImages: true,
+        allowVideos: true,
+        maxSize: 50 * 1024 * 1024,
+        context: 'ads.create',
+      });
       const uploaded = await this.objectStorage.uploadFile(file, 'medias');
       const thumbnailBuffer = await generateMediaThumbnailBuffer(file).catch(() => null);
       const thumbnail = thumbnailBuffer
@@ -865,6 +902,8 @@ export class AdsService {
       where: { id: ad.id },
       data: {
         ...(body.description !== undefined ? { description: body.description } : {}),
+        ...(body.contact_phone !== undefined ? { contactPhone: this.optionalString(body.contact_phone) } : {}),
+        ...(body.contact_email !== undefined ? { contactEmail: this.optionalString(body.contact_email) } : {}),
         ...(body.price !== undefined ? { price: Number(body.price) } : {}),
         ...(body.address !== undefined ? { adress: body.address } : {}),
         ...(body.city !== undefined ? { city: body.city } : {}),

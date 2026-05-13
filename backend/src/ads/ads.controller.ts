@@ -3,6 +3,7 @@ import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, Req, Res
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { AuthGuard } from '../auth/auth.guard';
+import { Throttle } from '@nestjs/throttler';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuthTokenService } from '../auth/auth-token.service';
 import { AdsService } from './ads.service';
@@ -10,6 +11,7 @@ import { QueryAdsDto } from './dto/query-ads.dto';
 import { QueryCitiesDto } from './dto/query-cities.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
+import { assertHoneypotClear } from '../common/honeypot';
 import { ALLOWED_MEDIA_MIME_PATTERN, MAX_AD_MEDIAS } from '../common/media/thumbnails';
 
 @ApiTags('Ads')
@@ -75,6 +77,7 @@ export class AdsController {
 
   @UseGuards(AuthGuard)
   @Post('announces')
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Create a new announce with optional uploaded medias' })
@@ -124,6 +127,7 @@ export class AdsController {
     }),
   )
   create(@CurrentUser() user: any, @Body() body: any, @UploadedFiles() files: any[] = []) {
+    assertHoneypotClear(body.website, 'ads.create');
     return this.adsService.create(body, files, user.id);
   }
 

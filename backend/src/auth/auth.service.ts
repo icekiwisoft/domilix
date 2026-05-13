@@ -2,15 +2,17 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { User } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import crypto from 'node:crypto';
-import nodemailer from 'nodemailer';
 import { PrismaService } from '../prisma/prisma.service';
 import { ObjectStorageService } from '../common/object-storage/object-storage.service';
+import { assertHoneypotClear } from '../common/honeypot';
+import { MailService } from '../mail/mail.service';
 import { AuthTokenService } from './auth-token.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { LoginDto } from './dto/login.dto';
@@ -23,11 +25,14 @@ import { VerificationCodeService } from './verification-code.service';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly tokens: AuthTokenService,
     private readonly verificationCodes: VerificationCodeService,
     private readonly objectStorage: ObjectStorageService,
+    private readonly mail: MailService,
   ) {}
 
   private async totalCreditsForUser(userId: bigint) {
@@ -82,12 +87,6 @@ export class AuthService {
       });
     } catch {
       // Notifications should never block authentication flows.
-    }
-  }
-
-  private ensureMailConfigured() {
-    if (!process.env.MAIL_HOST && process.env.NODE_ENV === 'production') {
-      throw new BadRequestException('Configuration email manquante.');
     }
   }
 
@@ -147,62 +146,6 @@ export class AuthService {
     }));
   }
 
-  private async sendResetPasswordEmail(email: string, code: string) {
-    this.ensureMailConfigured();
-
-    if (!process.env.MAIL_HOST) {
-      return;
-    }
-
-    const transporter = nodemailer.createTransport({
-      host: process.env.MAIL_HOST,
-      port: Number(process.env.MAIL_PORT || 587),
-      secure: process.env.MAIL_SECURE === 'true',
-      auth: process.env.MAIL_USERNAME
-        ? {
-            user: process.env.MAIL_USERNAME,
-            pass: process.env.MAIL_PASSWORD,
-          }
-        : undefined,
-    });
-
-    await transporter.sendMail({
-      from: `"${process.env.MAIL_FROM_NAME || 'Domilix'}" <${process.env.MAIL_FROM_ADDRESS || 'noreply@domilix.com'}>`,
-      to: email,
-      subject: 'Code de reinitialisation de votre mot de passe Domilix',
-      text: `Votre code de reinitialisation Domilix est : ${code}`,
-      html: `<p>Votre code de reinitialisation Domilix est :</p><p><strong>${code}</strong></p>`,
-    });
-  }
-
-  private async sendEmailVerificationCode(email: string, code: string) {
-    this.ensureMailConfigured();
-
-    if (!process.env.MAIL_HOST) {
-      return;
-    }
-
-    const transporter = nodemailer.createTransport({
-      host: process.env.MAIL_HOST,
-      port: Number(process.env.MAIL_PORT || 587),
-      secure: process.env.MAIL_SECURE === 'true',
-      auth: process.env.MAIL_USERNAME
-        ? {
-            user: process.env.MAIL_USERNAME,
-            pass: process.env.MAIL_PASSWORD,
-          }
-        : undefined,
-    });
-
-    await transporter.sendMail({
-      from: `"${process.env.MAIL_FROM_NAME || 'Domilix'}" <${process.env.MAIL_FROM_ADDRESS || 'noreply@domilix.com'}>`,
-      to: email,
-      subject: 'Code de verification de votre email Domilix',
-      text: `Votre code de verification Domilix est : ${code}`,
-      html: `<p>Votre code de verification Domilix est :</p><p><strong>${code}</strong></p>`,
-    });
-  }
-
   async sendEmailVerification(user: User) {
     if (user.emailVerified) {
       return { message: 'Email deja verifie.' };
@@ -212,7 +155,7 @@ export class AuthService {
     }
 
     const code = this.verificationCodes.generate(this.emailVerificationKey(user.id));
-    await this.sendEmailVerificationCode(user.email, code);
+    await this.mail.sendEmailVerificationCode(user.email, code);
 
     return {
       message: 'Un code de verification a ete envoye a votre email.',
@@ -242,6 +185,8 @@ export class AuthService {
   }
 
   async register(dto: RegisterDto) {
+    assertHoneypotClear(dto.website, 'auth.register');
+
     if (!dto.email && !dto.phone_number) {
       throw new BadRequestException('Email ou numero de telephone requis.');
     }
@@ -261,7 +206,7 @@ export class AuthService {
     }
 
     if (dto.email && !dto.phone_number) {
-      this.ensureMailConfigured();
+      this.mail.ensureConfigured();
     }
 
     const password = await bcrypt.hash(dto.password, 10);
@@ -303,7 +248,7 @@ export class AuthService {
     );
 
     if (!dto.phone_number) {
-      await this.sendEmailVerificationCode(user.email, code);
+      await this.mail.sendEmailVerificationCode(user.email, code);
     }
 
     await this.createUserNotification(user.id, {
@@ -341,6 +286,7 @@ export class AuthService {
     });
 
     if (!user || !(await bcrypt.compare(dto.password, user.password))) {
+      this.logger.warn(`Failed login attempt for ${dto.email || dto.phone_number || 'unknown'}`);
       throw new UnauthorizedException('Les informations de connexion sont incorrectes.');
     }
 
@@ -520,16 +466,25 @@ export class AuthService {
   }
 
   async sendResetLinkEmail(dto: SendResetLinkDto) {
+    assertHoneypotClear(dto.website, 'auth.sendResetEmail');
+    const resetMessage = 'Si cet email existe, un lien de reinitialisation a ete envoye.';
+
     const user = await this.prisma.user.findFirst({ where: { email: dto.email } });
     if (!user) {
-      throw new NotFoundException('Aucun utilisateur trouve avec cet email.');
+      this.logger.warn(`Password reset requested for unknown email ${dto.email}`);
+      return {
+        message: resetMessage,
+        verification_code: undefined,
+      };
     }
 
     const code = this.verificationCodes.generate(this.verificationCodeKey(user.id));
-    await this.sendResetPasswordEmail(user.email, code);
+    const frontendUrl = process.env.FRONTEND_URL || process.env.APP_URL || 'https://domilix.com';
+    const resetUrl = `${frontendUrl.replace(/\/$/, '')}/reset-password?email=${encodeURIComponent(user.email)}&token=${encodeURIComponent(code)}`;
+    await this.mail.sendPasswordResetLink(user.email, resetUrl);
 
     return {
-      message: 'Un code de verification a ete envoye a votre email.',
+      message: resetMessage,
       verification_code: process.env.NODE_ENV !== 'production' ? code : undefined,
     };
   }
@@ -541,12 +496,13 @@ export class AuthService {
 
     const user = await this.prisma.user.findFirst({ where: { email: dto.email } });
     if (!user) {
-      throw new NotFoundException('Aucun utilisateur trouve avec cet email.');
+      this.logger.warn(`Password reset completion attempted for unknown email ${dto.email}`);
+      throw new BadRequestException('Lien de reinitialisation invalide.');
     }
 
     const code = this.verificationCodes.get(this.verificationCodeKey(user.id));
-    if (code !== String(dto.code)) {
-      throw new BadRequestException('Code de verification invalide.');
+    if (code !== String(dto.token || dto.code || '')) {
+      throw new BadRequestException('Lien de reinitialisation invalide.');
     }
 
     await this.prisma.user.update({

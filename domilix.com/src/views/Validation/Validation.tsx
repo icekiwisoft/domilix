@@ -49,8 +49,8 @@ export default function Validation() {
             <div className='text-center mt-5'>
               <span className='text-[0.9rem]'>
                 already have an account ,
-                <a className='text-orange-700' href='/login'>
-                  signin
+                <a className='text-orange-700' href='/'>
+                  back home
                 </a>
               </span>
             </div>
