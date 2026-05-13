@@ -42,8 +42,17 @@ export class AddressesService {
 
   private parseReverseAddressComponents(features: any[]) {
     const primaryFeature = features.find(feature => feature?.place_type?.includes('address')) || features[0];
+    const findByType = (type: string) => features.find(feature => feature?.place_type?.includes(type));
+    const neighborhoodFeature = findByType('neighborhood');
+    const localityFeature = findByType('locality');
+    const districtFeature = findByType('district');
+    const placeFeature = findByType('place');
+    const postcodeFeature = findByType('postcode');
+    const regionFeature = findByType('region');
+    const countryFeature = findByType('country');
     const components = {
       address: primaryFeature?.place_name || '',
+      neighborhood: neighborhoodFeature?.text || '',
       city: '',
       state: '',
       country: '',
@@ -80,9 +89,16 @@ export class AddressesService {
       if (!components.city && type.isPlace) components.city = text;
       if (!components.city && type.isLocality) components.city = text;
       if (!components.city && type.isDistrict) components.city = text;
+      if (!components.neighborhood && type.isNeighborhood) components.neighborhood = text;
       if (!components.state && type.isRegion) components.state = text;
       if (!components.country && type.isCountry) components.country = text;
     }
+
+    components.neighborhood = components.neighborhood || neighborhoodFeature?.text || localityFeature?.text || '';
+    components.city = placeFeature?.text || components.city || localityFeature?.text || districtFeature?.text || '';
+    components.state = regionFeature?.text || components.state;
+    components.country = countryFeature?.text || components.country;
+    components.zip = postcodeFeature?.text || components.zip;
 
     if (!components.city) {
       const fallback = candidates.find(item => {
@@ -92,7 +108,42 @@ export class AddressesService {
       components.city = fallback?.text || '';
     }
 
+    const addressParts = [
+      components.neighborhood,
+      components.city,
+      components.state,
+      components.country,
+    ].filter(Boolean);
+    const uniqueAddressParts = addressParts.filter((part, index) => addressParts.indexOf(part) === index);
+    const composedAddress = uniqueAddressParts.join(', ');
+
+    if (components.address) {
+      const hasNeighborhood = components.neighborhood && components.address.toLowerCase().includes(components.neighborhood.toLowerCase());
+      components.address = hasNeighborhood || !components.neighborhood
+        ? components.address
+        : [components.neighborhood, components.address].join(', ');
+    } else {
+      components.address = composedAddress;
+    }
+
     return components;
+  }
+
+  private featureKey(feature: any) {
+    return feature?.id || `${feature?.place_type?.join('-') || 'feature'}:${feature?.text || feature?.place_name || ''}`;
+  }
+
+  private mergeFeatures(...featureGroups: any[][]) {
+    const byKey = new Map<string, any>();
+    for (const feature of featureGroups.flat()) {
+      if (!feature) continue;
+      byKey.set(this.featureKey(feature), feature);
+    }
+    return Array.from(byKey.values());
+  }
+
+  private hasFeatureType(features: any[], type: string) {
+    return features.some(feature => Array.isArray(feature?.place_type) && feature.place_type.includes(type));
   }
 
   async search(dto: SearchAddressesDto) {
@@ -175,6 +226,25 @@ export class AddressesService {
         const fallbackPayload = await fallbackResponse.json().catch(() => null);
         features = Array.isArray(fallbackPayload?.features) ? fallbackPayload.features : [];
       }
+    }
+
+    if (features.length) {
+      const wantedTypes = ['address', 'neighborhood', 'locality', 'district', 'place', 'postcode', 'region', 'country'];
+      const missingTypes = wantedTypes.filter(type => !this.hasFeatureType(features, type));
+      const typedFeatureGroups = await Promise.all(
+        missingTypes.map(async (type) => {
+          const typedParams = new URLSearchParams({
+            access_token: this.accessToken,
+            language: 'fr',
+            types: type,
+          });
+          const typedResponse = await fetchReverseGeocode(typedParams).catch(() => null);
+          if (!typedResponse?.ok) return [];
+          const typedPayload = await typedResponse.json().catch(() => null);
+          return Array.isArray(typedPayload?.features) ? typedPayload.features : [];
+        }),
+      );
+      features = this.mergeFeatures(features, ...typedFeatureGroups);
     }
 
     if (!features.length) {
