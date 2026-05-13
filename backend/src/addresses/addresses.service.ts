@@ -83,11 +83,13 @@ export class AddressesService {
       language: 'fr',
     });
 
+    const fetchReverseGeocode = async (searchParams: URLSearchParams) => fetch(
+      `${this.baseUrl}/${dto.longitude},${dto.latitude}.json?${searchParams.toString()}`,
+    );
+
     let response: Response;
     try {
-      response = await fetch(
-        `${this.baseUrl}/${dto.longitude},${dto.latitude}.json?${params.toString()}`,
-      );
+      response = await fetchReverseGeocode(params);
     } catch (error) {
       this.logger.warn(`Reverse geocoding request failed for coordinates ${dto.longitude},${dto.latitude}: ${error instanceof Error ? error.message : String(error)}`);
       return {
@@ -106,9 +108,22 @@ export class AddressesService {
     }
 
     const payload = await response.json();
-    const feature = payload.features?.[0];
+    let feature = payload.features?.[0];
+
     if (!feature) {
-      this.logger.warn(`Reverse geocoding returned no feature for coordinates ${dto.longitude},${dto.latitude}`);
+      const fallbackParams = new URLSearchParams({
+        access_token: this.accessToken,
+        language: 'fr',
+      });
+      const fallbackResponse = await fetchReverseGeocode(fallbackParams).catch(() => null);
+      if (fallbackResponse?.ok) {
+        const fallbackPayload = await fallbackResponse.json().catch(() => null);
+        feature = fallbackPayload?.features?.[0];
+      }
+    }
+
+    if (!feature) {
+      this.logger.warn(`Reverse geocoding returned no feature for coordinates ${dto.longitude},${dto.latitude}, including broad fallback`);
       return {
         success: false,
         message: "Impossible de resoudre l'adresse pour ces coordonnees",
