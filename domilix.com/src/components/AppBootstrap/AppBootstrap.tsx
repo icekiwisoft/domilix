@@ -5,6 +5,7 @@ import EmailVerificationBanner from '@components/EmailVerificationBanner/EmailVe
 import SigninDialog from '@components/SigninDialog/SigninDialog';
 import SignupDialog from '@components/SignupDialog/SignupDialog';
 import SiteTour from '@components/SiteTour/SiteTour';
+import SupportContactPopup from '@components/SupportContactPopup/SupportContactPopup';
 import { useAuth } from '@hooks/useAuth';
 import { useAuthStore, useUiStore } from '@stores/defineStore';
 import React, { useEffect } from 'react';
@@ -45,6 +46,7 @@ export default function AppBootstrap({
       {children}
       {signinModal && <SigninDialog />}
       {signupModal && <SignupDialog />}
+      <SupportContactPopup />
       <CookieConsent />
       <SiteTour />
     </>
