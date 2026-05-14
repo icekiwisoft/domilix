@@ -103,7 +103,7 @@ export default function ProductCard(props: Ad): React.ReactElement {
     >
       {/* Image */}
       <div className='relative h-[220px] w-full overflow-hidden'>
-        <Link to={`/houses/${id}`} target='_blank' className='block h-full'>
+        <Link to={`/houses/${id}`} className='block h-full'>
           <img
             alt={description || 'Annonce'}
             loading='lazy'
@@ -136,7 +136,7 @@ export default function ProductCard(props: Ad): React.ReactElement {
               type='button'
               onClick={handlePrev}
               aria-label='Image précédente'
-              className='absolute left-2 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-surface-container-lowest/80 shadow-sm backdrop-blur-sm transition-opacity duration-200 opacity-0 group-hover:opacity-100 hover:bg-surface-container-lowest'
+              className='absolute left-2 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-surface-container-lowest/80 shadow-sm backdrop-blur-sm transition-opacity duration-200 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto hover:bg-surface-container-lowest'
             >
               <ChevronLeftIcon className='size-4 text-on-surface' />
             </button>
@@ -144,7 +144,7 @@ export default function ProductCard(props: Ad): React.ReactElement {
               type='button'
               onClick={handleNext}
               aria-label='Image suivante'
-              className='absolute right-2 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-surface-container-lowest/80 shadow-sm backdrop-blur-sm transition-opacity duration-200 opacity-0 group-hover:opacity-100 hover:bg-surface-container-lowest'
+              className='absolute right-2 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-surface-container-lowest/80 shadow-sm backdrop-blur-sm transition-opacity duration-200 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto hover:bg-surface-container-lowest'
             >
               <ChevronRightIcon className='size-4 text-on-surface' />
             </button>
@@ -174,7 +174,7 @@ export default function ProductCard(props: Ad): React.ReactElement {
       {/* Content */}
       <div className='p-md'>
         {/* Price */}
-        <Link to={`/houses/${id}`} target='_blank'>
+        <Link to={`/houses/${id}`}>
           <h3 className='mb-xs text-headline-sm text-on-surface transition-colors hover:text-primary'>
             {formatPrice(price)}{' '}
             <span className='text-body-md font-normal text-on-surface-variant'>{currency}</span>
