@@ -898,6 +898,27 @@ export class AdsService {
       throw new ForbiddenException('Unauthorized');
     }
 
+    const localization = Array.isArray(body.localization)
+      ? body.localization
+      : body['localization[]']
+        ? [body['localization[]']]
+        : undefined;
+    const localizationValues = Array.isArray(localization)
+      ? localization.map((value) => Number(value))
+      : [];
+    const hasLocalization = localizationValues.length >= 2;
+    const longitude = hasLocalization && Number.isFinite(localizationValues[0]) ? localizationValues[0] : null;
+    const latitude = hasLocalization && Number.isFinite(localizationValues[1]) ? localizationValues[1] : null;
+    if (
+      (longitude !== null && (longitude < -180 || longitude > 180)) ||
+      (latitude !== null && (latitude < -90 || latitude > 90))
+    ) {
+      throw new BadRequestException('Coordonnees GPS invalides.');
+    }
+    const resolvedAddress = hasLocalization
+      ? await this.resolveAddressFromCoordinates(longitude, latitude)
+      : null;
+
     const updated = await this.prisma.ad.update({
       where: { id: ad.id },
       data: {
@@ -905,11 +926,11 @@ export class AdsService {
         ...(body.contact_phone !== undefined ? { contactPhone: this.optionalString(body.contact_phone) } : {}),
         ...(body.contact_email !== undefined ? { contactEmail: this.optionalString(body.contact_email) } : {}),
         ...(body.price !== undefined ? { price: Number(body.price) } : {}),
-        ...(body.address !== undefined ? { adress: body.address } : {}),
-        ...(body.city !== undefined ? { city: body.city } : {}),
-        ...(body.state !== undefined ? { state: body.state } : {}),
-        ...(body.country !== undefined ? { country: body.country } : {}),
-        ...(body.zip !== undefined ? { zip: body.zip } : {}),
+        ...(hasLocalization && resolvedAddress?.address ? { adress: resolvedAddress.address } : body.address !== undefined ? { adress: body.address } : {}),
+        ...(hasLocalization && resolvedAddress?.city ? { city: resolvedAddress.city } : body.city !== undefined ? { city: body.city } : {}),
+        ...(hasLocalization && resolvedAddress?.state ? { state: resolvedAddress.state } : body.state !== undefined ? { state: body.state } : {}),
+        ...(hasLocalization && resolvedAddress?.country ? { country: resolvedAddress.country } : body.country !== undefined ? { country: body.country } : {}),
+        ...(hasLocalization && resolvedAddress?.zip ? { zip: resolvedAddress.zip } : body.zip !== undefined ? { zip: body.zip } : {}),
         ...(body.period !== undefined && this.normalizePeriod(body.period)
           ? { period: this.normalizePeriod(body.period) }
           : {}),
@@ -930,15 +951,6 @@ export class AdsService {
         },
       });
     } else {
-      const localization = Array.isArray(body.localization)
-        ? body.localization
-        : body['localization[]']
-          ? [body['localization[]']]
-          : undefined;
-      const localizationValues = Array.isArray(localization)
-        ? localization.map((value) => Number(value))
-        : [];
-
       await this.prisma.realEstate.update({
         where: { id: ad.adId },
         data: {
@@ -968,7 +980,7 @@ export class AdsService {
             : {}),
           ...(body.garden !== undefined ? { garden: ['1', 'true', true].includes(body.garden) } : {}),
           ...(body.caution !== undefined ? { caution: Number(body.caution) } : {}),
-          ...(localizationValues.length >= 2 ? { lng: localizationValues[0], lat: localizationValues[1] } : {}),
+          ...(hasLocalization ? { lng: longitude, lat: latitude } : {}),
         },
       });
     }

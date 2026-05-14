@@ -1,10 +1,11 @@
 'use client';
 
-import AddressAutocomplete from '@components/AddressAutocomplete/AddressAutocomplete';
+import { addressApi, ReverseGeocodeResult } from '@services/addressApi';
 import { updateAd } from '@services/announceApi';
 import { Ad } from '@utils/types';
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { MapPinIcon, SparklesIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { MdMyLocation } from 'react-icons/md';
 
 interface EditAdModalProps {
   ad: Ad;
@@ -16,6 +17,13 @@ const boolToString = (value: unknown) => (value ? '1' : '0');
 
 export default function EditAdModal({ ad, onClose, onUpdated }: EditAdModalProps) {
   const [isSaving, setIsSaving] = useState(false);
+  const [locationError, setLocationError] = useState('');
+  const [detectedLocation, setDetectedLocation] = useState<ReverseGeocodeResult | null>(null);
+  const [isDetectingLocation, setIsDetectingLocation] = useState(false);
+  const [isGettingCurrentLocation, setIsGettingCurrentLocation] = useState(false);
+  const [longitudeInput, setLongitudeInput] = useState(ad.longitude ? String(ad.longitude) : '');
+  const [latitudeInput, setLatitudeInput] = useState(ad.latitude ? String(ad.latitude) : '');
+  const [useManualCoordinates, setUseManualCoordinates] = useState(!!ad.longitude && !!ad.latitude);
   const [formData, setFormData] = useState({
     description: ad.description || '',
     price: ad.price ? String(ad.price) : '',
@@ -49,6 +57,75 @@ export default function EditAdModal({ ad, onClose, onUpdated }: EditAdModalProps
   });
   const isRealestate = ad.type === 'realestate';
 
+  const getCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationError("La géolocalisation n'est pas supportée par ce navigateur.");
+      return;
+    }
+
+    setIsGettingCurrentLocation(true);
+    setLocationError('');
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        const { latitude, longitude } = position.coords;
+        setFormData(current => ({ ...current, localization: [longitude, latitude] }));
+        setLongitudeInput(String(longitude));
+        setLatitudeInput(String(latitude));
+        setUseManualCoordinates(true);
+        setIsGettingCurrentLocation(false);
+      },
+      () => {
+        setLocationError("Impossible d'obtenir votre position. Veuillez vérifier vos paramètres de géolocalisation.");
+        setIsGettingCurrentLocation(false);
+      },
+    );
+  };
+
+  const handleLocalizationChange = (value: string, index: number) => {
+    const normalizedValue = value.replace(',', '.');
+    const numericValue = normalizedValue === '' ? 0 : Number(normalizedValue);
+    if (index === 0) setLongitudeInput(value);
+    else setLatitudeInput(value);
+    if (normalizedValue !== '' && Number.isNaN(numericValue)) return;
+
+    setLocationError('');
+    setFormData(current => ({
+      ...current,
+      localization: index === 0
+        ? [numericValue, current.localization[1]]
+        : [current.localization[0], numericValue],
+    }));
+  };
+
+  useEffect(() => {
+    const [longitude, latitude] = formData.localization;
+    if (!longitude || !latitude) {
+      setDetectedLocation(null);
+      return;
+    }
+    if (longitude < -180 || longitude > 180 || latitude < -90 || latitude > 90) {
+      setDetectedLocation(null);
+      setLocationError('Coordonnées GPS invalides.');
+      return;
+    }
+
+    const timeout = window.setTimeout(async () => {
+      try {
+        setIsDetectingLocation(true);
+        const result = await addressApi.reverseGeocode(longitude, latitude);
+        setDetectedLocation(result);
+        setLocationError(result ? '' : "Impossible de détecter l'adresse pour ces coordonnées.");
+      } catch {
+        setDetectedLocation(null);
+        setLocationError("Impossible de détecter l'adresse pour ces coordonnées.");
+      } finally {
+        setIsDetectingLocation(false);
+      }
+    }, 600);
+
+    return () => window.clearTimeout(timeout);
+  }, [formData.localization]);
+
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     try {
@@ -56,11 +133,6 @@ export default function EditAdModal({ ad, onClose, onUpdated }: EditAdModalProps
       const updated = await updateAd(ad.id, {
         description: formData.description,
         price: Number(formData.price),
-        address: formData.address,
-        city: formData.city,
-        state: formData.state,
-        country: formData.country,
-        zip: formData.zip,
         period: formData.period,
         devise: formData.devise,
         localization: formData.localization.map(value => String(value)),
@@ -136,30 +208,63 @@ export default function EditAdModal({ ad, onClose, onUpdated }: EditAdModalProps
               <MapPinIcon className='h-5 w-5 text-primary' />
               <h4 className='text-sm font-black uppercase tracking-[0.16em] text-primary'>Localisation</h4>
             </div>
-            <AddressAutocomplete
-              value={formData.address}
-              onChange={value => setFormData(current => ({ ...current, address: value }))}
-              onLocationSelect={location => setFormData(current => ({
-                ...current,
-                address: location.address,
-                city: location.city,
-                state: location.state,
-                country: location.country,
-                zip: location.zip,
-                localization: location.coordinates,
-              }))}
-              placeholder='Rechercher la nouvelle adresse de l’annonce...'
-            />
-            <div className='mt-4 grid grid-cols-1 gap-4 sm:grid-cols-4'>
-              <Field label='Ville' value={formData.city} onChange={value => setFormData(current => ({ ...current, city: value }))} />
-              {(['state', 'country', 'zip'] as const).map((key, index) => (
-                <Field key={key} label={['Région', 'Pays', 'Code postal'][index]} value={formData[key]} onChange={value => setFormData(current => ({ ...current, [key]: value }))} />
-              ))}
+            <div className='rounded-xl border border-gray-200 bg-gray-50 p-4'>
+              <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
+                <div>
+                  <h5 className='text-sm font-semibold text-gray-800'>Position exacte du bien</h5>
+                  <p className='mt-1 text-xs text-gray-500'>
+                    Utilisez votre position actuelle ou entrez longitude puis latitude. Domilix remplira l'adresse automatiquement.
+                  </p>
+                </div>
+                <div className='flex flex-wrap gap-2'>
+                  <button
+                    type='button'
+                    onClick={getCurrentLocation}
+                    disabled={isGettingCurrentLocation}
+                    className='inline-flex items-center gap-1.5 rounded-lg bg-orange-500 px-3 py-2 text-xs font-bold text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:bg-gray-400'
+                  >
+                    <MdMyLocation className={`h-4 w-4 ${isGettingCurrentLocation ? 'animate-pulse' : ''}`} />
+                    {isGettingCurrentLocation ? 'Récupération...' : 'Position actuelle'}
+                  </button>
+                  <button
+                    type='button'
+                    onClick={() => setUseManualCoordinates(value => !value)}
+                    className='rounded-lg border border-orange-200 bg-white px-3 py-2 text-xs font-bold text-orange-600 transition hover:bg-orange-50'
+                  >
+                    {useManualCoordinates ? 'Masquer' : 'Saisie manuelle'}
+                  </button>
+                </div>
+              </div>
+
+              {(useManualCoordinates || (formData.localization[0] !== 0 && formData.localization[1] !== 0)) && (
+                <div className='mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2'>
+                  <Field label='Longitude' value={longitudeInput || (formData.localization[0] ? String(formData.localization[0]) : '')} onChange={value => handleLocalizationChange(value, 0)} />
+                  <Field label='Latitude' value={latitudeInput || (formData.localization[1] ? String(formData.localization[1]) : '')} onChange={value => handleLocalizationChange(value, 1)} />
+                </div>
+              )}
             </div>
-            <div className='mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2'>
-              <Field label='Longitude' type='number' value={String(formData.localization[0] || '')} onChange={value => setFormData(current => ({ ...current, localization: [Number(value || 0), current.localization[1]] }))} />
-              <Field label='Latitude' type='number' value={String(formData.localization[1] || '')} onChange={value => setFormData(current => ({ ...current, localization: [current.localization[0], Number(value || 0)] }))} />
+
+            <div className='mt-4 rounded-lg border border-orange-100 bg-orange-50 p-4 text-sm leading-6 text-orange-800'>
+              Après enregistrement, le backend utilisera ces coordonnées pour détecter automatiquement l'adresse, la ville, la région et le pays.
             </div>
+            {(isDetectingLocation || detectedLocation) && (
+              <div className='mt-4 rounded-lg border border-gray-200 bg-white p-4'>
+                <h5 className='text-sm font-semibold text-gray-800'>Lieu détecté</h5>
+                {isDetectingLocation ? (
+                  <p className='mt-2 text-sm text-gray-500'>Détection en cours...</p>
+                ) : detectedLocation && (
+                  <div className='mt-2 space-y-1 text-sm text-gray-700'>
+                    {detectedLocation.address && <p><strong>Adresse :</strong> {detectedLocation.address}</p>}
+                    {detectedLocation.neighborhood && <p><strong>Quartier :</strong> {detectedLocation.neighborhood}</p>}
+                    {detectedLocation.city && <p><strong>Ville :</strong> {detectedLocation.city}</p>}
+                    {detectedLocation.state && <p><strong>Région :</strong> {detectedLocation.state}</p>}
+                    {detectedLocation.country && <p><strong>Pays :</strong> {detectedLocation.country}</p>}
+                    {detectedLocation.zip && <p><strong>Code postal :</strong> {detectedLocation.zip}</p>}
+                  </div>
+                )}
+              </div>
+            )}
+            {locationError && <p className='mt-3 text-sm font-semibold text-red-600'>{locationError}</p>}
           </section>
 
           {isRealestate ? (
