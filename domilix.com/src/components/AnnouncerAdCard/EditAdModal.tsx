@@ -324,7 +324,7 @@ export default function EditAdModal({ ad, onClose, onUpdated }: EditAdModalProps
                     ) : detectedLocation && (
                       <div className='mt-2 space-y-1 text-sm text-gray-700'>
                         {detectedLocation.address && <p><strong>Adresse :</strong> {detectedLocation.address}</p>}
-                        {detectedLocation.neighborhood && <p><strong>Quartier :</strong> {detectedLocation.neighborhood}</p>}
+                        {detectedLocation.neighbourhood && <p><strong>Quartier :</strong> {detectedLocation.neighbourhood}</p>}
                         {detectedLocation.city && <p><strong>Ville :</strong> {detectedLocation.city}</p>}
                         {detectedLocation.state && <p><strong>Région :</strong> {detectedLocation.state}</p>}
                         {detectedLocation.country && <p><strong>Pays :</strong> {detectedLocation.country}</p>}

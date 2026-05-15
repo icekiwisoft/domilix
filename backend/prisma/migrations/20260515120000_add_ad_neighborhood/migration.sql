@@ -1,2 +1,0 @@
-ALTER TABLE `ads`
-  ADD COLUMN `neighborhood` VARCHAR(255) NOT NULL DEFAULT '' AFTER `city`;

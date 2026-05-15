@@ -92,7 +92,7 @@ export class AdsController {
         description: { type: 'string' },
         address: { type: 'string' },
         city: { type: 'string' },
-        neighborhood: { type: 'string' },
+        neighbourhood: { type: 'string' },
         state: { type: 'string' },
         country: { type: 'string' },
         zip: { type: 'string' },

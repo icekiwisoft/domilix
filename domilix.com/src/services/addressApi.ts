@@ -2,7 +2,7 @@ import api from './api';
 
 export type ReverseGeocodeResult = {
   address: string;
-  neighborhood?: string;
+  neighbourhood?: string;
   city: string;
   state: string;
   country: string;

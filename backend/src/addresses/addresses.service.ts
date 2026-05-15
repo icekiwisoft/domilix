@@ -46,14 +46,14 @@ export class AddressesService {
   }
 
   private parseGeoapifyReverseResult(result: any) {
-    const neighborhood = result?.neighbourhood || result?.neighborhood || result?.suburb || result?.quarter || '';
+    const neighbourhood = result?.neighbourhood || result?.neighborhood || result?.suburb || result?.quarter || '';
     const city = result?.city || result?.town || result?.village || result?.municipality || result?.county || '';
     const state = result?.state || result?.region || '';
     const country = result?.country || '';
     const address = result?.formatted || [
       result?.address_line1,
       result?.address_line2,
-      neighborhood,
+      neighbourhood,
       city,
       state,
       country,
@@ -61,13 +61,13 @@ export class AddressesService {
 
     return {
       address,
-      neighborhood,
+      neighbourhood,
       city,
       state,
       country,
       zip: result?.postcode || '',
       coordinates: [Number(result?.lon || 0), Number(result?.lat || 0)],
-      text: result?.name || result?.address_line1 || neighborhood || city || address,
+      text: result?.name || result?.address_line1 || neighbourhood || city || address,
     };
   }
 

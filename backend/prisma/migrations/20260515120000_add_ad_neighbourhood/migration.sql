@@ -1,0 +1,2 @@
+ALTER TABLE `ads`
+  ADD COLUMN `neighbourhood` VARCHAR(255) NOT NULL DEFAULT '' AFTER `city`;
