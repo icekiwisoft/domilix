@@ -6,9 +6,14 @@ import { SearchAddressesDto } from './dto/search-addresses.dto';
 export class AddressesService {
   private readonly logger = new Logger(AddressesService.name);
   private readonly baseUrl = 'https://api.mapbox.com/geocoding/v5/mapbox.places';
+  private readonly geoapifyReverseUrl = 'https://api.geoapify.com/v1/geocode/reverse';
 
   private get accessToken() {
     return process.env.MAPBOX_ACCESS_TOKEN || '';
+  }
+
+  private get geoapifyApiKey() {
+    return process.env.GEOAPIFY_API_KEY || '';
   }
 
   private parseAddressComponents(feature: any) {
@@ -40,110 +45,30 @@ export class AddressesService {
     return components;
   }
 
-  private parseReverseAddressComponents(features: any[]) {
-    const primaryFeature = features.find(feature => feature?.place_type?.includes('address')) || features[0];
-    const findByType = (type: string) => features.find(feature => feature?.place_type?.includes(type));
-    const neighborhoodFeature = findByType('neighborhood');
-    const localityFeature = findByType('locality');
-    const districtFeature = findByType('district');
-    const placeFeature = findByType('place');
-    const postcodeFeature = findByType('postcode');
-    const regionFeature = findByType('region');
-    const countryFeature = findByType('country');
-    const components = {
-      address: primaryFeature?.place_name || '',
-      neighborhood: neighborhoodFeature?.text || '',
-      city: '',
-      state: '',
-      country: '',
-      zip: '',
-      coordinates: primaryFeature?.center || primaryFeature?.geometry?.coordinates || [0, 0],
-      text: primaryFeature?.text || '',
+  private parseGeoapifyReverseResult(result: any) {
+    const neighborhood = result?.neighbourhood || result?.neighborhood || result?.suburb || result?.quarter || '';
+    const city = result?.city || result?.town || result?.village || result?.municipality || result?.county || '';
+    const state = result?.state || result?.region || '';
+    const country = result?.country || '';
+    const address = result?.formatted || [
+      result?.address_line1,
+      result?.address_line2,
+      neighborhood,
+      city,
+      state,
+      country,
+    ].filter(Boolean).join(', ');
+
+    return {
+      address,
+      neighborhood,
+      city,
+      state,
+      country,
+      zip: result?.postcode || '',
+      coordinates: [Number(result?.lon || 0), Number(result?.lat || 0)],
+      text: result?.name || result?.address_line1 || neighborhood || city || address,
     };
-
-    const candidates = [
-      ...features,
-      ...features.flatMap(feature => Array.isArray(feature?.context) ? feature.context : []),
-    ];
-
-    const readType = (item: any) => {
-      const id = item?.id || '';
-      const placeTypes = Array.isArray(item?.place_type) ? item.place_type : [];
-      return {
-        isPostcode: id.startsWith('postcode') || placeTypes.includes('postcode'),
-        isPlace: id.startsWith('place') || placeTypes.includes('place'),
-        isLocality: id.startsWith('locality') || placeTypes.includes('locality'),
-        isDistrict: id.startsWith('district') || placeTypes.includes('district'),
-        isNeighborhood: id.startsWith('neighborhood') || placeTypes.includes('neighborhood'),
-        isRegion: id.startsWith('region') || placeTypes.includes('region'),
-        isCountry: id.startsWith('country') || placeTypes.includes('country'),
-      };
-    };
-
-    for (const item of candidates) {
-      const text = item?.text || '';
-      if (!text) continue;
-
-      const type = readType(item);
-      if (!components.zip && type.isPostcode) components.zip = text;
-      if (!components.city && type.isPlace) components.city = text;
-      if (!components.city && type.isLocality) components.city = text;
-      if (!components.city && type.isDistrict) components.city = text;
-      if (!components.neighborhood && type.isNeighborhood) components.neighborhood = text;
-      if (!components.state && type.isRegion) components.state = text;
-      if (!components.country && type.isCountry) components.country = text;
-    }
-
-    components.neighborhood = components.neighborhood || neighborhoodFeature?.text || localityFeature?.text || '';
-    components.city = placeFeature?.text || components.city || localityFeature?.text || districtFeature?.text || '';
-    components.state = regionFeature?.text || components.state;
-    components.country = countryFeature?.text || components.country;
-    components.zip = postcodeFeature?.text || components.zip;
-
-    if (!components.city) {
-      const fallback = candidates.find(item => {
-        const type = readType(item);
-        return type.isNeighborhood || type.isLocality || type.isDistrict;
-      });
-      components.city = fallback?.text || '';
-    }
-
-    const addressParts = [
-      components.neighborhood,
-      components.city,
-      components.state,
-      components.country,
-    ].filter(Boolean);
-    const uniqueAddressParts = addressParts.filter((part, index) => addressParts.indexOf(part) === index);
-    const composedAddress = uniqueAddressParts.join(', ');
-
-    if (components.address) {
-      const hasNeighborhood = components.neighborhood && components.address.toLowerCase().includes(components.neighborhood.toLowerCase());
-      components.address = hasNeighborhood || !components.neighborhood
-        ? components.address
-        : [components.neighborhood, components.address].join(', ');
-    } else {
-      components.address = composedAddress;
-    }
-
-    return components;
-  }
-
-  private featureKey(feature: any) {
-    return feature?.id || `${feature?.place_type?.join('-') || 'feature'}:${feature?.text || feature?.place_name || ''}`;
-  }
-
-  private mergeFeatures(...featureGroups: any[][]) {
-    const byKey = new Map<string, any>();
-    for (const feature of featureGroups.flat()) {
-      if (!feature) continue;
-      byKey.set(this.featureKey(feature), feature);
-    }
-    return Array.from(byKey.values());
-  }
-
-  private hasFeatureType(features: any[], type: string) {
-    return features.some(feature => Array.isArray(feature?.place_type) && feature.place_type.includes(type));
   }
 
   async search(dto: SearchAddressesDto) {
@@ -175,8 +100,8 @@ export class AddressesService {
   }
 
   async reverseGeocode(dto: ReverseGeocodeDto) {
-    if (!this.accessToken) {
-      this.logger.warn(`Reverse geocoding skipped: MAPBOX_ACCESS_TOKEN is missing for coordinates ${dto.longitude},${dto.latitude}`);
+    if (!this.geoapifyApiKey) {
+      this.logger.warn(`Reverse geocoding skipped: GEOAPIFY_API_KEY is missing for coordinates ${dto.longitude},${dto.latitude}`);
       return {
         success: false,
         message: "Impossible de resoudre l'adresse pour ces coordonnees",
@@ -184,18 +109,16 @@ export class AddressesService {
     }
 
     const params = new URLSearchParams({
-      access_token: this.accessToken,
-      types: 'place,locality,neighborhood,address',
-      language: 'fr',
+      apiKey: this.geoapifyApiKey,
+      lon: String(dto.longitude),
+      lat: String(dto.latitude),
+      format: 'json',
+      lang: 'fr',
     });
-
-    const fetchReverseGeocode = async (searchParams: URLSearchParams) => fetch(
-      `${this.baseUrl}/${dto.longitude},${dto.latitude}.json?${searchParams.toString()}`,
-    );
 
     let response: Response;
     try {
-      response = await fetchReverseGeocode(params);
+      response = await fetch(`${this.geoapifyReverseUrl}?${params.toString()}`);
     } catch (error) {
       this.logger.warn(`Reverse geocoding request failed for coordinates ${dto.longitude},${dto.latitude}: ${error instanceof Error ? error.message : String(error)}`);
       return {
@@ -206,7 +129,7 @@ export class AddressesService {
 
     if (!response.ok) {
       const errorBody = await response.text().catch(() => '');
-      this.logger.warn(`Reverse geocoding failed for coordinates ${dto.longitude},${dto.latitude}: Mapbox status ${response.status}${errorBody ? ` - ${errorBody.slice(0, 300)}` : ''}`);
+      this.logger.warn(`Reverse geocoding failed for coordinates ${dto.longitude},${dto.latitude}: Geoapify status ${response.status}${errorBody ? ` - ${errorBody.slice(0, 300)}` : ''}`);
       return {
         success: false,
         message: "Impossible de resoudre l'adresse pour ces coordonnees",
@@ -214,48 +137,17 @@ export class AddressesService {
     }
 
     const payload = await response.json();
-    let features = Array.isArray(payload.features) ? payload.features : [];
+    const results = Array.isArray(payload.results) ? payload.results : [];
 
-    if (!features.length) {
-      const fallbackParams = new URLSearchParams({
-        access_token: this.accessToken,
-        language: 'fr',
-      });
-      const fallbackResponse = await fetchReverseGeocode(fallbackParams).catch(() => null);
-      if (fallbackResponse?.ok) {
-        const fallbackPayload = await fallbackResponse.json().catch(() => null);
-        features = Array.isArray(fallbackPayload?.features) ? fallbackPayload.features : [];
-      }
-    }
-
-    if (features.length) {
-      const wantedTypes = ['address', 'neighborhood', 'locality', 'district', 'place', 'postcode', 'region', 'country'];
-      const missingTypes = wantedTypes.filter(type => !this.hasFeatureType(features, type));
-      const typedFeatureGroups = await Promise.all(
-        missingTypes.map(async (type) => {
-          const typedParams = new URLSearchParams({
-            access_token: this.accessToken,
-            language: 'fr',
-            types: type,
-          });
-          const typedResponse = await fetchReverseGeocode(typedParams).catch(() => null);
-          if (!typedResponse?.ok) return [];
-          const typedPayload = await typedResponse.json().catch(() => null);
-          return Array.isArray(typedPayload?.features) ? typedPayload.features : [];
-        }),
-      );
-      features = this.mergeFeatures(features, ...typedFeatureGroups);
-    }
-
-    if (!features.length) {
-      this.logger.warn(`Reverse geocoding returned no feature for coordinates ${dto.longitude},${dto.latitude}, including broad fallback`);
+    if (!results.length) {
+      this.logger.warn(`Geoapify reverse geocoding returned no result for coordinates ${dto.longitude},${dto.latitude}`);
       return {
         success: false,
         message: "Impossible de resoudre l'adresse pour ces coordonnees",
       };
     }
 
-    const components = this.parseReverseAddressComponents(features);
+    const components = this.parseGeoapifyReverseResult(results[0]);
     this.logger.log(`Reverse geocoding resolved coordinates ${dto.longitude},${dto.latitude} to ${components.address || components.city || components.state || components.country || 'unknown place'}`);
 
     return {

@@ -60,6 +60,7 @@ export interface Ad {
   // Location fields
   address?: string;
   city?: string;
+  neighborhood?: string;
   state?: string;
   country?: string;
   zip?: string;

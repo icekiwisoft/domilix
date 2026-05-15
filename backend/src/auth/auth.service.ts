@@ -15,6 +15,7 @@ import { assertHoneypotClear } from '../common/honeypot';
 import { MailService } from '../mail/mail.service';
 import { AuthTokenService } from './auth-token.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { DeleteAccountDto } from './dto/delete-account.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
@@ -285,7 +286,7 @@ export class AuthService {
       where: dto.email ? { email: dto.email } : { phoneNumber: dto.phone_number! },
     });
 
-    if (!user || !(await bcrypt.compare(dto.password, user.password))) {
+    if (!user || user.deletedAt || !(await bcrypt.compare(dto.password, user.password))) {
       this.logger.warn(`Failed login attempt for ${dto.email || dto.phone_number || 'unknown'}`);
       throw new UnauthorizedException('Les informations de connexion sont incorrectes.');
     }
@@ -313,7 +314,7 @@ export class AuthService {
       ? this.tokens.decodeAccessToken(refreshTokenOrAccessToken)
       : this.tokens.verifyRefreshToken(refreshTokenOrAccessToken);
     const user = await this.prisma.user.findUnique({ where: { id: BigInt(payload.sub) } });
-    if (!user) {
+    if (!user || user.deletedAt) {
       throw new UnauthorizedException('Non authentifie.');
     }
 
@@ -533,5 +534,26 @@ export class AuthService {
     });
 
     return { message: 'Mot de passe modifie avec succes.' };
+  }
+
+  async deleteAccount(user: User, dto: DeleteAccountDto) {
+    const currentUser = await this.prisma.user.findFirst({
+      where: { id: user.id, deletedAt: null },
+    });
+    if (!currentUser) {
+      throw new UnauthorizedException('Non authentifie.');
+    }
+
+    const matches = await bcrypt.compare(dto.password, currentUser.password);
+    if (!matches) {
+      throw new UnauthorizedException('Mot de passe incorrect.');
+    }
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { deletedAt: new Date() },
+    });
+
+    return { message: 'Compte supprime avec succes.' };
   }
 }

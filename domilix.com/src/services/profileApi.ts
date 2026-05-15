@@ -12,6 +12,10 @@ export interface ChangePasswordData {
   new_password_confirmation: string;
 }
 
+export interface DeleteAccountData {
+  password: string;
+}
+
 export interface BecomeAnnouncerData {
   company_name?: string;
   bio?: string;
@@ -34,6 +38,12 @@ export const profileApi = {
   // Change password
   changePassword: async (data: ChangePasswordData) => {
     const response = await api.post('/auth/changePassword', data);
+    return response.data;
+  },
+
+  // Delete current account
+  deleteAccount: async (data: DeleteAccountData) => {
+    const response = await api.delete('/auth/me', { data });
     return response.data;
   },
 

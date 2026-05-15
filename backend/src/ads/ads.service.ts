@@ -78,6 +78,7 @@ export class AdsService {
         { description: { contains: query.search } },
         { adress: { contains: query.search } },
         { city: { contains: query.search } },
+        { neighborhood: { contains: query.search } },
       ];
 
       const numericSearch = Number(query.search);
@@ -453,6 +454,7 @@ export class AdsService {
         devise: ad.devise,
         address: ad.adress,
         city: ad.city,
+        neighborhood: ad.neighborhood,
         country: ad.country,
         postal_code: ad.zip,
         contact_phone: ad.contactPhone,
@@ -499,6 +501,7 @@ export class AdsService {
       devise: ad.devise,
       address: ad.adress,
       city: ad.city,
+      neighborhood: ad.neighborhood,
       country: ad.country,
       postal_code: ad.zip,
       contact_phone: ad.contactPhone,
@@ -784,6 +787,7 @@ export class AdsService {
         clientId: crypto.randomUUID(),
         adress: resolvedAddress?.address || body.address || '',
         city: resolvedAddress?.city || body.city || '',
+        neighborhood: resolvedAddress?.neighborhood || body.neighborhood || '',
         country: resolvedAddress?.country || body.country || '',
         state: resolvedAddress?.state || body.state || '',
         zip: resolvedAddress?.zip || body.zip || '',
@@ -928,6 +932,7 @@ export class AdsService {
         ...(body.price !== undefined ? { price: Number(body.price) } : {}),
         ...(hasLocalization && resolvedAddress?.address ? { adress: resolvedAddress.address } : body.address !== undefined ? { adress: body.address } : {}),
         ...(hasLocalization && resolvedAddress?.city ? { city: resolvedAddress.city } : body.city !== undefined ? { city: body.city } : {}),
+        ...(hasLocalization && resolvedAddress?.neighborhood ? { neighborhood: resolvedAddress.neighborhood } : body.neighborhood !== undefined ? { neighborhood: body.neighborhood } : {}),
         ...(hasLocalization && resolvedAddress?.state ? { state: resolvedAddress.state } : body.state !== undefined ? { state: body.state } : {}),
         ...(hasLocalization && resolvedAddress?.country ? { country: resolvedAddress.country } : body.country !== undefined ? { country: body.country } : {}),
         ...(hasLocalization && resolvedAddress?.zip ? { zip: resolvedAddress.zip } : body.zip !== undefined ? { zip: body.zip } : {}),

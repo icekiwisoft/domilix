@@ -14,6 +14,7 @@ import {
   subscriptionApi,
   type Subscription,
 } from '../../services/subscriptionApi';
+import { clearAuthState } from '../../stores/defineStore';
 
 interface ProfileDialogProps {
   isOpen: boolean;
@@ -58,6 +59,9 @@ export default function ProfileDialog({
     new_password: '',
     new_password_confirmation: '',
   });
+  const [deleteAccountPassword, setDeleteAccountPassword] = useState('');
+  const [confirmDeleteAccount, setConfirmDeleteAccount] = useState(false);
+  const [deleteAccountDialogOpen, setDeleteAccountDialogOpen] = useState(false);
 
   const [announcerForm, setAnnouncerForm] = useState({
     company_name: '',
@@ -175,6 +179,30 @@ export default function ProfileDialog({
       alert('Mot de passe changé avec succès');
     } catch (error) {
       alert('Erreur lors du changement de mot de passe');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!confirmDeleteAccount) {
+      alert('Veuillez confirmer que vous comprenez que cette action est irréversible.');
+      return;
+    }
+
+    if (!deleteAccountPassword) {
+      alert('Veuillez saisir votre mot de passe pour supprimer le compte.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await profileApi.deleteAccount({ password: deleteAccountPassword });
+      clearAuthState();
+      onClose();
+      window.location.href = '/';
+    } catch (error: any) {
+      alert(error.response?.data?.message || 'Erreur lors de la suppression du compte');
     } finally {
       setLoading(false);
     }
@@ -374,6 +402,25 @@ export default function ProfileDialog({
                 className='w-full bg-orange-600 hover:bg-orange-700 disabled:bg-orange-300 text-white font-medium py-2 px-4 rounded-lg transition-colors'
               >
                 {loading ? 'Changement...' : 'Changer le mot de passe'}
+              </button>
+            </div>
+
+            <div className='rounded-xl border border-red-200 bg-red-50 p-4'>
+              <h4 className='font-semibold text-red-900'>Supprimer mon compte</h4>
+              <p className='mt-2 text-sm leading-6 text-red-700'>
+                Cette action désactive votre compte Domilix. Vous serez déconnecté immédiatement et ne pourrez plus accéder à votre espace.
+              </p>
+
+              <button
+                type='button'
+                onClick={() => {
+                  setDeleteAccountPassword('');
+                  setConfirmDeleteAccount(false);
+                  setDeleteAccountDialogOpen(true);
+                }}
+                className='mt-4 w-full rounded-lg bg-red-600 px-4 py-2 font-medium text-white transition-colors hover:bg-red-700'
+              >
+                Supprimer mon compte
               </button>
             </div>
           </div>
@@ -731,6 +778,60 @@ export default function ProfileDialog({
     }
   };
 
+  const deleteAccountDialog = deleteAccountDialogOpen ? (
+    <div className='fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/60 px-4 backdrop-blur-sm'>
+      <div className='w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl'>
+        <h3 className='text-lg font-bold text-gray-950'>Confirmer la suppression</h3>
+        <p className='mt-2 text-sm leading-6 text-gray-600'>
+          Saisissez votre mot de passe pour supprimer votre compte Domilix. Cette action est irréversible.
+        </p>
+
+        <div className='mt-5 space-y-4'>
+          <div>
+            <label className='mb-2 block text-sm font-medium text-gray-700'>Mot de passe actuel</label>
+            <input
+              type='password'
+              value={deleteAccountPassword}
+              onChange={e => setDeleteAccountPassword(e.target.value)}
+              className='w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-red-500 focus:ring-2 focus:ring-red-500'
+              placeholder='Votre mot de passe'
+              autoFocus
+            />
+          </div>
+
+          <label className='flex items-start gap-3 text-sm text-gray-700'>
+            <input
+              type='checkbox'
+              checked={confirmDeleteAccount}
+              onChange={e => setConfirmDeleteAccount(e.target.checked)}
+              className='mt-1 h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500'
+            />
+            Je comprends que cette action est irréversible.
+          </label>
+        </div>
+
+        <div className='mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end'>
+          <button
+            type='button'
+            onClick={() => setDeleteAccountDialogOpen(false)}
+            disabled={loading}
+            className='rounded-lg px-4 py-2 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-100 disabled:opacity-60'
+          >
+            Annuler
+          </button>
+          <button
+            type='button'
+            onClick={handleDeleteAccount}
+            disabled={loading || !deleteAccountPassword || !confirmDeleteAccount}
+            className='rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-red-300'
+          >
+            {loading ? 'Suppression...' : 'Supprimer définitivement'}
+          </button>
+        </div>
+      </div>
+    </div>
+  ) : null;
+
   const settingsPanel = (
     <div
       className={
@@ -852,23 +953,29 @@ export default function ProfileDialog({
 
   if (variant === 'page') {
     return (
-      <div className='mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8'>
-        {settingsPanel}
-      </div>
+      <>
+        <div className='mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8'>
+          {settingsPanel}
+        </div>
+        {deleteAccountDialog}
+      </>
     );
   }
 
   return (
-    <div className='fixed inset-0 z-50 overflow-y-auto bg-slate-950/60 backdrop-blur-md'>
-      <div className='flex min-h-screen items-center justify-center p-4'>
-        <button
-          type='button'
-          className='fixed inset-0 cursor-default'
-          onClick={onClose}
-          aria-label='Fermer les paramètres'
-        />
-        {settingsPanel}
+    <>
+      <div className='fixed inset-0 z-50 overflow-y-auto bg-slate-950/60 backdrop-blur-md'>
+        <div className='flex min-h-screen items-center justify-center p-4'>
+          <button
+            type='button'
+            className='fixed inset-0 cursor-default'
+            onClick={onClose}
+            aria-label='Fermer les paramètres'
+          />
+          {settingsPanel}
+        </div>
       </div>
-    </div>
+      {deleteAccountDialog}
+    </>
   );
 }

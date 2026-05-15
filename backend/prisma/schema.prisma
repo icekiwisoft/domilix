@@ -175,6 +175,7 @@ model Ad {
   deletedAt       DateTime? @map("deleted_at") @db.Timestamp(0)
   adress          String    @default("") @db.VarChar(255)
   city            String    @default("") @db.VarChar(255)
+  neighborhood    String    @default("") @db.VarChar(255)
   country         String    @default("") @db.VarChar(255)
   state           String    @default("") @db.VarChar(255)
   zip             String    @default("") @db.VarChar(255)

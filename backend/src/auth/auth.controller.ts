@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   InternalServerErrorException,
   Param,
@@ -31,6 +32,7 @@ import { CurrentUser } from './current-user.decorator';
 import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { DeleteAccountDto } from './dto/delete-account.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
@@ -244,6 +246,15 @@ export class AuthController {
   @ApiOperation({ summary: 'Reset password using verification code' })
   resetPassword(@Body() dto: ResetPasswordDto) {
     return this.authService.resetPassword(dto);
+  }
+
+  @UseGuards(AuthGuard)
+  @Delete('me')
+  @Throttle({ default: { limit: 3, ttl: 15 * 60_000 } })
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete current authenticated account' })
+  deleteAccount(@CurrentUser() user: any, @Body() dto: DeleteAccountDto) {
+    return this.authService.deleteAccount(user, dto);
   }
 
   @UseGuards(AuthGuard)

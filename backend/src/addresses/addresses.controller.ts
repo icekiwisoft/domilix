@@ -10,7 +10,7 @@ export class AddressesController {
   constructor(private readonly addressesService: AddressesService) {}
 
   @Get('search')
-  @ApiOperation({ summary: 'Search addresses with Mapbox geocoding' })
+  @ApiOperation({ summary: 'Search addresses with geocoding provider' })
   @ApiOkResponse({ description: 'Address suggestions' })
   search(@Query() dto: SearchAddressesDto) {
     return this.addressesService.search(dto);

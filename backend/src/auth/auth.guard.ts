@@ -28,7 +28,7 @@ export class AuthGuard implements CanActivate {
       where: { id: BigInt(payload.sub) },
     });
 
-    if (!user) throw new UnauthorizedException('Non authentifie.');
+    if (!user || user.deletedAt) throw new UnauthorizedException('Non authentifie.');
 
     request.user = user;
     request.authToken = token;
