@@ -90,12 +90,6 @@ export const subscriptionApi = {
     return response.data;
   },
 
-  // Annuler un pack (soft delete)
-  cancelSubscription: async (id: number): Promise<{ message: string }> => {
-    const response = await api.delete(`/subscriptions/${id}`);
-    return response.data;
-  },
-
   // Fonction pour démarrer l'achat de Domicoins
   startCreditPurchase: async (
     plan_name: string,

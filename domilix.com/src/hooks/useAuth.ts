@@ -10,6 +10,7 @@ import {
 import {
   clearAuthState,
   getAuthToken,
+  setAuthPersistence,
   setAuthChecked,
   setAuthToken,
   setAuthUser,
@@ -23,11 +24,12 @@ export const useAuth = () => {
 
   const isAuthenticated = !!token && !!user;
 
-  const login = useCallback(async (credentials: LoginCredentials) => {
+  const login = useCallback(async (credentials: LoginCredentials, remember = false) => {
     try {
       setIsLoading(true);
       const response = await authApi.login(credentials);
 
+      setAuthPersistence(remember);
       setAuthToken(response.authorisation.token);
       setAuthUser(response.user);
       setAuthChecked(true);
@@ -49,6 +51,7 @@ export const useAuth = () => {
       setIsLoading(true);
       const response = await authApi.register(data);
 
+      setAuthPersistence(true);
       setAuthToken(response.authorisation.token);
       setAuthUser(response.user);
       setAuthChecked(true);

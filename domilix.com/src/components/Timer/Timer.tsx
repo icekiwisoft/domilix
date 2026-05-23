@@ -66,7 +66,7 @@ const Timer: React.FC<TimerProps> = ({
   }, [targetDate, displayMonths]);
 
   return (
-    <div className='text-center mx-auto w-96 py-4 px-4'>
+    <div className='mx-auto w-full max-w-96 px-2 py-4 text-center sm:px-4'>
       <div className='flex items-center justify-center w-full lg:gap-8 sm:gap-5 gap-1 count-down-main'>
         <div className='timer'>
           {renderDigitBlocks(timeLeft.days, dayDigits)}
@@ -81,15 +81,15 @@ const Timer: React.FC<TimerProps> = ({
             heures
           </p>
         </div>
-        <h3 className='font-manrope font-semibold text-xl text-gray-700'>:</h3>
-        <div className='timer'>
+        <h3 className='font-manrope font-semibold text-xl text-gray-700 max-[420px]:hidden'>:</h3>
+        <div className='timer max-[420px]:hidden'>
           {renderDigitBlocks(timeLeft.minutes, 2)}
           <p className=' lg:text-sm text-xs font-normal text-gray-700 mt-1 text-center w-full'>
             minutes
           </p>
         </div>
-        <h3 className='font-manrope font-semibold text-xl text-gray-700'>:</h3>
-        <div className='timer'>
+        <h3 className='hidden font-manrope text-xl font-semibold text-gray-700 sm:block'>:</h3>
+        <div className='timer hidden sm:block'>
           {renderDigitBlocks(timeLeft.seconds, 2)}
           <p className=' lg:text-sm text-xs font-normal text-gray-700 mt-1 text-center w-full'>
             secondes

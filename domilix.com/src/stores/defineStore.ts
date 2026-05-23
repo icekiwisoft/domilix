@@ -6,6 +6,10 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
 type UserState = any | null;
+const AUTH_STORAGE_KEY = 'domilix-auth-store';
+const AUTH_STORAGE_MODE_KEY = 'domilix-auth-storage-mode';
+
+type AuthStorageMode = 'local' | 'session';
 
 const createSafeStorage = () => {
   if (typeof window === 'undefined') {
@@ -17,6 +21,43 @@ const createSafeStorage = () => {
   }
 
   return window.localStorage;
+};
+
+const getAuthStorageMode = (): AuthStorageMode => {
+  if (typeof window === 'undefined') return 'local';
+  return window.localStorage.getItem(AUTH_STORAGE_MODE_KEY) === 'session' ? 'session' : 'local';
+};
+
+const getAuthStorage = () => {
+  if (typeof window === 'undefined') {
+    return {
+      getItem: () => null,
+      setItem: () => undefined,
+      removeItem: () => undefined,
+    };
+  }
+
+  return getAuthStorageMode() === 'session' ? window.sessionStorage : window.localStorage;
+};
+
+const authStorage = {
+  getItem: (name: string) => {
+    if (typeof window === 'undefined') return null;
+    return window.sessionStorage.getItem(name) || window.localStorage.getItem(name);
+  },
+  setItem: (name: string, value: string) => {
+    if (typeof window === 'undefined') return;
+    const storage = getAuthStorage();
+    const otherStorage = storage === window.sessionStorage ? window.localStorage : window.sessionStorage;
+    otherStorage.removeItem(name);
+    storage.setItem(name, value);
+  },
+  removeItem: (name: string) => {
+    if (typeof window === 'undefined') return;
+    window.localStorage.removeItem(name);
+    window.sessionStorage.removeItem(name);
+    window.localStorage.removeItem(AUTH_STORAGE_MODE_KEY);
+  },
 };
 
 type AuthStore = {
@@ -123,7 +164,7 @@ export const useAuthStore = create<AuthStore>()(
     }),
     {
       name: 'domilix-auth-store',
-      storage: createJSONStorage(createSafeStorage),
+      storage: createJSONStorage(() => authStorage),
       partialize: state => ({
         token: state.token,
         user: state.user,
@@ -137,6 +178,17 @@ export const useAuthStore = create<AuthStore>()(
     },
   ),
 );
+
+export const setAuthPersistence = (remember: boolean) => {
+  if (typeof window === 'undefined') return;
+  window.localStorage.setItem(AUTH_STORAGE_MODE_KEY, remember ? 'local' : 'session');
+  const currentValue = window.localStorage.getItem(AUTH_STORAGE_KEY) || window.sessionStorage.getItem(AUTH_STORAGE_KEY);
+  window.localStorage.removeItem(AUTH_STORAGE_KEY);
+  window.sessionStorage.removeItem(AUTH_STORAGE_KEY);
+  if (currentValue) {
+    (remember ? window.localStorage : window.sessionStorage).setItem(AUTH_STORAGE_KEY, currentValue);
+  }
+};
 
 export const useUiStore = create<UiStore>()(
   persist(

@@ -19,7 +19,7 @@ export default function SigninDialog() {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(true);
   const [website, setWebsite] = useState('');
   const [resetEmailLoading, setResetEmailLoading] = useState(false);
   const [error, setError] = useState('');
@@ -42,7 +42,7 @@ export default function SigninDialog() {
     const norm = isEmail(identifier) ? identifier.trim() : normalizeIdentifier(identifier);
     const credentials = { password, ...(isEmail(norm) ? { email: norm } : { phone_number: norm }) };
 
-    const result = await login(credentials);
+    const result = await login(credentials, rememberMe);
     if (result.success) {
       setSuccess('Connexion réussie !');
       if (!isEmail(norm) && !result.data?.user?.phone_verified) {

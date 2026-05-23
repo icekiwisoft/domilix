@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 
 import Footer2 from '@components/Footer2/Footer2';
 import Nav2 from '@components/Nav2/Nav2';
-import ProfileDialog from '@components/ProfileDialog/ProfileDialog';
+import SettingsPanel from '@components/SettingsPanel/SettingsPanel';
 import { useNavigate, useSearchParams } from '@router';
 import { useAuthStore } from '@stores/defineStore';
 
@@ -30,7 +30,7 @@ export default function Settings() {
   return (
     <div className='min-h-screen bg-gray-50 pt-20'>
       <Nav2 />
-      <ProfileDialog isOpen onClose={() => navigate('/')} variant='page' initialTab={initialTab} />
+      <SettingsPanel isOpen onClose={() => navigate('/')} variant='page' initialTab={initialTab} />
       <Footer2 />
     </div>
   );
