@@ -215,7 +215,7 @@ export default function Nav2({
                 <button
                   ref={profileButtonDesktopRef}
                   onClick={e => { e.stopPropagation(); setShowProfileMenu(prev => !prev); setShowNotifications(false); }}
-                  className='flex h-9 w-9 items-center justify-center rounded-full bg-primary/15 text-sm font-semibold text-primary transition-colors hover:bg-primary/25'
+                  className='flex h-9 w-9 items-center justify-center rounded-full bg-white text-sm font-semibold text-primary ring-1 ring-outline-variant transition-colors hover:bg-surface-container-low'
                 >
                   {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
                 </button>
@@ -285,7 +285,7 @@ export default function Nav2({
                   onClick={e => { e.stopPropagation(); setShowProfileMenu(prev => !prev); setShowNotifications(false); }}
                   className='flex items-center gap-1 rounded-full border border-outline-variant bg-surface-container-lowest p-0.5 transition-colors hover:bg-surface-container-low sm:gap-1.5 sm:p-1'
                 >
-                  <span className='flex h-7 w-7 items-center justify-center rounded-full bg-primary/15 text-xs font-bold text-primary'>
+                  <span className='flex h-7 w-7 items-center justify-center rounded-full bg-white text-xs font-bold text-primary ring-1 ring-outline-variant'>
                     {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
                   </span>
                   {/* <HiChevronDown className={`h-3 w-3 text-on-surface-variant transition-transform duration-200 sm:h-3.5 sm:w-3.5 ${showProfileMenu ? 'rotate-180' : ''}`} /> */}
