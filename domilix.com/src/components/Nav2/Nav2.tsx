@@ -169,7 +169,7 @@ export default function Nav2({
             <>
               {/* Domicoins */}
               <NavLink
-                to='/subscriptions'
+                to='/settings?tab=packs'
                 data-tour='user-credits'
                 className={({ isActive }) =>
                   `flex items-center gap-1.5 px-2 py-1 rounded-lg transition-colors ${isActive ? 'bg-yellow-50' : 'hover:bg-gray-100'
@@ -244,7 +244,7 @@ export default function Nav2({
 
               {/* Domicoins pill icon+count */}
               <NavLink
-                to='/subscriptions'
+                to='/settings?tab=packs'
                 data-tour='user-credits'
                 className={({ isActive }) =>
                   `flex items-center gap-1 rounded-full border border-outline-variant bg-surface-container-lowest py-1 pl-1.5 pr-1.5 transition-colors hover:bg-surface-container-low sm:gap-1.5 sm:pl-2 sm:pr-3 ${isActive ? 'border-primary/30 bg-primary/5' : ''}`
