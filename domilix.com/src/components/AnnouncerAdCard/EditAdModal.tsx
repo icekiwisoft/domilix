@@ -6,7 +6,11 @@ import { MdMyLocation } from 'react-icons/md';
 
 import { addressApi, ReverseGeocodeResult } from '@services/addressApi';
 import { getAd, updateAd } from '@services/announceApi';
+import { uploadApi } from '@services/uploadApi';
+import { mediaUrl } from '@utils/mediaUrl';
 import { Ad } from '@utils/types';
+
+const MAX_AD_MEDIAS = 10;
 
 interface EditAdModalProps {
   ad: Ad;
@@ -99,6 +103,9 @@ export default function EditAdModal({ ad, onClose, onUpdated }: EditAdModalProps
   const [details, setDetails] = useState(() => getAdDetails(ad));
   const [coordinates, setCoordinates] = useState(() => getAdCoordinates(ad));
   const [amenities, setAmenities] = useState<Record<AmenityKey, boolean>>(() => getAdAmenities(ad));
+  const [existingMedias, setExistingMedias] = useState(() => ad.medias || []);
+  const [newMediaFiles, setNewMediaFiles] = useState<File[]>([]);
+  const [mediaError, setMediaError] = useState('');
 
   const longitude = Number(coordinates.longitude.replace(',', '.'));
   const latitude = Number(coordinates.latitude.replace(',', '.'));
@@ -111,9 +118,12 @@ export default function EditAdModal({ ad, onClose, onUpdated }: EditAdModalProps
       setDetails(getAdDetails(nextAd));
       setCoordinates(getAdCoordinates(nextAd));
       setAmenities(getAdAmenities(nextAd));
+      setExistingMedias(nextAd.medias || []);
+      setNewMediaFiles([]);
       setShowCoordinates(hasValue(nextAd.longitude) && hasValue(nextAd.latitude));
       setLocationError('');
       setDetectedLocation(null);
+      setMediaError('');
     };
 
     applyAd(ad);
@@ -180,6 +190,42 @@ export default function EditAdModal({ ad, onClose, onUpdated }: EditAdModalProps
     setAmenities(current => ({ ...current, [key]: checked }));
   };
 
+  const removeExistingMedia = (mediaId: string) => {
+    setExistingMedias(current => current.filter(media => media.id !== mediaId));
+    setMediaError('');
+  };
+
+  const removeNewMedia = (index: number) => {
+    setNewMediaFiles(current => current.filter((_, fileIndex) => fileIndex !== index));
+    setMediaError('');
+  };
+
+  const handleMediaChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(event.target.files || []);
+    const allowedFiles = selectedFiles.filter(file => file.type.startsWith('image/') || file.type.startsWith('video/'));
+    const availableSlots = MAX_AD_MEDIAS - existingMedias.length - newMediaFiles.length;
+
+    if (allowedFiles.length !== selectedFiles.length) {
+      setMediaError('Seules les images et les vidéos sont acceptées.');
+    } else {
+      setMediaError('');
+    }
+
+    if (availableSlots <= 0) {
+      setMediaError(`Vous pouvez ajouter ${MAX_AD_MEDIAS} médias maximum.`);
+      event.target.value = '';
+      return;
+    }
+
+    const nextFiles = allowedFiles.slice(0, availableSlots);
+    if (allowedFiles.length > availableSlots) {
+      setMediaError(`Vous pouvez ajouter ${MAX_AD_MEDIAS} médias maximum.`);
+    }
+
+    setNewMediaFiles(current => [...current, ...nextFiles]);
+    event.target.value = '';
+  };
+
   const getCurrentLocation = () => {
     if (!navigator.geolocation) {
       setLocationError("La géolocalisation n'est pas supportée par ce navigateur.");
@@ -210,9 +256,23 @@ export default function EditAdModal({ ad, onClose, onUpdated }: EditAdModalProps
       setLocationError('Coordonnées GPS invalides.');
       return;
     }
+    const numberFields = isRealestate
+      ? [details.bedroom, details.mainroom, details.toilet, details.kitchen, details.size, details.caution]
+      : [details.height, details.width, details.length, details.weight];
+    if (numberFields.some(value => value !== '' && Number(value) < 0)) {
+      setLocationError('Les valeurs numériques ne peuvent pas être négatives.');
+      return;
+    }
+    if (existingMedias.length + newMediaFiles.length === 0) {
+      setMediaError('Ajoutez au moins un média pour cette annonce.');
+      return;
+    }
 
     try {
       setIsSaving(true);
+      const uploadedMedias = await Promise.all(
+        newMediaFiles.map(file => uploadApi.uploadFile(file, 'media')),
+      );
       const updated = await updateAd(ad.id, {
         description: details.description,
         price: Number(details.price),
@@ -220,6 +280,10 @@ export default function EditAdModal({ ad, onClose, onUpdated }: EditAdModalProps
         devise: details.devise,
         contact_phone: details.contact_phone,
         contact_email: details.contact_email,
+        media_ids: [
+          ...existingMedias.map(media => media.id),
+          ...uploadedMedias.map(media => media.id),
+        ],
         ...(hasCoordinates ? { localization: [String(longitude), String(latitude)] } : {}),
         ...(isRealestate
           ? {
@@ -273,6 +337,30 @@ export default function EditAdModal({ ad, onClose, onUpdated }: EditAdModalProps
                   <Field label='Email à afficher' type='email' value={details.contact_email} onChange={value => updateDetail('contact_email', value)} />
                 </div>
                 {isLoadingAdDetails && <p className='mt-3 text-sm font-semibold text-orange-600'>Chargement des informations existantes...</p>}
+              </Section>
+
+              <Section title='Médias'>
+                <div className='grid grid-cols-2 gap-3 sm:grid-cols-4'>
+                  {existingMedias.map(media => (
+                    <div key={media.id} className='relative overflow-hidden rounded-xl border border-gray-200 bg-gray-50'>
+                      <img src={mediaUrl(media.thumbnail || media.file) || ''} alt='Média annonce' className='h-28 w-full object-cover' />
+                      <button type='button' onClick={() => removeExistingMedia(media.id)} className='absolute right-2 top-2 rounded-full bg-white/90 px-2 py-1 text-xs font-bold text-red-600 shadow'>Retirer</button>
+                    </div>
+                  ))}
+                  {newMediaFiles.map((file, index) => (
+                    <div key={`${file.name}-${index}`} className='relative flex h-28 items-center justify-center rounded-xl border border-dashed border-orange-200 bg-orange-50 p-3 text-center text-xs font-semibold text-orange-700'>
+                      {file.name}
+                      <button type='button' onClick={() => removeNewMedia(index)} className='absolute right-2 top-2 rounded-full bg-white/90 px-2 py-1 text-xs font-bold text-red-600 shadow'>Retirer</button>
+                    </div>
+                  ))}
+                </div>
+
+                <label className='mt-4 flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 px-4 py-5 text-center text-sm font-semibold text-gray-600 transition hover:border-orange-300 hover:bg-orange-50 hover:text-orange-600'>
+                  Ajouter des médias
+                  <span className='mt-1 text-xs font-normal text-gray-500'>Images ou vidéos, {MAX_AD_MEDIAS} maximum.</span>
+                  <input type='file' accept='image/*,video/*' multiple onChange={handleMediaChange} className='hidden' />
+                </label>
+                {mediaError && <p className='mt-3 text-sm font-semibold text-red-600'>{mediaError}</p>}
               </Section>
 
               <Section title='Prix et disponibilité'>
@@ -339,12 +427,12 @@ export default function EditAdModal({ ad, onClose, onUpdated }: EditAdModalProps
               {isRealestate ? (
                 <Section title='Caractéristiques immobilier'>
                   <div className='grid grid-cols-2 gap-4 sm:grid-cols-5'>
-                    <Field label='Chambres' type='number' value={details.bedroom} onChange={value => updateDetail('bedroom', value)} />
-                    <Field label='Salons' type='number' value={details.mainroom} onChange={value => updateDetail('mainroom', value)} />
-                    <Field label='Toilettes' type='number' value={details.toilet} onChange={value => updateDetail('toilet', value)} />
-                    <Field label='Cuisines' type='number' value={details.kitchen} onChange={value => updateDetail('kitchen', value)} />
-                    <Field label='Caution' type='number' value={details.caution} onChange={value => updateDetail('caution', value)} />
-                    <Field label='Taille (m²)' type='number' value={details.size} onChange={value => updateDetail('size', value)} />
+                    <Field label='Chambres' type='number' min={0} value={details.bedroom} onChange={value => updateDetail('bedroom', value)} />
+                    <Field label='Salons' type='number' min={0} value={details.mainroom} onChange={value => updateDetail('mainroom', value)} />
+                    <Field label='Toilettes' type='number' min={0} value={details.toilet} onChange={value => updateDetail('toilet', value)} />
+                    <Field label='Cuisines' type='number' min={0} value={details.kitchen} onChange={value => updateDetail('kitchen', value)} />
+                    <Field label='Caution' type='number' min={0} value={details.caution} onChange={value => updateDetail('caution', value)} />
+                    <Field label='Taille (m²)' type='number' min={0} value={details.size} onChange={value => updateDetail('size', value)} />
                   </div>
 
                   <div className='mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2'>
@@ -356,10 +444,10 @@ export default function EditAdModal({ ad, onClose, onUpdated }: EditAdModalProps
               ) : (
                 <Section title='Dimensions mobilier'>
                   <div className='grid grid-cols-2 gap-4 sm:grid-cols-4'>
-                    <Field label='Hauteur' type='number' value={details.height} onChange={value => updateDetail('height', value)} />
-                    <Field label='Largeur' type='number' value={details.width} onChange={value => updateDetail('width', value)} />
-                    <Field label='Longueur' type='number' value={details.length} onChange={value => updateDetail('length', value)} />
-                    <Field label='Poids' type='number' value={details.weight} onChange={value => updateDetail('weight', value)} />
+                    <Field label='Hauteur' type='number' min={0} value={details.height} onChange={value => updateDetail('height', value)} />
+                    <Field label='Largeur' type='number' min={0} value={details.width} onChange={value => updateDetail('width', value)} />
+                    <Field label='Longueur' type='number' min={0} value={details.length} onChange={value => updateDetail('length', value)} />
+                    <Field label='Poids' type='number' min={0} value={details.weight} onChange={value => updateDetail('weight', value)} />
                   </div>
                 </Section>
               )}
@@ -396,14 +484,14 @@ function AmenityCheckbox({ label, checked, onChange }: { label: string; checked:
   );
 }
 
-function Field({ label, value, onChange, type = 'text', inputMode, textarea = false }: { label: string; value: string; onChange: (value: string) => void; type?: string; inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode']; textarea?: boolean }) {
+function Field({ label, value, onChange, type = 'text', inputMode, min, textarea = false }: { label: string; value: string; onChange: (value: string) => void; type?: string; inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode']; min?: number; textarea?: boolean }) {
   return (
     <div>
       <label className='mb-1 block text-sm font-bold text-gray-700'>{label}</label>
       {textarea ? (
         <textarea value={value} onChange={event => onChange(event.target.value)} rows={4} className='w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100' />
       ) : (
-        <input type={type} inputMode={inputMode} value={value} onChange={event => onChange(event.target.value)} className='w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100' />
+        <input type={type} inputMode={inputMode} min={min} value={value} onChange={event => onChange(event.target.value)} className='w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100' />
       )}
     </div>
   );

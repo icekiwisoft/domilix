@@ -268,11 +268,14 @@ export default function ArticlePostDialog({
   // Gestion des changements de formulaire (entrées texte et cases à cocher)
   const handleChange = (e: FormEvent) => {
     const { name, value, type, checked } = e.target as HTMLInputElement;
+    const nonNegativeFields = ['bedroom', 'mainroom', 'toilet', 'kitchen', 'size'];
     if (type === 'checkbox') {
       setFormData(prev => ({ ...prev, [name]: checked }));
     } else if (name === 'localization') {
       const [latitude, longitude] = value.split(',').map(Number);
       setFormData(prev => ({ ...prev, localization: [latitude, longitude] }));
+    } else if (nonNegativeFields.includes(name)) {
+      setFormData(prev => ({ ...prev, [name]: value === '' ? 0 : Math.max(0, Number(value)) }));
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
@@ -661,6 +664,7 @@ export default function ArticlePostDialog({
                 <div className='relative'>
                   <input
                     type='number'
+                    min={0}
                     name='bedroom'
                     value={formData.bedroom}
                     onChange={handleChange}
@@ -692,6 +696,7 @@ export default function ArticlePostDialog({
                 <div className='relative'>
                   <input
                     type='number'
+                    min={0}
                     name='mainroom'
                     value={formData.mainroom}
                     onChange={handleChange}
@@ -725,6 +730,7 @@ export default function ArticlePostDialog({
                 <div className='relative'>
                   <input
                     type='number'
+                    min={0}
                     name='toilet'
                     value={formData.toilet}
                     onChange={handleChange}
@@ -756,6 +762,7 @@ export default function ArticlePostDialog({
                 <div className='relative'>
                   <input
                     type='number'
+                    min={0}
                     name='kitchen'
                     value={formData.kitchen}
                     onChange={handleChange}
@@ -788,6 +795,7 @@ export default function ArticlePostDialog({
                 </label>
                 <input
                   type='number'
+                  min={0}
                   name='size'
                   value={formData.size}
                   onChange={handleChange}

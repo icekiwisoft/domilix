@@ -39,6 +39,28 @@ export class AdsService {
     return result?.success ? result.data : null;
   }
 
+  private parseNonNegativeNumber(value: unknown, field: string, fallback = 0) {
+    if (value === undefined || value === null || value === '') return fallback;
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed) || parsed < 0) {
+      throw new BadRequestException(`${field} ne peut pas etre negatif.`);
+    }
+    return parsed;
+  }
+
+  private parseOptionalNonNegativeNumber(value: unknown, field: string) {
+    if (value === undefined || value === null || value === '') return null;
+    return this.parseNonNegativeNumber(value, field);
+  }
+
+  private listFromBody(body: Record<string, any>, key: string) {
+    return [body[key], body[`${key}[]`]].flat().filter(Boolean).map(String);
+  }
+
+  private hasListInBody(body: Record<string, any>, key: string) {
+    return body[key] !== undefined || body[`${key}[]`] !== undefined;
+  }
+
   private async ensureAnnouncerUser(userId: bigint) {
     const announcer = await this.prisma.announcer.findFirst({ where: { userId } });
     if (!announcer) {
@@ -710,13 +732,11 @@ export class AdsService {
       .flat()
       .filter(Boolean) as string[];
     const filesId = Array.isArray(body.filesid)
-      ? body.filesid
+      ? body.filesid.map(String)
       : body.filesid
-        ? [body.filesid]
+        ? [String(body.filesid)]
         : [];
-    const mediaIds = [body.media_ids, body['media_ids[]']]
-      .flat()
-      .filter(Boolean) as string[];
+    const mediaIds = this.listFromBody(body, 'media_ids');
     const existingMediaIds = [...filesId, ...mediaIds];
     const totalMediaCount = files.length + existingMediaIds.length + mediaUrls.length;
     if (totalMediaCount > MAX_AD_MEDIAS) {
@@ -749,21 +769,21 @@ export class AdsService {
       const furniture = await this.prisma.furniture.create({
         data: {
           clientId: crypto.randomUUID(),
-          height: body.height ? Number(body.height) : null,
-          width: body.width ? Number(body.width) : null,
-          length: body.length ? Number(body.length) : null,
-          weight: body.weight ? Number(body.weight) : null,
+          height: this.parseOptionalNonNegativeNumber(body.height, 'La hauteur'),
+          width: this.parseOptionalNonNegativeNumber(body.width, 'La largeur'),
+          length: this.parseOptionalNonNegativeNumber(body.length, 'La longueur'),
+          weight: this.parseOptionalNonNegativeNumber(body.weight, 'Le poids'),
         },
       });
       adableId = furniture.id;
     } else {
       const realEstate = await this.prisma.realEstate.create({
         data: {
-          bedroom: Number(body.bedroom || 0),
-          mainroom: Number(body.mainroom || 0),
-          toilet: Number(body.toilet || 0),
-          kitchen: Number(body.kitchen || 0),
-          size: body.size ? Number(body.size) : null,
+          bedroom: this.parseNonNegativeNumber(body.bedroom, 'Le nombre de chambres'),
+          mainroom: this.parseNonNegativeNumber(body.mainroom, 'Le nombre de salons'),
+          toilet: this.parseNonNegativeNumber(body.toilet, 'Le nombre de toilettes'),
+          kitchen: this.parseNonNegativeNumber(body.kitchen, 'Le nombre de cuisines'),
+          size: this.parseOptionalNonNegativeNumber(body.size, 'La taille'),
           gate: ['1', 'true', true].includes(body.gate),
           wifi: ['1', 'true', true].includes(body.wifi),
           airConditioning: ['1', 'true', true].includes(body.air_conditioning),
@@ -774,7 +794,7 @@ export class AdsService {
           garage: ['1', 'true', true].includes(body.garage),
           furnished: ['1', 'true', true].includes(body.furnitured),
           garden: ['1', 'true', true].includes(body.garden),
-          caution: body.caution ? Number(body.caution) : null,
+          caution: this.parseOptionalNonNegativeNumber(body.caution, 'La caution'),
           lng: longitude,
           lat: latitude,
         },
@@ -922,6 +942,29 @@ export class AdsService {
     const resolvedAddress = hasLocalization
       ? await this.resolveAddressFromCoordinates(longitude, latitude)
       : null;
+    const mediaIdsProvided = this.hasListInBody(body, 'media_ids');
+    const mediaIds = this.listFromBody(body, 'media_ids');
+
+    if (mediaIdsProvided) {
+      if (mediaIds.length === 0) {
+        throw new ForbiddenException('At least one media file is required.');
+      }
+      if (mediaIds.length > MAX_AD_MEDIAS) {
+        throw new ForbiddenException(`The combined total of medias and mediasId must not exceed ${MAX_AD_MEDIAS}.`);
+      }
+
+      const ownedMedias = await this.prisma.media.findMany({
+        where: {
+          id: { in: mediaIds },
+          announcerId: announcer.id,
+          purpose: 'ad_media',
+        },
+        select: { id: true },
+      });
+      if (ownedMedias.length !== new Set(mediaIds).size) {
+        throw new ForbiddenException('Un ou plusieurs medias sont invalides.');
+      }
+    }
 
     const updated = await this.prisma.ad.update({
       where: { id: ad.id },
@@ -949,21 +992,21 @@ export class AdsService {
       await this.prisma.furniture.update({
         where: { id: ad.adId },
         data: {
-          ...(body.height !== undefined ? { height: Number(body.height) } : {}),
-          ...(body.width !== undefined ? { width: Number(body.width) } : {}),
-          ...(body.length !== undefined ? { length: Number(body.length) } : {}),
-          ...(body.weight !== undefined ? { weight: Number(body.weight) } : {}),
+          ...(body.height !== undefined ? { height: this.parseOptionalNonNegativeNumber(body.height, 'La hauteur') } : {}),
+          ...(body.width !== undefined ? { width: this.parseOptionalNonNegativeNumber(body.width, 'La largeur') } : {}),
+          ...(body.length !== undefined ? { length: this.parseOptionalNonNegativeNumber(body.length, 'La longueur') } : {}),
+          ...(body.weight !== undefined ? { weight: this.parseOptionalNonNegativeNumber(body.weight, 'Le poids') } : {}),
         },
       });
     } else {
       await this.prisma.realEstate.update({
         where: { id: ad.adId },
         data: {
-          ...(body.toilet !== undefined ? { toilet: Number(body.toilet) } : {}),
-          ...(body.kitchen !== undefined ? { kitchen: Number(body.kitchen) } : {}),
-          ...(body.bedroom !== undefined ? { bedroom: Number(body.bedroom) } : {}),
-          ...(body.mainroom !== undefined ? { mainroom: Number(body.mainroom) } : {}),
-          ...(body.size !== undefined ? { size: body.size ? Number(body.size) : null } : {}),
+          ...(body.toilet !== undefined ? { toilet: this.parseNonNegativeNumber(body.toilet, 'Le nombre de toilettes') } : {}),
+          ...(body.kitchen !== undefined ? { kitchen: this.parseNonNegativeNumber(body.kitchen, 'Le nombre de cuisines') } : {}),
+          ...(body.bedroom !== undefined ? { bedroom: this.parseNonNegativeNumber(body.bedroom, 'Le nombre de chambres') } : {}),
+          ...(body.mainroom !== undefined ? { mainroom: this.parseNonNegativeNumber(body.mainroom, 'Le nombre de salons') } : {}),
+          ...(body.size !== undefined ? { size: this.parseOptionalNonNegativeNumber(body.size, 'La taille') } : {}),
           ...(body.gate !== undefined ? { gate: ['1', 'true', true].includes(body.gate) } : {}),
           ...(body.wifi !== undefined ? { wifi: ['1', 'true', true].includes(body.wifi) } : {}),
           ...(body.air_conditioning !== undefined
@@ -984,10 +1027,23 @@ export class AdsService {
             ? { furnished: ['1', 'true', true].includes(body.furnitured) }
             : {}),
           ...(body.garden !== undefined ? { garden: ['1', 'true', true].includes(body.garden) } : {}),
-          ...(body.caution !== undefined ? { caution: Number(body.caution) } : {}),
+          ...(body.caution !== undefined ? { caution: this.parseOptionalNonNegativeNumber(body.caution, 'La caution') } : {}),
           ...(hasLocalization ? { lng: longitude, lat: latitude } : {}),
         },
       });
+    }
+
+    if (mediaIdsProvided) {
+      await this.prisma.adMedia.deleteMany({ where: { adId: id } });
+      for (const [index, mediaId] of mediaIds.entries()) {
+        await this.prisma.adMedia.create({
+          data: {
+            adId: id,
+            mediaId,
+            isPresentation: index === 0,
+          },
+        });
+      }
     }
 
     return this.show(String(updated.id), userId);
