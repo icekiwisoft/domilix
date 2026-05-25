@@ -651,7 +651,7 @@ export default function Ad(): React.ReactElement {
                     )}
                   </p>
                 </div>
-                <div className='w-14 h-14 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-white font-bold text-lg overflow-hidden flex-shrink-0 border-2 border-white shadow-md'>
+                <div className='w-14 h-14 rounded-full bg-white flex items-center justify-center text-primary font-bold text-lg overflow-hidden flex-shrink-0 border-2 border-white shadow-md ring-1 ring-gray-100'>
                   {adInfo.announcer?.avatar ? (
                     <img
                       src={mediaUrl(adInfo.announcer.avatar)}
@@ -860,7 +860,7 @@ export default function Ad(): React.ReactElement {
 
                   {/* Announcer mini-card */}
                   <div className='flex items-center gap-3 mb-4'>
-                    <div className='w-11 h-11 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-white font-bold text-base overflow-hidden flex-shrink-0'>
+                    <div className='w-11 h-11 rounded-full bg-white flex items-center justify-center text-primary font-bold text-base overflow-hidden flex-shrink-0 ring-1 ring-gray-100'>
                       {adInfo.announcer?.avatar ? (
                         <img
                           src={mediaUrl(adInfo.announcer.avatar)}

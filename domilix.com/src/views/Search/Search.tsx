@@ -62,6 +62,7 @@ export default function Search(): React.ReactElement {
   const navigate = useNavigate();
   const [ads, setAds] = useState<Ad[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSearchSubmitting, setIsSearchSubmitting] = useState(false);
   const [categories, setCategories] = useState<any[]>([]);
   const [searchLocation, setSearchLocation] = useState(
     searchParams.get('search') || ''
@@ -337,7 +338,10 @@ export default function Search(): React.ReactElement {
       } catch {
         if (!cancelled) setAds([]);
       } finally {
-        if (!cancelled) setIsLoading(false);
+        if (!cancelled) {
+          setIsLoading(false);
+          setIsSearchSubmitting(false);
+        }
       }
     };
 
@@ -379,6 +383,7 @@ export default function Search(): React.ReactElement {
   };
 
   const handleApplySearch = () => {
+    setIsSearchSubmitting(true);
     const params = new URLSearchParams();
 
     if (searchLocation.trim()) params.set('search', searchLocation.trim());
@@ -524,9 +529,12 @@ export default function Search(): React.ReactElement {
               <button
                 type='button'
                 onClick={handleApplySearch}
-                className='w-full bg-primary px-4 py-4 text-sm font-bold text-white transition-colors hover:bg-primary-light'
+                disabled={isSearchSubmitting || isLoading}
+                className='flex w-full items-center justify-center bg-primary px-4 py-4 text-sm font-bold text-white transition-colors hover:bg-primary-light disabled:cursor-wait disabled:opacity-80'
               >
-                {mobileFiltersExpanded ? 'Rechercher' : 'Rechercher avec ces filtres'}
+                {isSearchSubmitting || isLoading ? (
+                  <span className='h-5 w-5 animate-spin rounded-full border-2 border-white/40 border-t-white' aria-label='Recherche en cours' />
+                ) : mobileFiltersExpanded ? 'Rechercher' : 'Rechercher avec ces filtres'}
               </button>
             </div>
 
@@ -650,10 +658,15 @@ export default function Search(): React.ReactElement {
               <button
                 type='button'
                 onClick={handleApplySearch}
-                className='relative ml-1 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-primary text-white shadow-sm transition-colors hover:bg-primary-light'
+                disabled={isSearchSubmitting || isLoading}
+                className='relative ml-1 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-primary text-white shadow-sm transition-colors hover:bg-primary-light disabled:cursor-wait disabled:opacity-80'
                 title='Rechercher'
               >
-                <MdSearch size={20} />
+                {isSearchSubmitting || isLoading ? (
+                  <span className='h-5 w-5 animate-spin rounded-full border-2 border-white/40 border-t-white' aria-label='Recherche en cours' />
+                ) : (
+                  <MdSearch size={20} />
+                )}
               </button>
             </div>
           </div>

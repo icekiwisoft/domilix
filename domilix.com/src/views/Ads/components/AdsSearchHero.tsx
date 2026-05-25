@@ -49,6 +49,7 @@ export default function AdsSearchHero() {
   const [filters, setFilters] = useState<Filters>(emptyFilters);
   const [openFilterPopup, setOpenFilterPopup] = useState<FilterPopup | null>(null);
   const [mobileFiltersExpanded, setMobileFiltersExpanded] = useState(true);
+  const [isSearchSubmitting, setIsSearchSubmitting] = useState(false);
 
   useEffect(() => {
     getCategories('house').then(setCategories).catch(() => undefined);
@@ -77,6 +78,7 @@ export default function AdsSearchHero() {
   };
 
   const submitSearch = () => {
+    setIsSearchSubmitting(true);
     const params = new URLSearchParams();
     if (searchLocation.trim()) params.set('search', searchLocation.trim());
 
@@ -338,7 +340,9 @@ export default function AdsSearchHero() {
             </div>
           )}
 
-          <button type='button' onClick={submitSearch} className='w-full bg-primary px-4 py-4 text-center text-sm font-bold text-white transition-colors hover:bg-primary-light'>Lancer la recherche</button>
+          <button type='button' onClick={submitSearch} disabled={isSearchSubmitting} className='flex w-full items-center justify-center bg-primary px-4 py-4 text-center text-sm font-bold text-white transition-colors hover:bg-primary-light disabled:cursor-wait disabled:opacity-80'>
+            {isSearchSubmitting ? <span className='h-5 w-5 animate-spin rounded-full border-2 border-white/40 border-t-white' aria-label='Recherche en cours' /> : 'Lancer la recherche'}
+          </button>
         </div>
 
         {openFilterPopup && (
@@ -395,8 +399,8 @@ export default function AdsSearchHero() {
             {openFilterPopup === 'amenities' && <div className={`${popupPanelClass} right-0 top-[calc(100%+8px)] w-72 max-w-[90vw]`}>{renderFilterPopupContent('amenities')}</div>}
           </div>
 
-          <button type='button' onClick={submitSearch} className='relative ml-1 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-primary text-white shadow-sm transition-colors hover:bg-primary-light' title='Rechercher'>
-            <MdSearch size={20} />
+          <button type='button' onClick={submitSearch} disabled={isSearchSubmitting} className='relative ml-1 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-primary text-white shadow-sm transition-colors hover:bg-primary-light disabled:cursor-wait disabled:opacity-80' title='Rechercher'>
+            {isSearchSubmitting ? <span className='h-5 w-5 animate-spin rounded-full border-2 border-white/40 border-t-white' aria-label='Recherche en cours' /> : <MdSearch size={20} />}
           </button>
         </div>
       </div>

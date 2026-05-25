@@ -657,7 +657,11 @@ export class AdsService {
       orderBy: [{ unlockedAt: 'desc' }, { createdAt: 'desc' }],
     });
     if (existing) {
-      return { message: 'Annonce deja debloquee' };
+      return {
+        message: 'Annonce deja debloquee',
+        unlocking: this.serializeUnlocking(existing),
+        remaining_credits: await this.totalCreditsForUser(userId),
+      };
     }
 
     const now = new Date();
@@ -704,8 +708,28 @@ export class AdsService {
 
     return {
       message: 'Annonce debloquee avec succes',
-      unlocking,
+      unlocking: this.serializeUnlocking(unlocking),
       remaining_credits: await this.totalCreditsForUser(userId),
+    };
+  }
+
+  private serializeUnlocking(unlocking: {
+    id: bigint;
+    adId: string;
+    userId: bigint;
+    unlockedAt: Date | null;
+    expiresAt: Date | null;
+    createdAt: Date | null;
+    updatedAt: Date | null;
+  }) {
+    return {
+      id: unlocking.id.toString(),
+      ad_id: unlocking.adId,
+      user_id: unlocking.userId.toString(),
+      unlocked_at: unlocking.unlockedAt,
+      expires_at: unlocking.expiresAt,
+      created_at: unlocking.createdAt,
+      updated_at: unlocking.updatedAt,
     };
   }
 
