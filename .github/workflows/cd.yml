@@ -120,6 +120,22 @@ jobs:
             BACKEND_IMAGE="$BACKEND_IMAGE" docker compose -p domilix_backend --env-file deploy/.env.production -f deploy/docker-compose.api.domilix.com.yml pull backend
             BACKEND_IMAGE="$BACKEND_IMAGE" docker compose -p domilix_backend --env-file deploy/.env.production -f deploy/docker-compose.api.domilix.com.yml up -d db
 
+            echo "Baselining existing Prisma migrations on the deployed backend"
+            BACKEND_IMAGE="$BACKEND_IMAGE" docker compose -p domilix_backend --env-file deploy/.env.production -f deploy/docker-compose.api.domilix.com.yml run --rm backend sh -lc '
+              for migration in \
+                20260428000000_add_real_estate_amenities \
+                20260428001000_add_real_estate_size \
+                20260508000000_add_media_object_storage_paths \
+                20260508001000_add_announcer_avatar_object_storage_path \
+                20260508002000_add_media_purpose_and_announcer_media_refs \
+                20260512120000_add_ad_contact_fields \
+                20260512121000_add_broadcast_chip \
+                20260515120000_add_ad_neighbourhood
+              do
+                pnpm prisma migrate resolve --applied "$migration" || true
+              done
+            '
+
             echo "Running Prisma migrations on the deployed backend"
             BACKEND_IMAGE="$BACKEND_IMAGE" docker compose -p domilix_backend --env-file deploy/.env.production -f deploy/docker-compose.api.domilix.com.yml run --rm backend pnpm prisma migrate deploy
 

@@ -2,6 +2,7 @@ import Cover from '@assets/bg_img/cover_annonceur.jpg';
 import Domilix from '@assets/domilix_icon.png';
 import AnnouncerAdCard from '@components/AnnouncerAdCard/AnnouncerAdCard';
 import Footer2 from '@components/Footer2/Footer2';
+import MediasDialog from '@components/MediasDialog/MediasDialog';
 import Nav2 from '@components/Nav2/Nav2';
 import { Listbox, Transition } from '@headlessui/react';
 import { Fragment, useState, useEffect } from 'react';
@@ -10,8 +11,9 @@ import { useSearchParams, useParams } from '@router';
 import { motion } from 'framer-motion';
 import { getAdsByAnnouncer } from '@services/announceApi';
 import { getAnnouncer } from '@services/announcerApi';
+import { getMediasByAd } from '@services/mediaApi';
 import { mediaUrl } from '@utils/mediaUrl';
-import { Ad, type Announcer } from '@utils/types';
+import { Ad, Media, type Announcer } from '@utils/types';
 
 import { useAuth } from '../../hooks/useAuth';
 
@@ -134,17 +136,44 @@ function EmptyAnnouncerAdsState({ searchTerm }: { searchTerm: string }) {
   );
 }
 
+function EmptyAnnouncerMediasState() {
+  return (
+    <div className='flex min-h-[38vh] items-center justify-center rounded-2xl bg-white px-5 py-14 text-center'>
+      <div className='max-w-md'>
+        <div className='mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-[1.5rem] bg-orange-50 text-orange-500'>
+          <svg viewBox='0 0 120 120' className='h-14 w-14' fill='none' aria-hidden='true'>
+            <rect x='24' y='30' width='72' height='56' rx='8' fill='#FFF4E5' stroke='currentColor' strokeWidth='5' />
+            <path d='m31 76 18-18 13 13 10-10 18 18' stroke='currentColor' strokeWidth='5' strokeLinecap='round' strokeLinejoin='round' />
+            <circle cx='76' cy='48' r='7' fill='currentColor' />
+          </svg>
+        </div>
+        <p className='text-xs font-black uppercase tracking-[0.24em] text-orange-500'>Aucun média</p>
+        <h2 className='mt-3 text-2xl font-black tracking-tight text-slate-950'>Aucun média publié</h2>
+        <p className='mt-3 text-sm leading-6 text-slate-500'>Les images et vidéos des annonces de cet annonceur apparaîtront ici.</p>
+      </div>
+    </div>
+  );
+}
+
+function isVideoMedia(media: Media) {
+  return media.type?.toLowerCase().startsWith('video/');
+}
+
 export default function Announcer() {
   const coverSrc = typeof Cover === 'string' ? Cover : Cover.src;
   const domilixSrc = typeof Domilix === 'string' ? Domilix : Domilix.src;
 
   const [selectedSort, setSelectedSort] = useState(sortOptions[0]);
-  const options = ['announces', 'about'];
+  const options = ['announces', 'medias', 'about'];
   const [urlSearchParam] = useSearchParams();
   const [option, setOption] = useState('announces');
   const { id } = useParams<{ id: string }>();
 
   const [ads, setAds] = useState<Ad[]>([]);
+  const [medias, setMedias] = useState<Media[]>([]);
+  const [mediasLoading, setMediasLoading] = useState(false);
+  const [showMediasDialog, setShowMediasDialog] = useState(false);
+  const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
   const [announcer, setAnnouncer] = useState<Announcer | null>(null);
   const [loading, setLoading] = useState(true);
   const [serverError, setServerError] = useState(false);
@@ -168,6 +197,7 @@ export default function Announcer() {
       setServerError(false);
       setAnnouncer(null);
       setAds([]);
+      setMedias([]);
 
       try {
         const [announcerData, adsData] = await Promise.all([
@@ -178,6 +208,19 @@ export default function Announcer() {
         if (!cancelled) {
           setAnnouncer(announcerData);
           setAds(adsData);
+          setLoading(false);
+          setMediasLoading(true);
+        }
+
+        const mediaLists = await Promise.all(
+          adsData.map(ad => getMediasByAd(ad.id, 1).catch(() => [])),
+        );
+        const uniqueMedias = Array.from(
+          new Map(mediaLists.flat().map(media => [media.id, media])).values(),
+        );
+
+        if (!cancelled) {
+          setMedias(uniqueMedias);
         }
       } catch (error) {
         console.error('Error fetching announcer page:', error);
@@ -187,6 +230,7 @@ export default function Announcer() {
       } finally {
         if (!cancelled) {
           setLoading(false);
+          setMediasLoading(false);
         }
       }
     };
@@ -197,6 +241,11 @@ export default function Announcer() {
       cancelled = true;
     };
   }, [id]);
+
+  const openMediaPreview = (index: number) => {
+    setSelectedMediaIndex(index);
+    setShowMediasDialog(true);
+  };
 
   // Filter ads based on search term
   // const filteredAds = ads.filter(ad =>
@@ -336,7 +385,9 @@ export default function Announcer() {
                   }`}
                 onClick={() => setOption(menuItem)}
               >
-                {menuItem === 'announces' ? 'Annonces' : 'À propos'}
+                {menuItem === 'announces' && 'Annonces'}
+                {menuItem === 'medias' && 'Médias'}
+                {menuItem === 'about' && 'À propos'}
               </motion.button>
             ))}
           </motion.div>
@@ -442,6 +493,60 @@ export default function Announcer() {
                 <EmptyAnnouncerAdsState searchTerm={searchTerm} />
               )}
             </>
+          )}
+          {option === 'medias' && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className='rounded-2xl bg-white p-4 shadow-sm sm:p-6'
+            >
+              <div className='mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between'>
+                <div>
+                  <p className='text-xs font-black uppercase tracking-[0.22em] text-orange-500'>Galerie annonceur</p>
+                  <h2 className='mt-1 text-2xl font-black tracking-tight text-slate-950'>Médias publiés</h2>
+                </div>
+                <p className='text-sm font-semibold text-gray-500'>
+                  {medias.length} média{medias.length > 1 ? 's' : ''}
+                </p>
+              </div>
+
+              {mediasLoading ? (
+                <div className='grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5'>
+                  {Array.from({ length: 10 }).map((_, index) => (
+                    <div key={index} className='aspect-square animate-pulse rounded-2xl bg-gray-200' />
+                  ))}
+                </div>
+              ) : medias.length > 0 ? (
+                <div className='grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5'>
+                  {medias.map((media, index) => (
+                    <button
+                      key={media.id}
+                      type='button'
+                      onClick={() => openMediaPreview(index)}
+                      className='group relative aspect-square overflow-hidden rounded-2xl bg-gray-100 text-left shadow-sm ring-1 ring-gray-100 transition hover:-translate-y-1 hover:shadow-xl hover:ring-orange-200'
+                    >
+                      <img
+                        src={mediaUrl(media.thumbnail || media.file) || ''}
+                        alt='Média annonceur'
+                        className='h-full w-full object-cover transition duration-500 group-hover:scale-105'
+                        loading='lazy'
+                      />
+                      <div className='absolute inset-0 bg-gradient-to-t from-black/55 via-black/0 to-black/0 opacity-80 transition group-hover:opacity-100' />
+                      {isVideoMedia(media) && (
+                        <span className='absolute left-3 top-3 rounded-full bg-black/70 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-white backdrop-blur'>
+                          Vidéo
+                        </span>
+                      )}
+                      <span className='absolute bottom-3 left-3 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-gray-900 backdrop-blur'>
+                        Voir
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <EmptyAnnouncerMediasState />
+              )}
+            </motion.div>
           )}
           {option === 'about' && (
             <motion.div
@@ -587,6 +692,13 @@ export default function Announcer() {
         </div>
       </div>
       <Footer2 />
+      {showMediasDialog && (
+        <MediasDialog
+          medias={medias}
+          initialIndex={selectedMediaIndex}
+          toggleModal={() => setShowMediasDialog(false)}
+        />
+      )}
     </>
   );
 }

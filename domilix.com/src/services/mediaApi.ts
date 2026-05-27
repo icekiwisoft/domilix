@@ -3,9 +3,9 @@ import api from './api';
 import { uploadApi } from './uploadApi';
 
 //get medias for a specific ad
-export const getMediasByAd = async (adId: number): Promise<Media[]> => {
-  const response = await api.get(`medias?AnnounceId=${adId}`);
-  return response.data;
+export const getMediasByAd = async (adId: number, page = 1): Promise<Media[]> => {
+  const response = await api.get(`medias?AnnounceId=${adId}&page=${page}`);
+  return Array.isArray(response.data) ? response.data : response.data.data || [];
 };
 
 //get medias for a specific announcer
@@ -13,7 +13,7 @@ export const getMediasByAnnouncer = async (
   announcerId: number
 ): Promise<Media[]> => {
   const response = await api.get(`medias?AnnouncerId=${announcerId}`);
-  return response.data;
+  return Array.isArray(response.data) ? response.data : response.data.data || [];
 };
 
 //get all medias by page and size
@@ -22,7 +22,7 @@ export const getMedias = async (
   size: number
 ): Promise<Media[]> => {
   const response = await api.get(`medias?page=${page}&size=${size}`);
-  return response.data;
+  return Array.isArray(response.data) ? response.data : response.data.data || [];
 };
 
 //upload medias for a specific ad
