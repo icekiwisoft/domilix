@@ -54,11 +54,39 @@ export class AdsService {
   }
 
   private listFromBody(body: Record<string, any>, key: string) {
-    return [body[key], body[`${key}[]`]].flat().filter(Boolean).map(String);
+    const values = [body[key], body[`${key}[]`]];
+
+    for (const [bodyKey, value] of Object.entries(body)) {
+      if (bodyKey.startsWith(`${key}[`) && value !== undefined) {
+        values.push(value);
+      }
+    }
+
+    return values
+      .flatMap((value) => {
+        if (value === undefined || value === null || value === '') return [];
+        if (Array.isArray(value)) return value;
+        if (typeof value === 'string') {
+          const trimmed = value.trim();
+          if (!trimmed) return [];
+          if (trimmed.startsWith('[')) {
+            try {
+              const parsed = JSON.parse(trimmed);
+              return Array.isArray(parsed) ? parsed : [trimmed];
+            } catch {
+              return [trimmed];
+            }
+          }
+          return trimmed.includes(',') ? trimmed.split(',') : [trimmed];
+        }
+        return [value];
+      })
+      .map((value) => String(value).trim())
+      .filter(Boolean);
   }
 
   private hasListInBody(body: Record<string, any>, key: string) {
-    return body[key] !== undefined || body[`${key}[]`] !== undefined;
+    return body[key] !== undefined || body[`${key}[]`] !== undefined || Object.keys(body).some((bodyKey) => bodyKey.startsWith(`${key}[`));
   }
 
   private async ensureAnnouncerUser(userId: bigint) {
@@ -1058,16 +1086,18 @@ export class AdsService {
     }
 
     if (mediaIdsProvided) {
-      await this.prisma.adMedia.deleteMany({ where: { adId: id } });
-      for (const [index, mediaId] of mediaIds.entries()) {
-        await this.prisma.adMedia.create({
-          data: {
-            adId: id,
+      const normalizedAdId = ad.id.toString();
+
+      await this.prisma.$transaction(async (tx) => {
+        await tx.adMedia.deleteMany({ where: { adId: normalizedAdId } });
+        await tx.adMedia.createMany({
+          data: mediaIds.map((mediaId, index) => ({
+            adId: normalizedAdId,
             mediaId,
             isPresentation: index === 0,
-          },
+          })),
         });
-      }
+      });
     }
 
     return this.show(String(updated.id), userId);

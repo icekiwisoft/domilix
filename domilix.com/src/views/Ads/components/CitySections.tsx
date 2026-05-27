@@ -11,7 +11,7 @@ type CitySectionsProps = {
 
 export default function CitySections({ sections, isLoading, serverError }: CitySectionsProps) {
   return (
-    <div className='mx-auto max-w-container space-y-xl px-gutter'>
+    <div className='mx-auto mb-xl max-w-container space-y-xl px-gutter'>
       {isLoading && <AdsSkeleton />}
       {!isLoading && serverError && <AdsErrorState />}
       {!isLoading && !serverError && sections.length === 0 && <EmptyAdsState />}
