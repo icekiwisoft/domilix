@@ -348,8 +348,11 @@ export default function EditAdModal({ ad, onClose, onUpdated }: EditAdModalProps
                     </div>
                   ))}
                   {newMediaFiles.map((file, index) => (
-                    <div key={`${file.name}-${index}`} className='relative flex h-28 items-center justify-center rounded-xl border border-dashed border-orange-200 bg-orange-50 p-3 text-center text-xs font-semibold text-orange-700'>
-                      {file.name}
+                    <div key={`${file.name}-${index}`} className='relative overflow-hidden rounded-xl border border-dashed border-orange-200 bg-orange-50'>
+                      <LocalMediaPreview file={file} />
+                      <div className='absolute inset-x-0 bottom-0 line-clamp-1 bg-black/50 px-2 py-1 text-[10px] font-semibold text-white'>
+                        {file.name}
+                      </div>
                       <button type='button' onClick={() => removeNewMedia(index)} className='absolute right-2 top-2 rounded-full bg-white/90 px-2 py-1 text-xs font-bold text-red-600 shadow'>Retirer</button>
                     </div>
                   ))}
@@ -482,6 +485,35 @@ function AmenityCheckbox({ label, checked, onChange }: { label: string; checked:
       {label}
     </label>
   );
+}
+
+function LocalMediaPreview({ file }: { file: File }) {
+  const [previewUrl, setPreviewUrl] = useState('');
+
+  useEffect(() => {
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
+
+    return () => URL.revokeObjectURL(url);
+  }, [file]);
+
+  if (!previewUrl) {
+    return <div className='h-28 w-full bg-orange-50' />;
+  }
+
+  if (file.type.startsWith('video/')) {
+    return (
+      <video
+        src={previewUrl}
+        className='h-28 w-full bg-black object-cover'
+        muted
+        playsInline
+        preload='metadata'
+      />
+    );
+  }
+
+  return <img src={previewUrl} alt='Prévisualisation média' className='h-28 w-full object-cover' />;
 }
 
 function Field({ label, value, onChange, type = 'text', inputMode, min, textarea = false }: { label: string; value: string; onChange: (value: string) => void; type?: string; inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode']; min?: number; textarea?: boolean }) {
