@@ -124,11 +124,11 @@ export default function Footer2() {
 
         {/* Bottom Bar */}
         <div className='pt-6 border-t border-gray-200'>
-          <div className='flex flex-col sm:flex-row justify-between items-center gap-4'>
-            <p className='text-gray-500 text-sm'>
+          <div className='grid grid-cols-1 items-center gap-4 text-center sm:grid-cols-3'>
+            <p className='text-sm text-gray-500 sm:col-start-2 sm:justify-self-center'>
               © {new Date().getFullYear()} Domilix. Tous droits réservés.
             </p>
-            <div className='flex items-center gap-4 text-sm'>
+            <div className='flex items-center justify-center gap-4 text-sm sm:col-start-3 sm:justify-self-end'>
               <Link
                 to='/cgu'
                 className='text-gray-500 hover:text-orange-600 transition-colors'

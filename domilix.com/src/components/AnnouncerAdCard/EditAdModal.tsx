@@ -6,7 +6,7 @@ import { MdMyLocation } from 'react-icons/md';
 
 import { addressApi, ReverseGeocodeResult } from '@services/addressApi';
 import { getAd, updateAd } from '@services/announceApi';
-import { uploadApi } from '@services/uploadApi';
+import { uploadApi, type UploadResponse } from '@services/uploadApi';
 import { mediaUrl } from '@utils/mediaUrl';
 import { Ad } from '@utils/types';
 
@@ -106,6 +106,13 @@ export default function EditAdModal({ ad, onClose, onUpdated }: EditAdModalProps
   const [existingMedias, setExistingMedias] = useState(() => ad.medias || []);
   const [newMediaFiles, setNewMediaFiles] = useState<File[]>([]);
   const [mediaError, setMediaError] = useState('');
+  const [uploadProgress, setUploadProgress] = useState<{
+    current: number;
+    total: number;
+    fileName: string;
+    filePercent: number;
+    overallPercent: number;
+  } | null>(null);
 
   const longitude = Number(coordinates.longitude.replace(',', '.'));
   const latitude = Number(coordinates.latitude.replace(',', '.'));
@@ -124,6 +131,7 @@ export default function EditAdModal({ ad, onClose, onUpdated }: EditAdModalProps
       setLocationError('');
       setDetectedLocation(null);
       setMediaError('');
+      setUploadProgress(null);
     };
 
     applyAd(ad);
@@ -250,6 +258,46 @@ export default function EditAdModal({ ad, onClose, onUpdated }: EditAdModalProps
     );
   };
 
+  const uploadMediasSequentially = async (files: File[]) => {
+    const uploadedMedias: UploadResponse[] = [];
+
+    for (const [index, file] of files.entries()) {
+      const current = index + 1;
+
+      setUploadProgress({
+        current,
+        total: files.length,
+        fileName: file.name,
+        filePercent: 0,
+        overallPercent: Math.round((index / files.length) * 100),
+      });
+
+      const uploaded = await uploadApi.uploadFile(file, 'media', progress => {
+        setUploadProgress({
+          current,
+          total: files.length,
+          fileName: file.name,
+          filePercent: progress.percent,
+          overallPercent: Math.round(((index + progress.percent / 100) / files.length) * 100),
+        });
+      });
+
+      uploadedMedias.push(uploaded);
+    }
+
+    setUploadProgress(files.length > 0
+      ? {
+          current: files.length,
+          total: files.length,
+          fileName: files[files.length - 1].name,
+          filePercent: 100,
+          overallPercent: 100,
+        }
+      : null);
+
+    return uploadedMedias;
+  };
+
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     if (hasCoordinates && (longitude < -180 || longitude > 180 || latitude < -90 || latitude > 90)) {
@@ -270,9 +318,8 @@ export default function EditAdModal({ ad, onClose, onUpdated }: EditAdModalProps
 
     try {
       setIsSaving(true);
-      const uploadedMedias = await Promise.all(
-        newMediaFiles.map(file => uploadApi.uploadFile(file, 'media')),
-      );
+      setUploadProgress(null);
+      const uploadedMedias = await uploadMediasSequentially(newMediaFiles);
       const updated = await updateAd(ad.id, {
         description: details.description,
         price: Number(details.price),
@@ -309,6 +356,7 @@ export default function EditAdModal({ ad, onClose, onUpdated }: EditAdModalProps
       onClose();
     } finally {
       setIsSaving(false);
+      setUploadProgress(null);
     }
   };
 
@@ -364,6 +412,25 @@ export default function EditAdModal({ ad, onClose, onUpdated }: EditAdModalProps
                   <input type='file' accept='image/*,video/*' multiple onChange={handleMediaChange} className='hidden' />
                 </label>
                 {mediaError && <p className='mt-3 text-sm font-semibold text-red-600'>{mediaError}</p>}
+                {uploadProgress && (
+                  <div className='mt-3 rounded-xl border border-orange-100 bg-orange-50 p-3'>
+                    <div className='mb-2 flex items-center justify-between gap-3 text-xs font-bold text-orange-800'>
+                      <span className='line-clamp-1'>
+                        Upload {uploadProgress.current}/{uploadProgress.total} · {uploadProgress.fileName}
+                      </span>
+                      <span>{uploadProgress.overallPercent}%</span>
+                    </div>
+                    <div className='h-2 overflow-hidden rounded-full bg-orange-100'>
+                      <div
+                        className='h-full rounded-full bg-orange-500 transition-all duration-300'
+                        style={{ width: `${uploadProgress.overallPercent}%` }}
+                      />
+                    </div>
+                    <p className='mt-2 text-xs font-medium text-orange-700'>
+                      Fichier en cours : {uploadProgress.filePercent}%
+                    </p>
+                  </div>
+                )}
               </Section>
 
               <Section title='Prix et disponibilité'>
@@ -459,7 +526,7 @@ export default function EditAdModal({ ad, onClose, onUpdated }: EditAdModalProps
             <div className='mt-3 flex items-center justify-end gap-3 border-t border-gray-100 bg-white pt-4 sm:mt-8 sm:pt-6'>
               <button type='button' onClick={onClose} className='px-3 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:text-gray-800 sm:px-6 sm:text-base'>Annuler</button>
               <button type='submit' disabled={isSaving} className='rounded-xl bg-orange-500 px-5 py-3 text-sm font-bold text-white transition hover:bg-orange-600 disabled:bg-gray-300'>
-                {isSaving ? 'Enregistrement...' : 'Enregistrer'}
+                {isSaving ? (uploadProgress ? `Upload ${uploadProgress.overallPercent}%` : 'Enregistrement...') : 'Enregistrer'}
               </button>
             </div>
           </div>

@@ -306,10 +306,11 @@ export default function Ad(): React.ReactElement {
   const [modalInitialIndex, setModalInitialIndex] = useState(0);
   const [liked, setLiked] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
+  const [isUnlocking, setIsUnlocking] = useState(false);
   const [mobileSliderIndex, setMobileSliderIndex] = useState(0);
   const touchStartX = useRef<number | null>(null);
   const mountedAt = useRef(Date.now());
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, refreshProfile, user } = useAuth();
   const hasCredits = Number(user?.credits || 0) > 0;
   const displayContactPhone = adInfo?.contact_phone || adInfo?.announcer?.contact;
   const displayContactEmail = adInfo?.contact_email || adInfo?.announcer?.email;
@@ -321,7 +322,7 @@ export default function Ad(): React.ReactElement {
   };
 
   const handleUnlock = async () => {
-    if (!adInfo) return;
+    if (!adInfo || isUnlocking) return;
     if (!isAuthenticated) {
       signinDialogActions.toggle();
       return;
@@ -331,12 +332,20 @@ export default function Ad(): React.ReactElement {
       return;
     }
     try {
+      setIsUnlocking(true);
       await unlockAd(adInfo.id);
       const updated = await getAd(adInfo.id);
-      setAdInfo(updated);
+      setAdInfo({
+        ...adInfo,
+        ...updated,
+        unlocked: true,
+      });
+      void refreshProfile().catch(() => undefined);
       setShowUnlockDialog(false);
     } catch {
       // handled silently
+    } finally {
+      setIsUnlocking(false);
     }
   };
 
@@ -992,6 +1001,7 @@ export default function Ad(): React.ReactElement {
         onConfirm={handleUnlock}
         price={1}
         hasCredits={hasCredits}
+        isLoading={isUnlocking}
       />
 
       <SignalDialog

@@ -8,6 +8,7 @@ interface UnlockDialogProps {
   onConfirm: () => void;
   price: number;
   hasCredits?: boolean;
+  isLoading?: boolean;
 }
 
 export default function UnlockDialog({
@@ -16,6 +17,7 @@ export default function UnlockDialog({
   onConfirm,
   price,
   hasCredits = true,
+  isLoading = false,
 }: UnlockDialogProps) {
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -88,7 +90,8 @@ export default function UnlockDialog({
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className='flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-all'
+                    className='flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-all disabled:cursor-not-allowed disabled:opacity-60'
+                    disabled={isLoading}
                     onClick={onClose}
                   >
                     Annuler
@@ -96,11 +99,21 @@ export default function UnlockDialog({
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className='flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl font-medium hover:from-orange-600 hover:to-orange-700 transition-all'
+                    className='flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl font-medium hover:from-orange-600 hover:to-orange-700 transition-all disabled:cursor-not-allowed disabled:opacity-70'
+                    disabled={isLoading}
                     onClick={onConfirm}
                   >
-                    {hasCredits && <img src='/dom.png' alt='domicoin' className='w-5 h-5' />}
-                    {hasCredits ? 'Débloquer' : 'Acheter un pack'}
+                    {isLoading ? (
+                      <>
+                        <span className='h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white' />
+                        Déblocage...
+                      </>
+                    ) : (
+                      <>
+                        {hasCredits && <img src='/dom.png' alt='domicoin' className='w-5 h-5' />}
+                        {hasCredits ? 'Débloquer' : 'Acheter un pack'}
+                      </>
+                    )}
                   </motion.button>
                 </div>
               </Dialog.Panel>

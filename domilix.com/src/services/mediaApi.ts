@@ -31,7 +31,11 @@ export const uploadMediasForAd = async (
   formData: FormData
 ): Promise<Media[]> => {
   const files = formData.getAll('medias').filter((value): value is File => value instanceof File);
-  const uploadedMedias = await Promise.all(files.map(file => uploadApi.uploadFile(file, 'media')));
+  const uploadedMedias = [];
+
+  for (const file of files) {
+    uploadedMedias.push(await uploadApi.uploadFile(file, 'media'));
+  }
 
   const response = await api.post('medias', {
     AdId: String(adId),

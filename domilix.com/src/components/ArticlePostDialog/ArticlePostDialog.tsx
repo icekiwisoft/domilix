@@ -3,7 +3,7 @@
 import { Listbox, Transition } from '@headlessui/react';
 import api from '@services/api';
 import { addressApi, ReverseGeocodeResult } from '@services/addressApi';
-import { uploadApi } from '@services/uploadApi';
+import { uploadApi, type UploadResponse } from '@services/uploadApi';
 import { Category } from '@utils/types';
 import axios from 'axios';
 import { FormEvent, Fragment, useEffect, useState } from 'react';
@@ -38,6 +38,13 @@ export default function ArticlePostDialog({
   ); // Devise par défaut
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [mediaError, setMediaError] = useState('');
+  const [uploadProgress, setUploadProgress] = useState<{
+    current: number;
+    total: number;
+    fileName: string;
+    filePercent: number;
+    overallPercent: number;
+  } | null>(null);
   const [locationError, setLocationError] = useState('');
   const [detectedLocation, setDetectedLocation] = useState<ReverseGeocodeResult | null>(null);
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
@@ -312,6 +319,46 @@ export default function ArticlePostDialog({
     e.target.value = '';
   };
 
+  const uploadMediasSequentially = async (files: File[]) => {
+    const uploadedMedias: UploadResponse[] = [];
+
+    for (const [index, file] of files.entries()) {
+      const current = index + 1;
+
+      setUploadProgress({
+        current,
+        total: files.length,
+        fileName: file.name,
+        filePercent: 0,
+        overallPercent: Math.round((index / files.length) * 100),
+      });
+
+      const uploaded = await uploadApi.uploadFile(file, 'media', progress => {
+        setUploadProgress({
+          current,
+          total: files.length,
+          fileName: file.name,
+          filePercent: progress.percent,
+          overallPercent: Math.round(((index + progress.percent / 100) / files.length) * 100),
+        });
+      });
+
+      uploadedMedias.push(uploaded);
+    }
+
+    setUploadProgress(files.length > 0
+      ? {
+          current: files.length,
+          total: files.length,
+          fileName: files[files.length - 1].name,
+          filePercent: 100,
+          overallPercent: 100,
+        }
+      : null);
+
+    return uploadedMedias;
+  };
+
   // Soumission du formulaire
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -328,9 +375,8 @@ export default function ArticlePostDialog({
 
     try {
       setIsSubmitting(true);
-      const uploadedMedias = await Promise.all(
-        formData.medias.map(file => uploadApi.uploadFile(file, 'media')),
-      );
+      setUploadProgress(null);
+      const uploadedMedias = await uploadMediasSequentially(formData.medias);
 
       const data = {
         category_id: formData.category_id,
@@ -370,6 +416,7 @@ export default function ArticlePostDialog({
       console.error('Erreur lors de la soumission :', error);
     } finally {
       setIsSubmitting(false);
+      setUploadProgress(null);
     }
   };
 
@@ -1174,6 +1221,25 @@ export default function ArticlePostDialog({
               {mediaError && (
                 <p className='text-sm font-semibold text-red-600'>{mediaError}</p>
               )}
+              {uploadProgress && (
+                <div className='rounded-xl border border-orange-100 bg-orange-50 p-3 text-left'>
+                  <div className='mb-2 flex items-center justify-between gap-3 text-xs font-bold text-orange-800'>
+                    <span className='line-clamp-1'>
+                      Upload {uploadProgress.current}/{uploadProgress.total} · {uploadProgress.fileName}
+                    </span>
+                    <span>{uploadProgress.overallPercent}%</span>
+                  </div>
+                  <div className='h-2 overflow-hidden rounded-full bg-orange-100'>
+                    <div
+                      className='h-full rounded-full bg-orange-500 transition-all duration-300'
+                      style={{ width: `${uploadProgress.overallPercent}%` }}
+                    />
+                  </div>
+                  <p className='mt-2 text-xs font-medium text-orange-700'>
+                    Fichier en cours : {uploadProgress.filePercent}%
+                  </p>
+                </div>
+              )}
 
               {/* Prévisualisation des médias */}
               {formData.medias.length > 0 && (
@@ -1516,7 +1582,7 @@ export default function ArticlePostDialog({
                     {isSubmitting ? (
                       <span className='flex items-center justify-center gap-2'>
                         <span className='h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white' />
-                        Publication...
+                        {uploadProgress ? `${uploadProgress.overallPercent}%` : 'Publication...'}
                       </span>
                     ) : (
                       <span className='flex items-center justify-center gap-2'>

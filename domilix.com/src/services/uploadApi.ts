@@ -11,14 +11,33 @@ export type UploadResponse = {
   original_name?: string;
 };
 
+export type UploadProgress = {
+  loaded: number;
+  total: number;
+  percent: number;
+};
+
 export const uploadApi = {
-  uploadFile: async (file: File, type: UploadType): Promise<UploadResponse> => {
+  uploadFile: async (
+    file: File,
+    type: UploadType,
+    onProgress?: (progress: UploadProgress) => void,
+  ): Promise<UploadResponse> => {
     const formData = new FormData();
     formData.append('type', type);
     formData.append('file', file);
 
     const response = await api.post('/uploads', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
+      onUploadProgress: event => {
+        const total = event.total || file.size || 1;
+        const loaded = Math.min(event.loaded, total);
+        onProgress?.({
+          loaded,
+          total,
+          percent: Math.round((loaded / total) * 100),
+        });
+      },
     });
 
     return response.data;
