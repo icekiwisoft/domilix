@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { FaCheckCircle, FaEye, FaEyeSlash, FaFacebook, FaGoogle, FaTimesCircle } from 'react-icons/fa';
 
+import AuthImage from '@assets/bg_img/cover_annonceur.jpg';
 import HoneypotInput from '@components/HoneypotInput/HoneypotInput';
 import BlockInputs from '@components/OTP/BlockInputs';
 import { signupDialogActions, signinDialogActions } from '@stores/defineStore';
@@ -16,6 +17,7 @@ const isProd = process.env.NODE_ENV === 'production';
 const inputCls = 'w-full p-2.5 rounded-lg bg-white border border-gray-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-100 transition outline-none text-gray-800 text-sm';
 
 export default function SignupDialog() {
+  const authImageSrc = typeof AuthImage === 'string' ? AuthImage : AuthImage.src;
   const { register, verifyPhone, resendVerificationCode, isLoading, user } = useAuth();
 
   const [step, setStep] = useState<Step>('method');
@@ -109,12 +111,12 @@ export default function SignupDialog() {
       onClick={signupDialogActions.toggle}
     >
       <div
-        className='relative w-full max-w-md overflow-hidden rounded-xl bg-white shadow-2xl'
+        className='relative grid w-full max-w-4xl overflow-hidden rounded-2xl bg-white shadow-2xl lg:grid-cols-[1.05fr_0.95fr]'
         onClick={e => e.stopPropagation()}
       >
         {/* Close */}
         <button
-          className='absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700'
+          className='absolute right-4 top-4 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-gray-500 shadow-sm transition hover:bg-white hover:text-gray-800'
           onClick={signupDialogActions.toggle}
           aria-label='Fermer'
         >
@@ -123,7 +125,7 @@ export default function SignupDialog() {
           </svg>
         </button>
 
-        <div className='px-7 py-8'>
+        <div className='max-h-[92vh] overflow-y-auto px-7 py-8'>
           {/* Alerts */}
           {error && <div className='mb-5 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700'>{error}</div>}
           {success && <div className='mb-5 rounded-xl border border-green-100 bg-green-50 px-4 py-3 text-sm text-green-700'>{success}</div>}
@@ -310,6 +312,16 @@ export default function SignupDialog() {
             </>
           )}
         </div>
+
+        <aside className='relative hidden min-h-[620px] overflow-hidden bg-orange-950 lg:block'>
+          <img src={authImageSrc} alt='' className='h-full w-full object-cover opacity-85' />
+          <div className='absolute inset-0 bg-gradient-to-br from-orange-600/85 via-slate-950/20 to-slate-950/75' />
+          <div className='absolute inset-x-0 bottom-0 p-8 text-white'>
+            <p className='mb-3 w-fit rounded-full bg-white/15 px-3 py-1 text-xs font-black uppercase tracking-[0.22em] backdrop-blur'>Nouveau départ</p>
+            <h3 className='text-3xl font-black leading-tight'>Publiez, cherchez et débloquez vos contacts au même endroit.</h3>
+            <p className='mt-3 text-sm leading-6 text-white/80'>Créez votre compte Domilix pour accéder aux annonces et gérer vos opportunités immobilières.</p>
+          </div>
+        </aside>
       </div>
     </div>
   );

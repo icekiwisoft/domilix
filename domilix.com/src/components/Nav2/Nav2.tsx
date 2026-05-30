@@ -432,6 +432,8 @@ export default function Nav2({
         description='Vous devrez vous reconnecter pour publier, gérer vos annonces ou consulter vos informations.'
         confirmLabel='Se déconnecter'
         tone='danger'
+        centered
+        hideIcon
         onCancel={() => setShowLogoutConfirm(false)}
         onConfirm={confirmLogout}
       />

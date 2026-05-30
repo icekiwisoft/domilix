@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { FaEye, FaEyeSlash, FaFacebook, FaGoogle } from 'react-icons/fa';
 
+import AuthImage from '@assets/img/home.jpg';
 import { signinDialogActions, signupDialogActions } from '@stores/defineStore';
 import { useAuth } from '../../hooks/useAuth';
 import { authApi } from '../../services/authApi';
@@ -12,6 +13,7 @@ import BlockInputs from '@components/OTP/BlockInputs';
 const inputCls = 'w-full p-2.5 rounded-lg bg-white border border-gray-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-100 transition outline-none text-gray-800 text-sm';
 
 export default function SigninDialog() {
+  const authImageSrc = typeof AuthImage === 'string' ? AuthImage : AuthImage.src;
   const { login, verifyPhone, resendVerificationCode, isLoading, user } = useAuth();
 
   const [isForgotPassword, setIsForgotPassword] = useState(false);
@@ -99,12 +101,12 @@ export default function SigninDialog() {
       onClick={signinDialogActions.toggle}
     >
       <div
-        className='relative w-full max-w-md overflow-hidden rounded-xl bg-white shadow-2xl'
+        className='relative grid w-full max-w-4xl overflow-hidden rounded-2xl bg-white shadow-2xl lg:grid-cols-[1.05fr_0.95fr]'
         onClick={e => e.stopPropagation()}
       >
         {/* Close */}
         <button
-          className='absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700'
+          className='absolute right-4 top-4 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-gray-500 shadow-sm transition hover:bg-white hover:text-gray-800'
           onClick={signinDialogActions.toggle}
           aria-label='Fermer'
         >
@@ -113,7 +115,7 @@ export default function SigninDialog() {
           </svg>
         </button>
 
-        <div className='px-7 py-8'>
+        <div className='max-h-[92vh] overflow-y-auto px-7 py-8'>
           {/* Alerts */}
           {error && <div className='mb-5 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700'>{error}</div>}
           {success && <div className='mb-5 rounded-xl border border-green-100 bg-green-50 px-4 py-3 text-sm text-green-700'>{success}</div>}
@@ -176,6 +178,25 @@ export default function SigninDialog() {
                 </p>
               </div>
 
+              <div className='grid grid-cols-2 gap-3'>
+                <button type='button' disabled className='flex cursor-not-allowed items-center justify-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-sm font-semibold text-gray-400'>
+                  <FaGoogle className='h-4 w-4' />
+                  Google
+                  <span className='rounded-full bg-gray-200 px-1.5 py-0.5 text-[9px] font-black text-gray-500'>Coming soon</span>
+                </button>
+                <button type='button' disabled className='flex cursor-not-allowed items-center justify-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-sm font-semibold text-gray-400'>
+                  <FaFacebook className='h-4 w-4' />
+                  Facebook
+                  <span className='rounded-full bg-gray-200 px-1.5 py-0.5 text-[9px] font-black text-gray-500'>Coming soon</span>
+                </button>
+              </div>
+
+              <div className='my-5 flex items-center gap-3'>
+                <div className='h-px flex-1 bg-gray-200' />
+                <span className='text-xs font-semibold text-gray-400'>ou continuer avec</span>
+                <div className='h-px flex-1 bg-gray-200' />
+              </div>
+
               <form onSubmit={handleLogin} className='space-y-4'>
                 <div>
                   <label className='mb-1 block text-sm font-semibold text-gray-700'>Email ou téléphone</label>
@@ -212,6 +233,16 @@ export default function SigninDialog() {
             </>
           )}
         </div>
+
+        <aside className='relative hidden min-h-[620px] overflow-hidden bg-orange-950 lg:block'>
+          <img src={authImageSrc} alt='' className='h-full w-full object-cover opacity-85' />
+          <div className='absolute inset-0 bg-gradient-to-br from-orange-600/85 via-slate-950/30 to-slate-950/75' />
+          <div className='absolute inset-x-0 bottom-0 p-8 text-white'>
+            <p className='mb-3 w-fit rounded-full bg-white/15 px-3 py-1 text-xs font-black uppercase tracking-[0.22em] backdrop-blur'>Domilix</p>
+            <h3 className='text-3xl font-black leading-tight'>Retrouvez vos biens favoris en quelques secondes.</h3>
+            <p className='mt-3 text-sm leading-6 text-white/80'>Connectez-vous pour débloquer les contacts, gérer vos favoris et suivre vos annonces.</p>
+          </div>
+        </aside>
       </div>
     </div>
   );
