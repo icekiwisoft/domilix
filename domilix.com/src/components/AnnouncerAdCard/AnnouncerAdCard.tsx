@@ -40,9 +40,9 @@ export default function AnnouncerAdCard({
   const [isDeleting, setIsDeleting] = useState(false);
 
   const image = ad.medias?.[0]?.file ? mediaUrl(ad.medias[0].file) : defaultHouseImg.src;
-  const locationLabel = ad.city
-    ? `${ad.city}${ad.country ? `, ${ad.country}` : ''}`
-    : ad.address || 'Adresse non spécifiée';
+  const locationLabel = [ad.neighbourhood, ad.city, ad.country]
+    .filter(Boolean)
+    .join(', ') || ad.address || 'Adresse non spécifiée';
 
   const handleEdit = (event: React.MouseEvent) => {
     event.preventDefault();

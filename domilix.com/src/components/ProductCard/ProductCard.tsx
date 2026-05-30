@@ -41,9 +41,9 @@ export default function ProductCard(props: Ad): React.ReactElement {
 
   const hasMultipleImages = medias && medias.length > 1;
   const currency = devise ?? 'FCFA';
-  const locationLabel = props.city
-    ? `${props.city}${props.country ? `, ${props.country}` : ''}`
-    : props.address || 'Adresse non spécifiée';
+  const locationLabel = [props.neighbourhood, props.city, props.country]
+    .filter(Boolean)
+    .join(', ') || props.address || 'Adresse non spécifiée';
   const hasAmenities = !!size || !!bedroom || !!pool || !!garage || !!garden;
 
   useEffect(() => {
