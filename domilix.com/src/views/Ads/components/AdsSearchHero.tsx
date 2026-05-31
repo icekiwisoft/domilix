@@ -309,7 +309,7 @@ export default function AdsSearchHero() {
                 <HiMapPin className='h-4 w-4 flex-shrink-0 text-primary' />
                 <div className='min-w-0 flex-1 text-left'>
                   <span className='block text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant'>Localisation</span>
-                  <AddressAutocomplete value={searchLocation} onChange={setSearchLocation} onLocationSelect={location => setSearchLocation(location.city || location.address)} placeholder='Ville, quartier…' className='h-5 w-full border-0 bg-transparent p-0 text-sm font-medium text-on-surface outline-none placeholder:text-on-surface-variant/50 focus:border-0 focus:ring-0' />
+                  <AddressAutocomplete value={searchLocation} onChange={setSearchLocation} onSubmit={submitSearch} onLocationSelect={location => setSearchLocation(location.city || location.address)} placeholder='Ville, quartier…' className='h-5 w-full border-0 bg-transparent p-0 text-sm font-medium text-on-surface outline-none placeholder:text-on-surface-variant/50 focus:border-0 focus:ring-0' />
                 </div>
               </div>
 
@@ -356,7 +356,7 @@ export default function AdsSearchHero() {
         <div className='hidden items-center rounded-full border border-outline-variant bg-white px-3 py-1 shadow-card transition-shadow hover:shadow-card-hover md:flex'>
           <div className='flex h-[52px] min-w-0 flex-1 flex-col justify-center rounded-full px-5'>
             <span className='block text-xs font-semibold text-on-surface'>Localisation</span>
-            <AddressAutocomplete value={searchLocation} onChange={setSearchLocation} onLocationSelect={location => setSearchLocation(location.city || location.address)} placeholder='Rechercher une localisation' className='h-5 w-full border-0 bg-transparent p-0 text-sm leading-5 text-on-surface-variant outline-none placeholder:text-on-surface-variant/50 focus:border-0 focus:ring-0' />
+            <AddressAutocomplete value={searchLocation} onChange={setSearchLocation} onSubmit={submitSearch} onLocationSelect={location => setSearchLocation(location.city || location.address)} placeholder='Rechercher une localisation' className='h-5 w-full border-0 bg-transparent p-0 text-sm leading-5 text-on-surface-variant outline-none placeholder:text-on-surface-variant/50 focus:border-0 focus:ring-0' />
           </div>
 
           <div className='hidden h-8 w-px bg-outline-variant md:block' />

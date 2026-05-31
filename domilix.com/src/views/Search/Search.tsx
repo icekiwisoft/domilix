@@ -458,6 +458,7 @@ export default function Search(): React.ReactElement {
                       <AddressAutocomplete
                         value={searchLocation}
                         onChange={setSearchLocation}
+                        onSubmit={handleApplySearch}
                         onLocationSelect={handleLocationSelect}
                         placeholder='Rechercher une localisation'
                         className='h-5 w-full border-0 bg-transparent p-0 text-sm font-medium text-on-surface outline-none placeholder:text-on-surface-variant/50 focus:border-0 focus:ring-0'
@@ -556,6 +557,7 @@ export default function Search(): React.ReactElement {
                 <AddressAutocomplete
                   value={searchLocation}
                   onChange={setSearchLocation}
+                  onSubmit={handleApplySearch}
                   onLocationSelect={handleLocationSelect}
                   placeholder='Rechercher une localisation'
                   className='h-5 w-full border-0 bg-transparent p-0 text-sm leading-5 text-on-surface-variant outline-none placeholder:text-on-surface-variant/50 focus:border-0 focus:ring-0'

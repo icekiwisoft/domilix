@@ -21,6 +21,7 @@ interface AddressAutocompleteProps {
   }) => void;
   placeholder?: string;
   className?: string;
+  onSubmit?: () => void;
 }
 
 export default function AddressAutocomplete({
@@ -29,6 +30,7 @@ export default function AddressAutocomplete({
   onLocationSelect,
   placeholder = 'Rechercher une adresse...',
   className = '',
+  onSubmit,
 }: AddressAutocompleteProps) {
   const [suggestions, setSuggestions] = useState<MapboxFeature[]>([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -121,6 +123,13 @@ export default function AddressAutocomplete({
     onChange(e.target.value);
   };
 
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    setIsOpen(false);
+    onSubmit?.();
+  };
+
   const handleInputFocus = () => {
     if (suggestions.length > 0) {
       setIsOpen(true);
@@ -175,6 +184,7 @@ export default function AddressAutocomplete({
           type='text'
           value={value}
           onChange={handleInputChange}
+          onKeyDown={handleInputKeyDown}
           onFocus={handleInputFocus}
           placeholder={placeholder}
           className={
