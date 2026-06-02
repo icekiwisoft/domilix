@@ -168,7 +168,7 @@ export class CampaignsService {
           to: subscriber.email,
           subject: campaign.subject,
           text: campaign.content.replace(/<[^>]*>/g, ''),
-          html: campaign.content,
+          html: this.mailService.buildNewsletterHtml(campaign.content),
         });
 
         await this.prisma.campaignRecipient.create({

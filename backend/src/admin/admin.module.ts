@@ -5,6 +5,7 @@ import { AnnouncersModule } from '../announcers/announcers.module';
 import { AuthModule } from '../auth/auth.module';
 import { BroadcastsModule } from '../broadcasts/broadcasts.module';
 import { CampaignsModule } from '../campaigns/campaigns.module';
+import { CategoriesModule } from '../categories/categories.module';
 import { MediasModule } from '../medias/medias.module';
 import { NewslettersModule } from '../newsletters/newsletters.module';
 import { UsersModule } from '../users/users.module';
@@ -13,6 +14,7 @@ import { AdminAnnouncersController } from './announcers/admin-announcers.control
 import { AdminAnnouncesController } from './announces/admin-announces.controller';
 import { AdminBroadcastsController } from './broadcasts/admin-broadcasts.controller';
 import { AdminCampaignsController } from './campaigns/admin-campaigns.controller';
+import { AdminCategoriesController } from './categories/admin-categories.controller';
 import { AdminMediasController } from './medias/admin-medias.controller';
 import { AdminNewslettersController } from './newsletters/admin-newsletters.controller';
 import { AdminSubscriptionsController } from './subscriptions/admin-subscriptions.controller';
@@ -27,6 +29,7 @@ import { AdminUsersController } from './users/admin-users.controller';
     AnnouncersModule,
     BroadcastsModule,
     CampaignsModule,
+    CategoriesModule,
     MediasModule,
     NewslettersModule,
     UsersModule,
@@ -37,6 +40,7 @@ import { AdminUsersController } from './users/admin-users.controller';
     AdminAnnouncesController,
     AdminBroadcastsController,
     AdminCampaignsController,
+    AdminCategoriesController,
     AdminMediasController,
     AdminNewslettersController,
     AdminSubscriptionsController,

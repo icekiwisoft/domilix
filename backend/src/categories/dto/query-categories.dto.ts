@@ -21,4 +21,8 @@ export class QueryCategoriesDto {
   @ApiPropertyOptional({ example: 1 })
   @IsOptional()
   page?: string | number;
+
+  @ApiPropertyOptional({ example: 20 })
+  @IsOptional()
+  per_page?: string | number;
 }

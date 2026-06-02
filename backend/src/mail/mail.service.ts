@@ -59,6 +59,58 @@ export class MailService {
     });
   }
 
+  buildNewsletterHtml(content: string): string {
+    const frontendUrl = process.env.FRONTEND_URL || 'https://domilix.com';
+    const year = new Date().getFullYear();
+    return `
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Domilix</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f4f5;font-family:'Plus Jakarta Sans',Helvetica,Arial,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f5;">
+    <tr>
+      <td align="center" style="padding:32px 16px;">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+
+          <!-- Header -->
+          <tr>
+            <td style="background:linear-gradient(135deg,#E8921A,#f97316);padding:32px 40px;text-align:center;">
+              <img src="${frontendUrl}/favicon.png" alt="Domilix" width="48" height="48" style="display:block;margin:0 auto 12px;" />
+              <h1 style="margin:0;font-size:22px;font-weight:900;color:#ffffff;letter-spacing:-0.3px;">Domilix</h1>
+            </td>
+          </tr>
+
+          <!-- Content -->
+          <tr>
+            <td style="padding:40px;font-size:15px;line-height:1.7;color:#374151;">
+              ${content}
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding:24px 40px;background-color:#f9fafb;border-top:1px solid #e5e7eb;text-align:center;">
+              <p style="margin:0 0 8px;font-size:12px;color:#9ca3af;">
+                &copy; ${year} Domilix. Tous droits reserves.
+              </p>
+              <p style="margin:0;font-size:11px;color:#9ca3af;">
+                Cet email a ete envoye depuis Domilix. Si vous ne souhaitez plus recevoir nos communications, <a href="${frontendUrl}/newsletter/unsubscribe" style="color:#E8921A;text-decoration:underline;">desabonnez-vous</a>.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+  }
+
   async sendPasswordResetLink(email: string, resetUrl: string) {
     await this.send({
       to: email,
