@@ -6,7 +6,7 @@ import { useAuth } from '../../hooks/useAuth';
 import ProfilePopup from '@components/ProfilePopup/ProfilePopup';
 import NotificationPopup from '@components/NotificationPopup/NotificationPopup';
 import { notificationApi } from '@services/notificationApi';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { HiBars3, HiXMark, HiBell, HiArrowLeft } from 'react-icons/hi2';
 import { NavLink, useNavigate, Link } from '@router';
 
@@ -22,10 +22,25 @@ export default function MapNav() {
   const profileButtonRef = useRef<HTMLButtonElement>(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
+  const refreshUnreadCount = useCallback(() => {
     if (!isAuthenticated) return;
     notificationApi.getUnreadCount().then(setUnreadCount).catch(() => {});
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    refreshUnreadCount();
+  }, [refreshUnreadCount]);
+
+  useEffect(() => {
+    const handler = () => refreshUnreadCount();
+    window.addEventListener('notificationUpdate', handler);
+    return () => window.removeEventListener('notificationUpdate', handler);
+  }, [refreshUnreadCount]);
+
+  useEffect(() => {
+    if (!showNotifications) return;
+    refreshUnreadCount();
+  }, [showNotifications, refreshUnreadCount]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -52,17 +67,10 @@ export default function MapNav() {
           <Link to="/" className="flex items-center gap-2">
             <img src={logoSrc} alt="Domilix" className="h-7 w-auto md:h-8" />
             <span className="hidden text-sm font-black text-gray-900 md:inline" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-              Domilix <span className="text-[#E8921A]">Maps</span>
+              <span className="text-[#E8921A]">Maps</span>
             </span>
           </Link>
           <div className="hidden h-5 w-px bg-gray-200 md:block" />
-          <Link
-            to="/houses"
-            className="hidden items-center gap-1.5 text-xs font-medium text-gray-400 transition hover:text-gray-600 md:flex"
-          >
-            <HiArrowLeft className="h-3 w-3" />
-            Retour au site
-          </Link>
         </div>
 
         {/* Desktop nav links */}
@@ -169,7 +177,7 @@ export default function MapNav() {
             <Link to="/" className="flex items-center gap-2">
               <img src={logoSrc} alt="Domilix" className="h-6 w-auto" />
               <span className="text-xs font-black text-gray-900" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                Domilix <span className="text-[#E8921A]">Maps</span>
+                <span className="text-[#E8921A]">Maps</span>
               </span>
             </Link>
           </div>
@@ -188,14 +196,7 @@ export default function MapNav() {
                 {link.name}
               </NavLink>
             ))}
-            <Link
-              to="/houses"
-              onClick={() => setMenuOpen(false)}
-              className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-gray-400 transition hover:bg-gray-100"
-            >
-              <HiArrowLeft className="h-3.5 w-3.5" />
-              Retour au site
-            </Link>
+
           </div>
         </div>
       )}

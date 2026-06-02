@@ -242,12 +242,68 @@ export class SubscriptionsService {
     return { message: 'Subscription cancelled successfully' };
   }
 
+  private computeMapsEndDate(plan: string): Date {
+    const MAPS_PLANS: Record<string, { durationDays: number; durationHours: number }> = {
+      decouverte: { durationDays: 0, durationHours: 12 },
+      starter: { durationDays: 30, durationHours: 0 },
+      pro: { durationDays: 30, durationHours: 0 },
+      business: { durationDays: 30, durationHours: 0 },
+    };
+    const cfg = MAPS_PLANS[plan];
+    const now = new Date();
+    if (!cfg) return now;
+    if (cfg.durationHours > 0) return new Date(now.getTime() + cfg.durationHours * 60 * 60 * 1000);
+    return this.addDays(now, cfg.durationDays);
+  }
+
   async handleCampayWebhook(externalReference: string) {
     const payment = await this.prisma.payment.findUnique({
       where: { id: externalReference },
     });
     if (!payment) throw new NotFoundException('Payment not found');
 
+    /* Handle Maps subscription activation */
+    if (payment.paymentTypeInfo.startsWith('maps_')) {
+      const plan = payment.paymentTypeInfo.replace('maps_', '');
+      if (payment.status === 'completed' && payment.referenceId) {
+        const mapsSub = await this.prisma.mapsSubscription.findUnique({
+          where: { id: payment.referenceId },
+        });
+        if (mapsSub) return { message: 'Abonnement Maps déjà activé.', subscription: mapsSub };
+      }
+      if (payment.status === 'completed') return { message: 'Paiement déjà traité.' };
+
+      const endDate = this.computeMapsEndDate(plan);
+      const mapsSubscription = await this.prisma.$transaction(async (tx) => {
+        const created = await tx.mapsSubscription.create({
+          data: {
+            userId: payment.userId,
+            plan,
+            active: true,
+            price: payment.amount,
+            unlockCount: plan === 'decouverte' ? 0 : (plan === 'starter' ? 5 : plan === 'pro' ? 20 : 50),
+            startDate: new Date(),
+            endDate,
+          },
+        });
+        await tx.payment.update({
+          where: { id: payment.id },
+          data: { status: 'completed', referenceId: created.id },
+        });
+        return created;
+      });
+
+      await this.createUserNotification(payment.userId, {
+        type: 'payment_success',
+        title: 'Paiement Maps confirmé',
+        message: `Votre paiement de ${Number(payment.amount).toLocaleString('fr-FR')} FCFA pour l'abonnement Maps ${plan} a été confirmé.`,
+        link: '/maps/subscription',
+      });
+
+      return { message: 'Abonnement Maps activé.', subscription: mapsSubscription };
+    }
+
+    /* Handle regular Domicoin subscription */
     if (payment.status === 'completed' && payment.referenceId) {
       const subscription = await this.prisma.subscription.findUnique({
         where: { id: payment.referenceId },

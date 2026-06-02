@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { AuthGuard } from '../auth/auth.guard';
 import { AuthTokenService } from '../auth/auth-token.service';
 import { CurrentUser } from '../auth/current-user.decorator';
@@ -12,6 +12,14 @@ class SubscribeDto {
   @IsString()
   @IsNotEmpty()
   plan!: string;
+
+  @IsOptional()
+  @IsString()
+  payment_method?: string;
+
+  @IsOptional()
+  @IsString()
+  phone_number?: string;
 }
 
 @ApiTags('Maps')
@@ -65,9 +73,12 @@ export class MapsController {
   @Post('subscribe')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Subscribe to a Maps plan' })
+  @ApiOperation({ summary: 'Subscribe to a Maps plan (free) or initiate payment (paid plans)' })
   async subscribe(@CurrentUser() user: any, @Body() dto: SubscribeDto) {
-    return this.mapsService.subscribe(BigInt(user.id), dto.plan);
+    return this.mapsService.subscribe(BigInt(user.id), dto.plan, {
+      paymentMethod: dto.payment_method,
+      phoneNumber: dto.phone_number,
+    });
   }
 
   @Get('subscription')

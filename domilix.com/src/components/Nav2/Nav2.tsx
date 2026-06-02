@@ -10,7 +10,7 @@ import ArticlePostDialog from '@components/ArticlePostDialog/ArticlePostDialog';
 import ConfirmDialog from '@components/ConfirmDialog/ConfirmDialog';
 import { notificationApi } from '../../services/notificationApi';
 import React, { useState, useEffect, useRef } from 'react';
-import { HiBars3, HiXMark, HiBell, HiHomeModern, HiSparkles, HiMap } from 'react-icons/hi2';
+import { HiBars3, HiXMark, HiBell, HiHomeModern, HiSparkles, HiMapPin } from 'react-icons/hi2';
 import { MdChair, MdLandscape, MdOutlineCampaign } from 'react-icons/md';
 import { NavLink, useNavigate } from '@router';
 
@@ -30,7 +30,7 @@ type Nav2Props = {
 const linkIcons: Record<string, React.ReactNode> = {
   '/subscriptions': <HiSparkles className='h-4 w-4 shrink-0' />,
   '/houses': <HiHomeModern className='h-4 w-4 shrink-0' />,
-  '/maps': <HiMap className='h-4 w-4 shrink-0' />,
+  '/maps': <HiMapPin className='h-4 w-4 shrink-0' />,
   '/furnitures': <MdChair className='h-4 w-4 shrink-0' />,
   '/terrains': <MdLandscape className='h-4 w-4 shrink-0' />,
 };
@@ -379,7 +379,7 @@ export default function Nav2({
                   onClick={() => setClick(false)}
                 >
                   <span className='flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-[#E8921A] to-orange-500 text-white shadow-[0_3px_8px_rgba(232,146,26,0.25)]'>
-                    <HiMap className='h-4 w-4' />
+                    <HiMapPin className='h-4 w-4' />
                   </span>
                   <span className='flex-1 font-black'>Domilix Maps</span>
                   <span className='rounded-full bg-gradient-to-br from-[#E8921A] to-orange-500 px-2 py-0.5 text-[9px] font-black uppercase leading-none tracking-widest text-white shadow-[0_2px_4px_rgba(232,146,26,0.3)]'>New</span>

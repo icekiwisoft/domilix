@@ -43,7 +43,7 @@ export class UploadsController {
       properties: {
         type: {
           type: 'string',
-          enum: ['media', 'avatar', 'presentation-image'],
+          enum: ['media', 'avatar', 'presentation-image', 'broadcast-image'],
         },
         file: { type: 'string', format: 'binary' },
       },

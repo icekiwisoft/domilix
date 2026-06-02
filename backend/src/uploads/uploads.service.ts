@@ -13,11 +13,12 @@ import {
 import { validateUploadedFile } from '../common/media/validate-upload';
 import { PrismaService } from '../prisma/prisma.service';
 
-export type UploadType = 'media' | 'avatar' | 'presentation-image';
+export type UploadType = 'media' | 'avatar' | 'presentation-image' | 'broadcast-image';
 const uploadPurpose: Record<UploadType, string> = {
   media: 'ad_media',
   avatar: 'avatar',
   'presentation-image': 'presentation',
+  'broadcast-image': 'broadcast',
 };
 
 const uploadRules: Record<
@@ -32,6 +33,11 @@ const uploadRules: Record<
   avatar: { folder: 'avatars', maxSize: 5 * 1024 * 1024, pattern: /^image\// },
   'presentation-image': {
     folder: 'presentations',
+    maxSize: 10 * 1024 * 1024,
+    pattern: /^image\//,
+  },
+  'broadcast-image': {
+    folder: 'broadcasts',
     maxSize: 10 * 1024 * 1024,
     pattern: /^image\//,
   },
@@ -56,10 +62,13 @@ export class UploadsService {
       context: `uploads.${type}`,
     });
 
-    const announcer = await this.prisma.announcer.findFirst({
-      where: { userId: user.id },
-    });
-    if (!announcer) throw new UnauthorizedException('Announcer not found');
+    /* Broadcast images don't require an announcer profile */
+    if (type !== 'broadcast-image') {
+      const announcer = await this.prisma.announcer.findFirst({
+        where: { userId: user.id },
+      });
+      if (!announcer) throw new UnauthorizedException('Announcer not found');
+    }
 
     const uploaded = await this.objectStorage.uploadFile(file, rule.folder);
     let thumbnail: StoredObject | null = null;
@@ -75,6 +84,20 @@ export class UploadsService {
         : null;
     }
 
+    if (type === 'broadcast-image') {
+      return {
+        url: uploaded.url,
+        path: uploaded.path,
+        type,
+        mime_type: file.mimetype,
+        original_name: file.originalname,
+      };
+    }
+
+    const announcer = await this.prisma.announcer.findFirst({
+      where: { userId: user.id },
+    });
+
     const media = await this.prisma.media.create({
       data: {
         id: crypto.randomUUID(),
@@ -87,7 +110,7 @@ export class UploadsService {
         size: file.size,
         originalName: file.originalname,
         type: file.mimetype,
-        announcerId: announcer.id,
+        announcerId: announcer!.id,
       },
     });
 

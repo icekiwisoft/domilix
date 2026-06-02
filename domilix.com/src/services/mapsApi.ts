@@ -52,8 +52,8 @@ export const getMapsPlans = async (): Promise<MapsPlan[]> => {
   return response.data;
 };
 
-export const subscribeMaps = async (plan: string): Promise<{ subscription: MapsSubscription }> => {
-  const response = await api.post('/maps/subscribe', { plan });
+export const subscribeMaps = async (plan: string, paymentMethod?: string, phoneNumber?: string): Promise<any> => {
+  const response = await api.post('/maps/subscribe', { plan, payment_method: paymentMethod, phone_number: phoneNumber });
   return response.data;
 };
 

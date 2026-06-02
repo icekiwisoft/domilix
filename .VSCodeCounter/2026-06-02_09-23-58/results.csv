@@ -1,0 +1,152 @@
+"filename", "language", "TypeScript JSX", "TypeScript", "SCSS", "CSS", "XML", "comment", "blank", "total"
+"c:\dev\domilix\domilix.com\src\app\(legal)\layout.tsx", "TypeScript JSX", 134, 0, 0, 0, 0, 41, 9, 184
+"c:\dev\domilix\domilix.com\src\app\401\page.tsx", "TypeScript JSX", 5, 0, 0, 0, 0, 0, 3, 8
+"c:\dev\domilix\domilix.com\src\app\403\page.tsx", "TypeScript JSX", 5, 0, 0, 0, 0, 0, 3, 8
+"c:\dev\domilix\domilix.com\src\app\404\page.tsx", "TypeScript JSX", 5, 0, 0, 0, 0, 0, 3, 8
+"c:\dev\domilix\domilix.com\src\app\500\page.tsx", "TypeScript JSX", 5, 0, 0, 0, 0, 0, 3, 8
+"c:\dev\domilix\domilix.com\src\app\Forgot\page.tsx", "TypeScript JSX", 5, 0, 0, 0, 0, 0, 3, 8
+"c:\dev\domilix\domilix.com\src\app\Validation\page.tsx", "TypeScript JSX", 5, 0, 0, 0, 0, 0, 3, 8
+"c:\dev\domilix\domilix.com\src\app\about\layout.tsx", "TypeScript JSX", 35, 0, 0, 0, 0, 0, 3, 38
+"c:\dev\domilix\domilix.com\src\app\about\page.tsx", "TypeScript JSX", 5, 0, 0, 0, 0, 0, 3, 8
+"c:\dev\domilix\domilix.com\src\app\announcers\[id]\page.tsx", "TypeScript JSX", 5, 0, 0, 0, 0, 0, 3, 8
+"c:\dev\domilix\domilix.com\src\app\favorite\layout.tsx", "TypeScript JSX", 12, 0, 0, 0, 0, 0, 3, 15
+"c:\dev\domilix\domilix.com\src\app\favorite\page.tsx", "TypeScript JSX", 5, 0, 0, 0, 0, 0, 3, 8
+"c:\dev\domilix\domilix.com\src\app\forgot-password\page.tsx", "TypeScript JSX", 5, 0, 0, 0, 0, 0, 3, 8
+"c:\dev\domilix\domilix.com\src\app\furnitures\layout.tsx", "TypeScript JSX", 35, 0, 0, 0, 0, 0, 3, 38
+"c:\dev\domilix\domilix.com\src\app\furnitures\page.tsx", "TypeScript JSX", 5, 0, 0, 0, 0, 0, 3, 8
+"c:\dev\domilix\domilix.com\src\app\houses\[id]\page.tsx", "TypeScript JSX", 5, 0, 0, 0, 0, 0, 3, 8
+"c:\dev\domilix\domilix.com\src\app\houses\layout.tsx", "TypeScript JSX", 19, 0, 0, 0, 0, 0, 3, 22
+"c:\dev\domilix\domilix.com\src\app\houses\page.tsx", "TypeScript JSX", 5, 0, 0, 0, 0, 0, 3, 8
+"c:\dev\domilix\domilix.com\src\app\layout.tsx", "TypeScript JSX", 100, 0, 0, 0, 0, 0, 6, 106
+"c:\dev\domilix\domilix.com\src\app\maps\(with-layout)\layout.tsx", "TypeScript JSX", 4, 0, 0, 0, 0, 0, 2, 6
+"c:\dev\domilix\domilix.com\src\app\maps\(with-layout)\subscription\page.tsx", "TypeScript JSX", 252, 0, 0, 0, 0, 0, 25, 277
+"c:\dev\domilix\domilix.com\src\app\maps\page.tsx", "TypeScript JSX", 366, 0, 0, 0, 0, 0, 30, 396
+"c:\dev\domilix\domilix.com\src\app\not-found.tsx", "TypeScript JSX", 5, 0, 0, 0, 0, 0, 3, 8
+"c:\dev\domilix\domilix.com\src\app\notifications\layout.tsx", "TypeScript JSX", 12, 0, 0, 0, 0, 0, 3, 15
+"c:\dev\domilix\domilix.com\src\app\notifications\page.tsx", "TypeScript JSX", 9, 0, 0, 0, 0, 0, 4, 13
+"c:\dev\domilix\domilix.com\src\app\page.tsx", "TypeScript JSX", 4, 0, 0, 0, 0, 0, 2, 6
+"c:\dev\domilix\domilix.com\src\app\reset-password\page.tsx", "TypeScript JSX", 9, 0, 0, 0, 0, 0, 3, 12
+"c:\dev\domilix\domilix.com\src\app\robots.ts", "TypeScript", 0, 28, 0, 0, 0, 0, 3, 31
+"c:\dev\domilix\domilix.com\src\app\search\layout.tsx", "TypeScript JSX", 13, 0, 0, 0, 0, 0, 3, 16
+"c:\dev\domilix\domilix.com\src\app\search\page.tsx", "TypeScript JSX", 5, 0, 0, 0, 0, 0, 3, 8
+"c:\dev\domilix\domilix.com\src\app\settings\layout.tsx", "TypeScript JSX", 12, 0, 0, 0, 0, 0, 3, 15
+"c:\dev\domilix\domilix.com\src\app\settings\page.tsx", "TypeScript JSX", 9, 0, 0, 0, 0, 0, 4, 13
+"c:\dev\domilix\domilix.com\src\app\sitemap.ts", "TypeScript", 0, 55, 0, 0, 0, 0, 4, 59
+"c:\dev\domilix\domilix.com\src\app\subscriptions\layout.tsx", "TypeScript JSX", 13, 0, 0, 0, 0, 0, 3, 16
+"c:\dev\domilix\domilix.com\src\app\subscriptions\page.tsx", "TypeScript JSX", 5, 0, 0, 0, 0, 0, 3, 8
+"c:\dev\domilix\domilix.com\src\app\terrains\layout.tsx", "TypeScript JSX", 35, 0, 0, 0, 0, 0, 3, 38
+"c:\dev\domilix\domilix.com\src\app\terrains\page.tsx", "TypeScript JSX", 5, 0, 0, 0, 0, 0, 3, 8
+"c:\dev\domilix\domilix.com\src\assets\Fichier 2.svg", "XML", 0, 0, 0, 0, 20, 0, 2, 22
+"c:\dev\domilix\domilix.com\src\assets\Whited.svg", "XML", 0, 0, 0, 0, 133, 0, 0, 133
+"c:\dev\domilix\domilix.com\src\assets\img\SVG\Fichier 1.svg", "XML", 0, 0, 0, 0, 41, 0, 6, 47
+"c:\dev\domilix\domilix.com\src\components\AddressAutocomplete\AddressAutocomplete.tsx", "TypeScript JSX", 223, 0, 0, 0, 0, 10, 26, 259
+"c:\dev\domilix\domilix.com\src\components\AnnouncerAdCard\AnnouncerAdCard.tsx", "TypeScript JSX", 157, 0, 0, 0, 0, 0, 18, 175
+"c:\dev\domilix\domilix.com\src\components\AnnouncerAdCard\EditAdModal.tsx", "TypeScript JSX", 542, 0, 0, 0, 0, 0, 67, 609
+"c:\dev\domilix\domilix.com\src\components\AnnouncerRequiredModal\AnnouncerRequiredModal.tsx", "TypeScript JSX", 82, 0, 0, 0, 0, 0, 7, 89
+"c:\dev\domilix\domilix.com\src\components\AppBootstrap\AppBootstrap.tsx", "TypeScript JSX", 46, 0, 0, 0, 0, 0, 9, 55
+"c:\dev\domilix\domilix.com\src\components\ArticlePostDialog\ArticlePostDialog.tsx", "TypeScript JSX", 1502, 0, 0, 0, 0, 32, 69, 1603
+"c:\dev\domilix\domilix.com\src\components\Cards\Alert\AlertNotifs.tsx", "TypeScript JSX", 82, 0, 0, 0, 0, 1, 8, 91
+"c:\dev\domilix\domilix.com\src\components\Cards\Paiement\ChoiseMode.tsx", "TypeScript JSX", 219, 0, 0, 0, 0, 12, 23, 254
+"c:\dev\domilix\domilix.com\src\components\ConfirmDialog\ConfirmDialog.tsx", "TypeScript JSX", 72, 0, 0, 0, 0, 0, 9, 81
+"c:\dev\domilix\domilix.com\src\components\Contact\Contact.tsx", "TypeScript JSX", 126, 0, 0, 0, 0, 6, 12, 144
+"c:\dev\domilix\domilix.com\src\components\CookieConsent\CookieConsent.tsx", "TypeScript JSX", 114, 0, 0, 0, 0, 2, 13, 129
+"c:\dev\domilix\domilix.com\src\components\EmailVerificationBanner\EmailVerificationBanner.tsx", "TypeScript JSX", 217, 0, 0, 0, 0, 0, 31, 248
+"c:\dev\domilix\domilix.com\src\components\FilterHeader\FilterHeader.tsx", "TypeScript JSX", 85, 0, 0, 0, 0, 0, 5, 90
+"c:\dev\domilix\domilix.com\src\components\FloatingPublishButton\FloatingPublishButton.tsx", "TypeScript JSX", 38, 0, 0, 0, 0, 1, 7, 46
+"c:\dev\domilix\domilix.com\src\components\Footer2\Footer2.tsx", "TypeScript JSX", 156, 0, 0, 0, 0, 5, 6, 167
+"c:\dev\domilix\domilix.com\src\components\Footer2\index.ts", "TypeScript", 0, 1, 0, 0, 0, 0, 1, 2
+"c:\dev\domilix\domilix.com\src\components\FooterMinimal\FooterMinimal.tsx", "TypeScript JSX", 47, 0, 0, 0, 0, 3, 7, 57
+"c:\dev\domilix\domilix.com\src\components\FooterMinimal\index.ts", "TypeScript", 0, 1, 0, 0, 0, 0, 1, 2
+"c:\dev\domilix\domilix.com\src\components\Header\Hero\Hero.tsx", "TypeScript JSX", 59, 0, 0, 0, 0, 0, 11, 70
+"c:\dev\domilix\domilix.com\src\components\Header\Hero\hero.scss", "SCSS", 0, 0, 24, 0, 0, 0, 4, 28
+"c:\dev\domilix\domilix.com\src\components\Header\Nav\Nav.tsx", "TypeScript JSX", 92, 0, 0, 0, 0, 7, 8, 107
+"c:\dev\domilix\domilix.com\src\components\Header\header.tsx", "TypeScript JSX", 13, 0, 0, 0, 0, 0, 3, 16
+"c:\dev\domilix\domilix.com\src\components\HoneypotInput\HoneypotInput.tsx", "TypeScript JSX", 18, 0, 0, 0, 0, 0, 2, 20
+"c:\dev\domilix\domilix.com\src\components\MapNav\MapNav.tsx", "TypeScript JSX", 188, 0, 0, 0, 0, 5, 12, 205
+"c:\dev\domilix\domilix.com\src\components\MapboxMap\MapboxMap.tsx", "TypeScript JSX", 88, 0, 0, 0, 0, 5, 13, 106
+"c:\dev\domilix\domilix.com\src\components\MediasDialog\MediasDialog.tsx", "TypeScript JSX", 224, 0, 0, 0, 0, 6, 17, 247
+"c:\dev\domilix\domilix.com\src\components\Nav2\Nav2.tsx", "TypeScript JSX", 413, 0, 0, 0, 0, 15, 33, 461
+"c:\dev\domilix\domilix.com\src\components\NotificationPopup\NotificationPopup.tsx", "TypeScript JSX", 234, 0, 0, 0, 0, 7, 22, 263
+"c:\dev\domilix\domilix.com\src\components\OTP\BlockInputs.tsx", "TypeScript JSX", 82, 0, 0, 0, 0, 2, 12, 96
+"c:\dev\domilix\domilix.com\src\components\OTP\Input.tsx", "TypeScript JSX", 75, 0, 0, 0, 0, 0, 6, 81
+"c:\dev\domilix\domilix.com\src\components\Phone\Phone.tsx", "TypeScript JSX", 58, 0, 0, 0, 0, 2, 4, 64
+"c:\dev\domilix\domilix.com\src\components\ProductCard\ProductCard.tsx", "TypeScript JSX", 193, 0, 0, 0, 0, 11, 22, 226
+"c:\dev\domilix\domilix.com\src\components\ProfileDialog\ProfileDialog.tsx", "TypeScript JSX", 5, 0, 0, 0, 0, 0, 3, 8
+"c:\dev\domilix\domilix.com\src\components\ProfilePopup\ProfilePopup.tsx", "TypeScript JSX", 123, 0, 0, 0, 0, 0, 16, 139
+"c:\dev\domilix\domilix.com\src\components\ProtectedRoute\ProtectedRoute.tsx", "TypeScript JSX", 12, 0, 0, 0, 0, 0, 5, 17
+"c:\dev\domilix\domilix.com\src\components\SettingsPanel\SettingsPanel.tsx", "TypeScript JSX", 904, 0, 0, 0, 0, 9, 68, 981
+"c:\dev\domilix\domilix.com\src\components\ShareModal\ShareModal.tsx", "TypeScript JSX", 166, 0, 0, 0, 0, 4, 13, 183
+"c:\dev\domilix\domilix.com\src\components\SignalDialog\SignalDialog.tsx", "TypeScript JSX", 114, 0, 0, 0, 0, 0, 9, 123
+"c:\dev\domilix\domilix.com\src\components\SigninDialog\SigninDialog.tsx", "TypeScript JSX", 217, 0, 0, 0, 0, 5, 28, 250
+"c:\dev\domilix\domilix.com\src\components\SignupDialog\SignupDialog.tsx", "TypeScript JSX", 283, 0, 0, 0, 0, 10, 36, 329
+"c:\dev\domilix\domilix.com\src\components\SiteTour\SiteTour.tsx", "TypeScript JSX", 214, 0, 0, 0, 0, 0, 33, 247
+"c:\dev\domilix\domilix.com\src\components\Stats\Stats.tsx", "TypeScript JSX", 84, 0, 0, 0, 0, 4, 7, 95
+"c:\dev\domilix\domilix.com\src\components\SupportContactPopup\SupportContactPopup.tsx", "TypeScript JSX", 56, 0, 0, 0, 0, 0, 11, 67
+"c:\dev\domilix\domilix.com\src\components\Timer\Timer.tsx", "TypeScript JSX", 93, 0, 0, 0, 0, 0, 11, 104
+"c:\dev\domilix\domilix.com\src\components\UnlockDialog\UnlockDialog.tsx", "TypeScript JSX", 118, 0, 0, 0, 0, 0, 6, 124
+"c:\dev\domilix\domilix.com\src\context\MapsContext.tsx", "TypeScript JSX", 97, 0, 0, 0, 0, 0, 12, 109
+"c:\dev\domilix\domilix.com\src\hooks\index.ts", "TypeScript", 0, 1, 0, 0, 0, 0, 1, 2
+"c:\dev\domilix\domilix.com\src\hooks\useAuth.ts", "TypeScript", 0, 146, 0, 0, 0, 2, 25, 173
+"c:\dev\domilix\domilix.com\src\hooks\useCookieConsent.ts", "TypeScript", 0, 35, 0, 0, 0, 0, 9, 44
+"c:\dev\domilix\domilix.com\src\index.css", "CSS", 0, 0, 0, 139, 0, 14, 26, 179
+"c:\dev\domilix\domilix.com\src\lib\router.tsx", "TypeScript JSX", 98, 0, 0, 0, 0, 0, 18, 116
+"c:\dev\domilix\domilix.com\src\services\addressApi.ts", "TypeScript", 0, 46, 0, 0, 0, 0, 5, 51
+"c:\dev\domilix\domilix.com\src\services\announceApi.ts", "TypeScript", 0, 76, 0, 0, 0, 4, 12, 92
+"c:\dev\domilix\domilix.com\src\services\announcerApi.ts", "TypeScript", 0, 14, 0, 0, 0, 2, 3, 19
+"c:\dev\domilix\domilix.com\src\services\api.ts", "TypeScript", 0, 64, 0, 0, 0, 1, 12, 77
+"c:\dev\domilix\domilix.com\src\services\authApi.ts", "TypeScript", 0, 104, 0, 0, 0, 0, 18, 122
+"c:\dev\domilix\domilix.com\src\services\categoriesApi.ts", "TypeScript", 0, 12, 0, 0, 0, 1, 2, 15
+"c:\dev\domilix\domilix.com\src\services\favoritesApi.ts", "TypeScript", 0, 16, 0, 0, 0, 2, 3, 21
+"c:\dev\domilix\domilix.com\src\services\mapboxApi.ts", "TypeScript", 0, 112, 0, 0, 0, 6, 18, 136
+"c:\dev\domilix\domilix.com\src\services\mapsApi.ts", "TypeScript", 0, 58, 0, 0, 0, 0, 11, 69
+"c:\dev\domilix\domilix.com\src\services\mediaApi.ts", "TypeScript", 0, 59, 0, 0, 0, 7, 10, 76
+"c:\dev\domilix\domilix.com\src\services\newsletterApi.ts", "TypeScript", 0, 7, 0, 0, 0, 0, 2, 9
+"c:\dev\domilix\domilix.com\src\services\notificationApi.ts", "TypeScript", 0, 40, 0, 0, 0, 6, 8, 54
+"c:\dev\domilix\domilix.com\src\services\profileApi.ts", "TypeScript", 0, 47, 0, 0, 0, 5, 10, 62
+"c:\dev\domilix\domilix.com\src\services\statApi.ts", "TypeScript", 0, 22, 0, 0, 0, 0, 3, 25
+"c:\dev\domilix\domilix.com\src\services\subscriptionApi.ts", "TypeScript", 0, 147, 0, 0, 0, 9, 28, 184
+"c:\dev\domilix\domilix.com\src\services\uploadApi.ts", "TypeScript", 0, 39, 0, 0, 0, 0, 7, 46
+"c:\dev\domilix\domilix.com\src\services\userApi.ts", "TypeScript", 0, 55, 0, 0, 0, 5, 10, 70
+"c:\dev\domilix\domilix.com\src\stores\defineStore.ts", "TypeScript", 0, 221, 0, 0, 0, 0, 21, 242
+"c:\dev\domilix\domilix.com\src\utils\PrivateRoute.tsx", "TypeScript JSX", 12, 0, 0, 0, 0, 0, 4, 16
+"c:\dev\domilix\domilix.com\src\utils\mediaUrl.ts", "TypeScript", 0, 6, 0, 0, 0, 0, 2, 8
+"c:\dev\domilix\domilix.com\src\utils\types.ts", "TypeScript", 0, 171, 0, 0, 0, 9, 14, 194
+"c:\dev\domilix\domilix.com\src\views\About\About.tsx", "TypeScript JSX", 264, 0, 0, 0, 0, 0, 25, 289
+"c:\dev\domilix\domilix.com\src\views\Ad\Ad.tsx", "TypeScript JSX", 920, 0, 0, 0, 0, 31, 66, 1017
+"c:\dev\domilix\domilix.com\src\views\Ads\Ads.tsx", "TypeScript JSX", 150, 0, 0, 0, 0, 1, 17, 168
+"c:\dev\domilix\domilix.com\src\views\Ads\components\AdsSearchHero.tsx", "TypeScript JSX", 367, 0, 0, 0, 0, 0, 43, 410
+"c:\dev\domilix\domilix.com\src\views\Ads\components\AdsStates.tsx", "TypeScript JSX", 76, 0, 0, 0, 0, 0, 3, 79
+"c:\dev\domilix\domilix.com\src\views\Ads\components\CitySections.tsx", "TypeScript JSX", 56, 0, 0, 0, 0, 0, 6, 62
+"c:\dev\domilix\domilix.com\src\views\Ads\components\PromoCarousel.tsx", "TypeScript JSX", 76, 0, 0, 0, 0, 0, 8, 84
+"c:\dev\domilix\domilix.com\src\views\Ads\components\types.ts", "TypeScript", 0, 18, 0, 0, 0, 0, 3, 21
+"c:\dev\domilix\domilix.com\src\views\Announcer\Announcer.tsx", "TypeScript JSX", 646, 0, 0, 0, 0, 17, 42, 705
+"c:\dev\domilix\domilix.com\src\views\Carte\components\MapBottomSheet.tsx", "TypeScript JSX", 202, 0, 0, 0, 0, 0, 18, 220
+"c:\dev\domilix\domilix.com\src\views\Carte\components\MapDirectionsPanel.tsx", "TypeScript JSX", 124, 0, 0, 0, 0, 0, 10, 134
+"c:\dev\domilix\domilix.com\src\views\Carte\components\MapFavorites.tsx", "TypeScript JSX", 41, 0, 0, 0, 0, 0, 5, 46
+"c:\dev\domilix\domilix.com\src\views\Carte\components\MapFilters.tsx", "TypeScript JSX", 127, 0, 0, 0, 0, 0, 13, 140
+"c:\dev\domilix\domilix.com\src\views\Carte\components\MapListingCard.tsx", "TypeScript JSX", 124, 0, 0, 0, 0, 0, 7, 131
+"c:\dev\domilix\domilix.com\src\views\Carte\components\MapListingDetailsPanel.tsx", "TypeScript JSX", 149, 0, 0, 0, 0, 0, 19, 168
+"c:\dev\domilix\domilix.com\src\views\Carte\components\MapProPanel.tsx", "TypeScript JSX", 176, 0, 0, 0, 0, 0, 24, 200
+"c:\dev\domilix\domilix.com\src\views\Carte\components\MapSearchBar.tsx", "TypeScript JSX", 41, 0, 0, 0, 0, 0, 5, 46
+"c:\dev\domilix\domilix.com\src\views\Carte\components\MapSidebar.tsx", "TypeScript JSX", 175, 0, 0, 0, 0, 0, 13, 188
+"c:\dev\domilix\domilix.com\src\views\Carte\components\MapView.tsx", "TypeScript JSX", 520, 0, 0, 0, 0, 0, 55, 575
+"c:\dev\domilix\domilix.com\src\views\Carte\components\MapsPaymentDialog.tsx", "TypeScript JSX", 145, 0, 0, 0, 0, 0, 18, 163
+"c:\dev\domilix\domilix.com\src\views\Carte\data\mockListings.ts", "TypeScript", 0, 579, 0, 0, 0, 0, 2, 581
+"c:\dev\domilix\domilix.com\src\views\Carte\data\types.ts", "TypeScript", 0, 55, 0, 0, 0, 0, 5, 60
+"c:\dev\domilix\domilix.com\src\views\Contact\Contact.tsx", "TypeScript JSX", 28, 0, 0, 0, 0, 0, 4, 32
+"c:\dev\domilix\domilix.com\src\views\Favorites\Favorite.tsx", "TypeScript JSX", 120, 0, 0, 0, 0, 1, 9, 130
+"c:\dev\domilix\domilix.com\src\views\Forgot\Forgot.tsx", "TypeScript JSX", 78, 0, 0, 0, 0, 0, 11, 89
+"c:\dev\domilix\domilix.com\src\views\Furnitures\Furnitures.tsx", "TypeScript JSX", 49, 0, 0, 0, 0, 8, 12, 69
+"c:\dev\domilix\domilix.com\src\views\Notifications\Notifications.tsx", "TypeScript JSX", 161, 0, 0, 0, 0, 0, 14, 175
+"c:\dev\domilix\domilix.com\src\views\Privacy\Privacy.tsx", "TypeScript JSX", 5, 0, 0, 0, 0, 0, 3, 8
+"c:\dev\domilix\domilix.com\src\views\ResetPassword\ResetPassword.tsx", "TypeScript JSX", 156, 0, 0, 0, 0, 0, 21, 177
+"c:\dev\domilix\domilix.com\src\views\Search\Search.tsx", "TypeScript JSX", 639, 0, 0, 0, 0, 16, 56, 711
+"c:\dev\domilix\domilix.com\src\views\Settings\Settings.tsx", "TypeScript JSX", 31, 0, 0, 0, 0, 0, 7, 38
+"c:\dev\domilix\domilix.com\src\views\Subscriptions\Subscriptions.tsx", "TypeScript JSX", 332, 0, 0, 0, 0, 0, 17, 349
+"c:\dev\domilix\domilix.com\src\views\Terrains\Terrains.tsx", "TypeScript JSX", 49, 0, 0, 0, 0, 8, 12, 69
+"c:\dev\domilix\domilix.com\src\views\Validation\Validation.tsx", "TypeScript JSX", 60, 0, 0, 0, 0, 1, 5, 66
+"c:\dev\domilix\domilix.com\src\views\errors\401.tsx", "TypeScript JSX", 120, 0, 0, 0, 0, 6, 13, 139
+"c:\dev\domilix\domilix.com\src\views\errors\403.tsx", "TypeScript JSX", 28, 0, 0, 0, 0, 0, 4, 32
+"c:\dev\domilix\domilix.com\src\views\errors\404.tsx", "TypeScript JSX", 70, 0, 0, 0, 0, 8, 13, 91
+"c:\dev\domilix\domilix.com\src\views\errors\500.tsx", "TypeScript JSX", 26, 0, 0, 0, 0, 0, 4, 30
+"Total", "-", 15530, 2235, 24, 139, 194, 375, 1818, 20315

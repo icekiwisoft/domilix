@@ -1,4 +1,5 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import crypto from 'node:crypto';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { QueryMapsListingsDto, QueryMapsNearbyDto } from './dto/query-maps.dto';
 import { ObjectStorageService } from '../common/object-storage/object-storage.service';
@@ -320,7 +321,73 @@ export class MapsService {
     return end;
   }
 
-  async subscribe(userId: bigint, plan: string) {
+  private addDays(date: Date, days: number) {
+    return new Date(date.getTime() + days * 24 * 60 * 60 * 1000);
+  }
+
+  private getCampayConfig() {
+    const token = process.env.CAMPAY_TOKEN;
+    const endpoint = process.env.CAMPAY_ENDPOINT || 'https://demo.campay.net/api/collect/';
+    if (!token) {
+      throw new InternalServerErrorException('CAMPAY_TOKEN is not configured.');
+    }
+    return { token, endpoint };
+  }
+
+  private async collectCampayPayment(data: { amount: number; from: string; externalReference: string; description: string }) {
+    const { token, endpoint } = this.getCampayConfig();
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: { Authorization: `Token ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        amount: data.amount,
+        from: data.from,
+        description: data.description,
+        external_reference: data.externalReference,
+      }),
+    });
+    const text = await response.text();
+    let payload: unknown = text;
+    try { payload = text ? JSON.parse(text) : null; } catch { payload = text; }
+    if (!response.ok) {
+      throw new BadRequestException({
+        message: 'Campay payment request failed.',
+        status: response.status,
+        response: payload,
+      });
+    }
+    return payload;
+  }
+
+  /** Activate a Maps subscription without payment (for free plans or after webhook confirmation). */
+  async activateSubscription(userId: bigint, plan: string) {
+    const cfg = MAPS_PLANS[plan as MapsPlan];
+    const now = new Date();
+    const endDate = this.computeEndDate(plan as MapsPlan);
+    const subscription = await this.prisma.mapsSubscription.create({
+      data: {
+        userId,
+        plan,
+        active: true,
+        price: cfg.price,
+        unlockCount: cfg.unlockCount,
+        startDate: now,
+        endDate,
+      },
+    });
+    return {
+      id: Number(subscription.id),
+      plan: subscription.plan,
+      active: subscription.active,
+      price: Number(subscription.price),
+      unlock_count: subscription.unlockCount,
+      start_date: subscription.startDate,
+      end_date: subscription.endDate,
+      created_at: subscription.createdAt,
+    };
+  }
+
+  async subscribe(userId: bigint, plan: string, payment?: { paymentMethod?: string; phoneNumber?: string }) {
     if (!MAPS_PLANS[plan as MapsPlan]) {
       throw new BadRequestException(`Plan "${plan}" invalide. Plans disponibles : ${Object.keys(MAPS_PLANS).join(', ')}`);
     }
@@ -334,32 +401,55 @@ export class MapsService {
       throw new BadRequestException('Vous avez déjà un abonnement Maps actif. Résiliez-le d\'abord ou attendez son expiration.');
     }
 
-    const now = new Date();
-    const endDate = this.computeEndDate(plan as MapsPlan);
+    /* Free plan – activate directly */
+    if (cfg.price <= 0) {
+      const subscription = await this.activateSubscription(userId, plan);
+      return { subscription, free: true };
+    }
 
-    const subscription = await this.prisma.mapsSubscription.create({
-      data: {
-        userId,
+    /* Paid plan – require payment info */
+    if (!payment?.paymentMethod || !payment?.phoneNumber) {
+      return {
+        requires_payment: true,
         plan,
-        active: true,
         price: cfg.price,
-        unlockCount: cfg.unlockCount,
-        startDate: now,
-        endDate,
+        message: 'Ce plan nécessite un paiement. Fournissez payment_method et phone_number.',
+      };
+    }
+
+    const methodMap: Record<string, string> = { orange_money: 'orange', mtn_money: 'mtn', orange: 'orange', mtn: 'mtn' };
+    const paymentMethod = methodMap[payment.paymentMethod.toLowerCase()];
+    if (!paymentMethod) {
+      throw new BadRequestException('Méthode de paiement non supportée. Utilisez "mtn" ou "orange".');
+    }
+
+    const paymentRecord = await this.prisma.payment.create({
+      data: {
+        id: crypto.randomUUID(),
+        clientId: crypto.randomUUID(),
+        userId,
+        paymentType: 'subscription',
+        paymentMethod,
+        paymentInfo: payment.phoneNumber,
+        paymentTypeInfo: `maps_${plan}`,
+        amount: cfg.price,
+        status: 'pending',
       },
     });
 
+    const campayResponse = await this.collectCampayPayment({
+      amount: cfg.price,
+      from: payment.phoneNumber,
+      description: `Domilix Maps ${cfg.label}`,
+      externalReference: paymentRecord.id,
+    });
+
     return {
-      subscription: {
-        id: Number(subscription.id),
-        plan: subscription.plan,
-        active: subscription.active,
-        price: Number(subscription.price),
-        unlock_count: subscription.unlockCount,
-        start_date: subscription.startDate,
-        end_date: subscription.endDate,
-        created_at: subscription.createdAt,
-      },
+      message: 'Demande de paiement envoyée. Validez la transaction sur votre téléphone.',
+      payment_id: paymentRecord.id,
+      provider: 'campay',
+      campay: campayResponse,
+      requires_payment: true,
     };
   }
 
