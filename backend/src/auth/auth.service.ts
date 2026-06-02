@@ -229,8 +229,8 @@ export class AuthService {
         data: {
           userId: created.id,
           subscriptionPlanId: String(signupGiftPlan.id),
-          initialCredits: 20,
-          credits: 20,
+          initialCredits: 2,
+          credits: 2,
           price: 0,
           duration: 0,
           startDate: new Date(),
@@ -261,8 +261,8 @@ export class AuthService {
 
     await this.createUserNotification(user.id, {
       type: 'signup_gift_received',
-      title: '20 Domicoins offerts',
-      message: 'Bienvenue sur Domilix ! Vous recevez 20 Domicoins valables sans date d expiration pour debloquer vos premiers contacts.',
+      title: '2 Domicoins offerts',
+      message: 'Bienvenue sur Domilix ! Vous recevez 2 Domicoins valables sans date d expiration pour debloquer vos premiers contacts.',
       link: '/settings?tab=packs',
     });
 

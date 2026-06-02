@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   Param,
   Post,
@@ -99,13 +98,6 @@ export class MediasController {
     );
   }
 
-  @Delete(':id')
-  @ApiOperation({ summary: 'Delete a media or detach it from an announce' })
-  @ApiParam({ name: 'id', example: 'media-uuid' })
-  @ApiQuery({ name: 'AdId', required: false })
-  destroy(@Param('id') id: string, @Query('AdId') adId?: string) {
-    return this.mediasService.destroy(id, adId);
-  }
 }
 
 @ApiTags('Announcer Medias')

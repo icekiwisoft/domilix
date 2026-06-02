@@ -7,5 +7,6 @@ import { AnnouncersService } from './announcers.service';
   imports: [AuthModule],
   controllers: [AnnouncersController],
   providers: [AnnouncersService],
+  exports: [AnnouncersService],
 })
 export class AnnouncersModule {}

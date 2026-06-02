@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AdsModule } from './ads/ads.module';
+import { AdminModule } from './admin/admin.module';
 import { AddressesModule } from './addresses/addresses.module';
 import { AnnouncerRequestsModule } from './announcer-requests/announcer-requests.module';
 import { AnnouncersModule } from './announcers/announcers.module';
@@ -36,6 +37,7 @@ import { UsersModule } from './users/users.module';
     ObjectStorageModule,
     PrismaModule,
     AuthModule,
+    AdminModule,
     BroadcastsModule,
     AdsModule,
     AddressesModule,

@@ -1120,4 +1120,22 @@ export class AdsService {
     }
     return null;
   }
+
+  async destroyAdAsAdmin(id: string, user: any) {
+    if (!user?.isAdmin) {
+      throw new ForbiddenException('Admin access required');
+    }
+
+    const ad = await this.prisma.ad.findUnique({ where: { id: BigInt(id) } });
+    if (!ad) throw new NotFoundException('Ad not found');
+
+    await this.prisma.adMedia.deleteMany({ where: { adId: id } });
+    await this.prisma.ad.delete({ where: { id: ad.id } });
+    if (ad.itemType === FURNITURE_CLASS) {
+      await this.prisma.furniture.delete({ where: { id: ad.adId } });
+    } else {
+      await this.prisma.realEstate.delete({ where: { id: ad.adId } });
+    }
+    return null;
+  }
 }

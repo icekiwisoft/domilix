@@ -7,5 +7,6 @@ import { BroadcastsService } from './broadcasts.service';
   imports: [AuthModule],
   controllers: [BroadcastsController],
   providers: [BroadcastsService],
+  exports: [BroadcastsService],
 })
 export class BroadcastsModule {}

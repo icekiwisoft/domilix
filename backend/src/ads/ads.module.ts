@@ -8,5 +8,6 @@ import { AdsService } from './ads.service';
   imports: [AuthModule, AddressesModule],
   controllers: [AdsController],
   providers: [AdsService],
+  exports: [AdsService],
 })
 export class AdsModule {}

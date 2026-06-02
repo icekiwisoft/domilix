@@ -7,5 +7,6 @@ import { MediasService } from './medias.service';
   imports: [AuthModule],
   controllers: [MediasController, AnnouncerMediasController],
   providers: [MediasService],
+  exports: [MediasService],
 })
 export class MediasModule {}

@@ -211,14 +211,14 @@ export default function SigninDialog() {
                   </button>
                 </div>
 
-                <div className='flex items-center justify-between'>
-                  <label className='group flex cursor-pointer items-center gap-2'>
-                    <input type='checkbox' checked={rememberMe} onChange={() => setRememberMe(v => !v)} className='peer sr-only' />
-                    <span className='flex h-5 w-5 items-center justify-center rounded-md border-2 border-gray-300 bg-white transition peer-checked:border-orange-500 peer-checked:bg-orange-500 group-hover:border-orange-300'>
-                      <svg className='h-3 w-3 scale-0 text-white transition-transform peer-checked:scale-100' viewBox='0 0 20 20' fill='none'>
-                        <path d='M5 10.5 8.2 14 15 6' stroke='currentColor' strokeWidth='2.4' strokeLinecap='round' strokeLinejoin='round' />
-                      </svg>
-                    </span>
+                <div className='flex items-center justify-between gap-4'>
+                  <label className='flex cursor-pointer items-center gap-2.5'>
+                    <input
+                      type='checkbox'
+                      checked={rememberMe}
+                      onChange={event => setRememberMe(event.target.checked)}
+                      className='h-4 w-4 rounded border-gray-300 text-orange-500 accent-orange-500 focus:ring-2 focus:ring-orange-200'
+                    />
                     <span className='text-sm text-gray-600'>Se souvenir de moi</span>
                   </label>
                   <button type='button' onClick={() => { setIsForgotPassword(true); setError(''); setIdentifier(''); }} className='text-sm font-semibold text-orange-500 hover:text-orange-600'>
