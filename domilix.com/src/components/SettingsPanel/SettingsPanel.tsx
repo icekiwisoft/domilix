@@ -603,6 +603,32 @@ export default function SettingsPanel({
 
         return (
           <div className='space-y-6'>
+            <div className='rounded-2xl border border-orange-200 bg-gradient-to-br from-orange-50 via-white to-amber-50 p-5'>
+              <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
+                <div>
+                  <p className='mb-2 inline-flex rounded-full bg-orange-100 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-[#E8921A]'>Domilix Maps</p>
+                  <h3 className='text-lg font-black text-gray-950'>Abonnement Maps</h3>
+                  <p className='mt-1 max-w-xl text-sm leading-6 text-gray-600'>Maps est séparé des Domicoins : utilisez la carte pour trouver les biens, puis vos Domicoins pour débloquer les contacts.</p>
+                </div>
+                <div className='flex shrink-0 flex-col gap-2 sm:flex-row'>
+                  <button
+                    type='button'
+                    onClick={() => { window.location.href = '/maps'; }}
+                    className='rounded-xl border border-orange-200 bg-white px-4 py-2.5 text-sm font-black text-orange-700 transition hover:bg-orange-50'
+                  >
+                    Voir Maps
+                  </button>
+                  <button
+                    type='button'
+                    onClick={() => { window.location.href = '/maps/subscription'; }}
+                    className='rounded-xl bg-[#E8921A] px-4 py-2.5 text-sm font-black text-white shadow-sm transition hover:bg-orange-600'
+                  >
+                    Gérer l'abonnement
+                  </button>
+                </div>
+              </div>
+            </div>
+
             {/* Packs List */}
             <div>
               <div className='flex items-center justify-between mb-4'>

@@ -10,13 +10,14 @@ import ArticlePostDialog from '@components/ArticlePostDialog/ArticlePostDialog';
 import ConfirmDialog from '@components/ConfirmDialog/ConfirmDialog';
 import { notificationApi } from '../../services/notificationApi';
 import React, { useState, useEffect, useRef } from 'react';
-import { HiBars3, HiXMark, HiBell, HiHomeModern, HiSparkles, HiChevronDown } from 'react-icons/hi2';
+import { HiBars3, HiXMark, HiBell, HiHomeModern, HiSparkles, HiMap } from 'react-icons/hi2';
 import { MdChair, MdLandscape, MdOutlineCampaign } from 'react-icons/md';
 import { NavLink, useNavigate } from '@router';
 
 const defaultLinks = [
   { name: 'Acheter', url: '/subscriptions' },
   { name: 'Immobiliers', url: '/houses' },
+  { name: 'Maps', url: '/maps' },
   { name: 'Mobiliers', url: '/furnitures' },
   { name: 'Terrains', url: '/terrains' },
 ];
@@ -29,6 +30,7 @@ type Nav2Props = {
 const linkIcons: Record<string, React.ReactNode> = {
   '/subscriptions': <HiSparkles className='h-4 w-4 shrink-0' />,
   '/houses': <HiHomeModern className='h-4 w-4 shrink-0' />,
+  '/maps': <HiMap className='h-4 w-4 shrink-0' />,
   '/furnitures': <MdChair className='h-4 w-4 shrink-0' />,
   '/terrains': <MdLandscape className='h-4 w-4 shrink-0' />,
 };
@@ -146,13 +148,16 @@ export default function Nav2({
                         ? 'ring-2 ring-pink-200'
                         : 'hover:bg-pink-600 hover:border-pink-600 hover:shadow'
                       }`
-                      : isActive
+                      : link.url === '/maps'
+                        ? `relative inline-flex items-center gap-1.5 rounded-full border border-orange-200 bg-orange-50 px-3 py-1.5 text-sm font-black text-orange-700 shadow-sm transition-colors hover:bg-orange-100 xl:text-base ${isActive ? 'ring-2 ring-orange-200' : ''}`
+                        : isActive
                         ? 'inline-flex items-center gap-1.5 text-primary border-b-2 border-primary pb-1 text-body-md font-semibold'
                         : 'inline-flex items-center gap-1.5 text-on-surface-variant hover:text-primary transition-colors text-body-md font-semibold whitespace-nowrap'
                   }
                 >
                   {linkIcons[link.url]}
                   {link.name}
+                  {link.url === '/maps' && <span className='ml-0.5 rounded-full bg-[#E8921A] px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide text-white'>New</span>}
                 </NavLink>
               </li>
             ))}
@@ -365,6 +370,17 @@ export default function Nav2({
                 >
                   <HiSparkles className='h-5 w-5 shrink-0' />
                   Je cherche du mobilier
+                </NavLink>
+              </li>
+              <li>
+                <NavLink
+                  to='/maps'
+                  className='flex items-center gap-3 rounded-2xl border border-orange-200 bg-orange-50 px-4 py-3 text-orange-700 sm:gap-4'
+                  onClick={() => setClick(false)}
+                >
+                  <HiMap className='h-5 w-5 shrink-0' />
+                  <span className='flex-1'>Découvrir Domilix Maps</span>
+                  <span className='rounded-full bg-[#E8921A] px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-white'>New</span>
                 </NavLink>
               </li>
               <li>

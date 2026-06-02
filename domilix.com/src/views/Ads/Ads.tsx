@@ -1,5 +1,6 @@
 import FooterMinimal from '@components/FooterMinimal/FooterMinimal';
 import Nav2 from '@components/Nav2/Nav2';
+import Link from 'next/link';
 import coverAnnonceurImg from '@assets/bg_img/cover_annonceur.jpg';
 import furnituresPromoImg from '@assets/default-img/furnitures.jpg';
 import housesPromoImg from '@assets/default-img/houses.jpg';
@@ -153,6 +154,26 @@ export default function Ads(): React.ReactElement {
         <PromoCarousel slides={promoSlides} />
       </div>
       <AdsSearchHero />
+      <section className='mx-auto max-w-container px-gutter py-6 md:py-8'>
+        <div className='relative overflow-hidden rounded-[2rem] border border-orange-100 bg-gradient-to-br from-orange-50 via-white to-amber-50 p-5 shadow-sm md:p-7'>
+          <div className='pointer-events-none absolute -right-16 -top-16 h-44 w-44 rounded-full bg-orange-300/30 blur-3xl' />
+          <div className='relative flex flex-col gap-5 md:flex-row md:items-center md:justify-between'>
+            <div className='max-w-2xl'>
+              <p className='mb-2 inline-flex rounded-full bg-orange-100 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-[#E8921A]'>Nouveau · Domilix Maps</p>
+              <h2 className='text-2xl font-black tracking-tight text-gray-950 md:text-3xl'>Explorez les annonces directement sur une carte.</h2>
+              <p className='mt-2 text-sm leading-6 text-gray-600 md:text-base'>Repérez les biens par quartier, comparez les prix autour d’une zone et trouvez plus vite le logement qui correspond à votre recherche.</p>
+            </div>
+            <div className='flex flex-col gap-3 sm:flex-row md:shrink-0'>
+              <Link href='/maps' className='inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-[#E8921A] to-orange-500 px-5 py-3 text-sm font-black text-white shadow-lg shadow-orange-200 transition hover:from-orange-500 hover:to-orange-600'>
+                Voir sur la carte
+              </Link>
+              <Link href='/maps/subscription' className='inline-flex items-center justify-center rounded-2xl border border-orange-200 bg-white px-5 py-3 text-sm font-black text-orange-700 transition hover:bg-orange-50'>
+                Packs Maps
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
       <div className='min-h-screen'>
         <CitySections
           sections={citySections}
