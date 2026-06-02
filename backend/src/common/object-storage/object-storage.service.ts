@@ -122,6 +122,46 @@ export class ObjectStorageService {
     );
   }
 
+  storagePathFromUrl(value: string | null | undefined) {
+    if (!value) return null;
+    if (!/^https?:\/\//i.test(value)) return value.replace(/^\/+/, '');
+
+    let url: URL;
+    try {
+      url = new URL(value);
+    } catch {
+      return value;
+    }
+
+    if (this.publicBaseUrl) {
+      try {
+        const publicBase = new URL(this.publicBaseUrl);
+        if (url.origin === publicBase.origin) {
+          const basePath = publicBase.pathname.replace(/\/$/, '');
+          const currentPath = decodeURIComponent(url.pathname.replace(/^\//, ''));
+          const normalizedBase = decodeURIComponent(basePath.replace(/^\//, ''));
+          return normalizedBase && currentPath.startsWith(`${normalizedBase}/`)
+            ? currentPath.slice(normalizedBase.length + 1)
+            : currentPath;
+        }
+      } catch {
+        // Fall through to endpoint/bucket parsing.
+      }
+    }
+
+    const parts = decodeURIComponent(url.pathname).replace(/^\//, '').split('/');
+    if (this.bucketName && parts[0] === this.bucketName) return parts.slice(1).join('/');
+    return parts.join('/');
+  }
+
+  async getSignedUrlForStoredPath(value: string | null | undefined) {
+    const storagePath = this.storagePathFromUrl(value);
+    return {
+      path: storagePath,
+      url: await this.getSignedUrl(this.bucketName, storagePath),
+    };
+  }
+
   async uploadFile(file: UploadableFile, folder: string) {
     return this.uploadBuffer(
       file.buffer,

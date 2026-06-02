@@ -6,10 +6,14 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBroadcastDto } from './dto/create-broadcast.dto';
 import { QueryBroadcastsDto } from './dto/query-broadcasts.dto';
+import { ObjectStorageService } from '../common/object-storage/object-storage.service';
 
 @Injectable()
 export class BroadcastsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly objectStorage: ObjectStorageService,
+  ) {}
 
   private ensureAdmin(user: any) {
     if (!user?.isAdmin) {
@@ -17,7 +21,9 @@ export class BroadcastsService {
     }
   }
 
-  private serialize(item: any) {
+  private async serialize(item: any) {
+    const image = await this.objectStorage.getSignedUrlForStoredPath(item.image);
+
     return {
       id: Number(item.id),
       title: item.title,
@@ -25,7 +31,8 @@ export class BroadcastsService {
       chip: item.chip,
       badge: item.badge,
       cta: item.cta,
-      image: item.image,
+      image: image.url,
+      image_path: image.path,
       bg: item.bg,
       action_url: item.actionUrl,
       active: item.active,
@@ -52,7 +59,7 @@ export class BroadcastsService {
       orderBy: [{ position: 'asc' }, { createdAt: 'desc' }],
     });
 
-    return items.map((item) => this.serialize(item));
+    return Promise.all(items.map((item) => this.serialize(item)));
   }
 
   async show(id: string) {
@@ -72,7 +79,7 @@ export class BroadcastsService {
         chip: dto.chip,
         badge: dto.badge,
         cta: dto.cta,
-        image: dto.image,
+        image: this.objectStorage.storagePathFromUrl(dto.image),
         bg: dto.bg,
         actionUrl: dto.action_url,
         active: dto.active ?? true,
@@ -99,7 +106,9 @@ export class BroadcastsService {
         ...(dto.chip !== undefined ? { chip: dto.chip } : {}),
         ...(dto.badge !== undefined ? { badge: dto.badge } : {}),
         ...(dto.cta !== undefined ? { cta: dto.cta } : {}),
-        ...(dto.image !== undefined ? { image: dto.image } : {}),
+        ...(dto.image !== undefined
+          ? { image: this.objectStorage.storagePathFromUrl(dto.image) }
+          : {}),
         ...(dto.bg !== undefined ? { bg: dto.bg } : {}),
         ...(dto.action_url !== undefined ? { actionUrl: dto.action_url } : {}),
         ...(dto.active !== undefined ? { active: dto.active } : {}),
