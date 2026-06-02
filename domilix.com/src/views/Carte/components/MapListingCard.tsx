@@ -29,10 +29,9 @@ export default function MapListingCard({
   const badge = ADVERTISER_BADGES[listing.advertiser_type] || ADVERTISER_BADGES.Intermédiaire;
 
   return (
-    <button
-      type="button"
+    <div
       onClick={onSelect}
-      className={`w-full text-left rounded-xl transition-all ${
+      className={`w-full text-left rounded-xl transition-all cursor-pointer ${
         isSelected
           ? 'ring-2 ring-brand-500 shadow-md'
           : 'hover:shadow-sm'
@@ -112,6 +111,6 @@ export default function MapListingCard({
           </div>
         </div>
       </div>
-    </button>
+    </div>
   );
 }

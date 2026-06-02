@@ -31,7 +31,7 @@ export default function Footer2() {
               </li>
               <li>
                 <Link
-                  to='/carte'
+                  to='/maps'
                   className='text-gray-600 hover:text-orange-600 transition-colors'
                 >
                   Carte
