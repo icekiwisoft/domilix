@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { IsNotEmpty, IsString } from 'class-validator';
 import { AuthGuard } from '../auth/auth.guard';
 import { AuthTokenService } from '../auth/auth-token.service';
 import { CurrentUser } from '../auth/current-user.decorator';
@@ -8,6 +9,8 @@ import { MapsService } from './maps.service';
 import { QueryMapsListingsDto, QueryMapsNearbyDto } from './dto/query-maps.dto';
 
 class SubscribeDto {
+  @IsString()
+  @IsNotEmpty()
   plan!: string;
 }
 

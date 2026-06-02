@@ -38,12 +38,14 @@ export default function Carte() {
   useEffect(() => {
     (async () => {
       try {
-        const allPlans = getMapsPlans();
-        const listingResult = getMapListings({ per_page: '100' });
         const subResult = isAuthenticated ? getMapsSubscriptionStatus() : Promise.resolve(null);
+        const [plansData, dataResult, subStatus] = await Promise.all([
+          getMapsPlans(),
+          getMapListings({ per_page: '100' }),
+          subResult,
+        ]);
 
-        const [plansData, dataResult, subStatus] = await Promise.all([allPlans, listingResult, subResult]);
-        setPlans(plansData);
+        setPlans(plansData?.length ? plansData : FALLBACK_PLANS);
 
         if (subStatus) {
           setSubscriptionActive(subStatus.active);
@@ -115,6 +117,7 @@ export default function Carte() {
   }, []);
 
   const handleSubscribe = async (planId: string) => {
+    if (!planId) return;
     setActionLoading(planId);
     setSubError(null);
     try {
@@ -145,13 +148,19 @@ export default function Carte() {
 
   if (loading) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-white">
-        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-brand-500" />
+      <div className="fixed inset-0 flex items-center justify-center bg-[#fff8f4]">
+        <div className="h-9 w-9 animate-spin rounded-full border-2 border-[#eee0d2] border-t-[#E8921A]" />
       </div>
     );
   }
 
   const visiblePlans = plans.filter((p) => LAUNCH_PLANS.includes(p.id));
+
+  const getPlanFeatures = (plan: MapsPlan) => {
+    const base = ['Carte interactive des annonces', 'Filtres ville, prix, type'];
+    if (plan.unlock_count === 0) return base;
+    return [...base, `${plan.unlock_count} déblocage${plan.unlock_count > 1 ? 's' : ''} de contact`, 'Coordonnées exactes'];
+  };
 
   return (
     <div className="fixed inset-0 flex flex-col md:flex-row">
@@ -199,145 +208,154 @@ export default function Carte() {
           />
         </>
       ) : (
-        <div className="w-full h-full overflow-y-auto bg-gradient-to-b from-gray-50 to-white">
-          <div className="max-w-lg mx-auto px-4 py-8">
-            <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-brand-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-brand-500" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                </svg>
-              </div>
-              <h1 className="text-2xl font-bold text-gray-900 mb-2" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                Domilix <span className="text-brand-500">Maps</span>
-              </h1>
-              <p className="text-sm text-gray-500">
-                Explorez les annonces sur la carte interactive du Cameroun.
-              </p>
-            </div>
+        /* ══════════════════════════════════════════════════════
+           PAGE DE GARDE — CHOIX D'ABONNEMENT
+        ══════════════════════════════════════════════════════ */
+        <div className="relative w-full h-full overflow-hidden">
+          {/* Fond carte floutée */}
+          <div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: "url('https://images.unsplash.com/photo-1524661135-423995f22d0b?w=1400')" }}
+          />
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
 
-            {!isAuthenticated && (
-              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 text-center">
-                <p className="text-sm text-amber-800 font-medium mb-1">
-                  Connectez-vous pour accéder aux fonctionnalités Maps
-                </p>
-                <p className="text-xs text-amber-600">
-                  Souscrivez à un plan pour voir les annonces sur la carte.
-                </p>
-              </div>
-            )}
+          {/* Contenu */}
+          <div className="relative z-10 h-full overflow-y-auto">
+            <div className="min-h-full flex flex-col items-center justify-center px-4 py-12">
+              <div className="w-full max-w-4xl">
 
-            {subscriptionActive && subscription && (
-              <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-5 text-white mb-6">
-                <h3 className="text-lg font-bold mb-1">
-                  Maps {plans.find((p) => p.id === subscription.plan)?.label || subscription.plan}
-                </h3>
-                <p className="text-sm text-emerald-100 mb-1">Votre abonnement est actif.</p>
-                {subscription.end_date && (
-                  <p className="text-xs text-emerald-200 mb-4">
-                    Expire le {new Date(subscription.end_date).toLocaleDateString('fr-FR')}
+                {/* Header */}
+                <div className="mb-8 text-center">
+                  <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#E8921A] shadow-xl shadow-orange-900/30">
+                    <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                    </svg>
+                  </div>
+                  <h1 className="text-3xl font-black tracking-tight text-white sm:text-4xl">
+                    Domilix <span className="text-[#E8921A]">Maps</span>
+                  </h1>
+                  <p className="mt-2 text-base text-white/65">
+                    Explorez les annonces immobilières sur la carte interactive du Cameroun.
                   </p>
-                )}
-                <button
-                  type="button"
-                  onClick={handleCancel}
-                  disabled={actionLoading === 'cancel'}
-                  className="w-full py-2 rounded-xl bg-white text-emerald-700 font-bold text-sm hover:bg-emerald-50 transition disabled:opacity-50"
-                >
-                  {actionLoading === 'cancel' ? 'Annulation...' : "Résilier l'abonnement"}
-                </button>
-              </div>
-            )}
+                </div>
 
-            {subError && (
-              <div className="p-3 rounded-lg bg-red-50 text-red-700 text-xs mb-4">
-                {subError}
-              </div>
-            )}
-
-            {!subscriptionActive && (
-              <div className="space-y-4">
-                <h2 className="text-sm font-bold text-gray-900 text-center">
-                  Choisissez un plan pour accéder à la carte
-                </h2>
-
-                {visiblePlans.map((plan) => {
-                  const isFree = plan.price === 0;
-                  const isLoading = actionLoading === plan.id;
-
-                  return (
-                    <div
-                      key={plan.id}
-                      className={`rounded-xl border p-5 transition ${
-                        isFree
-                          ? 'border-gray-200 bg-white'
-                          : 'border-brand-200 bg-gradient-to-br from-brand-50 to-orange-50'
-                      }`}
-                    >
-                      <div className="flex items-start justify-between mb-3">
-                        <div>
-                          <h3 className="text-base font-bold text-gray-900">{plan.label}</h3>
-                          {plan.duration_hours > 0 && (
-                            <p className="text-xs text-gray-400">Valable {plan.duration_hours}h</p>
-                          )}
-                          {plan.duration_days > 0 && (
-                            <p className="text-xs text-gray-400">{plan.duration_days} jours</p>
-                          )}
-                        </div>
-                        <div className="text-right">
-                          <p className="text-xl font-bold text-gray-900">
-                            {isFree ? 'Gratuit' : `${plan.price.toLocaleString()} FCFA`}
-                          </p>
-                          {!isFree && <p className="text-[11px] text-gray-400">/ mois</p>}
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
-                        <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                        <span>
-                          {plan.unlock_count === 0
-                            ? 'Consultation de la carte uniquement'
-                            : `${plan.unlock_count} déblocage${plan.unlock_count > 1 ? 's' : ''} de contact`}
-                        </span>
-                      </div>
-
-                      {isAuthenticated ? (
-                        <button
-                          type="button"
-                          onClick={() => handleSubscribe(plan.id)}
-                          disabled={isLoading}
-                          className={`w-full py-2.5 rounded-xl text-sm font-bold transition disabled:opacity-50 ${
-                            isFree
-                              ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                              : 'bg-brand-500 text-white hover:bg-brand-600'
-                          }`}
-                        >
-                          {isLoading
-                            ? 'Abonnement...'
-                            : isFree
-                              ? 'Activer Découverte'
-                              : `Souscrire à ${plan.label}`}
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => (window as any).__openSigninDialog?.()}
-                          className="w-full py-2.5 rounded-xl text-sm font-bold bg-gray-900 text-white hover:bg-gray-800 transition"
-                        >
-                          Connectez-vous
-                        </button>
-                      )}
+                {/* Alerte non connecté */}
+                {!isAuthenticated && (
+                  <div className="mb-6 flex items-start gap-3 rounded-2xl border border-yellow-400/30 bg-yellow-400/10 px-5 py-4 backdrop-blur-sm">
+                    <svg className="mt-0.5 h-5 w-5 shrink-0 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <div>
+                      <p className="text-sm font-bold text-yellow-300">Connexion requise</p>
+                      <p className="text-xs text-yellow-200/80">Connectez-vous pour accéder à Domilix Maps.</p>
                     </div>
-                  );
-                })}
+                  </div>
+                )}
 
-                <p className="text-[11px] text-gray-400 text-center pt-2">
-                  Résiliez à tout moment. Plans disponibles : Découverte, Pro, Business.
+                {/* Erreur */}
+                {subError && (
+                  <div className="mb-6 rounded-2xl border border-red-400/30 bg-red-500/10 px-5 py-4 text-sm font-semibold text-red-300 backdrop-blur-sm">
+                    {subError}
+                  </div>
+                )}
+
+                {/* Plans */}
+                <div className="space-y-3">
+                  <p className="mb-4 text-center text-xs font-black uppercase tracking-widest text-white/40">
+                    Choisissez votre plan
+                  </p>
+
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                    {visiblePlans.map((plan) => {
+                    const isFree    = plan.price === 0;
+                    const isPro     = plan.id === 'pro';
+                    const isLoading = actionLoading === plan.id;
+                    const duration  = plan.duration_hours > 0
+                      ? `${plan.duration_hours}h d'accès`
+                      : plan.duration_days > 0
+                        ? `${plan.duration_days} jours`
+                        : '';
+
+                    return (
+                      <div
+                        key={plan.id}
+                        className={`overflow-hidden rounded-2xl border backdrop-blur-sm transition
+                          ${isPro
+                            ? 'border-[#E8921A]/50 bg-white/15'
+                            : 'border-white/15 bg-white/8'
+                          }`}
+                      >
+                        {isPro && (
+                          <div className="bg-[#E8921A] px-4 py-1.5 text-center">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-white">⭐ Le plus populaire</span>
+                          </div>
+                        )}
+
+                        <div className="p-5">
+                          <div className="mb-4 flex items-start justify-between gap-3">
+                            <div>
+                              <h3 className="text-base font-black text-white">{plan.label}</h3>
+                              {duration && <p className="mt-0.5 text-xs text-white/50">{duration}</p>}
+                            </div>
+                            <div className="shrink-0 text-right">
+                              <p className={`text-xl font-black ${isFree ? 'text-emerald-400' : 'text-white'}`}>
+                                {isFree ? 'Gratuit' : `${plan.price.toLocaleString()}`}
+                              </p>
+                              {!isFree && <p className="text-[10px] text-white/40">FCFA / mois</p>}
+                            </div>
+                          </div>
+
+                          <ul className="mb-5 space-y-1.5">
+                            {getPlanFeatures(plan).map((feat) => (
+                              <li key={feat} className="flex items-center gap-2">
+                                <svg className={`h-3.5 w-3.5 shrink-0 ${isFree ? 'text-white/40' : 'text-[#E8921A]'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
+                                <span className="text-xs text-white/70">{feat}</span>
+                              </li>
+                            ))}
+                          </ul>
+
+                          {isAuthenticated ? (
+                            <button
+                              type="button"
+                              onClick={() => handleSubscribe(plan.id)}
+                              disabled={isLoading}
+                              className={`w-full rounded-xl py-3 text-sm font-black transition disabled:opacity-50
+                                ${isFree
+                                  ? 'bg-white/15 text-white hover:bg-white/25'
+                                  : isPro
+                                    ? 'bg-[#E8921A] text-white shadow-lg shadow-orange-900/30 hover:bg-orange-600'
+                                    : 'bg-[#0d3556] text-white hover:bg-[#0a2840]'
+                                }`}
+                            >
+                              {isLoading
+                                ? 'Activation...'
+                                : isFree
+                                  ? 'Activer gratuitement'
+                                  : `Souscrire — ${plan.price.toLocaleString()} FCFA`}
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => (window as any).__openSigninDialog?.()}
+                              className="w-full rounded-xl bg-white py-3 text-sm font-black text-gray-900 transition hover:bg-gray-100"
+                            >
+                              Se connecter
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                  </div>
+                </div>
+
+                <p className="mt-5 text-center text-[10px] text-white/30">
+                  Résiliez à tout moment · Plans : Découverte, Pro, Business
                 </p>
               </div>
-            )}
+            </div>
           </div>
         </div>
       )}
