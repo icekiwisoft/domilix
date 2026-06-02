@@ -13,6 +13,12 @@ import { getAuthToken } from '../../../stores/defineStore';
 
 const LAUNCH_PLANS = ['decouverte', 'pro', 'business'];
 
+const FALLBACK_PLANS: MapsPlan[] = [
+  { id: 'decouverte', label: 'Découverte', price: 0, duration_days: 0, duration_hours: 12, unlock_count: 0 },
+  { id: 'pro', label: 'Pro', price: 5000, duration_days: 30, duration_hours: 0, unlock_count: 20 },
+  { id: 'business', label: 'Business', price: 15000, duration_days: 30, duration_hours: 0, unlock_count: 50 },
+];
+
 export default function MapProPanel() {
   const [plans, setPlans] = useState<MapsPlan[]>([]);
   const [subscription, setSubscription] = useState<MapsSubscription | null>(null);
@@ -37,6 +43,7 @@ export default function MapProPanel() {
         setSubscription(status.subscription);
       }
     } catch {
+      setPlans(FALLBACK_PLANS);
       setActive(false);
       setSubscription(null);
     } finally {

@@ -31,6 +31,14 @@ export default function Footer2() {
               </li>
               <li>
                 <Link
+                  to='/carte'
+                  className='text-gray-600 hover:text-orange-600 transition-colors'
+                >
+                  Carte
+                </Link>
+              </li>
+              <li>
+                <Link
                   to='/furnitures'
                   className='text-gray-600 hover:text-orange-600 transition-colors'
                 >

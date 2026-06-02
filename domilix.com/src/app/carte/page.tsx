@@ -13,6 +13,12 @@ const MapView = dynamic(() => import('@pages/Carte/components/MapView'), { ssr: 
 
 const LAUNCH_PLANS = ['decouverte', 'pro', 'business'];
 
+const FALLBACK_PLANS: MapsPlan[] = [
+  { id: 'decouverte', label: 'Découverte', price: 0, duration_days: 0, duration_hours: 12, unlock_count: 0 },
+  { id: 'pro', label: 'Pro', price: 5000, duration_days: 30, duration_hours: 0, unlock_count: 20 },
+  { id: 'business', label: 'Business', price: 15000, duration_days: 30, duration_hours: 0, unlock_count: 50 },
+];
+
 export default function Carte() {
   const [listings, setListings] = useState<MapListing[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,6 +60,7 @@ export default function Carte() {
       } catch {
         setListings(mockListings);
         setFavorites(mockListings.filter((l) => l.is_liked));
+        setPlans(FALLBACK_PLANS);
       } finally {
         setLoading(false);
       }
