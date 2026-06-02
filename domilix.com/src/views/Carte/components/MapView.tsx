@@ -1,19 +1,13 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
-import dynamic from 'next/dynamic';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+
+import { addressApi, type AddressSearchResult } from '@services/addressApi';
+import { mediaUrl } from '@utils/mediaUrl';
+
 import type { MapListing } from '../data/types';
 
 import 'leaflet/dist/leaflet.css';
-
-const MapContainer = dynamic(
-  () => import('react-leaflet').then((m) => m.MapContainer),
-  { ssr: false },
-);
-const TileLayer = dynamic(
-  () => import('react-leaflet').then((m) => m.TileLayer),
-  { ssr: false },
-);
 
 interface MapViewProps {
   listings: MapListing[];
@@ -53,6 +47,26 @@ function createPriceIcon(price: number, isSelected: boolean): any {
   });
 }
 
+function getResultCoordinates(result: AddressSearchResult): [number, number] | null {
+  if (typeof result.latitude === 'number' && typeof result.longitude === 'number') {
+    return [result.latitude, result.longitude];
+  }
+  if (result.center && result.center.length === 2) {
+    return [result.center[1], result.center[0]];
+  }
+  if (result.coordinates && result.coordinates.length === 2) {
+    return [result.coordinates[1], result.coordinates[0]];
+  }
+  return null;
+}
+
+const QUICK_SEARCHES = [
+  { label: 'Restaurants', icon: '🍴' },
+  { label: 'Coffee', icon: '☕' },
+  { label: 'Groceries', icon: '🛒' },
+  { label: 'Things to do', icon: '📷' },
+];
+
 export default function MapView({
   listings,
   selectedListingId,
@@ -61,20 +75,24 @@ export default function MapView({
   onToggleFavorite,
   isFavorite,
 }: MapViewProps) {
+  const mapElementRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<any>(null);
+  const initialCenterRef = useRef<[number, number] | null>(null);
   const markersRef = useRef<Map<number, any>>(new Map());
   const [leafletLoaded, setLeafletLoaded] = useState(false);
+  const [placeQuery, setPlaceQuery] = useState('');
+  const [placeSearching, setPlaceSearching] = useState(false);
 
   useEffect(() => {
     import('leaflet').then(() => setLeafletLoaded(true));
   }, []);
 
-  const center: [number, number] = (() => {
+  const center = useMemo<[number, number]>(() => {
     if (listings.length === 0) return [4.05, 9.76];
     const avgLat = listings.reduce((s, l) => s + l.latitude, 0) / listings.length;
     const avgLng = listings.reduce((s, l) => s + l.longitude, 0) / listings.length;
     return [avgLat, avgLng];
-  })();
+  }, [listings]);
 
   const handleRecenter = useCallback(() => {
     if (mapRef.current) {
@@ -95,6 +113,54 @@ export default function MapView({
     }
   }, []);
 
+  const handlePlaceSearch = useCallback(async (query = placeQuery) => {
+    const trimmed = query.trim();
+    if (!trimmed || !mapRef.current) return;
+
+    setPlaceSearching(true);
+    try {
+      const localListing = listings.find((listing) => {
+        const haystack = `${listing.city} ${listing.neighbourhood} ${listing.title}`.toLowerCase();
+        return haystack.includes(trimmed.toLowerCase());
+      });
+
+      if (localListing) {
+        mapRef.current.flyTo([localListing.latitude, localListing.longitude], 15, { duration: 0.7 });
+        onMarkerClick(localListing);
+        return;
+      }
+
+      const results = await addressApi.search(trimmed);
+      const coordinates = results.map(getResultCoordinates).find(Boolean);
+      if (coordinates) {
+        mapRef.current.flyTo(coordinates, 14, { duration: 0.7 });
+      }
+    } finally {
+      setPlaceSearching(false);
+    }
+  }, [listings, onMarkerClick, placeQuery]);
+
+  useEffect(() => {
+    if (!leafletLoaded || !mapElementRef.current || mapRef.current) return;
+    const L = require('leaflet');
+    const initialCenter = initialCenterRef.current ?? center;
+    initialCenterRef.current = initialCenter;
+    const map = L.map(mapElementRef.current, { zoomControl: false }).setView(initialCenter, 12);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    }).addTo(map);
+
+    mapRef.current = map;
+
+    return () => {
+      markersRef.current.forEach((marker) => map.removeLayer(marker));
+      markersRef.current.clear();
+      map.remove();
+      mapRef.current = null;
+    };
+  }, [leafletLoaded]);
+
   useEffect(() => {
     if (!leafletLoaded || !mapRef.current) return;
     const L = require('leaflet');
@@ -106,12 +172,14 @@ export default function MapView({
     listings.forEach((listing) => {
       const icon = createPriceIcon(listing.price, selectedListingId === listing.id);
       if (!icon) return;
+      const thumbnail = mediaUrl(listing.thumbnail || listing.medias?.find((media) => media.thumbnail)?.thumbnail || listing.medias?.find((media) => media.file)?.file);
       const marker = L.marker([listing.latitude, listing.longitude], { icon }).addTo(map);
       marker.on('click', () => onMarkerClick(listing));
       marker.bindPopup(`
-        <div style="font-family:system-ui,sans-serif;min-width:200px">
-          <div style="font-size:14px;font-weight:700;margin-bottom:4px">${listing.title}</div>
-          <div style="font-size:13px;color:#f97316;font-weight:600;margin-bottom:4px">${listing.price.toLocaleString()} FCFA/${listing.period === 'month' ? 'mois' : 'an'}</div>
+        <div style="font-family:system-ui,sans-serif;min-width:220px;max-width:240px;overflow:hidden;border-radius:14px">
+          ${thumbnail ? `<img src="${thumbnail}" alt="" style="width:100%;height:110px;object-fit:cover;margin:-8px -8px 10px -8px;max-width:calc(100% + 16px)" />` : ''}
+          <div style="font-size:14px;font-weight:800;margin-bottom:4px;color:#111827;line-height:1.25">${listing.title}</div>
+          <div style="font-size:13px;color:#E8921A;font-weight:800;margin-bottom:4px">${listing.price.toLocaleString()} FCFA/${listing.period === 'month' ? 'mois' : 'an'}</div>
           <div style="font-size:12px;color:#6b7280;margin-bottom:4px">${listing.neighbourhood}, ${listing.city}</div>
           <div style="font-size:12px;color:#6b7280">${listing.item_type} · ${listing.bedrooms} ch · ${listing.bathrooms} sdb</div>
         </div>
@@ -133,7 +201,7 @@ export default function MapView({
         mapRef.current.flyTo([listing.latitude, listing.longitude], 15, { duration: 0.6 });
       }
     }
-  }, [selectedListingId, leafletLoaded]);
+  }, [selectedListingId, leafletLoaded, listings]);
 
   if (!leafletLoaded) {
     return (
@@ -145,18 +213,46 @@ export default function MapView({
 
   return (
     <div className="relative flex-1 h-full min-h-0">
-      <MapContainer
-        ref={mapRef}
-        center={center}
-        zoom={12}
-        className="w-full h-full z-0"
-        zoomControl={false}
-      >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-      </MapContainer>
+      <div ref={mapElementRef} className="w-full h-full z-0" />
+
+      <div className="pointer-events-none absolute left-3 right-3 top-3 z-[1000] flex flex-col gap-2 md:left-5 md:right-auto md:top-4 md:max-w-[calc(100%-2rem)] md:flex-row md:items-center">
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            handlePlaceSearch();
+          }}
+          className="pointer-events-auto flex h-11 w-full items-center rounded-full border border-gray-200 bg-white px-4 shadow-[0_2px_8px_rgba(15,23,42,0.20)] md:w-[360px]"
+        >
+          <svg className="mr-2 h-5 w-5 shrink-0 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+          </svg>
+          <input
+            type="search"
+            value={placeQuery}
+            onChange={(event) => setPlaceQuery(event.target.value)}
+            placeholder="Rechercher un lieu..."
+            className="min-w-0 flex-1 bg-transparent text-sm font-medium text-gray-700 outline-none placeholder:text-gray-500"
+          />
+          {placeSearching && <span className="ml-2 h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-[#E8921A]" />}
+        </form>
+
+        <div className="pointer-events-auto flex gap-2 overflow-x-auto pb-1 md:pb-0">
+          {QUICK_SEARCHES.map((item) => (
+            <button
+              key={item.label}
+              type="button"
+              onClick={() => {
+                setPlaceQuery(item.label);
+                handlePlaceSearch(item.label);
+              }}
+              className="flex h-11 shrink-0 items-center gap-2 rounded-full border border-gray-200 bg-white px-4 text-sm font-bold text-gray-800 shadow-[0_2px_8px_rgba(15,23,42,0.18)] transition hover:bg-gray-50"
+            >
+              <span aria-hidden="true">{item.icon}</span>
+              {item.label}
+            </button>
+          ))}
+        </div>
+      </div>
 
       <button
         type="button"

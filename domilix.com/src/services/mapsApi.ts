@@ -32,7 +32,7 @@ export interface MapsSubscriptionStatusResponse {
 }
 
 export const getMapListings = async (params?: Record<string, any>): Promise<MapsListingsResponse> => {
-  const response = await api.get('/maps/listings', { params });
+  const response = await api.get('/maps/announces', { params });
   return response.data;
 };
 

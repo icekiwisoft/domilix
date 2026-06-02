@@ -1,6 +1,8 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { QueryMapsListingsDto, QueryMapsNearbyDto } from './dto/query-maps.dto';
+import { ObjectStorageService } from '../common/object-storage/object-storage.service';
+import { storageUrl } from '../common/http/formatters';
 
 export const MAPS_PLANS = {
   decouverte: { label: 'Découverte', price: 0, durationDays: 0, unlockCount: 0, durationHours: 12 },
@@ -11,17 +13,48 @@ export const MAPS_PLANS = {
 
 export type MapsPlan = keyof typeof MAPS_PLANS;
 
+type MapMedia = {
+  id: string;
+  file: string | null;
+  thumbnail: string | null;
+  type: string | null;
+};
+
 @Injectable()
 export class MapsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly objectStorage: ObjectStorageService,
+  ) {}
 
-  private serializeListing(
+  private async serializeMedia(media: any): Promise<MapMedia> {
+    const signedFile = await this.objectStorage.getSignedUrl(
+      media.bucket,
+      media.originalPath,
+    );
+    const signedThumbnail =
+      media.thumbnailPath && media.thumbnailPath !== media.originalPath
+        ? await this.objectStorage.getSignedUrl(media.bucket, media.thumbnailPath)
+        : null;
+
+    return {
+      id: media.id,
+      file: signedFile || storageUrl(media.file),
+      thumbnail: signedThumbnail || signedFile || storageUrl(media.thumbnail || media.file),
+      type: media.type || null,
+    };
+  }
+
+  private async serializeListing(
     ad: any,
     liked: boolean,
     announcerName?: string,
     announcerVerified?: boolean,
   ) {
     const re = ad.realEstate as { lat?: number | null; lng?: number | null; bedroom?: number; toilet?: number } | null;
+    const medias = await Promise.all((ad.medias || []).map((media: any) => this.serializeMedia(media)));
+    const thumbnail = medias.find((media) => media.thumbnail)?.thumbnail || medias.find((media) => media.file)?.file || null;
+
     return {
       id: Number(ad.id),
       title: ad.description?.substring(0, 80) || 'Annonce',
@@ -39,7 +72,8 @@ export class MapsService {
       longitude: re?.lng ?? null,
       bedrooms: re?.bedroom ?? 0,
       bathrooms: re?.toilet ?? 0,
-      thumbnail: null,
+      thumbnail,
+      medias,
       is_verified: announcerVerified ?? false,
       is_liked: liked,
       advertiser_name: announcerName ?? '',
@@ -92,14 +126,22 @@ export class MapsService {
       likedIds = new Set(favorites.map((f) => f.adId));
     }
 
-    const [realEstates, announcers] = await Promise.all([
+    const [realEstates, announcers, adMedias] = await Promise.all([
       adIds.length > 0
         ? this.prisma.realEstate.findMany({ where: { id: { in: adIds } }, select: { id: true, lat: true, lng: true, bedroom: true, toilet: true } })
         : ([] as Array<{ id: bigint; lat: number | null; lng: number | null; bedroom: number; toilet: number }>),
       announcerIds.length > 0
         ? this.prisma.announcer.findMany({ where: { id: { in: announcerIds } }, select: { id: true, name: true, verified: true } })
         : ([] as Array<{ id: string; name: string; verified: boolean }>),
+      ads.length > 0
+        ? this.prisma.adMedia.findMany({ where: { adId: { in: ads.map((ad) => ad.id.toString()) } }, orderBy: [{ isPresentation: 'desc' }, { id: 'asc' }] })
+        : ([] as Array<{ adId: string; mediaId: string }>),
     ]);
+
+    const mediaIds = [...new Set(adMedias.map((entry) => entry.mediaId))];
+    const medias = mediaIds.length
+      ? await this.prisma.media.findMany({ where: { id: { in: mediaIds } } })
+      : [];
 
     const reMap = new Map<string, { lat: number | null; lng: number | null; bedroom: number; toilet: number }>();
     for (const re of realEstates) reMap.set(re.id.toString(), re);
@@ -107,13 +149,23 @@ export class MapsService {
     const announcerMap = new Map<string, { name: string; verified: boolean }>();
     for (const a of announcers) announcerMap.set(a.id, a);
 
-    const data = ads
+    const mediaMap = new Map<string, any>();
+    for (const media of medias) mediaMap.set(media.id, media);
+
+    const adMediasMap = new Map<string, any[]>();
+    for (const ad of ads) {
+      const entries = adMedias.filter((entry) => entry.adId === ad.id.toString());
+      adMediasMap.set(ad.id.toString(), entries.map((entry) => mediaMap.get(entry.mediaId)).filter(Boolean));
+    }
+
+    const data = (await Promise.all(ads
       .map((ad) => {
         const re = reMap.get(ad.adId.toString()) ?? null;
         const announcer = announcerMap.get(ad.announcerId);
         const liked = likedIds.has(ad.id.toString());
-        return this.serializeListing({ ...ad, realEstate: re }, liked, announcer?.name, announcer?.verified);
-      })
+        const medias = adMediasMap.get(ad.id.toString()) || [];
+        return this.serializeListing({ ...ad, realEstate: re, medias }, liked, announcer?.name, announcer?.verified);
+      })))
       .filter((item) => {
         if (bboxWest !== undefined && bboxSouth !== undefined && bboxEast !== undefined && bboxNorth !== undefined) {
           if (item.latitude === null || item.longitude === null) return false;
@@ -153,14 +205,22 @@ export class MapsService {
 
     const announcerIds = [...new Set(ads.map((a) => a.announcerId))];
 
-    const [announcers, favorites] = await Promise.all([
+    const [announcers, favorites, adMedias] = await Promise.all([
       announcerIds.length > 0
         ? this.prisma.announcer.findMany({ where: { id: { in: announcerIds } }, select: { id: true, name: true, verified: true } })
         : ([] as Array<{ id: string; name: string; verified: boolean }>),
       currentUserId
         ? this.prisma.favorite.findMany({ where: { userId: currentUserId, adId: { in: ads.map((a) => a.id.toString()) } }, select: { adId: true } })
         : ([] as Array<{ adId: string }>),
+      ads.length > 0
+        ? this.prisma.adMedia.findMany({ where: { adId: { in: ads.map((ad) => ad.id.toString()) } }, orderBy: [{ isPresentation: 'desc' }, { id: 'asc' }] })
+        : ([] as Array<{ adId: string; mediaId: string }>),
     ]);
+
+    const mediaIds = [...new Set(adMedias.map((entry) => entry.mediaId))];
+    const medias = mediaIds.length
+      ? await this.prisma.media.findMany({ where: { id: { in: mediaIds } } })
+      : [];
 
     const likedIds = new Set(favorites.map((f) => f.adId));
 
@@ -170,12 +230,22 @@ export class MapsService {
     const announcerMap = new Map<string, { name: string; verified: boolean }>();
     for (const a of announcers) announcerMap.set(a.id, a);
 
-    const data = ads.map((ad) => {
+    const mediaMap = new Map<string, any>();
+    for (const media of medias) mediaMap.set(media.id, media);
+
+    const adMediasMap = new Map<string, any[]>();
+    for (const ad of ads) {
+      const entries = adMedias.filter((entry) => entry.adId === ad.id.toString());
+      adMediasMap.set(ad.id.toString(), entries.map((entry) => mediaMap.get(entry.mediaId)).filter(Boolean));
+    }
+
+    const data = await Promise.all(ads.map((ad) => {
       const re = reMap.get(ad.adId.toString()) ?? null;
       const announcer = announcerMap.get(ad.announcerId);
       const liked = likedIds.has(ad.id.toString());
-      return this.serializeListing({ ...ad, realEstate: re }, liked, announcer?.name, announcer?.verified);
-    });
+      const medias = adMediasMap.get(ad.id.toString()) || [];
+      return this.serializeListing({ ...ad, realEstate: re, medias }, liked, announcer?.name, announcer?.verified);
+    }));
 
     return { data, total: data.length };
   }

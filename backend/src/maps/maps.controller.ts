@@ -44,6 +44,12 @@ export class MapsController {
     return this.mapsService.listings(query, await this.resolveUserId(req));
   }
 
+  @Get('announces')
+  @ApiOperation({ summary: 'Get map announces with media thumbnails' })
+  async announces(@Query() query: QueryMapsListingsDto, @Req() req: any) {
+    return this.mapsService.listings(query, await this.resolveUserId(req));
+  }
+
   @Get('listings/nearby')
   @ApiOperation({ summary: 'Get listings near coordinates' })
   async nearby(@Query() query: QueryMapsNearbyDto, @Req() req: any) {

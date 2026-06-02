@@ -49,7 +49,8 @@ export default function MapSidebar({
   totalCount,
 }: MapSidebarProps) {
   return (
-    <aside className="hidden md:flex flex-col w-[360px] min-w-[360px] bg-white shadow-[2px_0_12px_rgba(0,0,0,0.08)] z-10 h-full overflow-hidden">
+    <aside className="hidden md:flex h-full w-[376px] min-w-[376px] p-2 pr-0">
+      <div className="z-10 flex h-full w-[360px] min-w-[360px] flex-col overflow-hidden rounded-2xl bg-white shadow-[0_8px_24px_rgba(0,0,0,0.10)]">
       <div className="p-4 border-b border-gray-100">
         <div className="flex items-center justify-between mb-3">
           <h1 className="text-lg font-bold text-gray-900">
@@ -128,6 +129,7 @@ export default function MapSidebar({
         )}
 
         {activeTab === 'pro' && <MapProPanel />}
+      </div>
       </div>
     </aside>
   );

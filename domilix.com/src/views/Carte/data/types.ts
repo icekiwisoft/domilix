@@ -16,6 +16,12 @@ export interface MapListing {
   bedrooms: number;
   bathrooms: number;
   thumbnail: string | null;
+  medias?: Array<{
+    id: string;
+    file: string | null;
+    thumbnail: string | null;
+    type: string | null;
+  }>;
   is_liked: boolean;
   is_verified: boolean;
   is_unlocked: boolean;
