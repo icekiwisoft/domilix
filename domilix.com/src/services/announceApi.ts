@@ -11,6 +11,7 @@ export interface BroadcastItem {
   id: number;
   title: string;
   subtitle?: string;
+  chip?: string;
   badge?: string;
   cta?: string;
   image?: string;

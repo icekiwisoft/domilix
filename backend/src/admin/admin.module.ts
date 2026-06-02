@@ -5,12 +5,14 @@ import { AnnouncersModule } from '../announcers/announcers.module';
 import { AuthModule } from '../auth/auth.module';
 import { BroadcastsModule } from '../broadcasts/broadcasts.module';
 import { MediasModule } from '../medias/medias.module';
+import { NewslettersModule } from '../newsletters/newsletters.module';
 import { UsersModule } from '../users/users.module';
 import { AdminAnnouncerRequestsController } from './announcer-requests/admin-announcer-requests.controller';
 import { AdminAnnouncersController } from './announcers/admin-announcers.controller';
 import { AdminAnnouncesController } from './announces/admin-announces.controller';
 import { AdminBroadcastsController } from './broadcasts/admin-broadcasts.controller';
 import { AdminMediasController } from './medias/admin-medias.controller';
+import { AdminNewslettersController } from './newsletters/admin-newsletters.controller';
 import { AdminSubscriptionsController } from './subscriptions/admin-subscriptions.controller';
 import { AdminSubscriptionsService } from './subscriptions/admin-subscriptions.service';
 import { AdminUsersController } from './users/admin-users.controller';
@@ -23,6 +25,7 @@ import { AdminUsersController } from './users/admin-users.controller';
     AnnouncersModule,
     BroadcastsModule,
     MediasModule,
+    NewslettersModule,
     UsersModule,
   ],
   controllers: [
@@ -31,6 +34,7 @@ import { AdminUsersController } from './users/admin-users.controller';
     AdminAnnouncesController,
     AdminBroadcastsController,
     AdminMediasController,
+    AdminNewslettersController,
     AdminSubscriptionsController,
     AdminUsersController,
   ],

@@ -81,6 +81,7 @@ export default function Ads(): React.ReactElement {
             id: `broadcast-${item.id}`,
             title: item.title,
             subtitle: item.subtitle || '',
+            chip: item.chip || undefined,
             badge: item.badge || 'Promo',
             cta: item.cta || 'Voir plus',
             bg: item.bg || 'from-orange-500 to-rose-500',
@@ -114,14 +115,14 @@ export default function Ads(): React.ReactElement {
 
         const sections = await Promise.all(
           cities.map(async (cityItem: CityItem) => {
-            const response: any = await getAds({ city: cityItem.city, page: 1 });
+            const response: any = await getAds({ city: cityItem.city, page: 1, per_page: 13 });
             const responseData = Array.isArray(response) ? response : response.data || [];
 
             return {
               city: cityItem.city,
               country: cityItem.country,
               adsCount: cityItem.ads_count,
-              ads: responseData.slice(0, 5),
+              ads: responseData,
             };
           }),
         );

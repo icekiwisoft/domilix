@@ -1,0 +1,169 @@
+Date : 2026-06-02 01:16:12
+Directory : c:\dev\domilix\backend\src
+Total : 94 files,  6191 codes, 3 comments, 892 blanks, all 7086 lines
+
+Languages
++------------+------------+------------+------------+------------+------------+
+| language   | files      | code       | comment    | blank      | total      |
++------------+------------+------------+------------+------------+------------+
+| TypeScript |         94 |      6,191 |          3 |        892 |      7,086 |
++------------+------------+------------+------------+------------+------------+
+
+Directories
++--------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                       | files      | code       | comment    | blank      | total      |
++--------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                          |         94 |      6,191 |          3 |        892 |      7,086 |
+| . (Files)                                                                                  |          5 |        233 |          0 |         31 |        264 |
+| addresses                                                                                  |          5 |        250 |          0 |         40 |        290 |
+| addresses (Files)                                                                          |          3 |        171 |          0 |         28 |        199 |
+| addresses\dto                                                                              |          2 |         79 |          0 |         12 |         91 |
+| admin                                                                                      |          9 |        529 |          0 |         69 |        598 |
+| admin (Files)                                                                              |          1 |         38 |          0 |          2 |         40 |
+| admin\announcer-requests                                                                   |          1 |         43 |          0 |          7 |         50 |
+| admin\announcers                                                                           |          1 |         94 |          0 |          9 |        103 |
+| admin\announces                                                                            |          1 |         90 |          0 |          8 |         98 |
+| admin\broadcasts                                                                           |          1 |         52 |          0 |          8 |         60 |
+| admin\medias                                                                               |          1 |         44 |          0 |          6 |         50 |
+| admin\subscriptions                                                                        |          2 |        119 |          0 |         21 |        140 |
+| admin\users                                                                                |          1 |         49 |          0 |          8 |         57 |
+| ads                                                                                        |          6 |      1,353 |          0 |        163 |      1,516 |
+| ads (Files)                                                                                |          3 |      1,187 |          0 |        123 |      1,310 |
+| ads\dto                                                                                    |          3 |        166 |          0 |         40 |        206 |
+| announcer-requests                                                                         |          4 |        126 |          0 |         20 |        146 |
+| announcer-requests (Files)                                                                 |          3 |        119 |          0 |         18 |        137 |
+| announcer-requests\dto                                                                     |          1 |          7 |          0 |          2 |          9 |
+| announcers                                                                                 |          5 |        247 |          0 |         36 |        283 |
+| announcers (Files)                                                                         |          3 |        201 |          0 |         25 |        226 |
+| announcers\dto                                                                             |          2 |         46 |          0 |         11 |         57 |
+| auth                                                                                       |         17 |      1,073 |          1 |        175 |      1,249 |
+| auth (Files)                                                                               |          7 |        895 |          1 |        130 |      1,026 |
+| auth\dto                                                                                   |         10 |        178 |          0 |         45 |        223 |
+| broadcasts                                                                                 |          5 |        242 |          0 |         33 |        275 |
+| broadcasts (Files)                                                                         |          3 |        167 |          0 |         18 |        185 |
+| broadcasts\dto                                                                             |          2 |         75 |          0 |         15 |         90 |
+| categories                                                                                 |          4 |        123 |          0 |         23 |        146 |
+| categories (Files)                                                                         |          3 |        103 |          0 |         18 |        121 |
+| categories\dto                                                                             |          1 |         20 |          0 |          5 |         25 |
+| common                                                                                     |          8 |        389 |          0 |         71 |        460 |
+| common (Files)                                                                             |          1 |          8 |          0 |          3 |         11 |
+| common\filters                                                                             |          1 |         21 |          0 |          5 |         26 |
+| common\http                                                                                |          2 |         86 |          0 |         13 |         99 |
+| common\media                                                                               |          2 |        169 |          0 |         30 |        199 |
+| common\object-storage                                                                      |          2 |        105 |          0 |         20 |        125 |
+| mail                                                                                       |          2 |         78 |          0 |         16 |         94 |
+| medias                                                                                     |          3 |        374 |          0 |         40 |        414 |
+| newsletters                                                                                |          5 |        189 |          1 |         33 |        223 |
+| newsletters (Files)                                                                        |          3 |        162 |          1 |         26 |        189 |
+| newsletters\dto                                                                            |          2 |         27 |          0 |          7 |         34 |
+| notifications                                                                              |          3 |        147 |          0 |         22 |        169 |
+| prisma                                                                                     |          2 |        134 |          0 |         24 |        158 |
+| subscriptions                                                                              |          4 |        322 |          1 |         47 |        370 |
+| subscriptions (Files)                                                                      |          3 |        309 |          1 |         43 |        353 |
+| subscriptions\dto                                                                          |          1 |         13 |          0 |          4 |         17 |
+| uploads                                                                                    |          3 |        121 |          0 |         15 |        136 |
+| users                                                                                      |          4 |        261 |          0 |         34 |        295 |
+| users (Files)                                                                              |          3 |        237 |          0 |         28 |        265 |
+| users\dto                                                                                  |          1 |         24 |          0 |          6 |         30 |
++--------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++--------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| filename                                                                                   | language   | code       | comment    | blank      | total      |
++--------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| c:\dev\domilix\backend\src\addresses\addresses.controller.ts                               | TypeScript |         25 |          0 |          4 |         29 |
+| c:\dev\domilix\backend\src\addresses\addresses.module.ts                                   | TypeScript |          9 |          0 |          2 |         11 |
+| c:\dev\domilix\backend\src\addresses\addresses.service.ts                                  | TypeScript |        137 |          0 |         22 |        159 |
+| c:\dev\domilix\backend\src\addresses\dto\reverse-geocode.dto.ts                            | TypeScript |         17 |          0 |          3 |         20 |
+| c:\dev\domilix\backend\src\addresses\dto\search-addresses.dto.ts                           | TypeScript |         62 |          0 |          9 |         71 |
+| c:\dev\domilix\backend\src\admin\admin.module.ts                                           | TypeScript |         38 |          0 |          2 |         40 |
+| c:\dev\domilix\backend\src\admin\announcer-requests\admin-announcer-requests.controller.ts | TypeScript |         43 |          0 |          7 |         50 |
+| c:\dev\domilix\backend\src\admin\announcers\admin-announcers.controller.ts                 | TypeScript |         94 |          0 |          9 |        103 |
+| c:\dev\domilix\backend\src\admin\announces\admin-announces.controller.ts                   | TypeScript |         90 |          0 |          8 |         98 |
+| c:\dev\domilix\backend\src\admin\broadcasts\admin-broadcasts.controller.ts                 | TypeScript |         52 |          0 |          8 |         60 |
+| c:\dev\domilix\backend\src\admin\medias\admin-medias.controller.ts                         | TypeScript |         44 |          0 |          6 |         50 |
+| c:\dev\domilix\backend\src\admin\subscriptions\admin-subscriptions.controller.ts           | TypeScript |         30 |          0 |          5 |         35 |
+| c:\dev\domilix\backend\src\admin\subscriptions\admin-subscriptions.service.ts              | TypeScript |         89 |          0 |         16 |        105 |
+| c:\dev\domilix\backend\src\admin\users\admin-users.controller.ts                           | TypeScript |         49 |          0 |          8 |         57 |
+| c:\dev\domilix\backend\src\ads\ads.controller.ts                                           | TypeScript |        142 |          0 |         12 |        154 |
+| c:\dev\domilix\backend\src\ads\ads.module.ts                                               | TypeScript |         12 |          0 |          2 |         14 |
+| c:\dev\domilix\backend\src\ads\ads.service.ts                                              | TypeScript |      1,033 |          0 |        109 |      1,142 |
+| c:\dev\domilix\backend\src\ads\dto\query-ads.dto.ts                                        | TypeScript |         98 |          0 |         23 |        121 |
+| c:\dev\domilix\backend\src\ads\dto\query-cities.dto.ts                                     | TypeScript |         46 |          0 |         11 |         57 |
+| c:\dev\domilix\backend\src\ads\dto\store-ad.dto.ts                                         | TypeScript |         22 |          0 |          6 |         28 |
+| c:\dev\domilix\backend\src\announcer-requests\announcer-requests.controller.ts             | TypeScript |         23 |          0 |          3 |         26 |
+| c:\dev\domilix\backend\src\announcer-requests\announcer-requests.module.ts                 | TypeScript |         11 |          0 |          2 |         13 |
+| c:\dev\domilix\backend\src\announcer-requests\announcer-requests.service.ts                | TypeScript |         85 |          0 |         13 |         98 |
+| c:\dev\domilix\backend\src\announcer-requests\dto\update-announcer-request.dto.ts          | TypeScript |          7 |          0 |          2 |          9 |
+| c:\dev\domilix\backend\src\announcers\announcers.controller.ts                             | TypeScript |         20 |          0 |          4 |         24 |
+| c:\dev\domilix\backend\src\announcers\announcers.module.ts                                 | TypeScript |         11 |          0 |          2 |         13 |
+| c:\dev\domilix\backend\src\announcers\announcers.service.ts                                | TypeScript |        170 |          0 |         19 |        189 |
+| c:\dev\domilix\backend\src\announcers\dto\query-announcers.dto.ts                          | TypeScript |          7 |          0 |          2 |          9 |
+| c:\dev\domilix\backend\src\announcers\dto\upsert-announcer.dto.ts                          | TypeScript |         39 |          0 |          9 |         48 |
+| c:\dev\domilix\backend\src\app.controller.spec.ts                                          | TypeScript |         27 |          0 |          6 |         33 |
+| c:\dev\domilix\backend\src\app.controller.ts                                               | TypeScript |         20 |          0 |          4 |         24 |
+| c:\dev\domilix\backend\src\app.module.ts                                                   | TypeScript |         62 |          0 |          2 |         64 |
+| c:\dev\domilix\backend\src\app.service.ts                                                  | TypeScript |         39 |          0 |          7 |         46 |
+| c:\dev\domilix\backend\src\auth\auth-token.service.ts                                      | TypeScript |         91 |          0 |         13 |        104 |
+| c:\dev\domilix\backend\src\auth\auth.controller.ts                                         | TypeScript |        248 |          0 |         20 |        268 |
+| c:\dev\domilix\backend\src\auth\auth.guard.ts                                              | TypeScript |         31 |          0 |          7 |         38 |
+| c:\dev\domilix\backend\src\auth\auth.module.ts                                             | TypeScript |         15 |          0 |          2 |         17 |
+| c:\dev\domilix\backend\src\auth\auth.service.ts                                            | TypeScript |        478 |          1 |         81 |        560 |
+| c:\dev\domilix\backend\src\auth\current-user.decorator.ts                                  | TypeScript |          7 |          0 |          2 |          9 |
+| c:\dev\domilix\backend\src\auth\dto\change-password.dto.ts                                 | TypeScript |         17 |          0 |          5 |         22 |
+| c:\dev\domilix\backend\src\auth\dto\delete-account.dto.ts                                  | TypeScript |          7 |          0 |          2 |          9 |
+| c:\dev\domilix\backend\src\auth\dto\login.dto.ts                                           | TypeScript |         16 |          0 |          4 |         20 |
+| c:\dev\domilix\backend\src\auth\dto\register.dto.ts                                        | TypeScript |         23 |          0 |          6 |         29 |
+| c:\dev\domilix\backend\src\auth\dto\reset-password.dto.ts                                  | TypeScript |         22 |          0 |          6 |         28 |
+| c:\dev\domilix\backend\src\auth\dto\send-reset-link.dto.ts                                 | TypeScript |         11 |          0 |          3 |         14 |
+| c:\dev\domilix\backend\src\auth\dto\update-announcer-profile.dto.ts                        | TypeScript |         52 |          0 |         11 |         63 |
+| c:\dev\domilix\backend\src\auth\dto\update-profile.dto.ts                                  | TypeScript |         16 |          0 |          4 |         20 |
+| c:\dev\domilix\backend\src\auth\dto\verify-email.dto.ts                                    | TypeScript |          7 |          0 |          2 |          9 |
+| c:\dev\domilix\backend\src\auth\dto\verify-phone.dto.ts                                    | TypeScript |          7 |          0 |          2 |          9 |
+| c:\dev\domilix\backend\src\auth\verification-code.service.ts                               | TypeScript |         25 |          0 |          5 |         30 |
+| c:\dev\domilix\backend\src\broadcasts\broadcasts.controller.ts                             | TypeScript |         40 |          0 |          4 |         44 |
+| c:\dev\domilix\backend\src\broadcasts\broadcasts.module.ts                                 | TypeScript |         11 |          0 |          2 |         13 |
+| c:\dev\domilix\backend\src\broadcasts\broadcasts.service.ts                                | TypeScript |        116 |          0 |         12 |        128 |
+| c:\dev\domilix\backend\src\broadcasts\dto\create-broadcast.dto.ts                          | TypeScript |         65 |          0 |         13 |         78 |
+| c:\dev\domilix\backend\src\broadcasts\dto\query-broadcasts.dto.ts                          | TypeScript |         10 |          0 |          2 |         12 |
+| c:\dev\domilix\backend\src\categories\categories.controller.ts                             | TypeScript |         26 |          0 |          4 |         30 |
+| c:\dev\domilix\backend\src\categories\categories.module.ts                                 | TypeScript |          8 |          0 |          2 |         10 |
+| c:\dev\domilix\backend\src\categories\categories.service.ts                                | TypeScript |         69 |          0 |         12 |         81 |
+| c:\dev\domilix\backend\src\categories\dto\query-categories.dto.ts                          | TypeScript |         20 |          0 |          5 |         25 |
+| c:\dev\domilix\backend\src\common\filters\upload-exception.filter.ts                       | TypeScript |         21 |          0 |          5 |         26 |
+| c:\dev\domilix\backend\src\common\honeypot.ts                                              | TypeScript |          8 |          0 |          3 |         11 |
+| c:\dev\domilix\backend\src\common\http\formatters.ts                                       | TypeScript |         31 |          0 |          4 |         35 |
+| c:\dev\domilix\backend\src\common\http\pagination.ts                                       | TypeScript |         55 |          0 |          9 |         64 |
+| c:\dev\domilix\backend\src\common\media\thumbnails.ts                                      | TypeScript |        110 |          0 |         18 |        128 |
+| c:\dev\domilix\backend\src\common\media\validate-upload.ts                                 | TypeScript |         59 |          0 |         12 |         71 |
+| c:\dev\domilix\backend\src\common\object-storage\object-storage.module.ts                  | TypeScript |          8 |          0 |          2 |         10 |
+| c:\dev\domilix\backend\src\common\object-storage\object-storage.service.ts                 | TypeScript |         97 |          0 |         18 |        115 |
+| c:\dev\domilix\backend\src\mail\mail.module.ts                                             | TypeScript |          7 |          0 |          2 |          9 |
+| c:\dev\domilix\backend\src\mail\mail.service.ts                                            | TypeScript |         71 |          0 |         14 |         85 |
+| c:\dev\domilix\backend\src\main.ts                                                         | TypeScript |         85 |          0 |         12 |         97 |
+| c:\dev\domilix\backend\src\medias\medias.controller.ts                                     | TypeScript |        107 |          0 |          8 |        115 |
+| c:\dev\domilix\backend\src\medias\medias.module.ts                                         | TypeScript |         11 |          0 |          2 |         13 |
+| c:\dev\domilix\backend\src\medias\medias.service.ts                                        | TypeScript |        256 |          0 |         30 |        286 |
+| c:\dev\domilix\backend\src\newsletters\dto\create-newsletter.dto.ts                        | TypeScript |         11 |          0 |          3 |         14 |
+| c:\dev\domilix\backend\src\newsletters\dto\update-newsletter.dto.ts                        | TypeScript |         16 |          0 |          4 |         20 |
+| c:\dev\domilix\backend\src\newsletters\newsletters.controller.ts                           | TypeScript |         56 |          1 |          8 |         65 |
+| c:\dev\domilix\backend\src\newsletters\newsletters.module.ts                               | TypeScript |          8 |          0 |          2 |         10 |
+| c:\dev\domilix\backend\src\newsletters\newsletters.service.ts                              | TypeScript |         98 |          0 |         16 |        114 |
+| c:\dev\domilix\backend\src\notifications\notifications.controller.ts                       | TypeScript |         62 |          0 |          8 |         70 |
+| c:\dev\domilix\backend\src\notifications\notifications.module.ts                           | TypeScript |         10 |          0 |          2 |         12 |
+| c:\dev\domilix\backend\src\notifications\notifications.service.ts                          | TypeScript |         75 |          0 |         12 |         87 |
+| c:\dev\domilix\backend\src\prisma\prisma.module.ts                                         | TypeScript |          8 |          0 |          2 |         10 |
+| c:\dev\domilix\backend\src\prisma\prisma.service.ts                                        | TypeScript |        126 |          0 |         22 |        148 |
+| c:\dev\domilix\backend\src\subscriptions\dto\create-subscription.dto.ts                    | TypeScript |         13 |          0 |          4 |         17 |
+| c:\dev\domilix\backend\src\subscriptions\subscriptions.controller.ts                       | TypeScript |         49 |          0 |          8 |         57 |
+| c:\dev\domilix\backend\src\subscriptions\subscriptions.module.ts                           | TypeScript |         10 |          0 |          2 |         12 |
+| c:\dev\domilix\backend\src\subscriptions\subscriptions.service.ts                          | TypeScript |        250 |          1 |         33 |        284 |
+| c:\dev\domilix\backend\src\uploads\uploads.controller.ts                                   | TypeScript |         42 |          0 |          3 |         45 |
+| c:\dev\domilix\backend\src\uploads\uploads.module.ts                                       | TypeScript |         10 |          0 |          2 |         12 |
+| c:\dev\domilix\backend\src\uploads\uploads.service.ts                                      | TypeScript |         69 |          0 |         10 |         79 |
+| c:\dev\domilix\backend\src\users\dto\update-user.dto.ts                                    | TypeScript |         24 |          0 |          6 |         30 |
+| c:\dev\domilix\backend\src\users\users.controller.ts                                       | TypeScript |         50 |          0 |          8 |         58 |
+| c:\dev\domilix\backend\src\users\users.module.ts                                           | TypeScript |         10 |          0 |          2 |         12 |
+| c:\dev\domilix\backend\src\users\users.service.ts                                          | TypeScript |        177 |          0 |         18 |        195 |
+| Total                                                                                      |            |      6,191 |          3 |        892 |      7,086 |
++--------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+

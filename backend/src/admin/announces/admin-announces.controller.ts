@@ -1,13 +1,43 @@
-import { Body, Controller, Delete, ForbiddenException, Get, Param, Post, Put, Query, Res, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Delete,
+  ForbiddenException,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+  Res,
+  UploadedFiles,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import type { Response } from 'express';
 import { memoryStorage } from 'multer';
 import { CurrentUser } from '../../auth/current-user.decorator';
 import { AuthGuard } from '../../auth/auth.guard';
 import { AdsService } from '../../ads/ads.service';
 import { QueryAdsDto } from '../../ads/dto/query-ads.dto';
-import { ALLOWED_MEDIA_MIME_PATTERN, MAX_AD_MEDIAS } from '../../common/media/thumbnails';
+import {
+  ALLOWED_MEDIA_MIME_PATTERN,
+  MAX_AD_MEDIAS,
+} from '../../common/media/thumbnails';
 import { assertHoneypotClear } from '../../common/honeypot';
+
+type AdminUser = {
+  id: bigint;
+  isAdmin?: boolean;
+};
 
 @ApiTags('Admin Announces')
 @UseGuards(AuthGuard)
@@ -16,13 +46,15 @@ import { assertHoneypotClear } from '../../common/honeypot';
 export class AdminAnnouncesController {
   constructor(private readonly adsService: AdsService) {}
 
-  private ensureAdmin(user: any) {
-    if (!user?.isAdmin) throw new ForbiddenException('Admin access required');
+  private ensureAdmin(user: AdminUser) {
+    if (!user.isAdmin) throw new ForbiddenException('Admin access required');
   }
 
   @Get()
-  @ApiOperation({ summary: 'List announces with filters and pagination (admin)' })
-  index(@CurrentUser() user: any, @Query() query: QueryAdsDto) {
+  @ApiOperation({
+    summary: 'List announces with filters and pagination (admin)',
+  })
+  index(@CurrentUser() user: AdminUser, @Query() query: QueryAdsDto) {
     this.ensureAdmin(user);
     return this.adsService.index(query, user.id);
   }
@@ -30,7 +62,7 @@ export class AdminAnnouncesController {
   @Get(':id')
   @ApiOperation({ summary: 'Get announce details (admin)' })
   @ApiParam({ name: 'id', example: '1' })
-  show(@CurrentUser() user: any, @Param('id') id: string) {
+  show(@CurrentUser() user: AdminUser, @Param('id') id: string) {
     this.ensureAdmin(user);
     return this.adsService.show(id, user.id);
   }
@@ -65,14 +97,23 @@ export class AdminAnnouncesController {
       storage: memoryStorage(),
       fileFilter: (_req, file, callback) => {
         const isAllowed = ALLOWED_MEDIA_MIME_PATTERN.test(file.mimetype);
-        callback(isAllowed ? null : new Error('Only image and video medias are allowed.'), isAllowed);
+        callback(
+          isAllowed
+            ? null
+            : new Error('Only image and video medias are allowed.'),
+          isAllowed,
+        );
       },
       limits: {
         fileSize: 50 * 1024 * 1024,
       },
     }),
   )
-  create(@CurrentUser() user: any, @Body() body: any, @UploadedFiles() files: any[] = []) {
+  create(
+    @CurrentUser() user: AdminUser,
+    @Body() body: Record<string, unknown>,
+    @UploadedFiles() files: Express.Multer.File[] = [],
+  ) {
     this.ensureAdmin(user);
     assertHoneypotClear(body.website, 'admin.ads.create');
     return this.adsService.create(body, files, user.id);
@@ -81,15 +122,23 @@ export class AdminAnnouncesController {
   @Put(':id')
   @ApiOperation({ summary: 'Update an announce (admin)' })
   @ApiParam({ name: 'id', example: '1' })
-  update(@Param('id') id: string, @CurrentUser() user: any, @Body() body: any) {
+  update(
+    @Param('id') id: string,
+    @CurrentUser() user: AdminUser,
+    @Body() body: Record<string, unknown>,
+  ) {
     this.ensureAdmin(user);
-    return this.adsService.updateAd(id, body, user.id);
+    return this.adsService.updateAdAsAdmin(id, body, user);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete an announce (admin)' })
   @ApiParam({ name: 'id', example: '1' })
-  async destroy(@Param('id') id: string, @CurrentUser() user: any, @Res() res: any) {
+  async destroy(
+    @Param('id') id: string,
+    @CurrentUser() user: AdminUser,
+    @Res() res: Response,
+  ) {
     this.ensureAdmin(user);
     await this.adsService.destroyAdAsAdmin(id, user);
     return res.status(204).send();

@@ -1,17 +1,7 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Post,
-  Put,
-  Res,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { CreateNewsletterDto } from './dto/create-newsletter.dto';
-import { UpdateNewsletterDto } from './dto/update-newsletter.dto';
 import { NewslettersService } from './newsletters.service';
 
 /**licorne pour la newsletter */
@@ -20,39 +10,11 @@ import { NewslettersService } from './newsletters.service';
 export class NewslettersController {
   constructor(private readonly newslettersService: NewslettersService) {}
 
-  @Get('newsletters')
-  @ApiOperation({ summary: 'List verified newsletter subscribers' })
-  index() {
-    return this.newslettersService.index();
-  }
-
   @Post('newsletters')
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @ApiOperation({ summary: 'Subscribe an email to the newsletter' })
   store(@Body() dto: CreateNewsletterDto) {
     return this.newslettersService.store(dto);
-  }
-
-  @Get('newsletters/:id')
-  @ApiOperation({ summary: 'Get newsletter subscriber by id' })
-  @ApiParam({ name: 'id', example: '1' })
-  show(@Param('id') id: string) {
-    return this.newslettersService.show(id);
-  }
-
-  @Put('newsletters/:id')
-  @ApiOperation({ summary: 'Update newsletter subscriber' })
-  @ApiParam({ name: 'id', example: '1' })
-  update(@Param('id') id: string, @Body() dto: UpdateNewsletterDto) {
-    return this.newslettersService.update(id, dto);
-  }
-
-  @Delete('newsletters/:id')
-  @ApiOperation({ summary: 'Delete newsletter subscriber' })
-  @ApiParam({ name: 'id', example: '1' })
-  async destroy(@Param('id') id: string, @Res() res: any) {
-    await this.newslettersService.destroy(id);
-    return res.status(204).send();
   }
 
   @Get('newsletter/:token')

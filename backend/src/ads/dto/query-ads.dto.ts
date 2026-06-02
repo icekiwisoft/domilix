@@ -8,10 +8,22 @@ import {
   IsString,
 } from 'class-validator';
 
-const toArray = ({ value }: { value: unknown }) => {
-  if (Array.isArray(value)) return value;
+const stringifyPrimitive = (value: unknown) => {
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number' || typeof value === 'boolean')
+    return value.toString();
+  return undefined;
+};
+
+const toArray = ({ value }: { value: unknown }): string[] | undefined => {
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => stringifyPrimitive(item))
+      .filter((item): item is string => Boolean(item));
+  }
   if (value === undefined || value === null || value === '') return undefined;
-  return [value];
+  const item = stringifyPrimitive(value);
+  return item ? [item] : undefined;
 };
 
 export class QueryAdsDto {
@@ -117,4 +129,9 @@ export class QueryAdsDto {
   @ApiPropertyOptional({ example: 1 })
   @IsOptional()
   page?: string | number;
+
+  @ApiPropertyOptional({ example: 13 })
+  @IsOptional()
+  @IsNumberString()
+  per_page?: string;
 }

@@ -1,4 +1,9 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import crypto from 'node:crypto';
 import { Prisma } from '@prisma/client';
 import {
@@ -7,7 +12,10 @@ import {
   storageUrl,
   toNumber,
 } from '../common/http/formatters';
-import { generateMediaThumbnailBuffer, MAX_AD_MEDIAS } from '../common/media/thumbnails';
+import {
+  generateMediaThumbnailBuffer,
+  MAX_AD_MEDIAS,
+} from '../common/media/thumbnails';
 import { validateUploadedFile } from '../common/media/validate-upload';
 import { ObjectStorageService } from '../common/object-storage/object-storage.service';
 import { buildLaravelPagination } from '../common/http/pagination';
@@ -19,9 +27,35 @@ import { QueryCitiesDto } from './dto/query-cities.dto';
 const REAL_ESTATE_CLASS = 'App\\Models\\RealEstate';
 const FURNITURE_CLASS = 'App\\Models\\Furniture';
 type MapPair<K, V> = [K, V];
+type AdminUser = {
+  id: bigint;
+  isAdmin?: boolean;
+};
 const AD_PERIODS = ['hour', 'day', 'night', 'month', 'year'] as const;
 const AD_DEVISES = [
-  'USD','EUR','GBP','XOF','XAF','NGN','KES','GHS','ZAR','JPY','CNY','INR','BRL','RUB','CAD','AUD','CHF','SGD','NZD','MXN','TRY','AED','SAR',
+  'USD',
+  'EUR',
+  'GBP',
+  'XOF',
+  'XAF',
+  'NGN',
+  'KES',
+  'GHS',
+  'ZAR',
+  'JPY',
+  'CNY',
+  'INR',
+  'BRL',
+  'RUB',
+  'CAD',
+  'AUD',
+  'CHF',
+  'SGD',
+  'NZD',
+  'MXN',
+  'TRY',
+  'AED',
+  'SAR',
 ] as const;
 
 @Injectable()
@@ -32,10 +66,15 @@ export class AdsService {
     private readonly addressesService: AddressesService,
   ) {}
 
-  private async resolveAddressFromCoordinates(longitude: number | null, latitude: number | null) {
+  private async resolveAddressFromCoordinates(
+    longitude: number | null,
+    latitude: number | null,
+  ) {
     if (longitude === null || latitude === null) return null;
 
-    const result = await this.addressesService.reverseGeocode({ longitude, latitude }).catch(() => null);
+    const result = await this.addressesService
+      .reverseGeocode({ longitude, latitude })
+      .catch(() => null);
     return result?.success ? result.data : null;
   }
 
@@ -86,11 +125,17 @@ export class AdsService {
   }
 
   private hasListInBody(body: Record<string, any>, key: string) {
-    return body[key] !== undefined || body[`${key}[]`] !== undefined || Object.keys(body).some((bodyKey) => bodyKey.startsWith(`${key}[`));
+    return (
+      body[key] !== undefined ||
+      body[`${key}[]`] !== undefined ||
+      Object.keys(body).some((bodyKey) => bodyKey.startsWith(`${key}[`))
+    );
   }
 
   private async ensureAnnouncerUser(userId: bigint) {
-    const announcer = await this.prisma.announcer.findFirst({ where: { userId } });
+    const announcer = await this.prisma.announcer.findFirst({
+      where: { userId },
+    });
     if (!announcer) {
       throw new ForbiddenException("Vous n'etes pas un annonceur");
     }
@@ -117,6 +162,14 @@ export class AdsService {
     return trimmed || null;
   }
 
+  private parsePositiveInteger(value: unknown, fallback: number, max?: number) {
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed) || parsed < 1) return fallback;
+
+    const normalized = Math.floor(parsed);
+    return max ? Math.min(normalized, max) : normalized;
+  }
+
   private buildAdWhere(
     query: QueryAdsDto,
     realEstateIds?: bigint[],
@@ -141,7 +194,8 @@ export class AdsService {
 
     if (query.type) {
       and.push({
-        itemType: query.type === 'furniture' ? FURNITURE_CLASS : REAL_ESTATE_CLASS,
+        itemType:
+          query.type === 'furniture' ? FURNITURE_CLASS : REAL_ESTATE_CLASS,
       });
     }
 
@@ -180,9 +234,14 @@ export class AdsService {
     return and.length ? { AND: and } : {};
   }
 
-  private async findMatchingRealEstateIds(query: QueryAdsDto): Promise<bigint[] | undefined> {
+  private async findMatchingRealEstateIds(
+    query: QueryAdsDto,
+  ): Promise<bigint[] | undefined> {
     const needRealEstateFilter =
-      query.bedroom_min || query.bedroom_max || query.amenities?.length || query.standing;
+      query.bedroom_min ||
+      query.bedroom_max ||
+      query.amenities?.length ||
+      query.standing;
 
     if (!needRealEstateFilter) return undefined;
 
@@ -247,40 +306,61 @@ export class AdsService {
     return filtered.map((entry) => entry.id);
   }
 
-  private async loadRelations(ads: Array<{ id: bigint; announcerId: string; categoryId: string | null; adId: bigint; itemType: string }>) {
+  private async loadRelations(
+    ads: Array<{
+      id: bigint;
+      announcerId: string;
+      categoryId: string | null;
+      adId: bigint;
+      itemType: string;
+    }>,
+  ) {
     const adIds = ads.map((ad) => ad.id.toString());
-    const categoryIds = Array.from(new Set(ads.map((ad) => ad.categoryId).filter(Boolean))) as string[];
+    const categoryIds = Array.from(
+      new Set(ads.map((ad) => ad.categoryId).filter(Boolean)),
+    ) as string[];
     const announcerIds = Array.from(new Set(ads.map((ad) => ad.announcerId)));
-    const realEstateIds = ads.filter((ad) => ad.itemType === REAL_ESTATE_CLASS).map((ad) => ad.adId);
-    const furnitureIds = ads.filter((ad) => ad.itemType === FURNITURE_CLASS).map((ad) => ad.adId);
+    const realEstateIds = ads
+      .filter((ad) => ad.itemType === REAL_ESTATE_CLASS)
+      .map((ad) => ad.adId);
+    const furnitureIds = ads
+      .filter((ad) => ad.itemType === FURNITURE_CLASS)
+      .map((ad) => ad.adId);
 
-    const [categories, announcers, adMedias, realEstates, furnitures] = await Promise.all([
-      categoryIds.length
-        ? this.prisma.category.findMany({
-            where: { id: { in: categoryIds.map((id) => BigInt(id)) } },
-          })
-        : Promise.resolve([]),
-      announcerIds.length
-        ? this.prisma.announcer.findMany({
-            where: { id: { in: announcerIds } },
-            include: { user: true },
-          })
-        : Promise.resolve([]),
-      adIds.length
-        ? this.prisma.adMedia.findMany({
-            where: { adId: { in: adIds } },
-            orderBy: [{ isPresentation: 'desc' }, { id: 'asc' }],
-          })
-        : Promise.resolve([]),
-      realEstateIds.length
-        ? this.prisma.realEstate.findMany({ where: { id: { in: realEstateIds } } })
-        : Promise.resolve([]),
-      furnitureIds.length
-        ? this.prisma.furniture.findMany({ where: { id: { in: furnitureIds } } })
-        : Promise.resolve([]),
-    ]);
+    const [categories, announcers, adMedias, realEstates, furnitures] =
+      await Promise.all([
+        categoryIds.length
+          ? this.prisma.category.findMany({
+              where: { id: { in: categoryIds.map((id) => BigInt(id)) } },
+            })
+          : Promise.resolve([]),
+        announcerIds.length
+          ? this.prisma.announcer.findMany({
+              where: { id: { in: announcerIds } },
+              include: { user: true },
+            })
+          : Promise.resolve([]),
+        adIds.length
+          ? this.prisma.adMedia.findMany({
+              where: { adId: { in: adIds } },
+              orderBy: [{ isPresentation: 'desc' }, { id: 'asc' }],
+            })
+          : Promise.resolve([]),
+        realEstateIds.length
+          ? this.prisma.realEstate.findMany({
+              where: { id: { in: realEstateIds } },
+            })
+          : Promise.resolve([]),
+        furnitureIds.length
+          ? this.prisma.furniture.findMany({
+              where: { id: { in: furnitureIds } },
+            })
+          : Promise.resolve([]),
+      ]);
 
-    const mediaIds = Array.from(new Set(adMedias.map((entry) => entry.mediaId)));
+    const mediaIds = Array.from(
+      new Set(adMedias.map((entry) => entry.mediaId)),
+    );
     const medias = mediaIds.length
       ? await this.prisma.media.findMany({
           where: { id: { in: mediaIds } },
@@ -291,34 +371,58 @@ export class AdsService {
     return {
       categories: new Map(
         categories.map(
-          (item) => [item.id.toString(), item] as MapPair<string, (typeof categories)[number]>,
+          (item) =>
+            [item.id.toString(), item] as MapPair<
+              string,
+              (typeof categories)[number]
+            >,
         ),
       ),
       announcers: new Map(
-        announcers.map((item) => [item.id, item] as MapPair<string, (typeof announcers)[number]>),
+        announcers.map(
+          (item) =>
+            [item.id, item] as MapPair<string, (typeof announcers)[number]>,
+        ),
       ),
       adMedias: new Map(
         adIds.map(
-          (id) => [id, adMedias.filter((item: any) => item.adId === id)] as MapPair<string, typeof adMedias>,
+          (id) =>
+            [id, adMedias.filter((item: any) => item.adId === id)] as MapPair<
+              string,
+              typeof adMedias
+            >,
         ),
       ),
       medias: new Map(
-        medias.map((item) => [item.id, item] as MapPair<string, (typeof medias)[number]>),
+        medias.map(
+          (item) => [item.id, item] as MapPair<string, (typeof medias)[number]>,
+        ),
       ),
       realEstates: new Map(
         realEstates.map(
-          (item) => [item.id.toString(), item] as MapPair<string, (typeof realEstates)[number]>,
+          (item) =>
+            [item.id.toString(), item] as MapPair<
+              string,
+              (typeof realEstates)[number]
+            >,
         ),
       ),
       furnitures: new Map(
         furnitures.map(
-          (item) => [item.id.toString(), item] as MapPair<string, (typeof furnitures)[number]>,
+          (item) =>
+            [item.id.toString(), item] as MapPair<
+              string,
+              (typeof furnitures)[number]
+            >,
         ),
       ),
     };
   }
 
-  private serializeUser(user: { name: string; sex: string; devise: string; phoneNumber: string }, announcerId: string) {
+  private serializeUser(
+    user: { name: string; sex: string; devise: string; phoneNumber: string },
+    announcerId: string,
+  ) {
     return {
       name: user.name,
       sex: user.sex,
@@ -331,14 +435,20 @@ export class AdsService {
 
   private async serializeAnnouncer(announcer: any) {
     const avatarMedia = announcer.avatarMediaId
-      ? await this.prisma.media.findUnique({ where: { id: announcer.avatarMediaId } })
+      ? await this.prisma.media.findUnique({
+          where: { id: announcer.avatarMediaId },
+        })
       : null;
 
     return {
       id: announcer.id,
       name: announcer.name,
       user: this.serializeUser(announcer.user, announcer.id),
-      avatar: await this.objectStorage.getSignedUrl(avatarMedia?.bucket || announcer.avatarBucket, avatarMedia?.originalPath || announcer.avatarPath) || storageUrl(announcer.avatar),
+      avatar:
+        (await this.objectStorage.getSignedUrl(
+          avatarMedia?.bucket || announcer.avatarBucket,
+          avatarMedia?.originalPath || announcer.avatarPath,
+        )) || storageUrl(announcer.avatar),
       avatar_media_id: announcer.avatarMediaId,
       contact: announcer.contact,
       email: announcer.user.email ?? null,
@@ -351,10 +461,17 @@ export class AdsService {
   }
 
   private async serializeMedia(media: any) {
-    const signedFile = await this.objectStorage.getSignedUrl(media.bucket, media.originalPath);
-    const signedThumbnail = media.thumbnailPath && media.thumbnailPath !== media.originalPath
-      ? await this.objectStorage.getSignedUrl(media.bucket, media.thumbnailPath)
-      : null;
+    const signedFile = await this.objectStorage.getSignedUrl(
+      media.bucket,
+      media.originalPath,
+    );
+    const signedThumbnail =
+      media.thumbnailPath && media.thumbnailPath !== media.originalPath
+        ? await this.objectStorage.getSignedUrl(
+            media.bucket,
+            media.thumbnailPath,
+          )
+        : null;
 
     return {
       id: media.id,
@@ -379,9 +496,11 @@ export class AdsService {
 
   async index(query: QueryAdsDto, currentUserId?: bigint) {
     if (query.AnnouncerId) {
-      const where = { announcerId: query.AnnouncerId } satisfies Prisma.AdWhereInput;
-      const page = Number(query.page || 1);
-      const perPage = 15;
+      const where = {
+        announcerId: query.AnnouncerId,
+      } satisfies Prisma.AdWhereInput;
+      const page = this.parsePositiveInteger(query.page, 1);
+      const perPage = this.parsePositiveInteger(query.per_page, 15, 100);
       const [ads, total] = await Promise.all([
         this.prisma.ad.findMany({
           where,
@@ -402,8 +521,8 @@ export class AdsService {
       });
     }
 
-    const page = Number(query.page || 1);
-    const perPage = 20;
+    const page = this.parsePositiveInteger(query.page, 1);
+    const perPage = this.parsePositiveInteger(query.per_page, 20, 100);
     const realEstateIds = await this.findMatchingRealEstateIds(query);
     const where = this.buildAdWhere(query, realEstateIds);
 
@@ -412,7 +531,9 @@ export class AdsService {
         where: { userId: currentUserId },
         select: { adId: true },
       });
-      Object.assign(where, { id: { in: favorites.map((item) => BigInt(item.adId)) } });
+      Object.assign(where, {
+        id: { in: favorites.map((item) => BigInt(item.adId)) },
+      });
     }
 
     if (query.unlocked && currentUserId) {
@@ -420,7 +541,9 @@ export class AdsService {
         where: { userId: currentUserId, expiresAt: { gt: new Date() } },
         select: { adId: true },
       });
-      Object.assign(where, { id: { in: unlockings.map((item) => BigInt(item.adId)) } });
+      Object.assign(where, {
+        id: { in: unlockings.map((item) => BigInt(item.adId)) },
+      });
     }
 
     const orderBy =
@@ -450,13 +573,22 @@ export class AdsService {
 
   private async serializeAds(ads: any[], currentUserId?: bigint) {
     const relations = await this.loadRelations(ads);
-    const categoryIds = Array.from(new Set(ads.map((ad) => ad.categoryId).filter(Boolean))) as string[];
+    const categoryIds = Array.from(
+      new Set(ads.map((ad) => ad.categoryId).filter(Boolean)),
+    ) as string[];
     const groupedAds = categoryIds.length
-      ? await this.prisma.ad.groupBy({ by: ['categoryId'], _count: { _all: true } })
+      ? await this.prisma.ad.groupBy({
+          by: ['categoryId'],
+          _count: { _all: true },
+        })
       : [];
     const categoryItemCounts = new Map(
       groupedAds.map(
-        (entry) => [entry.categoryId, entry._count._all] as MapPair<string | null, number>,
+        (entry) =>
+          [entry.categoryId, entry._count._all] as MapPair<
+            string | null,
+            number
+          >,
       ),
     );
 
@@ -464,7 +596,10 @@ export class AdsService {
       ? new Set(
           (
             await this.prisma.favorite.findMany({
-              where: { userId: currentUserId, adId: { in: ads.map((ad) => ad.id.toString()) } },
+              where: {
+                userId: currentUserId,
+                adId: { in: ads.map((ad) => ad.id.toString()) },
+              },
               select: { adId: true },
             })
           ).map((item) => item.adId),
@@ -485,36 +620,49 @@ export class AdsService {
         )
       : new Set<string>();
 
-    return Promise.all(ads.map(async (ad) => {
-      const category = ad.categoryId ? relations.categories.get(ad.categoryId) : null;
-      const mediaEntries = relations.adMedias.get(ad.id.toString()) || [];
-      const medias = await Promise.all(mediaEntries
-        .map((entry) => relations.medias.get(entry.mediaId))
-        .filter(Boolean)
-        .map((media) => this.serializeMedia(media)));
+    return Promise.all(
+      ads.map(async (ad) => {
+        const category = ad.categoryId
+          ? relations.categories.get(ad.categoryId)
+          : null;
+        const announcer = relations.announcers.get(ad.announcerId);
+        const mediaEntries = relations.adMedias.get(ad.id.toString()) || [];
+        const medias = await Promise.all(
+          mediaEntries
+            .map((entry) => relations.medias.get(entry.mediaId))
+            .filter(Boolean)
+            .map((media) => this.serializeMedia(media)),
+        );
 
-      return {
-        id: toNumber(ad.id),
-        type: itemTypeToApiType(ad.itemType),
-        description: ad.description,
-        price: toNumber(ad.price),
-        medias,
-        ad_type: ad.adType,
-        period: ad.period,
-        devise: ad.devise,
-        address: ad.adress,
-        city: ad.city,
-        neighbourhood: ad.neighbourhood,
-        country: ad.country,
-        postal_code: ad.zip,
-        contact_phone: ad.contactPhone,
-        contact_email: ad.contactEmail,
-        category: this.serializeCategory(category, category ? categoryItemCounts.get(ad.categoryId) || 0 : 0),
-        creation_date: ad.createdAt,
-        liked: favoriteIds.has(ad.id.toString()),
-        unlocked: unlockedIds.has(ad.id.toString()),
-      };
-    }));
+        return {
+          id: toNumber(ad.id),
+          type: itemTypeToApiType(ad.itemType),
+          description: ad.description,
+          price: toNumber(ad.price),
+          medias,
+          ad_type: ad.adType,
+          period: ad.period,
+          devise: ad.devise,
+          address: ad.adress,
+          city: ad.city,
+          neighbourhood: ad.neighbourhood,
+          country: ad.country,
+          postal_code: ad.zip,
+          contact_phone: ad.contactPhone,
+          contact_email: ad.contactEmail,
+          category: this.serializeCategory(
+            category,
+            category ? categoryItemCounts.get(ad.categoryId) || 0 : 0,
+          ),
+          announcer: announcer
+            ? await this.serializeAnnouncer(announcer)
+            : null,
+          creation_date: ad.createdAt,
+          liked: favoriteIds.has(ad.id.toString()),
+          unlocked: unlockedIds.has(ad.id.toString()),
+        };
+      }),
+    );
   }
 
   async show(id: string, currentUserId?: bigint) {
@@ -522,19 +670,29 @@ export class AdsService {
     if (!ad) throw new NotFoundException('Ad not found');
 
     const relations = await this.loadRelations([ad]);
-    const category = ad.categoryId ? relations.categories.get(ad.categoryId) : null;
+    const category = ad.categoryId
+      ? relations.categories.get(ad.categoryId)
+      : null;
     const announcer = relations.announcers.get(ad.announcerId);
     const mediaEntries = relations.adMedias.get(ad.id.toString()) || [];
-    const medias = await Promise.all(mediaEntries
-      .map((entry) => relations.medias.get(entry.mediaId))
-      .filter(Boolean)
-      .map((media) => this.serializeMedia(media)));
+    const medias = await Promise.all(
+      mediaEntries
+        .map((entry) => relations.medias.get(entry.mediaId))
+        .filter(Boolean)
+        .map((media) => this.serializeMedia(media)),
+    );
 
     const [isLiked, unlocking] = currentUserId
       ? await Promise.all([
-          this.prisma.favorite.findFirst({ where: { userId: currentUserId, adId: id } }),
+          this.prisma.favorite.findFirst({
+            where: { userId: currentUserId, adId: id },
+          }),
           this.prisma.unlocking.findFirst({
-            where: { userId: currentUserId, adId: id, expiresAt: { gt: new Date() } },
+            where: {
+              userId: currentUserId,
+              adId: id,
+              expiresAt: { gt: new Date() },
+            },
             orderBy: [{ unlockedAt: 'desc' }, { createdAt: 'desc' }],
           }),
         ])
@@ -575,10 +733,16 @@ export class AdsService {
         garden: realEstate ? boolFromUnknown(realEstate.garden) : false,
         gate: realEstate ? boolFromUnknown(realEstate.gate) : false,
         wifi: realEstate ? boolFromUnknown(realEstate.wifi) : false,
-        air_conditioning: realEstate ? boolFromUnknown(realEstate.airConditioning) : false,
-        security_24h: realEstate ? boolFromUnknown(realEstate.security24h) : false,
+        air_conditioning: realEstate
+          ? boolFromUnknown(realEstate.airConditioning)
+          : false,
+        security_24h: realEstate
+          ? boolFromUnknown(realEstate.security24h)
+          : false,
         smart_tv: realEstate ? boolFromUnknown(realEstate.smartTv) : false,
-        equipped_kitchen: realEstate ? boolFromUnknown(realEstate.equippedKitchen) : false,
+        equipped_kitchen: realEstate
+          ? boolFromUnknown(realEstate.equippedKitchen)
+          : false,
         pool: realEstate ? boolFromUnknown(realEstate.pool) : false,
         caution: realEstate ? toNumber(realEstate.caution) : null,
         longitude: realEstate ? toNumber(realEstate.lng) : null,
@@ -606,9 +770,14 @@ export class AdsService {
       ...(query.country ? { country: { contains: query.country } } : {}),
       ...(query.ad_type ? { adType: query.ad_type } : {}),
       ...(query.type
-        ? { itemType: query.type === 'furniture' ? FURNITURE_CLASS : REAL_ESTATE_CLASS }
+        ? {
+            itemType:
+              query.type === 'furniture' ? FURNITURE_CLASS : REAL_ESTATE_CLASS,
+          }
         : {}),
-      ...(query.category_id?.length ? { categoryId: { in: query.category_id } } : {}),
+      ...(query.category_id?.length
+        ? { categoryId: { in: query.category_id } }
+        : {}),
     };
 
     let rows = await this.prisma.ad.groupBy({
@@ -634,7 +803,9 @@ export class AdsService {
       data: rows.map((row) => ({
         city: row.city,
         country: row.country,
-        ...(boolFromUnknown(query.with_count ?? true) ? { ads_count: row._count._all } : {}),
+        ...(boolFromUnknown(query.with_count ?? true)
+          ? { ads_count: row._count._all }
+          : {}),
       })),
     };
   }
@@ -649,7 +820,10 @@ export class AdsService {
 
     if (existing) {
       await this.prisma.favorite.delete({ where: { id: existing.id } });
-      return { message: 'Ad removed from favorites successfully', liked: false };
+      return {
+        message: 'Ad removed from favorites successfully',
+        liked: false,
+      };
     }
 
     await this.prisma.favorite.create({
@@ -724,15 +898,18 @@ export class AdsService {
       },
     });
 
-    await this.prisma.notification.create({
-      data: {
-        userId,
-        type: 'ad_unlocked',
-        title: 'Annonce debloquee',
-        message: 'Vous pouvez maintenant consulter les informations de contact de cette annonce pendant 7 jours.',
-        link: `/houses/${ad.id}`,
-      },
-    }).catch(() => undefined);
+    await this.prisma.notification
+      .create({
+        data: {
+          userId,
+          type: 'ad_unlocked',
+          title: 'Annonce debloquee',
+          message:
+            'Vous pouvez maintenant consulter les informations de contact de cette annonce pendant 7 jours.',
+          link: `/houses/${ad.id}`,
+        },
+      })
+      .catch(() => undefined);
 
     return {
       message: 'Annonce debloquee avec succes',
@@ -777,10 +954,16 @@ export class AdsService {
     const mediaBuckets = [body.media_buckets, body['media_buckets[]']]
       .flat()
       .filter(Boolean) as string[];
-    const mediaOriginalPaths = [body.media_original_paths, body['media_original_paths[]']]
+    const mediaOriginalPaths = [
+      body.media_original_paths,
+      body['media_original_paths[]'],
+    ]
       .flat()
       .filter(Boolean) as string[];
-    const mediaThumbnailPaths = [body.media_thumbnail_paths, body['media_thumbnail_paths[]']]
+    const mediaThumbnailPaths = [
+      body.media_thumbnail_paths,
+      body['media_thumbnail_paths[]'],
+    ]
       .flat()
       .filter(Boolean) as string[];
     const filesId = Array.isArray(body.filesid)
@@ -790,9 +973,12 @@ export class AdsService {
         : [];
     const mediaIds = this.listFromBody(body, 'media_ids');
     const existingMediaIds = [...filesId, ...mediaIds];
-    const totalMediaCount = files.length + existingMediaIds.length + mediaUrls.length;
+    const totalMediaCount =
+      files.length + existingMediaIds.length + mediaUrls.length;
     if (totalMediaCount > MAX_AD_MEDIAS) {
-      throw new ForbiddenException(`The combined total of medias and mediasId must not exceed ${MAX_AD_MEDIAS}.`);
+      throw new ForbiddenException(
+        `The combined total of medias and mediasId must not exceed ${MAX_AD_MEDIAS}.`,
+      );
     }
     if (totalMediaCount === 0) {
       throw new ForbiddenException('At least one media file is required.');
@@ -806,24 +992,37 @@ export class AdsService {
     const localizationValues = Array.isArray(localization)
       ? localization.map((value) => Number(value))
       : [];
-    const longitude = Number.isFinite(localizationValues[0]) ? localizationValues[0] : null;
-    const latitude = Number.isFinite(localizationValues[1]) ? localizationValues[1] : null;
+    const longitude = Number.isFinite(localizationValues[0])
+      ? localizationValues[0]
+      : null;
+    const latitude = Number.isFinite(localizationValues[1])
+      ? localizationValues[1]
+      : null;
     if (
       (longitude !== null && (longitude < -180 || longitude > 180)) ||
       (latitude !== null && (latitude < -90 || latitude > 90))
     ) {
       throw new BadRequestException('Coordonnees GPS invalides.');
     }
-    const resolvedAddress = await this.resolveAddressFromCoordinates(longitude, latitude);
+    const resolvedAddress = await this.resolveAddressFromCoordinates(
+      longitude,
+      latitude,
+    );
 
     let adableId: bigint;
     if (type === 'furniture') {
       const furniture = await this.prisma.furniture.create({
         data: {
           clientId: crypto.randomUUID(),
-          height: this.parseOptionalNonNegativeNumber(body.height, 'La hauteur'),
+          height: this.parseOptionalNonNegativeNumber(
+            body.height,
+            'La hauteur',
+          ),
           width: this.parseOptionalNonNegativeNumber(body.width, 'La largeur'),
-          length: this.parseOptionalNonNegativeNumber(body.length, 'La longueur'),
+          length: this.parseOptionalNonNegativeNumber(
+            body.length,
+            'La longueur',
+          ),
           weight: this.parseOptionalNonNegativeNumber(body.weight, 'Le poids'),
         },
       });
@@ -831,10 +1030,22 @@ export class AdsService {
     } else {
       const realEstate = await this.prisma.realEstate.create({
         data: {
-          bedroom: this.parseNonNegativeNumber(body.bedroom, 'Le nombre de chambres'),
-          mainroom: this.parseNonNegativeNumber(body.mainroom, 'Le nombre de salons'),
-          toilet: this.parseNonNegativeNumber(body.toilet, 'Le nombre de toilettes'),
-          kitchen: this.parseNonNegativeNumber(body.kitchen, 'Le nombre de cuisines'),
+          bedroom: this.parseNonNegativeNumber(
+            body.bedroom,
+            'Le nombre de chambres',
+          ),
+          mainroom: this.parseNonNegativeNumber(
+            body.mainroom,
+            'Le nombre de salons',
+          ),
+          toilet: this.parseNonNegativeNumber(
+            body.toilet,
+            'Le nombre de toilettes',
+          ),
+          kitchen: this.parseNonNegativeNumber(
+            body.kitchen,
+            'Le nombre de cuisines',
+          ),
           size: this.parseOptionalNonNegativeNumber(body.size, 'La taille'),
           gate: ['1', 'true', true].includes(body.gate),
           wifi: ['1', 'true', true].includes(body.wifi),
@@ -846,7 +1057,10 @@ export class AdsService {
           garage: ['1', 'true', true].includes(body.garage),
           furnished: ['1', 'true', true].includes(body.furnitured),
           garden: ['1', 'true', true].includes(body.garden),
-          caution: this.parseOptionalNonNegativeNumber(body.caution, 'La caution'),
+          caution: this.parseOptionalNonNegativeNumber(
+            body.caution,
+            'La caution',
+          ),
           lng: longitude,
           lat: latitude,
         },
@@ -859,7 +1073,8 @@ export class AdsService {
         clientId: crypto.randomUUID(),
         adress: resolvedAddress?.address || body.address || '',
         city: resolvedAddress?.city || body.city || '',
-        neighbourhood: resolvedAddress?.neighbourhood || body.neighbourhood || '',
+        neighbourhood:
+          resolvedAddress?.neighbourhood || body.neighbourhood || '',
         country: resolvedAddress?.country || body.country || '',
         state: resolvedAddress?.state || body.state || '',
         zip: resolvedAddress?.zip || body.zip || '',
@@ -869,9 +1084,12 @@ export class AdsService {
         adType: body.ad_type,
         adId: adableId,
         announcerId: announcer.id,
-        categoryId: body.category_id !== undefined && body.category_id !== null && body.category_id !== ''
-          ? String(body.category_id)
-          : null,
+        categoryId:
+          body.category_id !== undefined &&
+          body.category_id !== null &&
+          body.category_id !== ''
+            ? String(body.category_id)
+            : null,
         period: this.normalizePeriod(body.period) || 'month',
         description: body.description || null,
         contactPhone: this.optionalString(body.contact_phone),
@@ -902,7 +1120,8 @@ export class AdsService {
           thumbnail: mediaThumbnails[index] || mediaUrl,
           bucket: mediaBuckets[index] || null,
           originalPath: mediaOriginalPaths[index] || null,
-          thumbnailPath: mediaThumbnailPaths[index] || mediaOriginalPaths[index] || null,
+          thumbnailPath:
+            mediaThumbnailPaths[index] || mediaOriginalPaths[index] || null,
           purpose: 'ad_media',
           type: mediaTypes[index] || 'application/octet-stream',
           announcerId: announcer.id,
@@ -919,9 +1138,13 @@ export class AdsService {
         context: 'ads.create',
       });
       const uploaded = await this.objectStorage.uploadFile(file, 'medias');
-      const thumbnailBuffer = await generateMediaThumbnailBuffer(file).catch(() => null);
+      const thumbnailBuffer = await generateMediaThumbnailBuffer(file).catch(
+        () => null,
+      );
       const thumbnail = thumbnailBuffer
-        ? await this.objectStorage.uploadThumbnail(thumbnailBuffer, file).catch(() => null)
+        ? await this.objectStorage
+            .uploadThumbnail(thumbnailBuffer, file)
+            .catch(() => null)
         : null;
       const media = await this.prisma.media.create({
         data: {
@@ -952,15 +1175,17 @@ export class AdsService {
       });
     }
 
-    await this.prisma.notification.create({
-      data: {
-        userId,
-        type: 'ad_published',
-        title: 'Annonce publiee',
-        message: 'Votre annonce a ete publiee avec succes sur Domilix.',
-        link: `/houses/${ad.id}`,
-      },
-    }).catch(() => undefined);
+    await this.prisma.notification
+      .create({
+        data: {
+          userId,
+          type: 'ad_published',
+          title: 'Annonce publiee',
+          message: 'Votre annonce a ete publiee avec succes sur Domilix.',
+          link: `/houses/${ad.id}`,
+        },
+      })
+      .catch(() => undefined);
 
     const [serialized] = await this.serializeAds([ad], userId);
     return serialized;
@@ -983,8 +1208,14 @@ export class AdsService {
       ? localization.map((value) => Number(value))
       : [];
     const hasLocalization = localizationValues.length >= 2;
-    const longitude = hasLocalization && Number.isFinite(localizationValues[0]) ? localizationValues[0] : null;
-    const latitude = hasLocalization && Number.isFinite(localizationValues[1]) ? localizationValues[1] : null;
+    const longitude =
+      hasLocalization && Number.isFinite(localizationValues[0])
+        ? localizationValues[0]
+        : null;
+    const latitude =
+      hasLocalization && Number.isFinite(localizationValues[1])
+        ? localizationValues[1]
+        : null;
     if (
       (longitude !== null && (longitude < -180 || longitude > 180)) ||
       (latitude !== null && (latitude < -90 || latitude > 90))
@@ -1002,7 +1233,9 @@ export class AdsService {
         throw new ForbiddenException('At least one media file is required.');
       }
       if (mediaIds.length > MAX_AD_MEDIAS) {
-        throw new ForbiddenException(`The combined total of medias and mediasId must not exceed ${MAX_AD_MEDIAS}.`);
+        throw new ForbiddenException(
+          `The combined total of medias and mediasId must not exceed ${MAX_AD_MEDIAS}.`,
+        );
       }
 
       const ownedMedias = await this.prisma.media.findMany({
@@ -1021,16 +1254,46 @@ export class AdsService {
     const updated = await this.prisma.ad.update({
       where: { id: ad.id },
       data: {
-        ...(body.description !== undefined ? { description: body.description } : {}),
-        ...(body.contact_phone !== undefined ? { contactPhone: this.optionalString(body.contact_phone) } : {}),
-        ...(body.contact_email !== undefined ? { contactEmail: this.optionalString(body.contact_email) } : {}),
+        ...(body.description !== undefined
+          ? { description: body.description }
+          : {}),
+        ...(body.contact_phone !== undefined
+          ? { contactPhone: this.optionalString(body.contact_phone) }
+          : {}),
+        ...(body.contact_email !== undefined
+          ? { contactEmail: this.optionalString(body.contact_email) }
+          : {}),
         ...(body.price !== undefined ? { price: Number(body.price) } : {}),
-        ...(hasLocalization && resolvedAddress?.address ? { adress: resolvedAddress.address } : body.address !== undefined ? { adress: body.address } : {}),
-        ...(hasLocalization && resolvedAddress?.city ? { city: resolvedAddress.city } : body.city !== undefined ? { city: body.city } : {}),
-        ...(hasLocalization && resolvedAddress?.neighbourhood ? { neighbourhood: resolvedAddress.neighbourhood } : body.neighbourhood !== undefined ? { neighbourhood: body.neighbourhood } : {}),
-        ...(hasLocalization && resolvedAddress?.state ? { state: resolvedAddress.state } : body.state !== undefined ? { state: body.state } : {}),
-        ...(hasLocalization && resolvedAddress?.country ? { country: resolvedAddress.country } : body.country !== undefined ? { country: body.country } : {}),
-        ...(hasLocalization && resolvedAddress?.zip ? { zip: resolvedAddress.zip } : body.zip !== undefined ? { zip: body.zip } : {}),
+        ...(hasLocalization && resolvedAddress?.address
+          ? { adress: resolvedAddress.address }
+          : body.address !== undefined
+            ? { adress: body.address }
+            : {}),
+        ...(hasLocalization && resolvedAddress?.city
+          ? { city: resolvedAddress.city }
+          : body.city !== undefined
+            ? { city: body.city }
+            : {}),
+        ...(hasLocalization && resolvedAddress?.neighbourhood
+          ? { neighbourhood: resolvedAddress.neighbourhood }
+          : body.neighbourhood !== undefined
+            ? { neighbourhood: body.neighbourhood }
+            : {}),
+        ...(hasLocalization && resolvedAddress?.state
+          ? { state: resolvedAddress.state }
+          : body.state !== undefined
+            ? { state: body.state }
+            : {}),
+        ...(hasLocalization && resolvedAddress?.country
+          ? { country: resolvedAddress.country }
+          : body.country !== undefined
+            ? { country: body.country }
+            : {}),
+        ...(hasLocalization && resolvedAddress?.zip
+          ? { zip: resolvedAddress.zip }
+          : body.zip !== undefined
+            ? { zip: body.zip }
+            : {}),
         ...(body.period !== undefined && this.normalizePeriod(body.period)
           ? { period: this.normalizePeriod(body.period) }
           : {}),
@@ -1044,25 +1307,96 @@ export class AdsService {
       await this.prisma.furniture.update({
         where: { id: ad.adId },
         data: {
-          ...(body.height !== undefined ? { height: this.parseOptionalNonNegativeNumber(body.height, 'La hauteur') } : {}),
-          ...(body.width !== undefined ? { width: this.parseOptionalNonNegativeNumber(body.width, 'La largeur') } : {}),
-          ...(body.length !== undefined ? { length: this.parseOptionalNonNegativeNumber(body.length, 'La longueur') } : {}),
-          ...(body.weight !== undefined ? { weight: this.parseOptionalNonNegativeNumber(body.weight, 'Le poids') } : {}),
+          ...(body.height !== undefined
+            ? {
+                height: this.parseOptionalNonNegativeNumber(
+                  body.height,
+                  'La hauteur',
+                ),
+              }
+            : {}),
+          ...(body.width !== undefined
+            ? {
+                width: this.parseOptionalNonNegativeNumber(
+                  body.width,
+                  'La largeur',
+                ),
+              }
+            : {}),
+          ...(body.length !== undefined
+            ? {
+                length: this.parseOptionalNonNegativeNumber(
+                  body.length,
+                  'La longueur',
+                ),
+              }
+            : {}),
+          ...(body.weight !== undefined
+            ? {
+                weight: this.parseOptionalNonNegativeNumber(
+                  body.weight,
+                  'Le poids',
+                ),
+              }
+            : {}),
         },
       });
     } else {
       await this.prisma.realEstate.update({
         where: { id: ad.adId },
         data: {
-          ...(body.toilet !== undefined ? { toilet: this.parseNonNegativeNumber(body.toilet, 'Le nombre de toilettes') } : {}),
-          ...(body.kitchen !== undefined ? { kitchen: this.parseNonNegativeNumber(body.kitchen, 'Le nombre de cuisines') } : {}),
-          ...(body.bedroom !== undefined ? { bedroom: this.parseNonNegativeNumber(body.bedroom, 'Le nombre de chambres') } : {}),
-          ...(body.mainroom !== undefined ? { mainroom: this.parseNonNegativeNumber(body.mainroom, 'Le nombre de salons') } : {}),
-          ...(body.size !== undefined ? { size: this.parseOptionalNonNegativeNumber(body.size, 'La taille') } : {}),
-          ...(body.gate !== undefined ? { gate: ['1', 'true', true].includes(body.gate) } : {}),
-          ...(body.wifi !== undefined ? { wifi: ['1', 'true', true].includes(body.wifi) } : {}),
+          ...(body.toilet !== undefined
+            ? {
+                toilet: this.parseNonNegativeNumber(
+                  body.toilet,
+                  'Le nombre de toilettes',
+                ),
+              }
+            : {}),
+          ...(body.kitchen !== undefined
+            ? {
+                kitchen: this.parseNonNegativeNumber(
+                  body.kitchen,
+                  'Le nombre de cuisines',
+                ),
+              }
+            : {}),
+          ...(body.bedroom !== undefined
+            ? {
+                bedroom: this.parseNonNegativeNumber(
+                  body.bedroom,
+                  'Le nombre de chambres',
+                ),
+              }
+            : {}),
+          ...(body.mainroom !== undefined
+            ? {
+                mainroom: this.parseNonNegativeNumber(
+                  body.mainroom,
+                  'Le nombre de salons',
+                ),
+              }
+            : {}),
+          ...(body.size !== undefined
+            ? {
+                size: this.parseOptionalNonNegativeNumber(
+                  body.size,
+                  'La taille',
+                ),
+              }
+            : {}),
+          ...(body.gate !== undefined
+            ? { gate: ['1', 'true', true].includes(body.gate) }
+            : {}),
+          ...(body.wifi !== undefined
+            ? { wifi: ['1', 'true', true].includes(body.wifi) }
+            : {}),
           ...(body.air_conditioning !== undefined
-            ? { airConditioning: ['1', 'true', true].includes(body.air_conditioning) }
+            ? {
+                airConditioning: ['1', 'true', true].includes(
+                  body.air_conditioning,
+                ),
+              }
             : {}),
           ...(body.security_24h !== undefined
             ? { security24h: ['1', 'true', true].includes(body.security_24h) }
@@ -1071,15 +1405,32 @@ export class AdsService {
             ? { smartTv: ['1', 'true', true].includes(body.smart_tv) }
             : {}),
           ...(body.equipped_kitchen !== undefined
-            ? { equippedKitchen: ['1', 'true', true].includes(body.equipped_kitchen) }
+            ? {
+                equippedKitchen: ['1', 'true', true].includes(
+                  body.equipped_kitchen,
+                ),
+              }
             : {}),
-          ...(body.pool !== undefined ? { pool: ['1', 'true', true].includes(body.pool) } : {}),
-          ...(body.garage !== undefined ? { garage: ['1', 'true', true].includes(body.garage) } : {}),
+          ...(body.pool !== undefined
+            ? { pool: ['1', 'true', true].includes(body.pool) }
+            : {}),
+          ...(body.garage !== undefined
+            ? { garage: ['1', 'true', true].includes(body.garage) }
+            : {}),
           ...(body.furnitured !== undefined
             ? { furnished: ['1', 'true', true].includes(body.furnitured) }
             : {}),
-          ...(body.garden !== undefined ? { garden: ['1', 'true', true].includes(body.garden) } : {}),
-          ...(body.caution !== undefined ? { caution: this.parseOptionalNonNegativeNumber(body.caution, 'La caution') } : {}),
+          ...(body.garden !== undefined
+            ? { garden: ['1', 'true', true].includes(body.garden) }
+            : {}),
+          ...(body.caution !== undefined
+            ? {
+                caution: this.parseOptionalNonNegativeNumber(
+                  body.caution,
+                  'La caution',
+                ),
+              }
+            : {}),
           ...(hasLocalization ? { lng: longitude, lat: latitude } : {}),
         },
       });
@@ -1103,6 +1454,26 @@ export class AdsService {
     return this.show(String(updated.id), userId);
   }
 
+  async updateAdAsAdmin(
+    id: string,
+    body: Record<string, any>,
+    user: AdminUser,
+  ) {
+    if (!user.isAdmin) {
+      throw new ForbiddenException('Admin access required');
+    }
+
+    const ad = await this.prisma.ad.findUnique({ where: { id: BigInt(id) } });
+    if (!ad) throw new NotFoundException('Ad not found');
+
+    const announcer = await this.prisma.announcer.findUnique({
+      where: { id: ad.announcerId },
+    });
+    if (!announcer) throw new NotFoundException('Announcer not found');
+
+    return this.updateAd(id, body, announcer.userId);
+  }
+
   async destroyAd(id: string, userId: bigint) {
     const announcer = await this.ensureAnnouncerUser(userId);
     const ad = await this.prisma.ad.findUnique({ where: { id: BigInt(id) } });
@@ -1121,8 +1492,8 @@ export class AdsService {
     return null;
   }
 
-  async destroyAdAsAdmin(id: string, user: any) {
-    if (!user?.isAdmin) {
+  async destroyAdAsAdmin(id: string, user: AdminUser) {
+    if (!user.isAdmin) {
       throw new ForbiddenException('Admin access required');
     }
 
