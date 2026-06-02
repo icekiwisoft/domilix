@@ -1,12 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { MapListing, MapFiltersState, MapTab } from '../data/types';
+import { MapListing, MapFiltersState, MapTab, DirectionPoint } from '../data/types';
 import MapSearchBar from './MapSearchBar';
 import MapListingCard from './MapListingCard';
 import MapFilters from './MapFilters';
 import MapFavorites from './MapFavorites';
 import MapProPanel from './MapProPanel';
+import MapDirectionsPanel from './MapDirectionsPanel';
 
 interface MapSidebarProps {
   listings: MapListing[];
@@ -24,12 +25,20 @@ interface MapSidebarProps {
   onFiltersChange: (filters: MapFiltersState) => void;
   cities: string[];
   totalCount: number;
+  directionFrom: DirectionPoint | null;
+  directionTo: DirectionPoint | null;
+  onSetDirectionFrom: (pt: DirectionPoint) => void;
+  onSetDirectionTo: (pt: DirectionPoint) => void;
+  onClearDirectionFrom: () => void;
+  onClearDirectionTo: () => void;
+  onClearDirections: () => void;
 }
 
 const TABS = [
   { key: 'listings' as const, label: 'Annonces' },
   { key: 'favorites' as const, label: 'Favoris' },
   { key: 'unlocked' as const, label: 'Débloquées' },
+  { key: 'directions' as const, label: 'Direction' },
   { key: 'filters' as const, label: 'Filtres' },
   { key: 'pro' as const, label: 'Pro' },
 ];
@@ -50,6 +59,13 @@ export default function MapSidebar({
   onFiltersChange,
   cities,
   totalCount,
+  directionFrom,
+  directionTo,
+  onSetDirectionFrom,
+  onSetDirectionTo,
+  onClearDirectionFrom,
+  onClearDirectionTo,
+  onClearDirections,
 }: MapSidebarProps) {
   return (
     <aside className="hidden md:flex h-full w-[376px] min-w-[376px] p-2 pr-0">
@@ -69,13 +85,13 @@ export default function MapSidebar({
         <MapSearchBar value={searchQuery} onChange={onSearchChange} />
       </div>
 
-      <div className="flex border-b border-gray-100">
+      <div className="flex gap-1 overflow-x-auto border-b border-gray-100 px-2 scrollbar-none">
         {TABS.map((tab) => (
           <button
             key={tab.key}
             type="button"
             onClick={() => onTabChange(tab.key)}
-            className={`flex-1 py-2.5 text-xs font-semibold transition relative ${
+            className={`relative shrink-0 whitespace-nowrap px-3 py-2.5 text-xs font-semibold transition ${
               activeTab === tab.key
                 ? 'text-brand-500'
                 : 'text-gray-400 hover:text-gray-600'
@@ -85,7 +101,7 @@ export default function MapSidebar({
             {tab.key === 'unlocked' && `${tab.label} (${unlockedListings.length})`}
             {tab.key !== 'favorites' && tab.key !== 'unlocked' && tab.label}
             {activeTab === tab.key && (
-              <span className="absolute bottom-0 left-1/4 right-1/4 h-0.5 bg-brand-500 rounded-full" />
+              <span className="absolute bottom-0 left-0 right-0 mx-3 h-0.5 bg-brand-500 rounded-full" />
             )}
           </button>
         ))}
@@ -143,6 +159,16 @@ export default function MapSidebar({
               ))
             )}
           </div>
+        )}
+
+        {activeTab === 'directions' && (
+          <MapDirectionsPanel
+            directionFrom={directionFrom}
+            directionTo={directionTo}
+            onClearFrom={onClearDirectionFrom}
+            onClearTo={onClearDirectionTo}
+            onClear={onClearDirections}
+          />
         )}
 
         {activeTab === 'filters' && (

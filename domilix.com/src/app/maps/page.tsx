@@ -7,7 +7,7 @@ import Link from 'next/link';
 import MapBottomSheet from '@pages/Carte/components/MapBottomSheet';
 import MapListingDetailsPanel from '@pages/Carte/components/MapListingDetailsPanel';
 import MapSidebar from '@pages/Carte/components/MapSidebar';
-import { MapListing, MapFiltersState, DEFAULT_FILTERS, MapTab } from '@pages/Carte/data/types';
+import { MapListing, MapFiltersState, DEFAULT_FILTERS, MapTab, DirectionPoint } from '@pages/Carte/data/types';
 import { unlockAd } from '@services/announceApi';
 import { toggleLike } from '@services/favoritesApi';
 import { getMapListings } from '@services/mapsApi';
@@ -36,6 +36,8 @@ function CarteContent() {
   const [unlockLoadingId, setUnlockLoadingId] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<MapTab>('listings');
   const [selectedListingId, setSelectedListingId] = useState<number | null>(null);
+  const [directionFrom, setDirectionFrom] = useState<DirectionPoint | null>(null);
+  const [directionTo, setDirectionTo] = useState<DirectionPoint | null>(null);
   const [filters, setFilters] = useState<MapFiltersState>(DEFAULT_FILTERS);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -103,7 +105,7 @@ function CarteContent() {
     if (favoriteLoadingId === listing.id) return;
     setFavoriteLoadingId(listing.id);
 
-    const wasFavorite = favorites.some((item) => item.id === listing.id);
+    const wasFavorite = listing.is_liked === true || favorites.some((item) => item.id === listing.id);
     setListings((prev) => prev.map((item) => item.id === listing.id ? { ...item, is_liked: !wasFavorite } : item));
     setFavorites((prev) => wasFavorite
       ? prev.filter((item) => item.id !== listing.id)
@@ -235,6 +237,13 @@ function CarteContent() {
             onFiltersChange={setFilters}
             cities={cities}
             totalCount={listings.length}
+            directionFrom={directionFrom}
+            directionTo={directionTo}
+            onSetDirectionFrom={setDirectionFrom}
+            onSetDirectionTo={setDirectionTo}
+            onClearDirectionFrom={() => setDirectionFrom(null)}
+            onClearDirectionTo={() => setDirectionTo(null)}
+            onClearDirections={() => { setDirectionFrom(null); setDirectionTo(null); }}
           />
           <MapView
             listings={mapListings}
@@ -243,6 +252,10 @@ function CarteContent() {
             onSelectListing={handleSelectListing}
             onToggleFavorite={toggleFavorite}
             isFavorite={isFavorite}
+            directionFrom={directionFrom}
+            directionTo={directionTo}
+            onSetDirectionFrom={setDirectionFrom}
+            onSetDirectionTo={setDirectionTo}
           />
           <MapBottomSheet
             listings={mapListings}
@@ -260,6 +273,11 @@ function CarteContent() {
             onFiltersChange={setFilters}
             cities={cities}
             totalCount={listings.length}
+            directionFrom={directionFrom}
+            directionTo={directionTo}
+            onSetDirectionFrom={setDirectionFrom}
+            onSetDirectionTo={setDirectionTo}
+            onClearDirections={() => { setDirectionFrom(null); setDirectionTo(null); }}
           />
           <MapListingDetailsPanel
             listing={selectedListing}

@@ -5,7 +5,7 @@ import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { addressApi, type AddressSearchResult } from '@services/addressApi';
 import { mediaUrl } from '@utils/mediaUrl';
 
-import type { MapListing } from '../data/types';
+import type { MapListing, DirectionPoint } from '../data/types';
 
 import 'leaflet/dist/leaflet.css';
 
@@ -16,6 +16,10 @@ interface MapViewProps {
   onSelectListing: (id: number) => void;
   onToggleFavorite: (listing: MapListing) => void;
   isFavorite: (id: number) => boolean;
+  directionFrom: DirectionPoint | null;
+  directionTo: DirectionPoint | null;
+  onSetDirectionFrom: (pt: DirectionPoint) => void;
+  onSetDirectionTo: (pt: DirectionPoint) => void;
 }
 
 function formatPrice(price: number): string {
@@ -25,9 +29,9 @@ function formatPrice(price: number): string {
 }
 
 function getPropertyLabel(listing: MapListing): string {
-  if (listing.item_type) return listing.item_type;
-  if (listing.ad_type === 'sale') return 'Vente';
-  return 'Location';
+  const propertyType = listing.type === 'furniture' ? 'Mobilier' : 'Immobilier';
+  const adType = listing.ad_type === 'sale' ? 'Vente' : 'Location';
+  return `${propertyType} · ${adType}`;
 }
 
 function createListingIcon(listing: MapListing, isSelected: boolean, liked: boolean): any {
@@ -121,6 +125,10 @@ export default function MapView({
   onSelectListing,
   onToggleFavorite,
   isFavorite,
+  directionFrom,
+  directionTo,
+  onSetDirectionFrom,
+  onSetDirectionTo,
 }: MapViewProps) {
   const mapElementRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<any>(null);
@@ -129,6 +137,28 @@ export default function MapView({
   const [leafletLoaded, setLeafletLoaded] = useState(false);
   const [placeQuery, setPlaceQuery] = useState('');
   const [placeSearching, setPlaceSearching] = useState(false);
+  const [userPosition, setUserPosition] = useState<[number, number] | null>(null);
+  const userMarkerRef = useRef<any>(null);
+  const [contextMenu, setContextMenu] = useState<{ lat: number; lng: number; x: number; y: number } | null>(null);
+  const contextMenuRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!contextMenu) return;
+    const handleClick = () => setContextMenu(null);
+    document.addEventListener('click', handleClick);
+    return () => document.removeEventListener('click', handleClick);
+  }, [contextMenu]);
+  const directionFromMarkerRef = useRef<any>(null);
+  const directionToMarkerRef = useRef<any>(null);
+  const directionLineRef = useRef<any>(null);
+
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `@keyframes domilix-pulse { 0%,100% { transform:scale(1);opacity:0.2; } 50% { transform:scale(1.8);opacity:0.08; } }`;
+    style.id = 'domilix-map-pulse';
+    if (!document.getElementById('domilix-map-pulse')) document.head.appendChild(style);
+    return () => { const s = document.getElementById('domilix-map-pulse'); if (s) s.remove(); };
+  }, []);
 
   useEffect(() => {
     import('leaflet').then(() => setLeafletLoaded(true));
@@ -151,8 +181,11 @@ export default function MapView({
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          setUserPosition([lat, lng]);
           if (mapRef.current) {
-            mapRef.current.flyTo([pos.coords.latitude, pos.coords.longitude], 14, { duration: 0.8 });
+            mapRef.current.flyTo([lat, lng], 14, { duration: 0.8 });
           }
         },
         () => {},
@@ -200,7 +233,18 @@ export default function MapView({
 
     mapRef.current = map;
 
+    map.on('contextmenu', (e: any) => {
+      const clientX = e.originalEvent?.clientX ?? e.containerPoint.x;
+      const clientY = e.originalEvent?.clientY ?? e.containerPoint.y;
+      setContextMenu({ lat: e.latlng.lat, lng: e.latlng.lng, x: clientX, y: clientY });
+    });
+
+    map.on('click', () => setContextMenu(null));
+    map.on('movestart', () => setContextMenu(null));
+
     return () => {
+      map.off('contextmenu');
+      map.off('click');
       markersRef.current.forEach((marker) => map.removeLayer(marker));
       markersRef.current.clear();
       map.remove();
@@ -261,6 +305,139 @@ export default function MapView({
 
   useEffect(() => {
     if (!leafletLoaded || !mapRef.current) return;
+    const L = require('leaflet');
+    const map = mapRef.current;
+
+    if (directionLineRef.current) { map.removeLayer(directionLineRef.current); directionLineRef.current = null; }
+    if (directionFromMarkerRef.current) { map.removeLayer(directionFromMarkerRef.current); directionFromMarkerRef.current = null; }
+    if (directionToMarkerRef.current) { map.removeLayer(directionToMarkerRef.current); directionToMarkerRef.current = null; }
+
+    const createDirectionIcon = (color: string, label: string) => L.divIcon({
+      className: '',
+      html: `<div style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:999px;background:${color};color:#fff;font-size:13px;font-weight:900;border:3px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,0.25)">${label}</div>`,
+      iconSize: [36, 36],
+      iconAnchor: [18, 18],
+    });
+
+    if (directionFrom) {
+      directionFromMarkerRef.current = L.marker([directionFrom.lat, directionFrom.lng], {
+        icon: createDirectionIcon('#10b981', 'A'),
+        zIndexOffset: 3000,
+      }).addTo(map);
+    }
+
+    if (directionTo) {
+      directionToMarkerRef.current = L.marker([directionTo.lat, directionTo.lng], {
+        icon: createDirectionIcon('#E8921A', 'B'),
+        zIndexOffset: 3000,
+      }).addTo(map);
+    }
+
+    let cancelled = false;
+
+    if (directionFrom && directionTo) {
+      const fetchRoute = async () => {
+        try {
+          const url = `https://router.project-osrm.org/route/v1/driving/${directionFrom.lng},${directionFrom.lat};${directionTo.lng},${directionTo.lat}?overview=full&geometries=geojson`;
+          const res = await fetch(url);
+          const data = await res.json();
+          if (cancelled) return;
+          if (data.code === 'Ok' && data.routes?.[0]?.geometry?.coordinates) {
+            const coords = data.routes[0].geometry.coordinates.map((c: number[]) => [c[1], c[0]]);
+            directionLineRef.current = L.polyline(coords, {
+              color: '#E8921A', weight: 4, opacity: 0.75,
+            }).addTo(map);
+          } else {
+            drawFallback();
+          }
+        } catch {
+          if (!cancelled) drawFallback();
+        }
+      };
+
+      const drawFallback = () => {
+        directionLineRef.current = L.polyline(
+          [[directionFrom.lat, directionFrom.lng], [directionTo.lat, directionTo.lng]],
+          { color: '#E8921A', weight: 3, opacity: 0.5, dashArray: '8 8' },
+        ).addTo(map);
+      };
+
+      fetchRoute();
+    }
+
+    return () => {
+      cancelled = true;
+      if (directionLineRef.current) { map.removeLayer(directionLineRef.current); directionLineRef.current = null; }
+      if (directionFromMarkerRef.current) { map.removeLayer(directionFromMarkerRef.current); directionFromMarkerRef.current = null; }
+      if (directionToMarkerRef.current) { map.removeLayer(directionToMarkerRef.current); directionToMarkerRef.current = null; }
+    };
+  }, [leafletLoaded, directionFrom, directionTo]);
+
+  useEffect(() => {
+    if (!leafletLoaded || !mapRef.current) return;
+    const L = require('leaflet');
+    const map = mapRef.current;
+
+    if (userMarkerRef.current) {
+      map.removeLayer(userMarkerRef.current);
+      userMarkerRef.current = null;
+    }
+
+    if (userPosition) {
+      const userIcon = L.divIcon({
+        className: '',
+        html: `
+          <div style="
+            position:relative;
+            transform:translate(-50%,-50%);
+            width:32px;
+            height:32px;
+          ">
+            <div style="
+              position:absolute;
+              inset:0;
+              border-radius:999px;
+              background:rgba(236,72,153,0.2);
+              animation:domilix-pulse 2s ease-in-out infinite;
+            "></div>
+            <div style="
+              position:absolute;
+              top:4px;left:4px;
+              width:24px;
+              height:24px;
+              border-radius:999px;
+              background:linear-gradient(135deg,#ec4899,#d946ef);
+              border:3px solid #fff;
+              box-shadow:0 2px 8px rgba(236,72,153,0.4);
+            "></div>
+            <div style="
+              position:absolute;
+              top:10px;left:10px;
+              width:12px;
+              height:12px;
+              border-radius:999px;
+              background:#fff;
+              opacity:0.5;
+            "></div>
+          </div>
+        `,
+        iconSize: [32, 32],
+        iconAnchor: [16, 16],
+      });
+
+      userMarkerRef.current = L.marker(userPosition, { icon: userIcon, zIndexOffset: 2000 }).addTo(map);
+    }
+
+    return () => {
+      if (userMarkerRef.current) {
+        map.removeLayer(userMarkerRef.current);
+        userMarkerRef.current = null;
+      }
+    };
+  }, [leafletLoaded, userPosition]);
+
+  useEffect(() => {
+    if (!leafletLoaded || !mapRef.current) return;
     if (selectedListingId) {
       const listing = listings.find((l) => l.id === selectedListingId);
       if (listing) {
@@ -280,6 +457,58 @@ export default function MapView({
   return (
     <div className="relative flex-1 h-full min-h-0">
       <div ref={mapElementRef} className="w-full h-full z-0" />
+
+      {contextMenu && (
+        <div
+          ref={contextMenuRef}
+          onClick={(event) => event.stopPropagation()}
+          className="fixed z-[2000] w-52 overflow-hidden rounded-2xl bg-white shadow-[0_12px_36px_rgba(0,0,0,0.18)] ring-1 ring-black/5"
+          style={{ left: Math.min(contextMenu.x + 8, window.innerWidth - 220), top: Math.min(contextMenu.y + 8, window.innerHeight - 240) }}
+        >
+          <div className="px-4 py-2.5 border-b border-gray-100">
+            <p className="text-[10px] font-black uppercase tracking-wider text-gray-400">Coordonnées</p>
+            <p className="mt-0.5 text-sm font-bold text-gray-900">
+              {contextMenu.lat.toFixed(6)}, {contextMenu.lng.toFixed(6)}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              navigator.clipboard.writeText(`${contextMenu.lat}, ${contextMenu.lng}`).catch(() => {});
+              setContextMenu(null);
+            }}
+            className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+          >
+            <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+            </svg>
+            Copier les coordonnées
+          </button>
+          <div className="border-t border-gray-100" />
+          <button
+            type="button"
+            onClick={() => {
+              onSetDirectionFrom({ lat: contextMenu.lat, lng: contextMenu.lng });
+              setContextMenu(null);
+            }}
+            className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+          >
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-[10px] font-black text-white">A</span>
+            Direction depuis
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              onSetDirectionTo({ lat: contextMenu.lat, lng: contextMenu.lng });
+              setContextMenu(null);
+            }}
+            className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+          >
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#E8921A] text-[10px] font-black text-white">B</span>
+            Direction vers
+          </button>
+        </div>
+      )}
 
       <div className="pointer-events-none absolute left-3 right-3 top-3 z-[1000] flex flex-col gap-2 md:left-5 md:right-auto md:top-4 md:max-w-[calc(100%-2rem)] md:flex-row md:items-center">
         <form

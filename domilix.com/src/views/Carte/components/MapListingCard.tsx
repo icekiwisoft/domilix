@@ -30,6 +30,8 @@ export default function MapListingCard({
 }: MapListingCardProps) {
   const badge = ADVERTISER_BADGES[listing.advertiser_type] || ADVERTISER_BADGES.Intermédiaire;
   const imageSrc = mediaUrl(listing.thumbnail || listing.medias?.find((media) => media.thumbnail)?.thumbnail || listing.medias?.find((media) => media.file)?.file);
+  const propertyType = listing.type === 'furniture' ? 'Mobilier' : 'Immobilier';
+  const adType = listing.ad_type === 'sale' ? 'Vente' : 'Location';
 
   return (
     <div
@@ -102,11 +104,14 @@ export default function MapListingCard({
             <span className={`rounded-full border px-2 py-0.5 text-[10px] font-black uppercase tracking-wide ${badge.color}`}>
               {badge.label}
             </span>
-            {listing.item_type && (
+            {listing.type && (
               <span className="rounded-full border border-gray-200 bg-white px-2 py-0.5 text-[10px] font-bold text-gray-600">
-                {listing.item_type}
+                {propertyType}
               </span>
             )}
+            <span className="rounded-full border border-gray-200 bg-white px-2 py-0.5 text-[10px] font-bold text-gray-600">
+              {adType}
+            </span>
             {!listing.is_unlocked && (
               <span className="rounded-full border border-orange-200 bg-orange-50 px-2 py-0.5 text-[10px] font-bold text-orange-700">
                 Contact caché

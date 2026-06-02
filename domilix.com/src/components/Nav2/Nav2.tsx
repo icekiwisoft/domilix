@@ -149,7 +149,7 @@ export default function Nav2({
                         : 'hover:bg-pink-600 hover:border-pink-600 hover:shadow'
                       }`
                       : link.url === '/maps'
-                        ? `relative inline-flex items-center gap-1.5 rounded-full border border-orange-200 bg-orange-50 px-3 py-1.5 text-sm font-black text-orange-700 shadow-sm transition-colors hover:bg-orange-100 xl:text-base ${isActive ? 'ring-2 ring-orange-200' : ''}`
+                        ? `relative inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#E8921A]/10 to-orange-100/60 px-3 py-1.5 text-sm font-black text-[#E8921A] shadow-[inset_0_1px_0_rgba(232,146,26,0.10),0_2px_6px_rgba(232,146,26,0.08)] transition-all duration-200 hover:from-[#E8921A]/15 hover:to-orange-100/80 hover:shadow-[inset_0_1px_0_rgba(232,146,26,0.14),0_4px_12px_rgba(232,146,26,0.14)] xl:text-base ${isActive ? 'ring-1 ring-[#E8921A]/30' : ''}`
                         : isActive
                         ? 'inline-flex items-center gap-1.5 text-primary border-b-2 border-primary pb-1 text-body-md font-semibold'
                         : 'inline-flex items-center gap-1.5 text-on-surface-variant hover:text-primary transition-colors text-body-md font-semibold whitespace-nowrap'
@@ -157,7 +157,7 @@ export default function Nav2({
                 >
                   {linkIcons[link.url]}
                   {link.name}
-                  {link.url === '/maps' && <span className='ml-0.5 rounded-full bg-[#E8921A] px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide text-white'>New</span>}
+                  {link.url === '/maps' && <span className='-mr-1.5 -translate-y-1/3 rounded-full bg-gradient-to-br from-[#E8921A] to-orange-500 px-1.5 py-0.5 text-[8px] font-black uppercase leading-none tracking-widest text-white shadow-[0_2px_4px_rgba(232,146,26,0.3)]'>New</span>}
                 </NavLink>
               </li>
             ))}
@@ -375,12 +375,14 @@ export default function Nav2({
               <li>
                 <NavLink
                   to='/maps'
-                  className='flex items-center gap-3 rounded-2xl border border-orange-200 bg-orange-50 px-4 py-3 text-orange-700 sm:gap-4'
+                  className='flex items-center gap-3 rounded-2xl bg-gradient-to-r from-[#E8921A]/8 to-orange-100/40 px-4 py-3 text-[#E8921A] shadow-[inset_0_1px_0_rgba(232,146,26,0.10)] sm:gap-4'
                   onClick={() => setClick(false)}
                 >
-                  <HiMap className='h-5 w-5 shrink-0' />
-                  <span className='flex-1'>Découvrir Domilix Maps</span>
-                  <span className='rounded-full bg-[#E8921A] px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-white'>New</span>
+                  <span className='flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-[#E8921A] to-orange-500 text-white shadow-[0_3px_8px_rgba(232,146,26,0.25)]'>
+                    <HiMap className='h-4 w-4' />
+                  </span>
+                  <span className='flex-1 font-black'>Domilix Maps</span>
+                  <span className='rounded-full bg-gradient-to-br from-[#E8921A] to-orange-500 px-2 py-0.5 text-[9px] font-black uppercase leading-none tracking-widest text-white shadow-[0_2px_4px_rgba(232,146,26,0.3)]'>New</span>
                 </NavLink>
               </li>
               <li>

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect, useMemo, useState } from 'react';
 
 import { mediaUrl } from '@utils/mediaUrl';
 
@@ -11,6 +12,8 @@ interface MapListingDetailsPanelProps {
   isFavorite: boolean;
   onClose: () => void;
   onToggleFavorite: (listing: MapListing) => void;
+  onUnlock: (listing: MapListing) => void;
+  isUnlocking: boolean;
 }
 
 export default function MapListingDetailsPanel({
@@ -18,14 +21,29 @@ export default function MapListingDetailsPanel({
   isFavorite,
   onClose,
   onToggleFavorite,
+  onUnlock,
+  isUnlocking,
 }: MapListingDetailsPanelProps) {
+  const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
+
+  const gallery = useMemo(() => {
+    if (!listing) return [];
+    const mediaItems = (listing.medias || [])
+      .map((media) => media.file || media.url || media.path || media.thumbnail)
+      .filter((value): value is string => Boolean(value))
+      .map((value) => mediaUrl(value))
+      .filter((value): value is string => Boolean(value));
+    const fallback = mediaUrl(listing.thumbnail);
+    return mediaItems.length > 0 ? mediaItems : fallback ? [fallback] : [];
+  }, [listing]);
+
+  useEffect(() => {
+    setCurrentMediaIndex(0);
+  }, [listing?.id]);
+
   if (!listing) return null;
 
-  const imageSrc = mediaUrl(
-    listing.thumbnail ||
-      listing.medias?.find((media) => media.thumbnail)?.thumbnail ||
-      listing.medias?.find((media) => media.file)?.file,
-  );
+  const imageSrc = gallery[currentMediaIndex] || null;
 
   return (
     <aside className="pointer-events-none absolute bottom-4 right-4 top-4 z-[900] hidden w-[380px] md:block">
@@ -61,11 +79,29 @@ export default function MapListingDetailsPanel({
           </div>
         </div>
 
+        {gallery.length > 1 && (
+          <div className="flex shrink-0 gap-2 overflow-x-auto border-b border-gray-100 bg-white px-4 py-3">
+            {gallery.map((media, index) => (
+              <button
+                key={`${media}-${index}`}
+                type="button"
+                onClick={() => setCurrentMediaIndex(index)}
+                className={`h-16 w-20 shrink-0 overflow-hidden rounded-xl border transition ${currentMediaIndex === index ? 'border-[#E8921A] ring-2 ring-orange-200' : 'border-gray-100 opacity-80 hover:opacity-100'}`}
+                aria-label={`Afficher le média ${index + 1}`}
+              >
+                <img src={media} alt="" className="h-full w-full object-cover" />
+              </button>
+            ))}
+          </div>
+        )}
+
         <div className="min-h-0 flex-1 overflow-y-auto p-5">
           <div className="mb-4 flex flex-wrap gap-2">
-            <span className="rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-[11px] font-black uppercase tracking-wide text-orange-700">{listing.item_type || listing.ad_type}</span>
+            <span className="rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-[11px] font-black uppercase tracking-wide text-orange-700">{listing.type === 'furniture' ? 'Mobilier' : 'Immobilier'}</span>
+            <span className="rounded-full border border-gray-200 bg-white px-3 py-1 text-[11px] font-black uppercase tracking-wide text-gray-600">{listing.ad_type === 'sale' ? 'Vente' : 'Location'}</span>
             {listing.is_verified && <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[11px] font-black text-emerald-700">Vérifié</span>}
             {!listing.is_unlocked && <span className="rounded-full border border-orange-200 bg-white px-3 py-1 text-[11px] font-black text-orange-700">Contact caché</span>}
+            {listing.is_unlocked && <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[11px] font-black text-emerald-700">Débloquée</span>}
           </div>
 
           <h2 className="text-xl font-black leading-tight text-gray-950">{listing.title}</h2>
@@ -97,6 +133,27 @@ export default function MapListingDetailsPanel({
             <p className="text-xs font-black uppercase tracking-wide text-gray-400">Annonceur</p>
             <p className="mt-1 text-sm font-black text-gray-900">{listing.advertiser_name || 'Annonceur Domilix'}</p>
           </div>
+
+          {!listing.is_unlocked && (
+            <div className="mt-4 rounded-2xl border border-orange-200 bg-orange-50 p-4">
+              <div className="flex items-start gap-3">
+                <img src="/dom.png" alt="Domicoin" className="mt-0.5 h-8 w-8" />
+                <div>
+                  <p className="text-sm font-black text-orange-950">Débloquer le contact</p>
+                  <p className="mt-1 text-xs leading-5 text-orange-800">Utilisez 1 Domicoin pour accéder aux coordonnées de cette annonce pendant 7 jours.</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => onUnlock(listing)}
+                disabled={isUnlocking}
+                className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#E8921A] px-4 py-3 text-sm font-black text-white shadow-lg shadow-orange-200 transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                {isUnlocking && <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />}
+                Débloquer avec 1 Domicoin
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="shrink-0 border-t border-gray-100 p-4">

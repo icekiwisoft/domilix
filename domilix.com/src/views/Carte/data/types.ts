@@ -32,7 +32,13 @@ export interface MapListing {
   advertiser_name: string;
 }
 
-export type MapTab = 'listings' | 'favorites' | 'unlocked' | 'filters' | 'pro';
+export type MapTab = 'listings' | 'favorites' | 'unlocked' | 'directions' | 'filters' | 'pro';
+
+export interface DirectionPoint {
+  lat: number;
+  lng: number;
+  label?: string;
+}
 
 export interface MapFiltersState {
   city: string;
