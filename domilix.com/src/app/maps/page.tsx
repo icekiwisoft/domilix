@@ -7,10 +7,13 @@ import Link from 'next/link';
 import MapBottomSheet from '@pages/Carte/components/MapBottomSheet';
 import MapListingDetailsPanel from '@pages/Carte/components/MapListingDetailsPanel';
 import MapSidebar from '@pages/Carte/components/MapSidebar';
-import { MapListing, MapFiltersState, DEFAULT_FILTERS } from '@pages/Carte/data/types';
+import { MapListing, MapFiltersState, DEFAULT_FILTERS, MapTab } from '@pages/Carte/data/types';
+import { unlockAd } from '@services/announceApi';
 import { toggleLike } from '@services/favoritesApi';
 import { getMapListings } from '@services/mapsApi';
 import { MapsProvider, useMaps } from '@context/MapsContext';
+import { useAuth } from '@hooks/useAuth';
+import { signinDialogActions } from '@stores/defineStore';
 
 const MapView = dynamic(() => import('@pages/Carte/components/MapView'), { ssr: false });
 
@@ -26,43 +29,67 @@ function CarteContent() {
   const [listings, setListings] = useState<MapListing[]>([]);
   const [loading, setLoading] = useState(true);
   const { subscriptionActive, loading: mapsLoading } = useMaps();
+  const { isAuthenticated, refreshProfile, user } = useAuth();
   const [favorites, setFavorites] = useState<MapListing[]>([]);
+  const [unlockedListings, setUnlockedListings] = useState<MapListing[]>([]);
   const [favoriteLoadingId, setFavoriteLoadingId] = useState<number | null>(null);
-  const [activeTab, setActiveTab] = useState<'listings' | 'favorites' | 'filters' | 'pro'>('listings');
+  const [unlockLoadingId, setUnlockLoadingId] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState<MapTab>('listings');
   const [selectedListingId, setSelectedListingId] = useState<number | null>(null);
   const [filters, setFilters] = useState<MapFiltersState>(DEFAULT_FILTERS);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const normalizeListing = useCallback((item: any): MapListing => ({
-    ...item,
-    is_liked: item.is_liked ?? false,
-    advertiser_type: item.advertiser_type || 'Propriétaire',
-  }), []);
+  const normalizeListing = useCallback((item: any): MapListing => {
+    const medias = Array.isArray(item.medias)
+      ? item.medias.map((media: any) => ({
+        ...media,
+        file: media.file || media.url || media.path || null,
+        thumbnail: media.thumbnail || media.file || media.url || media.path || null,
+      }))
+      : [];
+
+    return {
+      ...item,
+      type: item.type || (String(item.item_type || '').includes('Furniture') ? 'furniture' : 'realestate'),
+      item_type: item.item_type || item.type || '',
+      medias,
+      thumbnail: item.thumbnail || medias.find((media: any) => media.thumbnail)?.thumbnail || medias.find((media: any) => media.file)?.file || null,
+      is_liked: item.is_liked ?? item.liked ?? false,
+      is_unlocked: item.is_unlocked ?? item.unlocked ?? false,
+      advertiser_type: item.advertiser_type || 'Propriétaire',
+    };
+  }, []);
 
   const loadMapData = useCallback(async () => {
     setLoading(true);
     try {
-      const [announcesResult, favoritesResult] = await Promise.all([
+      const [announcesResult, favoritesResult, unlockedResult] = await Promise.all([
         getMapListings({ per_page: '100' }),
         getMapListings({ per_page: '100', is_liked: '1' }),
+        getMapListings({ per_page: '100', is_unlocked: '1' }),
       ]);
 
       const hasCoordinates = (item: MapListing) => typeof item.latitude === 'number' && typeof item.longitude === 'number';
       const favoriteData = favoritesResult.data.map(normalizeListing).filter(hasCoordinates).map((item) => ({ ...item, is_liked: true }));
+      const unlockedData = unlockedResult.data.map(normalizeListing).filter(hasCoordinates).map((item) => ({ ...item, is_unlocked: true }));
       const favoriteIds = new Set(favoriteData.map((item) => item.id));
+      const unlockedIds = new Set(unlockedData.map((item) => item.id));
       const announceData = announcesResult.data
         .map(normalizeListing)
         .filter(hasCoordinates)
         .map((item) => ({
           ...item,
-          is_liked: item.is_liked || favoriteIds.has(item.id),
+          is_liked: item.is_liked === true || favoriteIds.has(item.id),
+          is_unlocked: item.is_unlocked === true || unlockedIds.has(item.id),
         }));
 
       setListings(announceData);
       setFavorites(favoriteData);
+      setUnlockedListings(unlockedData);
     } catch {
       setListings([]);
       setFavorites([]);
+      setUnlockedListings([]);
     } finally {
       setLoading(false);
     }
@@ -102,9 +129,39 @@ function CarteContent() {
   }, [favoriteLoadingId, favorites]);
 
   const isFavorite = useCallback(
-    (id: number) => favorites.some((l) => l.id === id),
-    [favorites],
+    (id: number) => {
+      const listing = listings.find((item) => item.id === id);
+      if (listing) return listing.is_liked === true;
+      const favorite = favorites.find((item) => item.id === id);
+      return favorite?.is_liked === true;
+    },
+    [favorites, listings],
   );
+
+  const unlockListing = useCallback(async (listing: MapListing) => {
+    if (unlockLoadingId === listing.id || listing.is_unlocked) return;
+    if (!isAuthenticated) {
+      signinDialogActions.toggle();
+      return;
+    }
+    if (Number(user?.credits || 0) <= 0) {
+      window.location.href = '/subscriptions';
+      return;
+    }
+
+    setUnlockLoadingId(listing.id);
+    try {
+      await unlockAd(listing.id);
+      const markUnlocked = (item: MapListing) => item.id === listing.id ? { ...item, is_unlocked: true } : item;
+      const unlockedListing = { ...listing, is_unlocked: true };
+      setListings((prev) => prev.map(markUnlocked));
+      setFavorites((prev) => prev.map(markUnlocked));
+      setUnlockedListings((prev) => prev.some((item) => item.id === listing.id) ? prev.map(markUnlocked) : [unlockedListing, ...prev]);
+      void refreshProfile().catch(() => undefined);
+    } finally {
+      setUnlockLoadingId(null);
+    }
+  }, [isAuthenticated, refreshProfile, unlockLoadingId, user?.credits]);
 
   const filterMapListings = useCallback((items: MapListing[]) => {
     return items.filter((listing) => {
@@ -129,10 +186,11 @@ function CarteContent() {
 
   const filteredListings = useMemo(() => filterMapListings(listings), [filterMapListings, listings]);
   const filteredFavorites = useMemo(() => filterMapListings(favorites), [filterMapListings, favorites]);
-  const mapListings = activeTab === 'favorites' ? filteredFavorites : filteredListings;
+  const filteredUnlockedListings = useMemo(() => filterMapListings(unlockedListings), [filterMapListings, unlockedListings]);
+  const mapListings = activeTab === 'favorites' ? filteredFavorites : activeTab === 'unlocked' ? filteredUnlockedListings : filteredListings;
   const selectedListing = useMemo(
-    () => [...listings, ...favorites].find((listing) => listing.id === selectedListingId) || null,
-    [favorites, listings, selectedListingId],
+    () => [...listings, ...favorites, ...unlockedListings].find((listing) => listing.id === selectedListingId) || null,
+    [favorites, listings, selectedListingId, unlockedListings],
   );
 
   const cities = useMemo(
@@ -164,6 +222,7 @@ function CarteContent() {
           <MapSidebar
             listings={filteredListings}
             favorites={filteredFavorites}
+            unlockedListings={filteredUnlockedListings}
             activeTab={activeTab}
             onTabChange={setActiveTab}
             selectedListingId={selectedListingId}
@@ -188,6 +247,7 @@ function CarteContent() {
           <MapBottomSheet
             listings={mapListings}
             favorites={filteredFavorites}
+            unlockedListings={filteredUnlockedListings}
             activeTab={activeTab}
             onTabChange={setActiveTab}
             selectedListingId={selectedListingId}
@@ -206,6 +266,8 @@ function CarteContent() {
             isFavorite={selectedListing ? isFavorite(selectedListing.id) : false}
             onClose={() => setSelectedListingId(null)}
             onToggleFavorite={toggleFavorite}
+            onUnlock={unlockListing}
+            isUnlocking={selectedListing ? unlockLoadingId === selectedListing.id : false}
           />
         </div>
       ) : (
