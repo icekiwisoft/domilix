@@ -18,3 +18,13 @@ export const getFavoriteAds = async (
   });
   return response.data;
 };
+
+//get unlocked ads for authenticated user
+export const getUnlockedAds = async (
+  params?: Record<string, any>
+): Promise<any> => {
+  const response = await api.get('/announces', {
+    params: { ...params, unlocked: true },
+  });
+  return response.data;
+};

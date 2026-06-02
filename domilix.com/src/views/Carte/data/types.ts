@@ -30,6 +30,8 @@ export interface MapListing {
   is_unlocked: boolean;
   advertiser_type: string;
   advertiser_name: string;
+  contact_phone?: string | null;
+  contact_email?: string | null;
 }
 
 export type MapTab = 'listings' | 'favorites' | 'unlocked' | 'directions' | 'filters' | 'pro';

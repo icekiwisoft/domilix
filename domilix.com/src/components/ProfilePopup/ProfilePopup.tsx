@@ -103,7 +103,7 @@ const ProfilePopup = React.forwardRef<HTMLDivElement, ProfilePopupProps>(
             onClick={event => navigateTo(favoritesHref, event)}
             className={itemClassName}
           >
-            Mes Favoris
+            Mon espace logement
           </button>
 
           <button

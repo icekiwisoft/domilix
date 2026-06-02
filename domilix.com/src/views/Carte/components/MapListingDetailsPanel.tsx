@@ -134,6 +134,27 @@ export default function MapListingDetailsPanel({
             <p className="mt-1 text-sm font-black text-gray-900">{listing.advertiser_name || 'Annonceur Domilix'}</p>
           </div>
 
+          {listing.is_unlocked && (listing.contact_phone || listing.contact_email) && (
+            <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+              <div className="flex items-center gap-2 text-emerald-700">
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <p className="text-sm font-black">Annonce débloquée</p>
+              </div>
+              {listing.contact_phone && (
+                <a href={`tel:${listing.contact_phone}`} className="mt-3 flex items-center gap-3 rounded-xl bg-white px-4 py-3 text-sm font-black text-gray-900 shadow-sm transition hover:bg-emerald-50">
+                  <svg className="h-5 w-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                  {listing.contact_phone}
+                </a>
+              )}
+              {listing.contact_email && (
+                <a href={`mailto:${listing.contact_email}`} className="mt-2 flex items-center gap-3 rounded-xl bg-white px-4 py-3 text-sm font-black text-gray-900 shadow-sm transition hover:bg-emerald-50">
+                  <svg className="h-5 w-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                  {listing.contact_email}
+                </a>
+              )}
+            </div>
+          )}
+
           {!listing.is_unlocked && (
             <div className="mt-4 rounded-2xl border border-orange-200 bg-orange-50 p-4">
               <div className="flex items-start gap-3">

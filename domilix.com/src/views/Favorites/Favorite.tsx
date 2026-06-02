@@ -5,19 +5,49 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link, useSearchParams } from '@router';
 import { motion } from 'framer-motion';
 import { HiHeart } from 'react-icons/hi2';
+import { HiLockOpen } from 'react-icons/hi2';
 import { useAuth } from '../../hooks/useAuth';
 import { signinDialogActions } from '@stores/defineStore';
 
 import { Ad } from '../../utils/types';
-import { getFavoriteAds } from '../../services/favoritesApi';
+import { getFavoriteAds, getUnlockedAds } from '../../services/favoritesApi';
+
+type Tab = 'favorites' | 'unlocked';
 
 export default function Favorite() {
   const [ads, setAds] = useState<Ad[]>([]);
   const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState<Tab>('favorites');
   const [searchParams] = useSearchParams();
   const { isAuthenticated } = useAuth();
+  const [bannerOffset, setBannerOffset] = useState(0);
 
-  const loadFavoriteAds = useCallback(async () => {
+  useEffect(() => {
+    const el = document.documentElement;
+    const updateOffset = () => {
+      const val = getComputedStyle(el).getPropertyValue('--email-verification-banner-offset').trim();
+      setBannerOffset(val ? parseInt(val, 10) : 0);
+    };
+    updateOffset();
+    const observer = new MutationObserver(updateOffset);
+    observer.observe(el, { attributes: true, attributeFilter: ['style'] });
+    return () => observer.disconnect();
+  }, []);
+
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 640px)');
+    const handler = (e: MediaQueryListEvent | MediaQueryList) => setIsDesktop(e.matches);
+    handler(mq);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+
+  const navHeight = isDesktop ? 5 : 4;
+  const headerTop = `calc(${navHeight}rem + ${bannerOffset}px)`;
+
+  const loadAds = useCallback(async () => {
     if (!isAuthenticated) {
       setLoading(false);
       return;
@@ -26,27 +56,51 @@ export default function Favorite() {
     try {
       setLoading(true);
       const params = Object.fromEntries(searchParams);
-      const response = await getFavoriteAds(params);
-      // Handle the case where response has a data property
+      const response = tab === 'favorites'
+        ? await getFavoriteAds(params)
+        : await getUnlockedAds(params);
       const adsData = response?.data || response || [];
       setAds(Array.isArray(adsData) ? adsData : []);
     } catch (error) {
-      console.error('Error loading favorite ads:', error);
+      console.error('Error loading ads:', error);
       setAds([]);
     } finally {
       setLoading(false);
     }
-  }, [searchParams, isAuthenticated]);
+  }, [searchParams, isAuthenticated, tab]);
 
   useEffect(() => {
-    loadFavoriteAds();
-  }, [loadFavoriteAds]);
+    loadAds();
+  }, [loadAds]);
+
+  const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
+    { key: 'favorites', label: 'Favoris', icon: <HiHeart className="h-4 w-4" /> },
+    { key: 'unlocked', label: 'Annonces débloquées', icon: <HiLockOpen className="h-4 w-4" /> },
+  ];
 
   return (
     <div className='min-h-screen bg-white flex flex-col'>
       <Nav2 />
-      <div className='bg-white fixed top-16 z-30 flex px-2  xl:px-10 lg:px-10 md:px-4 py-3 w-full '>
-        <div className=' font-bold text-2xl '>Favoris</div>
+      <div className='bg-white fixed left-0 right-0 z-30 flex flex-col px-2 xl:px-10 lg:px-10 md:px-4 py-3 border-b border-gray-100' style={{ top: headerTop }}>
+        <div className='font-bold text-2xl mb-3'>Mon espace logement</div>
+
+        <div className='flex gap-1 rounded-xl bg-gray-100 p-1'>
+          {tabs.map((t) => (
+            <button
+              key={t.key}
+              type='button'
+              onClick={() => setTab(t.key)}
+              className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
+                tab === t.key
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              {t.icon}
+              {t.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {!isAuthenticated && (
@@ -64,11 +118,10 @@ export default function Favorite() {
               </div>
               <div className='flex-1'>
                 <h3 className='text-lg font-bold text-gray-900 mb-2'>
-                  Connectez-vous pour voir vos favoris
+                  Connectez-vous pour voir vos annonces
                 </h3>
                 <p className='text-gray-700 mb-4'>
-                  Sauvegardez vos annonces préférées et retrouvez-les
-                  facilement en vous connectant à votre compte.
+                  Sauvegardez vos annonces préférées et retrouvez les biens débloqués en vous connectant à votre compte.
                 </p>
                 <button
                   onClick={signinDialogActions.toggle}
@@ -83,10 +136,8 @@ export default function Favorite() {
       )}
 
       <section
-        className={
-          ' ' +
-          'grid 2xl:gap-5 mt-32 py-4 2xl:px-10 xl:px-6 gap-y-4 gap-x-4 2xl:grid-cols-4 lg:grid-cols-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 px-2 md:px-4 flex-1 content-start '
-        }
+        className='grid 2xl:gap-5 py-4 2xl:px-10 xl:px-6 gap-y-4 gap-x-4 2xl:grid-cols-4 lg:grid-cols-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 px-2 md:px-4 flex-1 content-start'
+        style={{ marginTop: navHeight * 16 + 108 + bannerOffset }}
       >
         {!isAuthenticated ? (
           <div className='col-span-full text-center py-12'>
@@ -94,32 +145,34 @@ export default function Favorite() {
               <HiHeart className='w-16 h-16 mx-auto' />
             </div>
             <p className='text-gray-500 text-lg'>
-              Connectez-vous pour voir vos favoris
+              Connectez-vous pour voir vos annonces
             </p>
           </div>
         ) : loading ? (
           <div className='col-span-full text-center py-8'>
-            <div className='text-gray-500'>Chargement des favoris...</div>
+            <div className='text-gray-500'>Chargement...</div>
           </div>
         ) : ads.length === 0 ? (
           <div className='col-span-full text-center py-8'>
             <div className='text-gray-500 mb-4'>
-              Aucune annonce favorite trouvée
+              {tab === 'favorites'
+                ? 'Aucune annonce favorite trouvée'
+                : 'Aucune annonce débloquée'}
             </div>
             <Link
               to='/'
               className='text-orange-600 hover:underline mt-2 inline-block'
             >
-              Parcourir les annonces pour ajouter des favoris
+              {tab === 'favorites'
+                ? 'Parcourir les annonces pour ajouter des favoris'
+                : 'Parcourir les annonces'}
             </Link>
           </div>
         ) : Array.isArray(ads) && ads.length > 0 ? (
           ads.map(ad => <ProductCard key={ad.id} {...ad} />)
         ) : (
           <div className='col-span-full text-center py-8'>
-            <div className='text-gray-500'>
-              Erreur lors du chargement des favoris
-            </div>
+            <div className='text-gray-500'>Erreur lors du chargement</div>
           </div>
         )}
       </section>

@@ -15,6 +15,7 @@ export default function MapNav() {
 
   const [menuOpen, setMenuOpen] = useState(false);
   const { user, isAuthenticated, logout } = useAuth();
+  const userCredits = Number(user?.credits || 0);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -94,6 +95,13 @@ export default function MapNav() {
         <div className="flex items-center gap-2">
           {isAuthenticated ? (
             <>
+              <Link
+                to="/settings?tab=packs"
+                className="flex items-center gap-1 rounded-full border border-gray-200 bg-white py-1 pl-1.5 pr-1.5 transition hover:bg-gray-50 sm:gap-1.5 sm:pl-2 sm:pr-3"
+              >
+                <img src="/dom.png" alt="coin" className="h-4 w-4" />
+                <span className="text-xs font-bold text-brand-600">{userCredits}</span>
+              </Link>
               <button
                 type="button"
                 onClick={() => setShowNotifications(!showNotifications)}

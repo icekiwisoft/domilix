@@ -62,12 +62,14 @@ export class MapsService {
     ad: any,
     liked: boolean,
     unlocked: boolean,
-    announcerName?: string,
-    announcerVerified?: boolean,
+    announcerInfo?: { name?: string; verified?: boolean; phone?: string | null; email?: string | null },
   ) {
     const re = ad.realEstate as { lat?: number | null; lng?: number | null; bedroom?: number; toilet?: number } | null;
     const medias = await Promise.all((ad.medias || []).map((media: any) => this.serializeMedia(media)));
     const thumbnail = medias.find((media) => media.thumbnail)?.thumbnail || medias.find((media) => media.file)?.file || null;
+
+    const contactPhone = (ad.contactPhone as string) || announcerInfo?.phone || null;
+    const contactEmail = (ad.contactEmail as string) || announcerInfo?.email || null;
 
     return {
       id: Number(ad.id),
@@ -89,10 +91,12 @@ export class MapsService {
       bathrooms: re?.toilet ?? 0,
       thumbnail,
       medias,
-      is_verified: announcerVerified ?? false,
+      is_verified: announcerInfo?.verified ?? false,
       is_liked: liked,
       is_unlocked: unlocked,
-      advertiser_name: announcerName ?? '',
+      advertiser_name: announcerInfo?.name ?? '',
+      contact_phone: unlocked ? contactPhone : null,
+      contact_email: unlocked ? contactEmail : null,
     };
   }
 
@@ -172,8 +176,8 @@ export class MapsService {
         ? this.prisma.realEstate.findMany({ where: { id: { in: adIds } }, select: { id: true, lat: true, lng: true, bedroom: true, toilet: true } })
         : ([] as Array<{ id: bigint; lat: number | null; lng: number | null; bedroom: number; toilet: number }>),
       announcerIds.length > 0
-        ? this.prisma.announcer.findMany({ where: { id: { in: announcerIds } }, select: { id: true, name: true, verified: true } })
-        : ([] as Array<{ id: string; name: string; verified: boolean }>),
+        ? this.prisma.announcer.findMany({ where: { id: { in: announcerIds } }, select: { id: true, name: true, verified: true, userId: true } })
+        : ([] as Array<{ id: string; name: string; verified: boolean; userId: bigint }>),
       ads.length > 0
         ? this.prisma.adMedia.findMany({ where: { adId: { in: ads.map((ad) => ad.id.toString()) } }, orderBy: [{ isPresentation: 'desc' }, { id: 'asc' }] })
         : ([] as Array<{ adId: string; mediaId: string }>),
@@ -187,8 +191,17 @@ export class MapsService {
     const reMap = new Map<string, { lat: number | null; lng: number | null; bedroom: number; toilet: number }>();
     for (const re of realEstates) reMap.set(re.id.toString(), re);
 
-    const announcerMap = new Map<string, { name: string; verified: boolean }>();
-    for (const a of announcers) announcerMap.set(a.id, a);
+    const userIds = [...new Set(announcers.map((a) => a.userId).filter(Boolean))];
+    const users = userIds.length
+      ? await this.prisma.user.findMany({ where: { id: { in: userIds } }, select: { id: true, phoneNumber: true, email: true } })
+      : [];
+    const userMap = new Map(users.map((u) => [u.id.toString(), u]));
+
+    const announcerMap = new Map<string, { name: string; verified: boolean; phone?: string | null; email?: string | null }>();
+    for (const a of announcers) {
+      const user = userMap.get(a.userId.toString());
+      announcerMap.set(a.id, { ...a, phone: user?.phoneNumber ?? null, email: user?.email ?? null });
+    }
 
     const mediaMap = new Map<string, any>();
     for (const media of medias) mediaMap.set(media.id, media);
@@ -206,7 +219,7 @@ export class MapsService {
         const liked = likedIds.has(ad.id.toString());
         const unlocked = unlockedIds.has(ad.id.toString());
         const medias = adMediasMap.get(ad.id.toString()) || [];
-        return this.serializeListing({ ...ad, realEstate: re, medias }, liked, unlocked, announcer?.name, announcer?.verified);
+        return this.serializeListing({ ...ad, realEstate: re, medias }, liked, unlocked, announcer);
       })))
       .filter((item) => {
         if (bboxWest !== undefined && bboxSouth !== undefined && bboxEast !== undefined && bboxNorth !== undefined) {
@@ -249,8 +262,8 @@ export class MapsService {
 
     const [announcers, favorites, adMedias] = await Promise.all([
       announcerIds.length > 0
-        ? this.prisma.announcer.findMany({ where: { id: { in: announcerIds } }, select: { id: true, name: true, verified: true } })
-        : ([] as Array<{ id: string; name: string; verified: boolean }>),
+        ? this.prisma.announcer.findMany({ where: { id: { in: announcerIds } }, select: { id: true, name: true, verified: true, userId: true } })
+        : ([] as Array<{ id: string; name: string; verified: boolean; userId: bigint }>),
       currentUserId
         ? this.prisma.favorite.findMany({ where: { userId: currentUserId, adId: { in: ads.map((a) => a.id.toString()) } }, select: { adId: true } })
         : ([] as Array<{ adId: string }>),
@@ -275,8 +288,17 @@ export class MapsService {
     const reMap = new Map<string, { lat: number | null; lng: number | null; bedroom: number; toilet: number }>();
     for (const re of realEstates) { if (nearbyReIds.includes(re.id)) reMap.set(re.id.toString(), re); }
 
-    const announcerMap = new Map<string, { name: string; verified: boolean }>();
-    for (const a of announcers) announcerMap.set(a.id, a);
+    const nearbyUserIds = [...new Set(announcers.map((a) => a.userId).filter(Boolean))];
+    const nearbyUsers = nearbyUserIds.length
+      ? await this.prisma.user.findMany({ where: { id: { in: nearbyUserIds } }, select: { id: true, phoneNumber: true, email: true } })
+      : [];
+    const nearbyUserMap = new Map(nearbyUsers.map((u) => [u.id.toString(), u]));
+
+    const announcerMap = new Map<string, { name: string; verified: boolean; phone?: string | null; email?: string | null }>();
+    for (const a of announcers) {
+      const user = nearbyUserMap.get(a.userId.toString());
+      announcerMap.set(a.id, { ...a, phone: user?.phoneNumber ?? null, email: user?.email ?? null });
+    }
 
     const mediaMap = new Map<string, any>();
     for (const media of medias) mediaMap.set(media.id, media);
@@ -293,7 +315,7 @@ export class MapsService {
       const liked = likedIds.has(ad.id.toString());
       const unlocked = unlockedIds.has(ad.id.toString());
       const medias = adMediasMap.get(ad.id.toString()) || [];
-      return this.serializeListing({ ...ad, realEstate: re, medias }, liked, unlocked, announcer?.name, announcer?.verified);
+      return this.serializeListing({ ...ad, realEstate: re, medias }, liked, unlocked, announcer);
     }));
 
     return { data, total: data.length };
