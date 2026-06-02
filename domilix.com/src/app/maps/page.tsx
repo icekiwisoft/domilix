@@ -5,9 +5,10 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 
 import MapBottomSheet from '@pages/Carte/components/MapBottomSheet';
+import MapListingDetailsPanel from '@pages/Carte/components/MapListingDetailsPanel';
 import MapSidebar from '@pages/Carte/components/MapSidebar';
 import { MapListing, MapFiltersState, DEFAULT_FILTERS } from '@pages/Carte/data/types';
-import { mockListings } from '@pages/Carte/data/mockListings';
+import { toggleLike } from '@services/favoritesApi';
 import { getMapListings } from '@services/mapsApi';
 import { MapsProvider, useMaps } from '@context/MapsContext';
 
@@ -26,46 +27,87 @@ function CarteContent() {
   const [loading, setLoading] = useState(true);
   const { subscriptionActive, loading: mapsLoading } = useMaps();
   const [favorites, setFavorites] = useState<MapListing[]>([]);
+  const [favoriteLoadingId, setFavoriteLoadingId] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<'listings' | 'favorites' | 'filters' | 'pro'>('listings');
   const [selectedListingId, setSelectedListingId] = useState<number | null>(null);
   const [filters, setFilters] = useState<MapFiltersState>(DEFAULT_FILTERS);
   const [searchQuery, setSearchQuery] = useState('');
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const dataResult = await getMapListings({ per_page: '100' });
-        const data = dataResult.data.map((item: any) => ({
-          ...item,
-          is_liked: item.is_liked ?? false,
-          advertiser_type: item.advertiser_type || 'Propriétaire',
-        }));
-        setListings(data);
-        setFavorites(data.filter((l: MapListing) => l.is_liked));
-      } catch {
-        setListings(mockListings);
-        setFavorites(mockListings.filter((l) => l.is_liked));
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, []);
+  const normalizeListing = useCallback((item: any): MapListing => ({
+    ...item,
+    is_liked: item.is_liked ?? false,
+    advertiser_type: item.advertiser_type || 'Propriétaire',
+  }), []);
 
-  const toggleFavorite = useCallback((listing: MapListing) => {
-    setFavorites((prev) => {
-      const exists = prev.find((l) => l.id === listing.id);
-      if (exists) return prev.filter((l) => l.id !== listing.id);
-      return [...prev, { ...listing, is_liked: true }];
-    });
-  }, []);
+  const loadMapData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [announcesResult, favoritesResult] = await Promise.all([
+        getMapListings({ per_page: '100' }),
+        getMapListings({ per_page: '100', is_liked: '1' }),
+      ]);
+
+      const hasCoordinates = (item: MapListing) => typeof item.latitude === 'number' && typeof item.longitude === 'number';
+      const favoriteData = favoritesResult.data.map(normalizeListing).filter(hasCoordinates).map((item) => ({ ...item, is_liked: true }));
+      const favoriteIds = new Set(favoriteData.map((item) => item.id));
+      const announceData = announcesResult.data
+        .map(normalizeListing)
+        .filter(hasCoordinates)
+        .map((item) => ({
+          ...item,
+          is_liked: item.is_liked || favoriteIds.has(item.id),
+        }));
+
+      setListings(announceData);
+      setFavorites(favoriteData);
+    } catch {
+      setListings([]);
+      setFavorites([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [normalizeListing]);
+
+  useEffect(() => {
+    loadMapData();
+  }, [loadMapData]);
+
+  const toggleFavorite = useCallback(async (listing: MapListing) => {
+    if (favoriteLoadingId === listing.id) return;
+    setFavoriteLoadingId(listing.id);
+
+    const wasFavorite = favorites.some((item) => item.id === listing.id);
+    setListings((prev) => prev.map((item) => item.id === listing.id ? { ...item, is_liked: !wasFavorite } : item));
+    setFavorites((prev) => wasFavorite
+      ? prev.filter((item) => item.id !== listing.id)
+      : [{ ...listing, is_liked: true }, ...prev]);
+
+    try {
+      const result = await toggleLike(listing.id);
+      setListings((prev) => prev.map((item) => item.id === listing.id ? { ...item, is_liked: result.liked } : item));
+      setFavorites((prev) => {
+        const exists = prev.some((item) => item.id === listing.id);
+        if (result.liked && !exists) return [{ ...listing, is_liked: true }, ...prev];
+        if (!result.liked) return prev.filter((item) => item.id !== listing.id);
+        return prev;
+      });
+    } catch {
+      setListings((prev) => prev.map((item) => item.id === listing.id ? { ...item, is_liked: wasFavorite } : item));
+      setFavorites((prev) => wasFavorite
+        ? [{ ...listing, is_liked: true }, ...prev.filter((item) => item.id !== listing.id)]
+        : prev.filter((item) => item.id !== listing.id));
+    } finally {
+      setFavoriteLoadingId(null);
+    }
+  }, [favoriteLoadingId, favorites]);
 
   const isFavorite = useCallback(
     (id: number) => favorites.some((l) => l.id === id),
     [favorites],
   );
 
-  const filteredListings = useMemo(() => {
-    return listings.filter((listing) => {
+  const filterMapListings = useCallback((items: MapListing[]) => {
+    return items.filter((listing) => {
       if (searchQuery) {
         const q = searchQuery.toLowerCase();
         const matchesSearch =
@@ -83,7 +125,15 @@ function CarteContent() {
       if (filters.verified_only && !listing.is_verified) return false;
       return true;
     });
-  }, [listings, searchQuery, filters]);
+  }, [searchQuery, filters]);
+
+  const filteredListings = useMemo(() => filterMapListings(listings), [filterMapListings, listings]);
+  const filteredFavorites = useMemo(() => filterMapListings(favorites), [filterMapListings, favorites]);
+  const mapListings = activeTab === 'favorites' ? filteredFavorites : filteredListings;
+  const selectedListing = useMemo(
+    () => [...listings, ...favorites].find((listing) => listing.id === selectedListingId) || null,
+    [favorites, listings, selectedListingId],
+  );
 
   const cities = useMemo(
     () => [...new Set(listings.map((l) => l.city))].sort(),
@@ -113,7 +163,7 @@ function CarteContent() {
         <div className="flex min-h-0 flex-1 flex-col md:flex-row">
           <MapSidebar
             listings={filteredListings}
-            favorites={favorites}
+            favorites={filteredFavorites}
             activeTab={activeTab}
             onTabChange={setActiveTab}
             selectedListingId={selectedListingId}
@@ -128,7 +178,7 @@ function CarteContent() {
             totalCount={listings.length}
           />
           <MapView
-            listings={filteredListings}
+            listings={mapListings}
             selectedListingId={selectedListingId}
             onMarkerClick={handleMarkerClick}
             onSelectListing={handleSelectListing}
@@ -136,8 +186,8 @@ function CarteContent() {
             isFavorite={isFavorite}
           />
           <MapBottomSheet
-            listings={filteredListings}
-            favorites={favorites}
+            listings={mapListings}
+            favorites={filteredFavorites}
             activeTab={activeTab}
             onTabChange={setActiveTab}
             selectedListingId={selectedListingId}
@@ -150,6 +200,12 @@ function CarteContent() {
             onFiltersChange={setFilters}
             cities={cities}
             totalCount={listings.length}
+          />
+          <MapListingDetailsPanel
+            listing={selectedListing}
+            isFavorite={selectedListing ? isFavorite(selectedListing.id) : false}
+            onClose={() => setSelectedListingId(null)}
+            onToggleFavorite={toggleFavorite}
           />
         </div>
       ) : (

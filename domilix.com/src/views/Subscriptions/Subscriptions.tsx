@@ -2,6 +2,7 @@ import ChoiseMode from '@components/Cards/Paiement/ChoiseMode';
 import FooterMinimal from '@components/FooterMinimal/FooterMinimal';
 import Nav2 from '@components/Nav2/Nav2';
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 import { useState } from 'react';
 import { FaCheck, FaPlus } from 'react-icons/fa';
 import { PricingProps } from 'utils/types';
@@ -191,6 +192,29 @@ export default function Subscriptions() {
               <span className='sm:hidden'>Débloquez les contacts des annonces qui vous intéressent.</span>
               <span className='hidden sm:inline'>Débloquez les coordonnées des biens qui vous intéressent et augmentez vos chances de trouver rapidement.</span>
             </p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45 }}
+            className='mx-auto mb-10 max-w-5xl overflow-hidden rounded-[2rem] border border-orange-200 bg-gradient-to-br from-orange-50 via-white to-amber-50 p-5 shadow-sm md:p-7'
+          >
+            <div className='flex flex-col gap-5 md:flex-row md:items-center md:justify-between'>
+              <div>
+                <p className='mb-2 inline-flex rounded-full bg-orange-100 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-[#E8921A]'>Service séparé</p>
+                <h2 className='text-xl font-black text-gray-950 md:text-2xl'>Besoin de chercher sur une carte ?</h2>
+                <p className='mt-2 max-w-2xl text-sm leading-6 text-gray-600'>Les Domicoins servent à débloquer les contacts. Domilix Maps est un abonnement à part pour explorer les biens par quartier, proximité et position sur la carte.</p>
+              </div>
+              <div className='flex shrink-0 flex-col gap-3 sm:flex-row'>
+                <Link href='/maps' className='inline-flex items-center justify-center rounded-2xl border border-orange-200 bg-white px-5 py-3 text-sm font-black text-orange-700 transition hover:bg-orange-50'>
+                  Découvrir Maps
+                </Link>
+                <Link href='/maps/subscription' className='inline-flex items-center justify-center rounded-2xl bg-[#E8921A] px-5 py-3 text-sm font-black text-white shadow-lg shadow-orange-200 transition hover:bg-orange-600'>
+                  Voir les abonnements
+                </Link>
+              </div>
+            </div>
           </motion.div>
 
           <div data-tour='packs-grid' className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto'>

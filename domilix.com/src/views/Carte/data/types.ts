@@ -1,5 +1,6 @@
 export interface MapListing {
   id: number;
+  type?: string;
   title: string;
   description?: string;
   price: number;
@@ -20,6 +21,8 @@ export interface MapListing {
     id: string;
     file: string | null;
     thumbnail: string | null;
+    url?: string | null;
+    path?: string | null;
     type: string | null;
   }>;
   is_liked: boolean;
@@ -28,6 +31,8 @@ export interface MapListing {
   advertiser_type: string;
   advertiser_name: string;
 }
+
+export type MapTab = 'listings' | 'favorites' | 'unlocked' | 'filters' | 'pro';
 
 export interface MapFiltersState {
   city: string;

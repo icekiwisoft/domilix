@@ -24,26 +24,73 @@ function formatPrice(price: number): string {
   return price.toString();
 }
 
-function createPriceIcon(price: number, isSelected: boolean): any {
+function getPropertyLabel(listing: MapListing): string {
+  if (listing.item_type) return listing.item_type;
+  if (listing.ad_type === 'sale') return 'Vente';
+  return 'Location';
+}
+
+function createListingIcon(listing: MapListing, isSelected: boolean, liked: boolean): any {
   if (typeof window === 'undefined') return null;
   const L = require('leaflet');
+  const propertyLabel = getPropertyLabel(listing);
+
   return L.divIcon({
     className: '',
-    html: `<div style="
-      background: ${isSelected ? '#f97316' : '#ffffff'};
-      color: ${isSelected ? '#ffffff' : '#1f2937'};
-      padding: 4px 8px;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 700;
-      white-space: nowrap;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-      border: 2px solid ${isSelected ? '#f97316' : '#ffffff'};
-      transform: translate(-50%, -100%);
-      font-family: system-ui, -apple-system, sans-serif;
-    ">${formatPrice(price)}</div>`,
-    iconSize: [0, 0],
-    iconAnchor: [0, 0],
+    html: `
+      <div style="
+        position:relative;
+        transform:translate(-50%, -104%);
+        font-family:Manrope, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        filter:drop-shadow(0 10px 18px rgba(15,23,42,0.22));
+      ">
+        <div style="
+          position:relative;
+          display:flex;
+          align-items:center;
+          gap:7px;
+          min-width:${isSelected ? '112px' : '92px'};
+          padding:${isSelected ? '7px 10px' : '6px 9px'};
+          border-radius:16px;
+          border:2px solid ${isSelected ? '#E8921A' : 'rgba(255,255,255,0.95)'};
+          background:${isSelected ? 'linear-gradient(135deg,#E8921A,#f97316)' : 'rgba(255,255,255,0.96)'};
+          color:${isSelected ? '#fff' : '#111827'};
+          box-shadow:${isSelected ? '0 14px 28px rgba(232,146,26,0.35)' : '0 8px 22px rgba(15,23,42,0.16)'};
+          white-space:nowrap;
+          backdrop-filter:blur(12px);
+        ">
+          <div style="
+            display:flex;
+            height:28px;
+            width:28px;
+            align-items:center;
+            justify-content:center;
+            border-radius:10px;
+            background:${isSelected ? 'rgba(255,255,255,0.18)' : '#fff7ed'};
+            color:${isSelected ? '#fff' : '#E8921A'};
+            font-size:14px;
+          ">⌂</div>
+          <div style="line-height:1.05">
+            <div style="font-size:${isSelected ? '14px' : '13px'};font-weight:900;letter-spacing:-0.02em">${formatPrice(listing.price)}</div>
+            <div style="margin-top:2px;max-width:78px;overflow:hidden;text-overflow:ellipsis;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;opacity:${isSelected ? '0.82' : '0.48'}">${propertyLabel}</div>
+          </div>
+          ${liked ? `<div style="position:absolute;right:-5px;top:-5px;display:flex;height:18px;width:18px;align-items:center;justify-content:center;border-radius:999px;background:#E8921A;color:white;border:2px solid white;font-size:10px">♥</div>` : ''}
+        </div>
+        <div style="
+          position:absolute;
+          left:50%;
+          bottom:-7px;
+          height:14px;
+          width:14px;
+          transform:translateX(-50%) rotate(45deg);
+          border-right:2px solid ${isSelected ? '#E8921A' : 'rgba(255,255,255,0.95)'};
+          border-bottom:2px solid ${isSelected ? '#E8921A' : 'rgba(255,255,255,0.95)'};
+          background:${isSelected ? '#f97316' : 'rgba(255,255,255,0.96)'};
+        "></div>
+      </div>
+    `,
+    iconSize: [120, 58],
+    iconAnchor: [60, 58],
   });
 }
 
@@ -170,18 +217,37 @@ export default function MapView({
     markersRef.current.clear();
 
     listings.forEach((listing) => {
-      const icon = createPriceIcon(listing.price, selectedListingId === listing.id);
+      const isSelected = selectedListingId === listing.id;
+      const liked = isFavorite(listing.id);
+      const icon = createListingIcon(listing, isSelected, liked);
       if (!icon) return;
       const thumbnail = mediaUrl(listing.thumbnail || listing.medias?.find((media) => media.thumbnail)?.thumbnail || listing.medias?.find((media) => media.file)?.file);
-      const marker = L.marker([listing.latitude, listing.longitude], { icon }).addTo(map);
+      const marker = L.marker([listing.latitude, listing.longitude], {
+        icon,
+        zIndexOffset: isSelected ? 1000 : 0,
+      }).addTo(map);
       marker.on('click', () => onMarkerClick(listing));
       marker.bindPopup(`
-        <div style="font-family:system-ui,sans-serif;min-width:220px;max-width:240px;overflow:hidden;border-radius:14px">
-          ${thumbnail ? `<img src="${thumbnail}" alt="" style="width:100%;height:110px;object-fit:cover;margin:-8px -8px 10px -8px;max-width:calc(100% + 16px)" />` : ''}
-          <div style="font-size:14px;font-weight:800;margin-bottom:4px;color:#111827;line-height:1.25">${listing.title}</div>
-          <div style="font-size:13px;color:#E8921A;font-weight:800;margin-bottom:4px">${listing.price.toLocaleString()} FCFA/${listing.period === 'month' ? 'mois' : 'an'}</div>
-          <div style="font-size:12px;color:#6b7280;margin-bottom:4px">${listing.neighbourhood}, ${listing.city}</div>
-          <div style="font-size:12px;color:#6b7280">${listing.item_type} · ${listing.bedrooms} ch · ${listing.bathrooms} sdb</div>
+        <div style="font-family:Manrope,system-ui,sans-serif;width:250px;overflow:hidden;border-radius:18px;background:#fff">
+          <div style="position:relative;height:128px;background:linear-gradient(135deg,#fff7ed,#f3f4f6);overflow:hidden">
+            ${thumbnail ? `<img src="${thumbnail}" alt="" style="width:100%;height:100%;object-fit:cover" />` : `<div style="display:flex;height:100%;align-items:center;justify-content:center;color:#fed7aa;font-size:42px">⌂</div>`}
+            <div style="position:absolute;inset:auto 0 0 0;height:58px;background:linear-gradient(to top,rgba(0,0,0,.55),transparent)"></div>
+            <div style="position:absolute;left:10px;bottom:9px;border-radius:999px;background:#E8921A;color:white;padding:5px 9px;font-size:12px;font-weight:900;box-shadow:0 8px 18px rgba(232,146,26,.35)">${listing.price.toLocaleString()} FCFA</div>
+            ${liked ? `<div style="position:absolute;right:10px;top:10px;border-radius:999px;background:white;color:#E8921A;height:28px;width:28px;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 8px 18px rgba(0,0,0,.18)">♥</div>` : ''}
+          </div>
+          <div style="padding:12px 12px 13px">
+            <div style="font-size:14px;font-weight:900;margin-bottom:5px;color:#111827;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${listing.title}</div>
+            <div style="display:flex;align-items:center;gap:5px;margin-bottom:9px;color:#6b7280;font-size:12px;font-weight:650">
+              <span style="color:#E8921A">●</span>
+              <span>${listing.neighbourhood || listing.city}${listing.neighbourhood && listing.city ? `, ${listing.city}` : ''}</span>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px">
+              <span style="border:1px solid #fed7aa;background:#fff7ed;color:#c2410c;border-radius:999px;padding:4px 8px;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.04em">${getPropertyLabel(listing)}</span>
+              ${listing.bedrooms ? `<span style="border:1px solid #e5e7eb;background:#fff;color:#4b5563;border-radius:999px;padding:4px 8px;font-size:10px;font-weight:800">${listing.bedrooms} ch</span>` : ''}
+              ${listing.bathrooms ? `<span style="border:1px solid #e5e7eb;background:#fff;color:#4b5563;border-radius:999px;padding:4px 8px;font-size:10px;font-weight:800">${listing.bathrooms} sdb</span>` : ''}
+              ${listing.is_verified ? `<span style="border:1px solid #bbf7d0;background:#f0fdf4;color:#15803d;border-radius:999px;padding:4px 8px;font-size:10px;font-weight:900">Verifie</span>` : ''}
+            </div>
+          </div>
         </div>
       `);
       markersRef.current.set(listing.id, marker);
@@ -191,7 +257,7 @@ export default function MapView({
       markersRef.current.forEach((marker) => map.removeLayer(marker));
       markersRef.current.clear();
     };
-  }, [listings, selectedListingId, leafletLoaded, onMarkerClick]);
+  }, [listings, selectedListingId, leafletLoaded, onMarkerClick, isFavorite]);
 
   useEffect(() => {
     if (!leafletLoaded || !mapRef.current) return;

@@ -1,0 +1,110 @@
+'use client';
+
+import Link from 'next/link';
+
+import { mediaUrl } from '@utils/mediaUrl';
+
+import { MapListing } from '../data/types';
+
+interface MapListingDetailsPanelProps {
+  listing: MapListing | null;
+  isFavorite: boolean;
+  onClose: () => void;
+  onToggleFavorite: (listing: MapListing) => void;
+}
+
+export default function MapListingDetailsPanel({
+  listing,
+  isFavorite,
+  onClose,
+  onToggleFavorite,
+}: MapListingDetailsPanelProps) {
+  if (!listing) return null;
+
+  const imageSrc = mediaUrl(
+    listing.thumbnail ||
+      listing.medias?.find((media) => media.thumbnail)?.thumbnail ||
+      listing.medias?.find((media) => media.file)?.file,
+  );
+
+  return (
+    <aside className="pointer-events-none absolute bottom-4 right-4 top-4 z-[900] hidden w-[380px] md:block">
+      <div className="pointer-events-auto flex h-full flex-col overflow-hidden rounded-[1.75rem] border border-orange-100 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.18)]">
+        <div className="relative h-56 shrink-0 bg-gradient-to-br from-orange-50 to-gray-100">
+          {imageSrc ? (
+            <img src={imageSrc} alt={listing.title} className="h-full w-full object-cover" />
+          ) : (
+            <div className="flex h-full items-center justify-center text-6xl text-orange-200">⌂</div>
+          )}
+          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 to-transparent" />
+          <button
+            type="button"
+            onClick={onClose}
+            className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-gray-700 shadow-lg transition hover:bg-white"
+            aria-label="Fermer le détail"
+          >
+            ×
+          </button>
+          <button
+            type="button"
+            onClick={() => onToggleFavorite(listing)}
+            className="absolute left-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/95 shadow-lg transition hover:bg-orange-50"
+            aria-label={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+          >
+            <svg className={`h-5 w-5 ${isFavorite ? 'fill-[#E8921A] text-[#E8921A]' : 'text-gray-500'}`} viewBox="0 0 24 24" fill={isFavorite ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+          </button>
+          <div className="absolute bottom-4 left-4 rounded-2xl bg-[#E8921A] px-4 py-2 text-white shadow-lg shadow-orange-900/20">
+            <p className="text-lg font-black leading-none">{listing.price.toLocaleString()} FCFA</p>
+            <p className="mt-1 text-[10px] font-black uppercase tracking-wide text-white/75">/{listing.period === 'month' ? 'mois' : 'an'}</p>
+          </div>
+        </div>
+
+        <div className="min-h-0 flex-1 overflow-y-auto p-5">
+          <div className="mb-4 flex flex-wrap gap-2">
+            <span className="rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-[11px] font-black uppercase tracking-wide text-orange-700">{listing.item_type || listing.ad_type}</span>
+            {listing.is_verified && <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[11px] font-black text-emerald-700">Vérifié</span>}
+            {!listing.is_unlocked && <span className="rounded-full border border-orange-200 bg-white px-3 py-1 text-[11px] font-black text-orange-700">Contact caché</span>}
+          </div>
+
+          <h2 className="text-xl font-black leading-tight text-gray-950">{listing.title}</h2>
+          <p className="mt-2 text-sm font-semibold text-gray-500">{listing.neighbourhood}{listing.neighbourhood && listing.city ? ', ' : ''}{listing.city}</p>
+
+          <div className="mt-5 grid grid-cols-3 gap-2">
+            <div className="rounded-2xl bg-orange-50 p-3 text-center">
+              <p className="text-lg font-black text-gray-950">{listing.bedrooms || '-'}</p>
+              <p className="text-[10px] font-bold uppercase text-gray-400">Chambres</p>
+            </div>
+            <div className="rounded-2xl bg-orange-50 p-3 text-center">
+              <p className="text-lg font-black text-gray-950">{listing.bathrooms || '-'}</p>
+              <p className="text-[10px] font-bold uppercase text-gray-400">SDB</p>
+            </div>
+            <div className="rounded-2xl bg-orange-50 p-3 text-center">
+              <p className="truncate text-lg font-black text-gray-950">{listing.devise || 'XOF'}</p>
+              <p className="text-[10px] font-bold uppercase text-gray-400">Devise</p>
+            </div>
+          </div>
+
+          {listing.description && (
+            <div className="mt-5">
+              <h3 className="text-sm font-black text-gray-950">Description</h3>
+              <p className="mt-2 line-clamp-6 text-sm leading-6 text-gray-600">{listing.description}</p>
+            </div>
+          )}
+
+          <div className="mt-5 rounded-2xl border border-gray-100 bg-gray-50 p-4">
+            <p className="text-xs font-black uppercase tracking-wide text-gray-400">Annonceur</p>
+            <p className="mt-1 text-sm font-black text-gray-900">{listing.advertiser_name || 'Annonceur Domilix'}</p>
+          </div>
+        </div>
+
+        <div className="shrink-0 border-t border-gray-100 p-4">
+          <Link href={`/houses/${listing.id}`} className="flex w-full items-center justify-center rounded-2xl bg-[#E8921A] px-5 py-3 text-sm font-black text-white shadow-lg shadow-orange-200 transition hover:bg-orange-600">
+            Voir l’annonce complète
+          </Link>
+        </div>
+      </div>
+    </aside>
+  );
+}

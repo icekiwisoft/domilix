@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { PrismaService } from '../prisma/prisma.service';
 import { QueryMapsListingsDto, QueryMapsNearbyDto } from './dto/query-maps.dto';
 import { ObjectStorageService } from '../common/object-storage/object-storage.service';
-import { storageUrl } from '../common/http/formatters';
+import { itemTypeToApiType, storageUrl } from '../common/http/formatters';
 
 export const MAPS_PLANS = {
   decouverte: { label: 'Découverte', price: 0, durationDays: 0, unlockCount: 0, durationHours: 12 },
@@ -17,6 +17,8 @@ type MapMedia = {
   id: string;
   file: string | null;
   thumbnail: string | null;
+  url: string | null;
+  path: string | null;
   type: string | null;
 };
 
@@ -41,13 +43,24 @@ export class MapsService {
       id: media.id,
       file: signedFile || storageUrl(media.file),
       thumbnail: signedThumbnail || signedFile || storageUrl(media.thumbnail || media.file),
+      url: signedFile || storageUrl(media.file),
+      path: storageUrl(media.file),
       type: media.type || null,
     };
+  }
+
+  private wantsLikedOnly(value?: string) {
+    return ['1', 'true', 'yes'].includes(String(value || '').toLowerCase());
+  }
+
+  private wantsUnlockedOnly(value?: string) {
+    return ['1', 'true', 'yes'].includes(String(value || '').toLowerCase());
   }
 
   private async serializeListing(
     ad: any,
     liked: boolean,
+    unlocked: boolean,
     announcerName?: string,
     announcerVerified?: boolean,
   ) {
@@ -57,6 +70,7 @@ export class MapsService {
 
     return {
       id: Number(ad.id),
+      type: itemTypeToApiType(ad.itemType as string),
       title: ad.description?.substring(0, 80) || 'Annonce',
       description: ad.description as string | undefined,
       price: Number(ad.price),
@@ -76,6 +90,7 @@ export class MapsService {
       medias,
       is_verified: announcerVerified ?? false,
       is_liked: liked,
+      is_unlocked: unlocked,
       advertiser_name: announcerName ?? '',
     };
   }
@@ -101,13 +116,30 @@ export class MapsService {
     }
 
     let likedIds = new Set<string>();
-    if (query.is_liked && currentUserId) {
+    const likedOnly = this.wantsLikedOnly(query.is_liked);
+    let unlockedIds = new Set<string>();
+    const unlockedOnly = this.wantsUnlockedOnly(query.is_unlocked);
+
+    if ((likedOnly || unlockedOnly) && !currentUserId) {
+      return { data: [], total: 0 };
+    }
+
+    if (likedOnly && currentUserId) {
       const favorites = await this.prisma.favorite.findMany({
         where: { userId: currentUserId },
         select: { adId: true },
       });
       likedIds = new Set(favorites.map((f) => f.adId));
       Object.assign(where, { id: { in: [...likedIds].map((id) => BigInt(id)) } });
+    }
+
+    if (unlockedOnly && currentUserId) {
+      const unlockings = await this.prisma.unlocking.findMany({
+        where: { userId: currentUserId, expiresAt: { gt: new Date() } },
+        select: { adId: true },
+      });
+      unlockedIds = new Set(unlockings.map((item) => item.adId));
+      Object.assign(where, { id: { in: [...unlockedIds].map((id) => BigInt(id)) } });
     }
 
     const [ads, total] = await Promise.all([
@@ -124,6 +156,14 @@ export class MapsService {
         select: { adId: true },
       });
       likedIds = new Set(favorites.map((f) => f.adId));
+    }
+
+    if (currentUserId && unlockedIds.size === 0) {
+      const unlockings = await this.prisma.unlocking.findMany({
+        where: { userId: currentUserId, adId: { in: ads.map((a) => a.id.toString()) }, expiresAt: { gt: new Date() } },
+        select: { adId: true },
+      });
+      unlockedIds = new Set(unlockings.map((item) => item.adId));
     }
 
     const [realEstates, announcers, adMedias] = await Promise.all([
@@ -163,8 +203,9 @@ export class MapsService {
         const re = reMap.get(ad.adId.toString()) ?? null;
         const announcer = announcerMap.get(ad.announcerId);
         const liked = likedIds.has(ad.id.toString());
+        const unlocked = unlockedIds.has(ad.id.toString());
         const medias = adMediasMap.get(ad.id.toString()) || [];
-        return this.serializeListing({ ...ad, realEstate: re, medias }, liked, announcer?.name, announcer?.verified);
+        return this.serializeListing({ ...ad, realEstate: re, medias }, liked, unlocked, announcer?.name, announcer?.verified);
       })))
       .filter((item) => {
         if (bboxWest !== undefined && bboxSouth !== undefined && bboxEast !== undefined && bboxNorth !== undefined) {
@@ -223,6 +264,12 @@ export class MapsService {
       : [];
 
     const likedIds = new Set(favorites.map((f) => f.adId));
+    const unlockedIds = currentUserId
+      ? new Set((await this.prisma.unlocking.findMany({
+        where: { userId: currentUserId, adId: { in: ads.map((a) => a.id.toString()) }, expiresAt: { gt: new Date() } },
+        select: { adId: true },
+      })).map((item) => item.adId))
+      : new Set<string>();
 
     const reMap = new Map<string, { lat: number | null; lng: number | null; bedroom: number; toilet: number }>();
     for (const re of realEstates) { if (nearbyReIds.includes(re.id)) reMap.set(re.id.toString(), re); }
@@ -243,8 +290,9 @@ export class MapsService {
       const re = reMap.get(ad.adId.toString()) ?? null;
       const announcer = announcerMap.get(ad.announcerId);
       const liked = likedIds.has(ad.id.toString());
+      const unlocked = unlockedIds.has(ad.id.toString());
       const medias = adMediasMap.get(ad.id.toString()) || [];
-      return this.serializeListing({ ...ad, realEstate: re, medias }, liked, announcer?.name, announcer?.verified);
+      return this.serializeListing({ ...ad, realEstate: re, medias }, liked, unlocked, announcer?.name, announcer?.verified);
     }));
 
     return { data, total: data.length };

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { MapListing, MapFiltersState } from '../data/types';
+import { MapListing, MapFiltersState, MapTab } from '../data/types';
 import MapSearchBar from './MapSearchBar';
 import MapListingCard from './MapListingCard';
 import MapFilters from './MapFilters';
@@ -11,8 +11,9 @@ import MapProPanel from './MapProPanel';
 interface MapBottomSheetProps {
   listings: MapListing[];
   favorites: MapListing[];
-  activeTab: 'listings' | 'favorites' | 'filters' | 'pro';
-  onTabChange: (tab: 'listings' | 'favorites' | 'filters' | 'pro') => void;
+  unlockedListings: MapListing[];
+  activeTab: MapTab;
+  onTabChange: (tab: MapTab) => void;
   selectedListingId: number | null;
   onSelectListing: (id: number) => void;
   onToggleFavorite: (listing: MapListing) => void;
@@ -28,6 +29,7 @@ interface MapBottomSheetProps {
 const TABS = [
   { key: 'listings' as const, label: 'Annonces' },
   { key: 'favorites' as const, label: 'Favoris' },
+  { key: 'unlocked' as const, label: 'Débloquées' },
   { key: 'filters' as const, label: 'Filtres' },
   { key: 'pro' as const, label: 'Pro' },
 ];
@@ -35,6 +37,7 @@ const TABS = [
 export default function MapBottomSheet({
   listings,
   favorites,
+  unlockedListings,
   activeTab,
   onTabChange,
   selectedListingId,
@@ -109,7 +112,9 @@ export default function MapBottomSheet({
                 : 'text-gray-400 hover:text-gray-600'
             }`}
           >
-            {tab.label === 'Favoris' ? `${tab.label} (${favorites.length})` : tab.label}
+            {tab.key === 'favorites' && `${tab.label} (${favorites.length})`}
+            {tab.key === 'unlocked' && `${tab.label} (${unlockedListings.length})`}
+            {tab.key !== 'favorites' && tab.key !== 'unlocked' && tab.label}
             {activeTab === tab.key && (
               <span className="absolute bottom-0 left-1/4 right-1/4 h-0.5 bg-brand-500 rounded-full" />
             )}
@@ -121,6 +126,7 @@ export default function MapBottomSheet({
         <div className="py-1.5 text-xs text-gray-400">
           {activeTab === 'listings' && `${listings.length} annonce${listings.length > 1 ? 's' : ''}`}
           {activeTab === 'favorites' && `${favorites.length} favori${favorites.length > 1 ? 's' : ''}`}
+          {activeTab === 'unlocked' && `${unlockedListings.length} débloquée${unlockedListings.length > 1 ? 's' : ''}`}
         </div>
 
         {activeTab === 'listings' && (
@@ -150,6 +156,26 @@ export default function MapBottomSheet({
             onSelectListing={onSelectListing}
             onToggleFavorite={onToggleFavorite}
           />
+        )}
+
+        {activeTab === 'unlocked' && (
+          <div className="space-y-2 pb-4">
+            {unlockedListings.length === 0 ? (
+              <p className="text-sm text-gray-400 text-center py-6">Aucune annonce débloquée</p>
+            ) : (
+              unlockedListings.map((listing) => (
+                <MapListingCard
+                  key={listing.id}
+                  listing={listing}
+                  isSelected={selectedListingId === listing.id}
+                  isFavorite={isFavorite(listing.id)}
+                  onSelect={() => onSelectListing(listing.id)}
+                  onToggleFavorite={() => onToggleFavorite(listing)}
+                  compact
+                />
+              ))
+            )}
+          </div>
         )}
 
         {activeTab === 'filters' && (

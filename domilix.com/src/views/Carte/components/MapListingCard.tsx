@@ -34,7 +34,7 @@ export default function MapListingCard({
   return (
     <div
       onClick={onSelect}
-      className={`relative w-full cursor-pointer rounded-2xl border text-left transition-all duration-200 ${
+      className={`group relative w-full cursor-pointer rounded-2xl border text-left transition-all duration-200 ${
         isSelected
           ? 'border-orange-300 bg-gradient-to-br from-orange-50 via-white to-white shadow-[0_10px_24px_rgba(232,146,26,0.20)] ring-2 ring-orange-400/25'
           : 'border-transparent bg-white hover:border-orange-100 hover:bg-orange-50/30 hover:shadow-sm'
@@ -77,7 +77,7 @@ export default function MapListingCard({
                 e.stopPropagation();
                 onToggleFavorite();
               }}
-              className="-mr-1 -mt-1 flex-shrink-0 rounded-full p-1 transition hover:bg-orange-100"
+              className={`-mr-1 -mt-1 flex-shrink-0 rounded-full p-1 transition hover:bg-orange-100 ${isFavorite ? 'opacity-100' : 'opacity-100 md:opacity-0 md:group-hover:opacity-100'}`}
             >
               <svg
                 className={`w-4 h-4 ${isFavorite ? 'text-orange-500 fill-orange-500' : 'text-gray-300'}`}
