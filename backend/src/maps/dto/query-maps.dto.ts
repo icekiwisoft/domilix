@@ -31,6 +31,9 @@ export class QueryMapsListingsDto {
   @ApiPropertyOptional({ description: 'Ad type (location/sale)' })
   ad_type?: string;
 
+  @ApiPropertyOptional({ description: 'Filter by user likes (1 = only liked)' })
+  is_liked?: string;
+
   @ApiPropertyOptional({ description: 'Page number' })
   page?: string;
 

@@ -16,7 +16,7 @@ export interface MapListing {
   bedrooms: number;
   bathrooms: number;
   thumbnail: string | null;
-  is_favorite: boolean;
+  is_liked: boolean;
   is_verified: boolean;
   is_unlocked: boolean;
   advertiser_type: string;

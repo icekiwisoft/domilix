@@ -129,6 +129,7 @@ model User {
   favorites         Favorite[]
   unlockings        Unlocking[]
   announcerRequests AnnouncerRequest[]
+  mapsSubscriptions MapsSubscription[]
 
   @@map("users")
 }
@@ -413,6 +414,23 @@ model CampaignRecipient {
   @@index([campaignId], map: "campaign_recipients_campaign_id_foreign")
   @@index([newsletterId], map: "campaign_recipients_newsletter_id_foreign")
   @@map("campaign_recipients")
+}
+
+model MapsSubscription {
+  id          BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  userId      BigInt    @map("user_id") @db.UnsignedBigInt
+  plan        String    @default("decouverte") @db.VarChar(50)
+  active      Boolean   @default(true)
+  price       Decimal   @default(0) @db.Decimal(10, 2)
+  unlockCount Int       @default(0) @map("unlock_count")
+  startDate   DateTime? @map("start_date") @db.Date
+  endDate     DateTime? @map("end_date") @db.Date
+  createdAt   DateTime? @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt   DateTime? @default(now()) @map("updated_at") @db.Timestamp(0)
+  user        User      @relation(fields: [userId], references: [id])
+
+  @@index([userId], map: "maps_subscriptions_user_id_foreign")
+  @@map("maps_subscriptions")
 }
 
 model Broadcast {
