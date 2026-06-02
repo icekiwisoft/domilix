@@ -15,14 +15,15 @@ const MAPS_PACKS = [
     label: 'Decouverte',
     price: 0,
     duration: '12 heures',
-    unlockCount: 0,
+    unlockCount: 2,
     accent: 'emerald',
     description: 'Tester Domilix Maps et explorer la carte sans engagement.',
   },
-  {
+    {
     id: 'starter',
     label: 'Starter',
-    price: 2000,
+    price: 1000,
+    originalPrice: 2000,
     duration: '30 jours',
     unlockCount: 5,
     accent: 'slate',
@@ -31,7 +32,8 @@ const MAPS_PACKS = [
   {
     id: 'pro',
     label: 'Pro',
-    price: 5000,
+    price: 2500,
+    originalPrice: 5000,
     duration: '30 jours',
     unlockCount: 20,
     accent: 'orange',
@@ -41,7 +43,8 @@ const MAPS_PACKS = [
   {
     id: 'business',
     label: 'Business',
-    price: 15000,
+    price: 7500,
+    originalPrice: 15000,
     duration: '30 jours',
     unlockCount: 50,
     accent: 'black',
@@ -122,6 +125,10 @@ export default function SubscriptionPage() {
             <p className="mx-auto mt-4 max-w-2xl text-sm leading-6 text-gray-500 md:text-base">
               Les packs Maps donnent acces a la carte interactive et aux recherches geolocalisees. Les Domicoins restent separes pour debloquer les contacts.
             </p>
+            <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-100 to-orange-100 px-5 py-2 text-sm font-bold text-[#E8921A] shadow-sm">
+              <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" fillRule="evenodd" /></svg>
+              Prix de lancement — profitez-en !
+            </div>
           </div>
 
           {subscriptionActive && subscription && (
@@ -176,7 +183,7 @@ export default function SubscriptionPage() {
                 const isPro = pack.id === 'pro';
                 const isCurrentPack = subscription?.plan === pack.id && subscriptionActive;
                 const features = pack.unlockCount > 0
-                  ? [...BASE_FEATURES, `${pack.unlockCount} deblocage${pack.unlockCount > 1 ? 's' : ''} de contact`, 'Coordonnees exactes des biens']
+                  ? [...BASE_FEATURES, `${pack.unlockCount} Domicoins inclus`, 'Deblocage des contacts et coordonnees']
                   : BASE_FEATURES;
 
                 return (
@@ -209,11 +216,28 @@ export default function SubscriptionPage() {
                         <p className="mt-2 min-h-[44px] text-sm leading-5 text-gray-500">{pack.description}</p>
                       </div>
 
-                      <div className="mb-6 rounded-2xl bg-gray-50 p-4">
-                        <p className={`text-3xl font-black tracking-tight ${isFree ? 'text-emerald-600' : 'text-gray-950'}`}>
-                          {isFree ? 'Gratuit' : `${pack.price.toLocaleString()} FCFA`}
+                      <div className="mb-6 rounded-2xl bg-gray-50 px-5 py-5">
+                        {!isFree && pack.originalPrice ? (
+                          <div className="text-center">
+                            <p className="text-4xl font-black tracking-tight text-gray-950">
+                              {pack.price.toLocaleString()}{' '}
+                              <span className="text-base font-bold text-gray-400">FCFA</span>
+                            </p>
+                            <div className="mt-1.5 flex items-center justify-center gap-2">
+                              <span className="text-sm text-gray-400 line-through">{pack.originalPrice.toLocaleString()} FCFA</span>
+                              <span className="inline-block rounded-full bg-red-100 px-2.5 py-0.5 text-[11px] font-black text-red-600">
+                                -{Math.round((1 - pack.price / pack.originalPrice) * 100)}%
+                              </span>
+                            </div>
+                          </div>
+                        ) : (
+                          <p className={`text-center text-4xl font-black tracking-tight ${isFree ? 'text-emerald-600' : 'text-gray-950'}`}>
+                            {isFree ? 'Gratuit' : `${pack.price.toLocaleString()} FCFA`}
+                          </p>
+                        )}
+                        <p className="mt-2 text-center text-xs font-semibold text-gray-400">
+                          {pack.duration}
                         </p>
-                        <p className="mt-1 text-xs font-semibold text-gray-400">Validite : {pack.duration}</p>
                       </div>
 
                       <ul className="mb-6 flex-1 space-y-3">

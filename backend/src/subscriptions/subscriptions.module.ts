@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
+import { MapsModule } from '../maps/maps.module';
 import {
   SubscriptionsController,
   WebhooksController,
@@ -7,7 +8,7 @@ import {
 import { SubscriptionsService } from './subscriptions.service';
 
 @Module({
-  imports: [AuthModule],
+  imports: [AuthModule, MapsModule],
   controllers: [SubscriptionsController, WebhooksController],
   providers: [SubscriptionsService],
 })

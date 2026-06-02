@@ -7,9 +7,9 @@ import { getAuthToken } from '@stores/defineStore';
 
 const MAPS_PACKS = [
   { id: 'decouverte', label: 'Decouverte', price: 0, duration: '12h', unlockCount: 0 },
-  { id: 'starter', label: 'Starter', price: 2000, duration: '30 jours', unlockCount: 5 },
-  { id: 'pro', label: 'Pro', price: 5000, duration: '30 jours', unlockCount: 20, popular: true },
-  { id: 'business', label: 'Business', price: 15000, duration: '30 jours', unlockCount: 50 },
+  { id: 'starter', label: 'Starter', price: 1000, originalPrice: 2000, duration: '30 jours', unlockCount: 5 },
+  { id: 'pro', label: 'Pro', price: 2500, originalPrice: 5000, duration: '30 jours', unlockCount: 20, popular: true },
+  { id: 'business', label: 'Business', price: 7500, originalPrice: 15000, duration: '30 jours', unlockCount: 50 },
 ];
 
 function MapIcon({ className }: { className?: string }) {
@@ -33,8 +33,8 @@ function getPlanFeatures(plan: typeof MAPS_PACKS[number]) {
   if (plan.unlockCount === 0) return base;
   return [
     ...base,
-    `${plan.unlockCount} deblocage${plan.unlockCount > 1 ? 's' : ''} de contact`,
-    'Coordonnees exactes des annonces',
+    `${plan.unlockCount} Domicoins inclus`,
+    'Deblocage des contacts et coordonnees',
   ];
 }
 
@@ -90,7 +90,7 @@ export default function MapProPanel() {
               {subscription.unlock_count > 0 && (
                 <div className="flex items-center gap-2 text-sm text-white/80">
                   <CheckIcon className="h-4 w-4 shrink-0 text-emerald-400" />
-                  <span>{subscription.unlock_count} deblocage{subscription.unlock_count > 1 ? 's' : ''} de contact</span>
+                  <span>{subscription.unlock_count} Domicoins inclus</span>
                 </div>
               )}
               {endDate && <p className="text-sm text-white/60">Expire le {endDate}</p>}
@@ -158,10 +158,20 @@ export default function MapProPanel() {
                     <p className="mt-0.5 text-xs text-gray-400">{plan.duration}</p>
                   </div>
                   <div className="shrink-0 text-right">
-                    <p className={`text-xl font-black ${isFree ? 'text-emerald-600' : 'text-gray-950'}`}>
-                      {isFree ? 'Gratuit' : `${plan.price.toLocaleString()}`}
-                    </p>
-                    {!isFree && <p className="text-[10px] text-gray-400">FCFA / mois</p>}
+                    {!isFree && plan.originalPrice ? (
+                      <div className="flex flex-col items-end">
+                        <p className="text-xl font-black text-gray-950">{plan.price.toLocaleString()}</p>
+                        <p className="text-[10px] font-bold text-gray-400 line-through">{plan.originalPrice.toLocaleString()} FCFA</p>
+                        <p className="text-[10px] text-gray-400">FCFA / mois</p>
+                      </div>
+                    ) : (
+                      <>
+                        <p className={`text-xl font-black ${isFree ? 'text-emerald-600' : 'text-gray-950'}`}>
+                          {isFree ? 'Gratuit' : `${plan.price.toLocaleString()}`}
+                        </p>
+                        {!isFree && <p className="text-[10px] text-gray-400">FCFA / mois</p>}
+                      </>
+                    )}
                   </div>
                 </div>
 

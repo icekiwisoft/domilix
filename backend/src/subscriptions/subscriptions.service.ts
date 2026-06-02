@@ -7,11 +7,15 @@ import {
 } from '@nestjs/common';
 import crypto from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service';
+import { MapsService } from '../maps/maps.service';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
 
 @Injectable()
 export class SubscriptionsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly mapsService: MapsService,
+  ) {}
 
   private normalizePlanName(name: string) {
     const lower = name.toLowerCase();
@@ -293,12 +297,21 @@ export class SubscriptionsService {
         return created;
       });
 
-      await this.createUserNotification(payment.userId, {
-        type: 'payment_success',
-        title: 'Paiement Maps confirmé',
-        message: `Votre paiement de ${Number(payment.amount).toLocaleString('fr-FR')} FCFA pour l'abonnement Maps ${plan} a été confirmé.`,
-        link: '/maps/subscription',
-      });
+      await Promise.all([
+        this.createUserNotification(payment.userId, {
+          type: 'payment_success',
+          title: 'Paiement Maps confirmé',
+          message: `Votre paiement de ${Number(payment.amount).toLocaleString('fr-FR')} FCFA pour l'abonnement Maps ${plan} a été confirmé.`,
+          link: '/maps/subscription',
+        }),
+        this.createUserNotification(payment.userId, {
+          type: 'credits_received',
+          title: 'Domicoins inclus',
+          message: `${plan === 'starter' ? 5 : plan === 'pro' ? 20 : 50} Domicoins ont été ajoutés à votre compte avec votre abonnement Maps.`,
+          link: '/maps',
+        }),
+        this.mapsService.grantMapsDomicoins(payment.userId, plan),
+      ]);
 
       return { message: 'Abonnement Maps activé.', subscription: mapsSubscription };
     }

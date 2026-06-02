@@ -6,10 +6,10 @@ import { ObjectStorageService } from '../common/object-storage/object-storage.se
 import { itemTypeToApiType, storageUrl } from '../common/http/formatters';
 
 export const MAPS_PLANS = {
-  decouverte: { label: 'Découverte', price: 0, durationDays: 0, unlockCount: 0, durationHours: 12 },
-  starter: { label: 'Starter', price: 2000, durationDays: 30, unlockCount: 5, durationHours: 0 },
-  pro: { label: 'Pro', price: 5000, durationDays: 30, unlockCount: 20, durationHours: 0 },
-  business: { label: 'Business', price: 15000, durationDays: 30, unlockCount: 50, durationHours: 0 },
+  decouverte: { label: 'Découverte', price: 0, durationDays: 0, unlockCount: 2, durationHours: 12 },
+  starter: { label: 'Starter', price: 1000, durationDays: 30, unlockCount: 5, durationHours: 0 },
+  pro: { label: 'Pro', price: 2500, durationDays: 30, unlockCount: 20, durationHours: 0 },
+  business: { label: 'Business', price: 7500, durationDays: 30, unlockCount: 50, durationHours: 0 },
 };
 
 export type MapsPlan = keyof typeof MAPS_PLANS;
@@ -313,11 +313,15 @@ export class MapsService {
   private computeEndDate(plan: keyof typeof MAPS_PLANS): Date {
     const cfg = MAPS_PLANS[plan];
     const now = new Date();
+    let end: Date;
     if (cfg.durationHours > 0) {
-      return new Date(now.getTime() + cfg.durationHours * 60 * 60 * 1000);
+      end = new Date(now.getTime() + cfg.durationHours * 60 * 60 * 1000);
+    } else {
+      end = new Date(now);
+      end.setDate(end.getDate() + cfg.durationDays);
     }
-    const end = new Date(now);
-    end.setDate(end.getDate() + cfg.durationDays);
+    // `end_date` is @db.Date (no time) in MySQL; clamp to end of day so it doesn't expire at midnight
+    end.setHours(23, 59, 59, 999);
     return end;
   }
 
@@ -359,6 +363,42 @@ export class MapsService {
     return payload;
   }
 
+  private async ensureMapsDomicoinPlan(): Promise<{ id: bigint }> {
+    let plan = await this.prisma.subscriptionPlan.findFirst({
+      where: { name: 'Maps Pack' },
+    });
+    if (!plan) {
+      plan = await this.prisma.subscriptionPlan.create({
+        data: { name: 'Maps Pack' },
+      });
+    }
+    return plan;
+  }
+
+  /** Grant Domicoins corresponding to a Maps pack. */
+  async grantMapsDomicoins(userId: bigint, plan: string) {
+    const cfg = MAPS_PLANS[plan as MapsPlan];
+    if (!cfg || cfg.unlockCount <= 0) return;
+
+    const mapsPlan = await this.ensureMapsDomicoinPlan();
+    const now = new Date();
+    const endDate = this.computeEndDate(plan as MapsPlan);
+
+    await this.prisma.subscription.create({
+      data: {
+        userId,
+        subscriptionPlanId: String(mapsPlan.id),
+        initialCredits: cfg.unlockCount,
+        credits: cfg.unlockCount,
+        price: 0,
+        duration: cfg.durationDays,
+        startDate: now,
+        endDate,
+        expireAt: endDate,
+      },
+    });
+  }
+
   /** Activate a Maps subscription without payment (for free plans or after webhook confirmation). */
   async activateSubscription(userId: bigint, plan: string) {
     const cfg = MAPS_PLANS[plan as MapsPlan];
@@ -375,6 +415,9 @@ export class MapsService {
         endDate,
       },
     });
+
+    await this.grantMapsDomicoins(userId, plan);
+
     return {
       id: Number(subscription.id),
       plan: subscription.plan,
