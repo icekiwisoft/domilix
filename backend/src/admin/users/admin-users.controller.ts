@@ -1,5 +1,22 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, Res, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Put,
+  Query,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AuthGuard } from '../../auth/auth.guard';
 import { CurrentUser } from '../../auth/current-user.decorator';
 import { UpdateUserDto } from '../../users/dto/update-user.dto';
@@ -28,27 +45,39 @@ export class AdminUsersController {
   @Put(':id')
   @ApiOperation({ summary: 'Update a user (admin)' })
   @ApiParam({ name: 'id', example: '1' })
-  update(@CurrentUser() user: any, @Param('id') id: string, @Body() dto: UpdateUserDto) {
+  update(
+    @CurrentUser() user: any,
+    @Param('id') id: string,
+    @Body() dto: UpdateUserDto,
+  ) {
     return this.usersService.update(user, id, dto);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Soft delete a user (admin)' })
   @ApiParam({ name: 'id', example: '1' })
-  async destroy(@CurrentUser() user: any, @Param('id') id: string, @Res() res: any) {
+  async destroy(
+    @CurrentUser() user: any,
+    @Param('id') id: string,
+    @Res() res: any,
+  ) {
     await this.usersService.destroy(user, id);
     return res.status(204).send();
   }
 
   @Patch(':id/become-announcer')
-  @ApiOperation({ summary: 'Create a request for user to become announcer (admin)' })
+  @ApiOperation({
+    summary: 'Create a request for user to become announcer (admin)',
+  })
   @ApiParam({ name: 'id', example: '1' })
   becomeAnnouncer(@CurrentUser() user: any, @Param('id') id: string) {
     return this.usersService.becomeAnnouncer(user, id);
   }
 
   @Post(':id/promote')
-  @ApiOperation({ summary: 'Create a request for user to become announcer (admin)' })
+  @ApiOperation({
+    summary: 'Create a request for user to become announcer (admin)',
+  })
   @ApiParam({ name: 'id', example: '1' })
   promote(@CurrentUser() user: any, @Param('id') id: string) {
     return this.usersService.becomeAnnouncer(user, id);

@@ -6,7 +6,10 @@ export class CreateSubscriptionDto {
   @IsString()
   plan_name!: string;
 
-  @ApiProperty({ example: 'mtn', enum: ['mtn', 'orange', 'mtn_money', 'orange_money'] })
+  @ApiProperty({
+    example: 'mtn',
+    enum: ['mtn', 'orange', 'mtn_money', 'orange_money'],
+  })
   @IsString()
   method!: string;
 

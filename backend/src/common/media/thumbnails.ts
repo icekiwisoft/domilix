@@ -20,35 +20,42 @@ const thumbnailDiskPath = (filename: string) => {
   return path.join(thumbnailDir, `${parsed.name}.webp`);
 };
 
-const generateVideoThumbnailFrame = async (inputPath: string, outputPath: string) => {
+const generateVideoThumbnailFrame = async (
+  inputPath: string,
+  outputPath: string,
+) => {
   const ffmpegPath = process.env.FFMPEG_PATH || ffmpegStatic || 'ffmpeg';
 
   await new Promise<void>((resolve, reject) => {
-    const child = spawn(ffmpegPath, [
-      '-y',
-      '-loglevel',
-      'error',
-      '-ss',
-      '00:00:01',
-      '-i',
-      inputPath,
-      '-frames:v',
-      '1',
-      '-vf',
-      'scale=500:-1',
-      outputPath,
-    ], { stdio: 'ignore' });
+    const child = spawn(
+      ffmpegPath,
+      [
+        '-y',
+        '-loglevel',
+        'error',
+        '-ss',
+        '00:00:01',
+        '-i',
+        inputPath,
+        '-frames:v',
+        '1',
+        '-vf',
+        'scale=500:-1',
+        outputPath,
+      ],
+      { stdio: 'ignore' },
+    );
 
     const timeout = setTimeout(() => {
       child.kill('SIGKILL');
       reject(new Error('ffmpeg thumbnail generation timed out'));
     }, 30000);
 
-    child.on('error', error => {
+    child.on('error', (error) => {
       clearTimeout(timeout);
       reject(error);
     });
-    child.on('close', code => {
+    child.on('close', (code) => {
       clearTimeout(timeout);
       if (code === 0) resolve();
       else reject(new Error(`ffmpeg exited with code ${code}`));
@@ -77,12 +84,13 @@ export const generateMediaThumbnail = async (file: {
     }
 
     if (file.mimetype.startsWith('video/')) {
-      const framePath = path.join(thumbnailDir, `${path.parse(file.filename).name}-${Date.now()}.jpg`);
+      const framePath = path.join(
+        thumbnailDir,
+        `${path.parse(file.filename).name}-${Date.now()}.jpg`,
+      );
       try {
         await generateVideoThumbnailFrame(inputPath, framePath);
-        await sharp(framePath)
-          .webp({ quality: 82 })
-          .toFile(outputPath);
+        await sharp(framePath).webp({ quality: 82 }).toFile(outputPath);
       } finally {
         await fs.rm(framePath, { force: true });
       }
@@ -110,7 +118,8 @@ export const generateMediaThumbnailBuffer = async (file: {
 
   if (!file.mimetype.startsWith('video/')) return null;
 
-  const extension = path.extname(file.originalname || file.filename || '.mp4') || '.mp4';
+  const extension =
+    path.extname(file.originalname || file.filename || '.mp4') || '.mp4';
   const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'domilix-video-'));
   const inputPath = path.join(tempDir, `input${extension}`);
   const outputPath = path.join(tempDir, 'thumbnail.jpg');
@@ -118,9 +127,7 @@ export const generateMediaThumbnailBuffer = async (file: {
   try {
     await fs.writeFile(inputPath, file.buffer);
     await generateVideoThumbnailFrame(inputPath, outputPath);
-    return sharp(outputPath)
-      .webp({ quality: 82 })
-      .toBuffer();
+    return sharp(outputPath).webp({ quality: 82 }).toBuffer();
   } finally {
     await fs.rm(tempDir, { recursive: true, force: true });
   }

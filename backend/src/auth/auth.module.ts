@@ -10,7 +10,12 @@ import { VerificationCodeService } from './verification-code.service';
 @Module({
   imports: [PrismaModule, MailModule],
   controllers: [AuthController],
-  providers: [AuthService, AuthTokenService, VerificationCodeService, AuthGuard],
+  providers: [
+    AuthService,
+    AuthTokenService,
+    VerificationCodeService,
+    AuthGuard,
+  ],
   exports: [AuthGuard, AuthTokenService],
 })
 export class AuthModule {}

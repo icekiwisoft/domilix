@@ -50,7 +50,11 @@ export class AuthController {
     private readonly objectStorage: ObjectStorageService,
   ) {}
 
-  private async uploadOptionalProfileFile(file: any | undefined, folder: string, existingUrl?: string) {
+  private async uploadOptionalProfileFile(
+    file: any | undefined,
+    folder: string,
+    existingUrl?: string,
+  ) {
     if (existingUrl) return existingUrl;
     if (!file) return undefined;
 
@@ -63,7 +67,9 @@ export class AuthController {
       });
       return (await this.objectStorage.uploadFile(file, folder)).url;
     } catch {
-      throw new InternalServerErrorException('Impossible d uploader le fichier.');
+      throw new InternalServerErrorException(
+        'Impossible d uploader le fichier.',
+      );
     }
   }
 
@@ -86,12 +92,16 @@ export class AuthController {
   @Post('refresh')
   @ApiOperation({ summary: 'Refresh an expired access token' })
   refresh(@Req() req: any) {
-    const refreshToken = req.body?.refresh_token || req.headers['x-refresh-token'];
+    const refreshToken =
+      req.body?.refresh_token || req.headers['x-refresh-token'];
     const authorization = req.headers.authorization as string | undefined;
     const accessToken = authorization?.startsWith('Bearer ')
       ? authorization.slice(7)
       : undefined;
-    return this.authService.refresh(refreshToken || accessToken, !refreshToken && !!accessToken);
+    return this.authService.refresh(
+      refreshToken || accessToken,
+      !refreshToken && !!accessToken,
+    );
   }
 
   @Post('verifyPhone/:user_id')
@@ -172,12 +182,15 @@ export class AuthController {
     },
   })
   @UseInterceptors(
-    FileFieldsInterceptor([
-      { name: 'avatar', maxCount: 1 },
-      { name: 'presentation', maxCount: 1 },
-    ], {
-      storage: memoryStorage(),
-    }),
+    FileFieldsInterceptor(
+      [
+        { name: 'avatar', maxCount: 1 },
+        { name: 'presentation', maxCount: 1 },
+      ],
+      {
+        storage: memoryStorage(),
+      },
+    ),
   )
   async updateAnnouncerProfilePut(
     @CurrentUser() user: any,
@@ -189,8 +202,16 @@ export class AuthController {
     return this.authService.updateAnnouncerProfile(
       user,
       dto,
-      await this.uploadOptionalProfileFile(avatar, 'announcers', (dto as any).avatar_url),
-      await this.uploadOptionalProfileFile(presentation, 'announcers', (dto as any).presentation_url),
+      await this.uploadOptionalProfileFile(
+        avatar,
+        'announcers',
+        (dto as any).avatar_url,
+      ),
+      await this.uploadOptionalProfileFile(
+        presentation,
+        'announcers',
+        (dto as any).presentation_url,
+      ),
     );
   }
 
@@ -198,7 +219,9 @@ export class AuthController {
   @Post('announcer-profile')
   @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
-  @ApiOperation({ summary: 'Fallback POST endpoint for announcer profile update' })
+  @ApiOperation({
+    summary: 'Fallback POST endpoint for announcer profile update',
+  })
   @ApiBody({
     schema: {
       type: 'object',
@@ -212,12 +235,15 @@ export class AuthController {
     },
   })
   @UseInterceptors(
-    FileFieldsInterceptor([
-      { name: 'avatar', maxCount: 1 },
-      { name: 'presentation', maxCount: 1 },
-    ], {
-      storage: memoryStorage(),
-    }),
+    FileFieldsInterceptor(
+      [
+        { name: 'avatar', maxCount: 1 },
+        { name: 'presentation', maxCount: 1 },
+      ],
+      {
+        storage: memoryStorage(),
+      },
+    ),
   )
   async updateAnnouncerProfilePost(
     @CurrentUser() user: any,
@@ -229,8 +255,16 @@ export class AuthController {
     return this.authService.updateAnnouncerProfile(
       user,
       dto,
-      await this.uploadOptionalProfileFile(avatar, 'announcers', (dto as any).avatar_url),
-      await this.uploadOptionalProfileFile(presentation, 'announcers', (dto as any).presentation_url),
+      await this.uploadOptionalProfileFile(
+        avatar,
+        'announcers',
+        (dto as any).avatar_url,
+      ),
+      await this.uploadOptionalProfileFile(
+        presentation,
+        'announcers',
+        (dto as any).presentation_url,
+      ),
     );
   }
 

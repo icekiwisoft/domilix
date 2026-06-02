@@ -1,5 +1,18 @@
-import { Controller, Delete, Get, Param, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AuthGuard } from '../../auth/auth.guard';
 import { CurrentUser } from '../../auth/current-user.decorator';
 import { AdminSubscriptionsService } from './admin-subscriptions.service';
@@ -9,10 +22,14 @@ import { AdminSubscriptionsService } from './admin-subscriptions.service';
 @ApiBearerAuth()
 @Controller('admin/subscriptions')
 export class AdminSubscriptionsController {
-  constructor(private readonly adminSubscriptionsService: AdminSubscriptionsService) {}
+  constructor(
+    private readonly adminSubscriptionsService: AdminSubscriptionsService,
+  ) {}
 
   @Get()
-  @ApiOperation({ summary: 'List all subscriptions with user information (admin)' })
+  @ApiOperation({
+    summary: 'List all subscriptions with user information (admin)',
+  })
   @ApiQuery({ name: 'page', required: false })
   index(@CurrentUser() user: any, @Query('page') page?: string) {
     return this.adminSubscriptionsService.index(user, Number(page || 1));

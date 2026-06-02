@@ -1,8 +1,4 @@
-import {
-  Controller,
-  Post,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { AuthGuard } from '../auth/auth.guard';

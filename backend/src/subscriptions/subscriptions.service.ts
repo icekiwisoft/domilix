@@ -1,4 +1,10 @@
-import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import crypto from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
@@ -36,12 +42,15 @@ export class SubscriptionsService {
     return new Date(date.getTime() + days * 24 * 60 * 60 * 1000);
   }
 
-  private async createUserNotification(userId: bigint, data: {
-    type: string;
-    title: string;
-    message: string;
-    link?: string;
-  }) {
+  private async createUserNotification(
+    userId: bigint,
+    data: {
+      type: string;
+      title: string;
+      message: string;
+      link?: string;
+    },
+  ) {
     try {
       await this.prisma.notification.create({
         data: {
@@ -59,7 +68,8 @@ export class SubscriptionsService {
 
   private getCampayConfig() {
     const token = process.env.CAMPAY_TOKEN;
-    const endpoint = process.env.CAMPAY_ENDPOINT || 'https://demo.campay.net/api/collect/';
+    const endpoint =
+      process.env.CAMPAY_ENDPOINT || 'https://demo.campay.net/api/collect/';
 
     if (!token) {
       throw new InternalServerErrorException('CAMPAY_TOKEN is not configured.');
@@ -150,15 +160,24 @@ export class SubscriptionsService {
       orderBy: { createdAt: 'desc' },
     });
     const plans = await this.prisma.subscriptionPlan.findMany();
-    const byId = new Map(plans.map((plan) => [String(plan.id), plan.name] as const));
-    return subscriptions.map((sub) => this.serialize(sub, byId.get(sub.subscriptionPlanId) || 'Unknown'));
+    const byId = new Map(
+      plans.map((plan) => [String(plan.id), plan.name] as const),
+    );
+    return subscriptions.map((sub) =>
+      this.serialize(sub, byId.get(sub.subscriptionPlanId) || 'Unknown'),
+    );
   }
 
   async show(userId: bigint, id: string) {
-    const subscription = await this.prisma.subscription.findUnique({ where: { id: BigInt(id) } });
+    const subscription = await this.prisma.subscription.findUnique({
+      where: { id: BigInt(id) },
+    });
     if (!subscription) throw new NotFoundException('Subscription not found');
-    if (subscription.userId !== userId) throw new ForbiddenException('Unauthorized');
-    const plan = await this.prisma.subscriptionPlan.findUnique({ where: { id: BigInt(subscription.subscriptionPlanId) } });
+    if (subscription.userId !== userId)
+      throw new ForbiddenException('Unauthorized');
+    const plan = await this.prisma.subscriptionPlan.findUnique({
+      where: { id: BigInt(subscription.subscriptionPlanId) },
+    });
     return this.serialize(subscription, plan?.name || 'Unknown');
   }
 
@@ -213,20 +232,28 @@ export class SubscriptionsService {
   }
 
   async destroy(userId: bigint, id: string) {
-    const subscription = await this.prisma.subscription.findUnique({ where: { id: BigInt(id) } });
+    const subscription = await this.prisma.subscription.findUnique({
+      where: { id: BigInt(id) },
+    });
     if (!subscription) throw new NotFoundException('Subscription not found');
-    if (subscription.userId !== userId) throw new ForbiddenException('Unauthorized');
+    if (subscription.userId !== userId)
+      throw new ForbiddenException('Unauthorized');
     await this.prisma.subscription.delete({ where: { id: subscription.id } });
     return { message: 'Subscription cancelled successfully' };
   }
 
   async handleCampayWebhook(externalReference: string) {
-    const payment = await this.prisma.payment.findUnique({ where: { id: externalReference } });
+    const payment = await this.prisma.payment.findUnique({
+      where: { id: externalReference },
+    });
     if (!payment) throw new NotFoundException('Payment not found');
 
     if (payment.status === 'completed' && payment.referenceId) {
-      const subscription = await this.prisma.subscription.findUnique({ where: { id: payment.referenceId } });
-      if (subscription) return this.serialize(subscription, payment.paymentTypeInfo);
+      const subscription = await this.prisma.subscription.findUnique({
+        where: { id: payment.referenceId },
+      });
+      if (subscription)
+        return this.serialize(subscription, payment.paymentTypeInfo);
     }
     if (payment.status === 'completed') {
       return { message: 'Payment already processed.' };
@@ -234,7 +261,9 @@ export class SubscriptionsService {
 
     const planName = this.normalizePlanName(payment.paymentTypeInfo);
     const config = this.getPlanConfig(planName);
-    const plan = await this.prisma.subscriptionPlan.findFirst({ where: { name: planName } });
+    const plan = await this.prisma.subscriptionPlan.findFirst({
+      where: { name: planName },
+    });
     if (!plan) throw new NotFoundException('Subscription plan not found');
 
     const startDate = new Date();

@@ -1,6 +1,22 @@
-import { Controller, Delete, Get, Param, Patch, Post, Put, Query, Res, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Put,
+  Query,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { Body } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AuthGuard } from '../auth/auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -29,14 +45,22 @@ export class UsersController {
   @Put(':id')
   @ApiOperation({ summary: 'Update a user' })
   @ApiParam({ name: 'id', example: '1' })
-  update(@CurrentUser() user: any, @Param('id') id: string, @Body() dto: UpdateUserDto) {
+  update(
+    @CurrentUser() user: any,
+    @Param('id') id: string,
+    @Body() dto: UpdateUserDto,
+  ) {
     return this.usersService.update(user, id, dto);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Soft delete a user' })
   @ApiParam({ name: 'id', example: '1' })
-  async destroy(@CurrentUser() user: any, @Param('id') id: string, @Res() res: any) {
+  async destroy(
+    @CurrentUser() user: any,
+    @Param('id') id: string,
+    @Res() res: any,
+  ) {
     await this.usersService.destroy(user, id);
     return res.status(204).send();
   }

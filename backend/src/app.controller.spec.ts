@@ -23,7 +23,10 @@ describe('AppController', () => {
   });
 
   it('returns stats', async () => {
-    await expect(appController.getStats()).resolves.toEqual({ users: 1, houses: 2 });
+    await expect(appController.getStats()).resolves.toEqual({
+      users: 1,
+      houses: 2,
+    });
   });
 
   it('returns health', async () => {

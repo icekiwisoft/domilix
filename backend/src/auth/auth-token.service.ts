@@ -43,9 +43,13 @@ export class AuthTokenService {
   issueTokens(user: User) {
     const accessJti = crypto.randomUUID();
     const refreshJti = crypto.randomUUID();
-    const accessToken = jwt.sign(this.createPayload(user, accessJti), this.secret, {
-      expiresIn: '7d',
-    });
+    const accessToken = jwt.sign(
+      this.createPayload(user, accessJti),
+      this.secret,
+      {
+        expiresIn: '7d',
+      },
+    );
     const refreshToken = jwt.sign(
       this.createPayload(user, refreshJti),
       this.refreshSecret,

@@ -9,7 +9,9 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const server = app.getHttpServer();
-  const requestTimeout = Number(process.env.HTTP_REQUEST_TIMEOUT_MS || 15 * 60 * 1000);
+  const requestTimeout = Number(
+    process.env.HTTP_REQUEST_TIMEOUT_MS || 15 * 60 * 1000,
+  );
 
   server.requestTimeout = requestTimeout;
   server.headersTimeout = requestTimeout + 60 * 1000;
@@ -17,24 +19,25 @@ async function bootstrap() {
   app.use(
     helmet({
       crossOriginResourcePolicy: { policy: 'cross-origin' },
-      contentSecurityPolicy: process.env.NODE_ENV === 'production'
-        ? {
-            directives: {
-              defaultSrc: ["'self'"],
-              baseUri: ["'self'"],
-              fontSrc: ["'self'", 'https:', 'data:'],
-              formAction: ["'self'"],
-              frameAncestors: ["'self'"],
-              imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
-              objectSrc: ["'none'"],
-              scriptSrc: ["'self'", "'unsafe-inline'"],
-              scriptSrcAttr: ["'none'"],
-              styleSrc: ["'self'", "'unsafe-inline'", 'https:'],
-              connectSrc: ["'self'", 'https:'],
-              upgradeInsecureRequests: [],
-            },
-          }
-        : false,
+      contentSecurityPolicy:
+        process.env.NODE_ENV === 'production'
+          ? {
+              directives: {
+                defaultSrc: ["'self'"],
+                baseUri: ["'self'"],
+                fontSrc: ["'self'", 'https:', 'data:'],
+                formAction: ["'self'"],
+                frameAncestors: ["'self'"],
+                imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
+                objectSrc: ["'none'"],
+                scriptSrc: ["'self'", "'unsafe-inline'"],
+                scriptSrcAttr: ["'none'"],
+                styleSrc: ["'self'", "'unsafe-inline'", 'https:'],
+                connectSrc: ["'self'", 'https:'],
+                upgradeInsecureRequests: [],
+              },
+            }
+          : false,
     }),
   );
 
@@ -42,17 +45,35 @@ async function bootstrap() {
     origin: true,
     credentials: true,
     methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Authorization', 'Content-Type', 'Accept', 'Origin', 'X-Requested-With'],
+    allowedHeaders: [
+      'Authorization',
+      'Content-Type',
+      'Accept',
+      'Origin',
+      'X-Requested-With',
+    ],
     maxAge: 86400,
   });
 
-  app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
-    const publicCacheRoutes = ['/categories', '/cities', '/broadcasts'];
-    if (req.method === 'GET' && publicCacheRoutes.some(route => req.path.startsWith(route))) {
-      res.setHeader('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
-    }
-    next();
-  });
+  app.use(
+    (
+      req: express.Request,
+      res: express.Response,
+      next: express.NextFunction,
+    ) => {
+      const publicCacheRoutes = ['/categories', '/cities', '/broadcasts'];
+      if (
+        req.method === 'GET' &&
+        publicCacheRoutes.some((route) => req.path.startsWith(route))
+      ) {
+        res.setHeader(
+          'Cache-Control',
+          'public, max-age=60, stale-while-revalidate=300',
+        );
+      }
+      next();
+    },
+  );
 
   app.use(
     '/storage',
@@ -76,11 +97,17 @@ async function bootstrap() {
   });
 
   const expressApp = app.getHttpAdapter().getInstance();
-  expressApp.get('/swagger.json', (_req: express.Request, res: express.Response) => {
-    res.setHeader('Content-Type', 'application/json');
-    res.setHeader('Content-Disposition', 'attachment; filename="swagger.json"');
-    res.send(swaggerDocument);
-  });
+  expressApp.get(
+    '/swagger.json',
+    (_req: express.Request, res: express.Response) => {
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader(
+        'Content-Disposition',
+        'attachment; filename="swagger.json"',
+      );
+      res.send(swaggerDocument);
+    },
+  );
 
   app.useGlobalPipes(
     new ValidationPipe({

@@ -1,6 +1,9 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
-import { AnnouncerMediasController, MediasController } from './medias.controller';
+import {
+  AnnouncerMediasController,
+  MediasController,
+} from './medias.controller';
 import { MediasService } from './medias.service';
 
 @Module({

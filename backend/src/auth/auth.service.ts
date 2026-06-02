@@ -64,18 +64,25 @@ export class AuthService {
   }
 
   private async ensureSignupGiftPlan() {
-    const existing = await this.prisma.subscriptionPlan.findFirst({ where: { name: 'Signup Gift' } });
+    const existing = await this.prisma.subscriptionPlan.findFirst({
+      where: { name: 'Signup Gift' },
+    });
     if (existing) return existing;
 
-    return this.prisma.subscriptionPlan.create({ data: { name: 'Signup Gift' } });
+    return this.prisma.subscriptionPlan.create({
+      data: { name: 'Signup Gift' },
+    });
   }
 
-  private async createUserNotification(userId: bigint, data: {
-    type: string;
-    title: string;
-    message: string;
-    link?: string;
-  }) {
+  private async createUserNotification(
+    userId: bigint,
+    data: {
+      type: string;
+      title: string;
+      message: string;
+      link?: string;
+    },
+  ) {
     try {
       await this.prisma.notification.create({
         data: {
@@ -119,11 +126,18 @@ export class AuthService {
     };
   }
 
-  private async ensureOwnedMedia(userId: bigint, mediaId: string | undefined, purpose: string) {
+  private async ensureOwnedMedia(
+    userId: bigint,
+    mediaId: string | undefined,
+    purpose: string,
+  ) {
     if (!mediaId) return null;
 
-    const announcer = await this.prisma.announcer.findFirst({ where: { userId } });
-    if (!announcer) throw new ForbiddenException("Vous n'etes pas un annonceur");
+    const announcer = await this.prisma.announcer.findFirst({
+      where: { userId },
+    });
+    if (!announcer)
+      throw new ForbiddenException("Vous n'etes pas un annonceur");
 
     const media = await this.prisma.media.findFirst({
       where: { id: mediaId, announcerId: announcer.id, purpose },
@@ -152,20 +166,27 @@ export class AuthService {
       return { message: 'Email deja verifie.' };
     }
     if (user.email.endsWith('@domilix.local')) {
-      throw new BadRequestException('Ajoutez une adresse email avant de la verifier.');
+      throw new BadRequestException(
+        'Ajoutez une adresse email avant de la verifier.',
+      );
     }
 
-    const code = this.verificationCodes.generate(this.emailVerificationKey(user.id));
+    const code = this.verificationCodes.generate(
+      this.emailVerificationKey(user.id),
+    );
     await this.mail.sendEmailVerificationCode(user.email, code);
 
     return {
       message: 'Un code de verification a ete envoye a votre email.',
-      verification_code: process.env.NODE_ENV !== 'production' ? code : undefined,
+      verification_code:
+        process.env.NODE_ENV !== 'production' ? code : undefined,
     };
   }
 
   async verifyEmail(user: User, verificationCode: string) {
-    const cachedCode = this.verificationCodes.get(this.emailVerificationKey(user.id));
+    const cachedCode = this.verificationCodes.get(
+      this.emailVerificationKey(user.id),
+    );
     if (!cachedCode) {
       throw new BadRequestException('Le code de verification a expire.');
     }
@@ -193,16 +214,30 @@ export class AuthService {
     }
 
     if (dto.email) {
-      const existingEmail = await this.prisma.user.findFirst({ where: { email: dto.email } });
+      const existingEmail = await this.prisma.user.findFirst({
+        where: { email: dto.email },
+      });
       if (existingEmail) {
-        throw new BadRequestException({ status: 'error', message: 'Validation failed', errors: { email: ['The email has already been taken.'] } });
+        throw new BadRequestException({
+          status: 'error',
+          message: 'Validation failed',
+          errors: { email: ['The email has already been taken.'] },
+        });
       }
     }
 
     if (dto.phone_number) {
-      const existingPhone = await this.prisma.user.findFirst({ where: { phoneNumber: dto.phone_number } });
+      const existingPhone = await this.prisma.user.findFirst({
+        where: { phoneNumber: dto.phone_number },
+      });
       if (existingPhone) {
-        throw new BadRequestException({ status: 'error', message: 'Validation failed', errors: { phone_number: ['The phone number has already been taken.'] } });
+        throw new BadRequestException({
+          status: 'error',
+          message: 'Validation failed',
+          errors: {
+            phone_number: ['The phone number has already been taken.'],
+          },
+        });
       }
     }
 
@@ -217,7 +252,9 @@ export class AuthService {
         data: {
           name: dto.name,
           email: dto.email || `temp_${crypto.randomUUID()}@domilix.local`,
-          phoneNumber: dto.phone_number || crypto.randomUUID().replace(/-/g, '').slice(0, 12),
+          phoneNumber:
+            dto.phone_number ||
+            crypto.randomUUID().replace(/-/g, '').slice(0, 12),
           password,
           phoneVerified: false,
           emailVerified: false,
@@ -255,14 +292,16 @@ export class AuthService {
     await this.createUserNotification(user.id, {
       type: 'welcome',
       title: 'Bienvenue sur Domilix',
-      message: 'Votre compte a ete cree avec succes. Vous pouvez maintenant rechercher des annonces, sauvegarder vos favoris et configurer votre profil.',
+      message:
+        'Votre compte a ete cree avec succes. Vous pouvez maintenant rechercher des annonces, sauvegarder vos favoris et configurer votre profil.',
       link: '/settings',
     });
 
     await this.createUserNotification(user.id, {
       type: 'signup_gift_received',
       title: '2 Domicoins offerts',
-      message: 'Bienvenue sur Domilix ! Vous recevez 2 Domicoins valables sans date d expiration pour debloquer vos premiers contacts.',
+      message:
+        'Bienvenue sur Domilix ! Vous recevez 2 Domicoins valables sans date d expiration pour debloquer vos premiers contacts.',
       link: '/settings?tab=packs',
     });
 
@@ -273,7 +312,8 @@ export class AuthService {
     const response = await this.authResponse(user, message);
     return {
       ...response,
-      verification_code: process.env.NODE_ENV !== 'production' ? code : undefined,
+      verification_code:
+        process.env.NODE_ENV !== 'production' ? code : undefined,
     };
   }
 
@@ -283,12 +323,22 @@ export class AuthService {
     }
 
     const user = await this.prisma.user.findFirst({
-      where: dto.email ? { email: dto.email } : { phoneNumber: dto.phone_number! },
+      where: dto.email
+        ? { email: dto.email }
+        : { phoneNumber: dto.phone_number! },
     });
 
-    if (!user || user.deletedAt || !(await bcrypt.compare(dto.password, user.password))) {
-      this.logger.warn(`Failed login attempt for ${dto.email || dto.phone_number || 'unknown'}`);
-      throw new UnauthorizedException('Les informations de connexion sont incorrectes.');
+    if (
+      !user ||
+      user.deletedAt ||
+      !(await bcrypt.compare(dto.password, user.password))
+    ) {
+      this.logger.warn(
+        `Failed login attempt for ${dto.email || dto.phone_number || 'unknown'}`,
+      );
+      throw new UnauthorizedException(
+        'Les informations de connexion sont incorrectes.',
+      );
     }
 
     if (dto.phone_number && !user.phoneVerified) {
@@ -298,7 +348,8 @@ export class AuthService {
     await this.createUserNotification(user.id, {
       type: 'new_login',
       title: 'Nouvelle connexion',
-      message: 'Une nouvelle connexion a votre compte Domilix vient d etre effectuee.',
+      message:
+        'Une nouvelle connexion a votre compte Domilix vient d etre effectuee.',
       link: '/settings',
     });
 
@@ -313,7 +364,9 @@ export class AuthService {
     const payload = isAccessToken
       ? this.tokens.decodeAccessToken(refreshTokenOrAccessToken)
       : this.tokens.verifyRefreshToken(refreshTokenOrAccessToken);
-    const user = await this.prisma.user.findUnique({ where: { id: BigInt(payload.sub) } });
+    const user = await this.prisma.user.findUnique({
+      where: { id: BigInt(payload.sub) },
+    });
     if (!user || user.deletedAt) {
       throw new UnauthorizedException('Non authentifie.');
     }
@@ -347,24 +400,33 @@ export class AuthService {
   }
 
   async resendVerificationCode(userId: string) {
-    const user = await this.prisma.user.findUnique({ where: { id: BigInt(userId) } });
+    const user = await this.prisma.user.findUnique({
+      where: { id: BigInt(userId) },
+    });
     if (!user) throw new NotFoundException('Utilisateur non trouve.');
     if (user.phoneVerified) {
       throw new BadRequestException('Le numero de telephone est deja verifie.');
     }
 
-    const code = this.verificationCodes.generate(this.verificationCodeKey(user.id));
+    const code = this.verificationCodes.generate(
+      this.verificationCodeKey(user.id),
+    );
     return {
       message: 'Un nouveau SMS de verification a ete envoye.',
-      verification_code: process.env.NODE_ENV !== 'production' ? code : undefined,
+      verification_code:
+        process.env.NODE_ENV !== 'production' ? code : undefined,
     };
   }
 
   async verifyPhone(userId: string, verificationCode: string) {
-    const user = await this.prisma.user.findUnique({ where: { id: BigInt(userId) } });
+    const user = await this.prisma.user.findUnique({
+      where: { id: BigInt(userId) },
+    });
     if (!user) throw new NotFoundException('Utilisateur non trouve.');
 
-    const cachedCode = this.verificationCodes.get(this.verificationCodeKey(user.id));
+    const cachedCode = this.verificationCodes.get(
+      this.verificationCodeKey(user.id),
+    );
     if (!cachedCode) {
       throw new BadRequestException('Le code de verification a expire.');
     }
@@ -383,16 +445,30 @@ export class AuthService {
 
   async updateProfile(user: User, dto: UpdateProfileDto) {
     if (dto.email && dto.email !== user.email) {
-      const existing = await this.prisma.user.findFirst({ where: { email: dto.email } });
+      const existing = await this.prisma.user.findFirst({
+        where: { email: dto.email },
+      });
       if (existing) {
-        throw new BadRequestException({ status: 'error', message: 'Validation failed', errors: { email: ['The email has already been taken.'] } });
+        throw new BadRequestException({
+          status: 'error',
+          message: 'Validation failed',
+          errors: { email: ['The email has already been taken.'] },
+        });
       }
     }
 
     if (dto.phone_number && dto.phone_number !== user.phoneNumber) {
-      const existing = await this.prisma.user.findFirst({ where: { phoneNumber: dto.phone_number } });
+      const existing = await this.prisma.user.findFirst({
+        where: { phoneNumber: dto.phone_number },
+      });
       if (existing) {
-        throw new BadRequestException({ status: 'error', message: 'Validation failed', errors: { phone_number: ['The phone number has already been taken.'] } });
+        throw new BadRequestException({
+          status: 'error',
+          message: 'Validation failed',
+          errors: {
+            phone_number: ['The phone number has already been taken.'],
+          },
+        });
       }
     }
 
@@ -403,11 +479,15 @@ export class AuthService {
         ...(dto.email !== undefined && dto.email !== null
           ? {
               email: dto.email,
-              emailVerified: dto.email === user.email ? user.emailVerified : false,
-              emailVerifiedAt: dto.email === user.email ? user.emailVerifiedAt : null,
+              emailVerified:
+                dto.email === user.email ? user.emailVerified : false,
+              emailVerifiedAt:
+                dto.email === user.email ? user.emailVerifiedAt : null,
             }
           : {}),
-        ...(dto.phone_number !== undefined ? { phoneNumber: dto.phone_number } : {}),
+        ...(dto.phone_number !== undefined
+          ? { phoneNumber: dto.phone_number }
+          : {}),
       },
     });
 
@@ -418,8 +498,15 @@ export class AuthService {
     };
   }
 
-  async updateAnnouncerProfile(user: User, dto: UpdateAnnouncerProfileDto, avatarPath?: string, presentationPath?: string) {
-    const announcer = await this.prisma.announcer.findFirst({ where: { userId: user.id } });
+  async updateAnnouncerProfile(
+    user: User,
+    dto: UpdateAnnouncerProfileDto,
+    avatarPath?: string,
+    presentationPath?: string,
+  ) {
+    const announcer = await this.prisma.announcer.findFirst({
+      where: { userId: user.id },
+    });
     if (!announcer) {
       throw new ForbiddenException("Vous n'etes pas un annonceur");
     }
@@ -434,12 +521,28 @@ export class AuthService {
       data: {
         ...(dto.company_name !== undefined ? { name: dto.company_name } : {}),
         ...(dto.bio !== undefined ? { bio: dto.bio } : {}),
-        ...(dto.professional_phone !== undefined ? { contact: dto.professional_phone } : {}),
+        ...(dto.professional_phone !== undefined
+          ? { contact: dto.professional_phone }
+          : {}),
         ...(avatarPath ? { avatar: avatarPath } : {}),
-        ...(dto.avatar_bucket && dto.avatar_path ? { avatarBucket: dto.avatar_bucket, avatarPath: dto.avatar_path } : {}),
-        ...(avatarMedia ? { avatarMediaId: avatarMedia.id, avatar: avatarMedia.file, avatarBucket: avatarMedia.bucket, avatarPath: avatarMedia.originalPath } : {}),
+        ...(dto.avatar_bucket && dto.avatar_path
+          ? { avatarBucket: dto.avatar_bucket, avatarPath: dto.avatar_path }
+          : {}),
+        ...(avatarMedia
+          ? {
+              avatarMediaId: avatarMedia.id,
+              avatar: avatarMedia.file,
+              avatarBucket: avatarMedia.bucket,
+              avatarPath: avatarMedia.originalPath,
+            }
+          : {}),
         ...(presentationPath ? { presentation: presentationPath } : {}),
-        ...(presentationMedia ? { presentationMediaId: presentationMedia.id, presentation: presentationMedia.file } : {}),
+        ...(presentationMedia
+          ? {
+              presentationMediaId: presentationMedia.id,
+              presentation: presentationMedia.file,
+            }
+          : {}),
       },
     });
 
@@ -454,8 +557,16 @@ export class AuthService {
       announcer: {
         id: refreshed.id,
         name: refreshed.name,
-        avatar: await this.objectStorage.getSignedUrl(refreshed.avatarBucket, refreshed.avatarPath) || refreshed.avatar,
-        presentation: await this.objectStorage.getSignedUrl(presentationMedia?.bucket, presentationMedia?.originalPath) || refreshed.presentation,
+        avatar:
+          (await this.objectStorage.getSignedUrl(
+            refreshed.avatarBucket,
+            refreshed.avatarPath,
+          )) || refreshed.avatar,
+        presentation:
+          (await this.objectStorage.getSignedUrl(
+            presentationMedia?.bucket,
+            presentationMedia?.originalPath,
+          )) || refreshed.presentation,
         avatar_media_id: refreshed.avatarMediaId,
         presentation_media_id: refreshed.presentationMediaId,
         avatar_bucket: refreshed.avatarBucket,
@@ -468,36 +579,51 @@ export class AuthService {
 
   async sendResetLinkEmail(dto: SendResetLinkDto) {
     assertHoneypotClear(dto.website, 'auth.sendResetEmail');
-    const resetMessage = 'Si cet email existe, un lien de reinitialisation a ete envoye.';
+    const resetMessage =
+      'Si cet email existe, un lien de reinitialisation a ete envoye.';
 
-    const user = await this.prisma.user.findFirst({ where: { email: dto.email } });
+    const user = await this.prisma.user.findFirst({
+      where: { email: dto.email },
+    });
     if (!user) {
-      this.logger.warn(`Password reset requested for unknown email ${dto.email}`);
+      this.logger.warn(
+        `Password reset requested for unknown email ${dto.email}`,
+      );
       return {
         message: resetMessage,
         verification_code: undefined,
       };
     }
 
-    const code = this.verificationCodes.generate(this.verificationCodeKey(user.id));
-    const frontendUrl = process.env.FRONTEND_URL || process.env.APP_URL || 'https://domilix.com';
+    const code = this.verificationCodes.generate(
+      this.verificationCodeKey(user.id),
+    );
+    const frontendUrl =
+      process.env.FRONTEND_URL || process.env.APP_URL || 'https://domilix.com';
     const resetUrl = `${frontendUrl.replace(/\/$/, '')}/reset-password?email=${encodeURIComponent(user.email)}&token=${encodeURIComponent(code)}`;
     await this.mail.sendPasswordResetLink(user.email, resetUrl);
 
     return {
       message: resetMessage,
-      verification_code: process.env.NODE_ENV !== 'production' ? code : undefined,
+      verification_code:
+        process.env.NODE_ENV !== 'production' ? code : undefined,
     };
   }
 
   async resetPassword(dto: ResetPasswordDto) {
     if (dto.password !== dto.password_confirmation) {
-      throw new BadRequestException('The password confirmation does not match.');
+      throw new BadRequestException(
+        'The password confirmation does not match.',
+      );
     }
 
-    const user = await this.prisma.user.findFirst({ where: { email: dto.email } });
+    const user = await this.prisma.user.findFirst({
+      where: { email: dto.email },
+    });
     if (!user) {
-      this.logger.warn(`Password reset completion attempted for unknown email ${dto.email}`);
+      this.logger.warn(
+        `Password reset completion attempted for unknown email ${dto.email}`,
+      );
       throw new BadRequestException('Lien de reinitialisation invalide.');
     }
 
@@ -520,9 +646,13 @@ export class AuthService {
       throw new BadRequestException('Mot de passe actuel requis.');
     }
     if (dto.new_password !== dto.new_password_confirmation) {
-      throw new BadRequestException('The new password confirmation does not match.');
+      throw new BadRequestException(
+        'The new password confirmation does not match.',
+      );
     }
-    const currentUser = await this.prisma.user.findUniqueOrThrow({ where: { id: user.id } });
+    const currentUser = await this.prisma.user.findUniqueOrThrow({
+      where: { id: user.id },
+    });
     const matches = await bcrypt.compare(currentPassword, currentUser.password);
     if (!matches) {
       throw new UnauthorizedException('L’ancien mot de passe est incorrect.');

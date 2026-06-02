@@ -1,20 +1,6 @@
-import {
-  CacheInterceptor,
-  CacheTTL,
-} from '@nestjs/cache-manager';
-import {
-  Controller,
-  Get,
-  Param,
-  Query,
-  UseInterceptors,
-} from '@nestjs/common';
-import {
-  ApiOperation,
-  ApiParam,
-  ApiQuery,
-  ApiTags,
-} from '@nestjs/swagger';
+import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
+import { Controller, Get, Param, Query, UseInterceptors } from '@nestjs/common';
+import { ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { BroadcastsService } from './broadcasts.service';
 import { QueryBroadcastsDto } from './dto/query-broadcasts.dto';
 

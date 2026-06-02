@@ -27,7 +27,11 @@ const stringifyQuery = (query: Record<string, unknown>) => {
   return params.toString();
 };
 
-const pageUrl = (path: string, query: Record<string, unknown>, page: number) => {
+const pageUrl = (
+  path: string,
+  query: Record<string, unknown>,
+  page: number,
+) => {
   const serialized = stringifyQuery({ ...query, page });
   return serialized ? `${path}?${serialized}` : path;
 };

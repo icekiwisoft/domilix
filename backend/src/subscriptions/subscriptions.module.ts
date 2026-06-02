@@ -1,6 +1,9 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
-import { SubscriptionsController, WebhooksController } from './subscriptions.controller';
+import {
+  SubscriptionsController,
+  WebhooksController,
+} from './subscriptions.controller';
 import { SubscriptionsService } from './subscriptions.service';
 
 @Module({

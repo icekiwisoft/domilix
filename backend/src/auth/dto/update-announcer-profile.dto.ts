@@ -8,7 +8,9 @@ export class UpdateAnnouncerProfileDto {
   @MaxLength(255)
   company_name?: string;
 
-  @ApiPropertyOptional({ example: 'Agence specialisee dans la location et la vente.' })
+  @ApiPropertyOptional({
+    example: 'Agence specialisee dans la location et la vente.',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(1000)
@@ -26,7 +28,9 @@ export class UpdateAnnouncerProfileDto {
   @MaxLength(255)
   presentation?: string;
 
-  @ApiPropertyOptional({ example: 'https://storage.googleapis.com/bucket/avatars/file.jpg' })
+  @ApiPropertyOptional({
+    example: 'https://storage.googleapis.com/bucket/avatars/file.jpg',
+  })
   @IsOptional()
   @IsString()
   avatar_url?: string;
@@ -55,7 +59,9 @@ export class UpdateAnnouncerProfileDto {
   @MaxLength(36)
   presentation_media_id?: string;
 
-  @ApiPropertyOptional({ example: 'https://storage.googleapis.com/bucket/presentations/file.jpg' })
+  @ApiPropertyOptional({
+    example: 'https://storage.googleapis.com/bucket/presentations/file.jpg',
+  })
   @IsOptional()
   @IsString()
   presentation_url?: string;

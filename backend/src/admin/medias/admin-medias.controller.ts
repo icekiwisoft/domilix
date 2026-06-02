@@ -1,5 +1,19 @@
-import { Controller, Delete, ForbiddenException, Get, Param, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  Controller,
+  Delete,
+  ForbiddenException,
+  Get,
+  Param,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AuthGuard } from '../../auth/auth.guard';
 import { CurrentUser } from '../../auth/current-user.decorator';
 import { MediasService } from '../../medias/medias.service';
@@ -16,7 +30,9 @@ export class AdminMediasController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'List medias filtered by announce or announcer (admin)' })
+  @ApiOperation({
+    summary: 'List medias filtered by announce or announcer (admin)',
+  })
   @ApiQuery({ name: 'AnnounceId', required: false })
   @ApiQuery({ name: 'AnnouncerId', required: false })
   @ApiQuery({ name: 'page', required: false })
@@ -39,10 +55,16 @@ export class AdminMediasController {
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Delete a media or detach it from an announce (admin)' })
+  @ApiOperation({
+    summary: 'Delete a media or detach it from an announce (admin)',
+  })
   @ApiParam({ name: 'id', example: 'media-uuid' })
   @ApiQuery({ name: 'AdId', required: false })
-  destroy(@CurrentUser() user: any, @Param('id') id: string, @Query('AdId') adId?: string) {
+  destroy(
+    @CurrentUser() user: any,
+    @Param('id') id: string,
+    @Query('AdId') adId?: string,
+  ) {
     this.ensureAdmin(user);
     return this.mediasService.destroy(id, adId);
   }

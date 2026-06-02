@@ -24,7 +24,8 @@ export class AnnouncerRequestsService {
     });
     if (existing) {
       throw new BadRequestException({
-        message: 'You already have a pending request or are already an advertiser.',
+        message:
+          'You already have a pending request or are already an advertiser.',
       });
     }
 
@@ -37,7 +38,8 @@ export class AnnouncerRequestsService {
     });
 
     return {
-      message: 'Your request to become an announcer has been successfully submitted.',
+      message:
+        'Your request to become an announcer has been successfully submitted.',
     };
   }
 

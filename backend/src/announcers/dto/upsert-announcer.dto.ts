@@ -22,7 +22,9 @@ export class UpsertAnnouncerDto {
   @IsString()
   contact?: string;
 
-  @ApiPropertyOptional({ example: 'https://storage.googleapis.com/bucket/avatars/file.jpg' })
+  @ApiPropertyOptional({
+    example: 'https://storage.googleapis.com/bucket/avatars/file.jpg',
+  })
   @IsOptional()
   @IsString()
   avatar_url?: string;

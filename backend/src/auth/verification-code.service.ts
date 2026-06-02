@@ -2,7 +2,10 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class VerificationCodeService {
-  private readonly codes = new Map<string, { code: string; expiresAt: number }>();
+  private readonly codes = new Map<
+    string,
+    { code: string; expiresAt: number }
+  >();
 
   generate(key: string, ttlMinutes = 10) {
     const code = String(Math.floor(100000 + Math.random() * 900000));

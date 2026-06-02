@@ -112,10 +112,18 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
   }
 
   private async ensureDefaultSubscriptionPlans() {
-    const plans = ['Standart', 'Advantage', 'Premium', 'Ultimate', 'Signup Gift'];
+    const plans = [
+      'Standart',
+      'Advantage',
+      'Premium',
+      'Ultimate',
+      'Signup Gift',
+    ];
 
     for (const name of plans) {
-      const existing = await this.subscriptionPlan.findFirst({ where: { name } });
+      const existing = await this.subscriptionPlan.findFirst({
+        where: { name },
+      });
       if (existing) continue;
 
       await this.subscriptionPlan.create({

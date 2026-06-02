@@ -1,5 +1,20 @@
-import { BadRequestException, Body, Controller, Post, UploadedFile, UseFilters, UseGuards, UseInterceptors } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Post,
+  UploadedFile,
+  UseFilters,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Throttle } from '@nestjs/throttler';
 import { memoryStorage } from 'multer';
@@ -26,7 +41,10 @@ export class UploadsController {
       type: 'object',
       required: ['type', 'file'],
       properties: {
-        type: { type: 'string', enum: ['media', 'avatar', 'presentation-image'] },
+        type: {
+          type: 'string',
+          enum: ['media', 'avatar', 'presentation-image'],
+        },
         file: { type: 'string', format: 'binary' },
       },
     },
@@ -37,7 +55,11 @@ export class UploadsController {
       limits: { fileSize: 50 * 1024 * 1024 },
     }),
   )
-  upload(@CurrentUser() user: any, @Body('type') type: UploadType, @UploadedFile() file?: any) {
+  upload(
+    @CurrentUser() user: any,
+    @Body('type') type: UploadType,
+    @UploadedFile() file?: any,
+  ) {
     if (!file) throw new BadRequestException('Aucun fichier fourni.');
     return this.uploadsService.upload(user, type, file);
   }

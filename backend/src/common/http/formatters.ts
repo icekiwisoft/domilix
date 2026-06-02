@@ -14,7 +14,8 @@ export const storageUrl = (value: string | null | undefined) => {
   if (value.startsWith('http://') || value.startsWith('https://')) return value;
   if (value.startsWith('/storage/')) return value;
   if (value.startsWith('storage/')) return `/${value}`;
-  if (value.startsWith('public/')) return `/storage/${value.replace(/^public\//, '')}`;
+  if (value.startsWith('public/'))
+    return `/storage/${value.replace(/^public\//, '')}`;
   return `/storage/${value}`;
 };
 

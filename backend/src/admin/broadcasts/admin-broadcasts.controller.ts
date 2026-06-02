@@ -1,5 +1,23 @@
-import { Body, Controller, Delete, ForbiddenException, Get, Param, Post, Put, Query, Res, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Delete,
+  ForbiddenException,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AuthGuard } from '../../auth/auth.guard';
 import { CurrentUser } from '../../auth/current-user.decorator';
 import { BroadcastsService } from '../../broadcasts/broadcasts.service';
@@ -43,7 +61,11 @@ export class AdminBroadcastsController {
   @Put(':id')
   @ApiOperation({ summary: 'Update a broadcast (admin)' })
   @ApiParam({ name: 'id', example: '1' })
-  update(@CurrentUser() user: any, @Param('id') id: string, @Body() dto: CreateBroadcastDto) {
+  update(
+    @CurrentUser() user: any,
+    @Param('id') id: string,
+    @Body() dto: CreateBroadcastDto,
+  ) {
     this.ensureAdmin(user);
     return this.broadcastsService.update(user, id, dto);
   }
@@ -51,7 +73,11 @@ export class AdminBroadcastsController {
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a broadcast (admin)' })
   @ApiParam({ name: 'id', example: '1' })
-  async destroy(@CurrentUser() user: any, @Param('id') id: string, @Res() res: any) {
+  async destroy(
+    @CurrentUser() user: any,
+    @Param('id') id: string,
+    @Res() res: any,
+  ) {
     this.ensureAdmin(user);
     await this.broadcastsService.destroy(user, id);
     return res.status(204).send();

@@ -374,15 +374,45 @@ model AnnouncerRequest {
 }
 
 model Newsletter {
-  id                BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
-  clientId          String    @unique @map("client_id") @db.Char(36)
-  email             String    @db.VarChar(255)
-  verificationToken String?   @map("verification_token") @db.VarChar(255)
-  verified          Boolean   @default(false)
-  createdAt         DateTime? @default(now()) @map("created_at") @db.Timestamp(0)
-  updatedAt         DateTime? @default(now()) @map("updated_at") @db.Timestamp(0)
+  id                BigInt              @id @default(autoincrement()) @db.UnsignedBigInt
+  clientId          String              @unique @map("client_id") @db.Char(36)
+  email             String              @db.VarChar(255)
+  verificationToken String?             @map("verification_token") @db.VarChar(255)
+  verified          Boolean             @default(false)
+  createdAt         DateTime?           @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt         DateTime?           @default(now()) @map("updated_at") @db.Timestamp(0)
+  campaignRecipients CampaignRecipient[]
 
   @@map("newsletters")
+}
+
+model Campaign {
+  id         BigInt              @id @default(autoincrement()) @db.UnsignedBigInt
+  subject    String              @db.VarChar(255)
+  content    String              @db.Text
+  status     String              @default("draft") @db.VarChar(50)
+  sentAt     DateTime?           @map("sent_at") @db.Timestamp(0)
+  createdAt  DateTime?           @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt  DateTime?           @default(now()) @map("updated_at") @db.Timestamp(0)
+  recipients CampaignRecipient[]
+
+  @@map("campaigns")
+}
+
+model CampaignRecipient {
+  id          BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  campaignId  BigInt    @map("campaign_id") @db.UnsignedBigInt
+  newsletterId BigInt   @map("newsletter_id") @db.UnsignedBigInt
+  email       String    @db.VarChar(255)
+  sentAt      DateTime? @map("sent_at") @db.Timestamp(0)
+  createdAt   DateTime? @default(now()) @map("created_at") @db.Timestamp(0)
+
+  campaign   Campaign  @relation(fields: [campaignId], references: [id])
+  newsletter  Newsletter @relation(fields: [newsletterId], references: [id])
+
+  @@index([campaignId], map: "campaign_recipients_campaign_id_foreign")
+  @@index([newsletterId], map: "campaign_recipients_newsletter_id_foreign")
+  @@map("campaign_recipients")
 }
 
 model Broadcast {

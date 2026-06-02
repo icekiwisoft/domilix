@@ -15,7 +15,9 @@ export class CreateBroadcastDto {
   @MaxLength(255)
   title!: string;
 
-  @ApiPropertyOptional({ example: 'Publiez en illimite et obtenez plus de visibilite.' })
+  @ApiPropertyOptional({
+    example: 'Publiez en illimite et obtenez plus de visibilite.',
+  })
   @IsOptional()
   @IsString()
   subtitle?: string;

@@ -23,23 +23,26 @@ export class UsersService {
     const [liked, announcer, unlocked] = await Promise.all([
       this.prisma.favorite.count({ where: { userId: user.id } }),
       this.prisma.announcer.findFirst({ where: { userId: user.id } }),
-      this.prisma.unlocking.count({ where: { userId: user.id, expiresAt: { gt: new Date() } } }),
+      this.prisma.unlocking.count({
+        where: { userId: user.id, expiresAt: { gt: new Date() } },
+      }),
     ]);
-    const announces = includeAnnounces && announcer
-      ? await this.prisma.ad.findMany({
-          where: { announcerId: announcer.id, deletedAt: null },
-          orderBy: { createdAt: 'desc' },
-          select: {
-            id: true,
-            description: true,
-            price: true,
-            adType: true,
-            city: true,
-            country: true,
-            createdAt: true,
-          },
-        })
-      : undefined;
+    const announces =
+      includeAnnounces && announcer
+        ? await this.prisma.ad.findMany({
+            where: { announcerId: announcer.id, deletedAt: null },
+            orderBy: { createdAt: 'desc' },
+            select: {
+              id: true,
+              description: true,
+              price: true,
+              adType: true,
+              city: true,
+              country: true,
+              createdAt: true,
+            },
+          })
+        : undefined;
     const role = user.isAdmin ? 'admin' : announcer ? 'announcer' : 'client';
 
     return {
@@ -73,7 +76,9 @@ export class UsersService {
           }
         : null,
       announces_count: announcer
-        ? await this.prisma.ad.count({ where: { announcerId: announcer.id, deletedAt: null } })
+        ? await this.prisma.ad.count({
+            where: { announcerId: announcer.id, deletedAt: null },
+          })
         : 0,
       ...(announces
         ? {
@@ -106,7 +111,9 @@ export class UsersService {
       this.prisma.user.count({ where: { deletedAt: null } }),
     ]);
 
-    const data = await Promise.all(users.map((user) => this.serializeUser(user)));
+    const data = await Promise.all(
+      users.map((user) => this.serializeUser(user)),
+    );
     return buildLaravelPagination(data, {
       total,
       page,
@@ -118,7 +125,9 @@ export class UsersService {
 
   async show(currentUser: any, id: string) {
     this.ensureAdmin(currentUser);
-    const user = await this.prisma.user.findUnique({ where: { id: BigInt(id) } });
+    const user = await this.prisma.user.findUnique({
+      where: { id: BigInt(id) },
+    });
     if (!user || user.deletedAt) throw new NotFoundException('User not found');
     return this.serializeUser(user, true);
   }
@@ -126,15 +135,20 @@ export class UsersService {
   async update(currentUser: any, id: string, dto: UpdateUserDto) {
     this.ensureAdmin(currentUser);
     const userId = BigInt(id);
-    const existing = await this.prisma.user.findUnique({ where: { id: userId } });
-    if (!existing || existing.deletedAt) throw new NotFoundException('User not found');
+    const existing = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+    if (!existing || existing.deletedAt)
+      throw new NotFoundException('User not found');
 
     if (dto.email !== undefined) {
       const emailOwner = await this.prisma.user.findFirst({
         where: { email: dto.email, NOT: { id: userId } },
       });
       if (emailOwner) {
-        throw new BadRequestException({ errors: { email: ['The email has already been taken.'] } });
+        throw new BadRequestException({
+          errors: { email: ['The email has already been taken.'] },
+        });
       }
     }
 
@@ -143,8 +157,12 @@ export class UsersService {
       data: {
         name: dto.name,
         email: dto.email,
-        ...(dto.phone_number !== undefined ? { phoneNumber: dto.phone_number } : {}),
-        ...(dto.phone_verified !== undefined ? { phoneVerified: dto.phone_verified } : {}),
+        ...(dto.phone_number !== undefined
+          ? { phoneNumber: dto.phone_number }
+          : {}),
+        ...(dto.phone_verified !== undefined
+          ? { phoneVerified: dto.phone_verified }
+          : {}),
         ...(dto.is_admin !== undefined ? { isAdmin: dto.is_admin } : {}),
       },
     });
@@ -168,8 +186,11 @@ export class UsersService {
   async becomeAnnouncer(currentUser: any, id: string) {
     this.ensureAdmin(currentUser);
     const userId = BigInt(id);
-    const existingUser = await this.prisma.user.findUnique({ where: { id: userId } });
-    if (!existingUser || existingUser.deletedAt) throw new NotFoundException('User not found');
+    const existingUser = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+    if (!existingUser || existingUser.deletedAt)
+      throw new NotFoundException('User not found');
 
     const existingRequest = await this.prisma.announcerRequest.findFirst({
       where: { userId },

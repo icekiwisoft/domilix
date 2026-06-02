@@ -23,7 +23,9 @@ export class CategoriesService {
       ...(query.type ? { type: query.type } : {}),
     };
 
-    const orderBy = query.orderBy ? { [query.orderBy]: 'asc' as const } : { id: 'asc' as const };
+    const orderBy = query.orderBy
+      ? { [query.orderBy]: 'asc' as const }
+      : { id: 'asc' as const };
 
     const [categories, total, groupedAds] = await Promise.all([
       this.prisma.category.findMany({

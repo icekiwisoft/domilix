@@ -10,13 +10,23 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiConsumes,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { AuthGuard } from '../auth/auth.guard';
 import { MediasService } from './medias.service';
-import { ALLOWED_MEDIA_MIME_PATTERN, MAX_AD_MEDIAS } from '../common/media/thumbnails';
+import {
+  ALLOWED_MEDIA_MIME_PATTERN,
+  MAX_AD_MEDIAS,
+} from '../common/media/thumbnails';
 
 @ApiTags('Medias')
 @Controller('medias')
@@ -47,7 +57,9 @@ export class MediasController {
   @Post()
   @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
-  @ApiOperation({ summary: 'Upload medias and optionally attach them to an announce' })
+  @ApiOperation({
+    summary: 'Upload medias and optionally attach them to an announce',
+  })
   @UseInterceptors(
     FilesInterceptor('medias', MAX_AD_MEDIAS, {
       storage: memoryStorage(),
@@ -74,13 +86,33 @@ export class MediasController {
       : body.filesid
         ? [body.filesid]
         : [];
-    const mediaIds = [body.media_ids, body['media_ids[]']].flat().filter(Boolean);
-    const mediaUrls = [body.media_urls, body['media_urls[]']].flat().filter(Boolean);
-    const mediaThumbnails = [body.media_thumbnails, body['media_thumbnails[]']].flat().filter(Boolean);
-    const mediaTypes = [body.media_types, body['media_types[]']].flat().filter(Boolean);
-    const mediaBuckets = [body.media_buckets, body['media_buckets[]']].flat().filter(Boolean);
-    const mediaOriginalPaths = [body.media_original_paths, body['media_original_paths[]']].flat().filter(Boolean);
-    const mediaThumbnailPaths = [body.media_thumbnail_paths, body['media_thumbnail_paths[]']].flat().filter(Boolean);
+    const mediaIds = [body.media_ids, body['media_ids[]']]
+      .flat()
+      .filter(Boolean);
+    const mediaUrls = [body.media_urls, body['media_urls[]']]
+      .flat()
+      .filter(Boolean);
+    const mediaThumbnails = [body.media_thumbnails, body['media_thumbnails[]']]
+      .flat()
+      .filter(Boolean);
+    const mediaTypes = [body.media_types, body['media_types[]']]
+      .flat()
+      .filter(Boolean);
+    const mediaBuckets = [body.media_buckets, body['media_buckets[]']]
+      .flat()
+      .filter(Boolean);
+    const mediaOriginalPaths = [
+      body.media_original_paths,
+      body['media_original_paths[]'],
+    ]
+      .flat()
+      .filter(Boolean);
+    const mediaThumbnailPaths = [
+      body.media_thumbnail_paths,
+      body['media_thumbnail_paths[]'],
+    ]
+      .flat()
+      .filter(Boolean);
     return this.mediasService.store(
       user,
       {
@@ -97,7 +129,6 @@ export class MediasController {
       files,
     );
   }
-
 }
 
 @ApiTags('Announcer Medias')
@@ -108,7 +139,10 @@ export class AnnouncerMediasController {
   @Get()
   @ApiOperation({ summary: 'List medias for a specific announcer' })
   @ApiParam({ name: 'announcerId', example: 'announcer-uuid' })
-  index(@Param('announcerId') announcerId: string, @Query('page') page?: string) {
+  index(
+    @Param('announcerId') announcerId: string,
+    @Query('page') page?: string,
+  ) {
     return this.mediasService.indexByAnnouncer(announcerId, Number(page || 1));
   }
 }

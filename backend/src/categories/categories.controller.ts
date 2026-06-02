@@ -1,6 +1,11 @@
 import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 import { Controller, Get, Param, Query, UseInterceptors } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import {
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CategoriesService } from './categories.service';
 import { QueryCategoriesDto } from './dto/query-categories.dto';
 

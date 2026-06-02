@@ -1,6 +1,28 @@
 import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, Req, Res, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Put,
+  Query,
+  Req,
+  Res,
+  UploadedFiles,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { AuthGuard } from '../auth/auth.guard';
 import { Throttle } from '@nestjs/throttler';
@@ -12,7 +34,10 @@ import { QueryCitiesDto } from './dto/query-cities.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { assertHoneypotClear } from '../common/honeypot';
-import { ALLOWED_MEDIA_MIME_PATTERN, MAX_AD_MEDIAS } from '../common/media/thumbnails';
+import {
+  ALLOWED_MEDIA_MIME_PATTERN,
+  MAX_AD_MEDIAS,
+} from '../common/media/thumbnails';
 
 @ApiTags('Ads')
 @Controller()
@@ -29,7 +54,9 @@ export class AdsController {
 
     try {
       const payload = this.tokens.verifyAccessToken(authorization.slice(7));
-      const user = await this.prisma.user.findUnique({ where: { id: BigInt(payload.sub) } });
+      const user = await this.prisma.user.findUnique({
+        where: { id: BigInt(payload.sub) },
+      });
       return user?.id;
     } catch {
       return undefined;
@@ -80,7 +107,9 @@ export class AdsController {
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
-  @ApiOperation({ summary: 'Create a new announce with optional uploaded medias' })
+  @ApiOperation({
+    summary: 'Create a new announce with optional uploaded medias',
+  })
   @ApiBody({
     schema: {
       type: 'object',
@@ -103,7 +132,10 @@ export class AdsController {
         equipped_kitchen: { type: 'string', enum: ['0', '1'] },
         gate: { type: 'string', enum: ['0', '1'] },
         pool: { type: 'string', enum: ['0', '1'] },
-        size: { type: 'string', description: 'Real estate size in square meters' },
+        size: {
+          type: 'string',
+          description: 'Real estate size in square meters',
+        },
         'medias[]': {
           type: 'array',
           items: { type: 'string', format: 'binary' },
@@ -127,7 +159,11 @@ export class AdsController {
       },
     }),
   )
-  create(@CurrentUser() user: any, @Body() body: any, @UploadedFiles() files: any[] = []) {
+  create(
+    @CurrentUser() user: any,
+    @Body() body: any,
+    @UploadedFiles() files: any[] = [],
+  ) {
     assertHoneypotClear(body.website, 'ads.create');
     return this.adsService.create(body, files, user.id);
   }
@@ -146,7 +182,11 @@ export class AdsController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete an announce' })
   @ApiParam({ name: 'id', example: '1' })
-  async destroy(@Param('id') id: string, @CurrentUser() user: any, @Res() res: any) {
+  async destroy(
+    @Param('id') id: string,
+    @CurrentUser() user: any,
+    @Res() res: any,
+  ) {
     await this.adsService.destroyAd(id, user.id);
     return res.status(204).send();
   }

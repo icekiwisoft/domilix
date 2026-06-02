@@ -9,7 +9,9 @@ export class AppService {
     const [furnitures, houses, announcers, users, verifiedAnnouncers] =
       await Promise.all([
         this.prisma.ad.count({ where: { itemType: 'App\\Models\\Furniture' } }),
-        this.prisma.ad.count({ where: { itemType: 'App\\Models\\RealEstate' } }),
+        this.prisma.ad.count({
+          where: { itemType: 'App\\Models\\RealEstate' },
+        }),
         this.prisma.announcer.count(),
         this.prisma.user.count(),
         this.prisma.announcer.count({ where: { verified: true } }),

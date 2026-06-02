@@ -1,5 +1,9 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import {
+  GetObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import crypto from 'node:crypto';
 import path from 'node:path';
@@ -22,7 +26,9 @@ export class ObjectStorageService {
   private readonly bucketName = process.env.WASABI_BUCKET;
   private readonly endpoint = process.env.WASABI_ENDPOINT;
   private readonly publicBaseUrl = process.env.WASABI_PUBLIC_BASE_URL;
-  private readonly signedUrlTtlSeconds = Number(process.env.WASABI_SIGNED_URL_TTL_SECONDS || 3600);
+  private readonly signedUrlTtlSeconds = Number(
+    process.env.WASABI_SIGNED_URL_TTL_SECONDS || 3600,
+  );
   private client?: S3Client;
 
   private get storageClient() {
@@ -35,8 +41,16 @@ export class ObjectStorageService {
     const secretAccessKey = process.env.WASABI_SECRET_ACCESS_KEY;
     const region = process.env.WASABI_REGION;
 
-    if (!accessKeyId || !secretAccessKey || !region || !this.endpoint || !this.bucketName) {
-      throw new InternalServerErrorException('Wasabi storage is not configured.');
+    if (
+      !accessKeyId ||
+      !secretAccessKey ||
+      !region ||
+      !this.endpoint ||
+      !this.bucketName
+    ) {
+      throw new InternalServerErrorException(
+        'Wasabi storage is not configured.',
+      );
     }
 
     return new S3Client({
@@ -50,14 +64,21 @@ export class ObjectStorageService {
     });
   }
 
-  private makeStoragePath(folder: string, file: Pick<UploadableFile, 'originalname' | 'filename'>, extensionOverride?: string) {
+  private makeStoragePath(
+    folder: string,
+    file: Pick<UploadableFile, 'originalname' | 'filename'>,
+    extensionOverride?: string,
+  ) {
     const sourceName = file.originalname || file.filename || '';
     const extension = extensionOverride || path.extname(sourceName) || '';
     return `${folder}/${Date.now()}-${crypto.randomUUID()}${extension}`;
   }
 
   private publicUrl(destination: string) {
-    const encodedDestination = encodeURIComponent(destination).replace(/%2F/g, '/');
+    const encodedDestination = encodeURIComponent(destination).replace(
+      /%2F/g,
+      '/',
+    );
 
     if (this.publicBaseUrl) {
       return `${this.publicBaseUrl.replace(/\/$/, '')}/${encodedDestination}`;
@@ -67,14 +88,16 @@ export class ObjectStorageService {
   }
 
   async uploadBuffer(buffer: Buffer, destination: string, contentType: string) {
-    await this.storageClient.send(new PutObjectCommand({
-      Bucket: this.bucketName,
-      Key: destination,
-      Body: buffer,
-      ContentType: contentType,
-      CacheControl: 'public, max-age=31536000, immutable',
-      ACL: 'public-read',
-    }));
+    await this.storageClient.send(
+      new PutObjectCommand({
+        Bucket: this.bucketName,
+        Key: destination,
+        Body: buffer,
+        ContentType: contentType,
+        CacheControl: 'public, max-age=31536000, immutable',
+        ACL: 'public-read',
+      }),
+    );
 
     return {
       bucket: this.bucketName!,
@@ -83,7 +106,10 @@ export class ObjectStorageService {
     };
   }
 
-  async getSignedUrl(bucket: string | null | undefined, path: string | null | undefined) {
+  async getSignedUrl(
+    bucket: string | null | undefined,
+    path: string | null | undefined,
+  ) {
     if (!bucket || !path) return null;
 
     return getSignedUrl(
@@ -104,7 +130,11 @@ export class ObjectStorageService {
     );
   }
 
-  async uploadThumbnail(buffer: Buffer, sourceFile: Pick<UploadableFile, 'originalname' | 'filename'>, folder = 'thumbnails') {
+  async uploadThumbnail(
+    buffer: Buffer,
+    sourceFile: Pick<UploadableFile, 'originalname' | 'filename'>,
+    folder = 'thumbnails',
+  ) {
     return this.uploadBuffer(
       buffer,
       this.makeStoragePath(folder, sourceFile, '.webp'),

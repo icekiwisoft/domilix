@@ -1,4 +1,8 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { buildLaravelPagination } from '../../common/http/pagination';
 import { PrismaService } from '../../prisma/prisma.service';
 
@@ -15,11 +19,12 @@ export class AdminSubscriptionsService {
   private serialize(subscription: any, planName: string) {
     const now = new Date();
     const expiresAt = subscription.expireAt || subscription.endDate;
-    const status = expiresAt && expiresAt <= now
-      ? 'expired'
-      : subscription.credits <= 0
+    const status =
+      expiresAt && expiresAt <= now
         ? 'expired'
-        : 'active';
+        : subscription.credits <= 0
+          ? 'expired'
+          : 'active';
 
     return {
       id: Number(subscription.id),
@@ -62,10 +67,15 @@ export class AdminSubscriptionsService {
       this.prisma.subscriptionPlan.findMany(),
     ]);
 
-    const planNamesById = new Map(plans.map((plan) => [String(plan.id), plan.name] as const));
-    const data = subscriptions.map((subscription) => (
-      this.serialize(subscription, planNamesById.get(subscription.subscriptionPlanId) || 'Unknown')
-    ));
+    const planNamesById = new Map(
+      plans.map((plan) => [String(plan.id), plan.name] as const),
+    );
+    const data = subscriptions.map((subscription) =>
+      this.serialize(
+        subscription,
+        planNamesById.get(subscription.subscriptionPlanId) || 'Unknown',
+      ),
+    );
 
     return buildLaravelPagination(data, {
       total,
@@ -95,7 +105,9 @@ export class AdminSubscriptionsService {
   async destroy(currentUser: any, id: string) {
     this.ensureAdmin(currentUser);
 
-    const subscription = await this.prisma.subscription.findUnique({ where: { id: BigInt(id) } });
+    const subscription = await this.prisma.subscription.findUnique({
+      where: { id: BigInt(id) },
+    });
     if (!subscription) throw new NotFoundException('Subscription not found');
 
     await this.prisma.subscription.delete({ where: { id: subscription.id } });
