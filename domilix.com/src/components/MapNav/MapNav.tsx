@@ -99,7 +99,7 @@ export default function MapNav() {
                 )}
               </button>
               {showNotifications && (
-                <NotificationPopup onClose={() => setShowNotifications(false)} />
+                <NotificationPopup isOpen={showNotifications} onClose={() => setShowNotifications(false)} />
               )}
               <button
                 ref={profileButtonRef}
@@ -130,7 +130,7 @@ export default function MapNav() {
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={() => signinDialogActions.open()}
+                onClick={() => signinDialogActions.toggle()}
                 className="rounded-lg px-4 py-1.5 text-xs font-bold text-gray-600 transition hover:bg-gray-100"
               >
                 Connexion
@@ -138,7 +138,7 @@ export default function MapNav() {
               <button
                 type="button"
                 onClick={() => {
-                  signinDialogActions.open();
+                  signinDialogActions.toggle();
                   setTimeout(() => {
                     const tab = document.querySelector('[data-signup-tab]') as HTMLElement;
                     tab?.click();

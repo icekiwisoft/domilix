@@ -2,29 +2,27 @@
 
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import dynamic from 'next/dynamic';
-import { getAuthToken } from '@stores/defineStore';
+import Link from 'next/link';
+
+import MapBottomSheet from '@pages/Carte/components/MapBottomSheet';
+import MapSidebar from '@pages/Carte/components/MapSidebar';
+import { MapListing, MapFiltersState, DEFAULT_FILTERS } from '@pages/Carte/data/types';
+import { mockListings } from '@pages/Carte/data/mockListings';
+import MapNav from '@components/MapNav/MapNav';
 import { getMapListings } from '@services/mapsApi';
 import { useMaps } from '@context/MapsContext';
-import { mockListings } from '@pages/Carte/data/mockListings';
-import { MapListing, MapFiltersState, DEFAULT_FILTERS } from '@pages/Carte/data/types';
-import MapNav from '@components/MapNav/MapNav';
-import MapSidebar from '@pages/Carte/components/MapSidebar';
-import MapBottomSheet from '@pages/Carte/components/MapBottomSheet';
-import Link from 'next/link';
 
 const MapView = dynamic(() => import('@pages/Carte/components/MapView'), { ssr: false });
 
 export default function Carte() {
   const [listings, setListings] = useState<MapListing[]>([]);
   const [loading, setLoading] = useState(true);
-  const { subscriptionActive } = useMaps();
+  const { subscriptionActive, loading: mapsLoading } = useMaps();
   const [favorites, setFavorites] = useState<MapListing[]>([]);
   const [activeTab, setActiveTab] = useState<'listings' | 'favorites' | 'filters' | 'pro'>('listings');
   const [selectedListingId, setSelectedListingId] = useState<number | null>(null);
   const [filters, setFilters] = useState<MapFiltersState>(DEFAULT_FILTERS);
   const [searchQuery, setSearchQuery] = useState('');
-
-  const isAuthenticated = !!getAuthToken();
 
   useEffect(() => {
     (async () => {
@@ -88,7 +86,7 @@ export default function Carte() {
   const handleSelectListing = useCallback((id: number) => { setSelectedListingId(id); }, []);
   const handleMarkerClick = useCallback((listing: MapListing) => { setSelectedListingId(listing.id); }, []);
 
-  if (loading) {
+  if (loading || mapsLoading) {
     return (
       <div className="fixed inset-0 z-[41] flex flex-col">
         <MapNav />
