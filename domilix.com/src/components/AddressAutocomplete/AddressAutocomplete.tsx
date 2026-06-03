@@ -2,10 +2,11 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import {
+  GeoapifyFeature,
+  getFeatureCoordinates,
   searchPlaces,
-  MapboxFeature,
   parseAddressComponents,
-} from '@services/mapboxApi';
+} from '@services/geoapifyApi';
 import { MdLocationOn, MdMyLocation } from 'react-icons/md';
 
 interface AddressAutocompleteProps {
@@ -32,7 +33,7 @@ export default function AddressAutocomplete({
   className = '',
   onSubmit,
 }: AddressAutocompleteProps) {
-  const [suggestions, setSuggestions] = useState<MapboxFeature[]>([]);
+  const [suggestions, setSuggestions] = useState<GeoapifyFeature[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(
@@ -102,12 +103,13 @@ export default function AddressAutocomplete({
     }
   };
 
-  const handleSuggestionClick = (feature: MapboxFeature) => {
+  const handleSuggestionClick = (feature: GeoapifyFeature) => {
     const addressComponents = parseAddressComponents(feature);
+    const coordinates = getFeatureCoordinates(feature);
 
-    onChange(feature.place_name);
+    onChange(addressComponents.address);
     onLocationSelect({
-      coordinates: feature.center,
+      coordinates,
       address: addressComponents.address,
       city: addressComponents.city,
       state: addressComponents.state,
@@ -145,12 +147,12 @@ export default function AddressAutocomplete({
 
           // Faire un géocodage inverse pour obtenir l'adresse
           try {
-            const { reverseGeocode } = await import('@services/mapboxApi');
+            const { reverseGeocode } = await import('@services/geoapifyApi');
             const result = await reverseGeocode(longitude, latitude);
 
             if (result) {
               const addressComponents = parseAddressComponents(result);
-              onChange(result.place_name);
+              onChange(addressComponents.address);
               onLocationSelect({
                 coordinates: [longitude, latitude],
                 address: addressComponents.address,
@@ -233,7 +235,7 @@ export default function AddressAutocomplete({
         <div className='absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto'>
           {suggestions.map((suggestion, index) => (
             <button
-              key={suggestion.id || index}
+              key={suggestion.id || `${suggestion.properties.lon}-${suggestion.properties.lat}-${index}`}
               type='button'
               onClick={() => handleSuggestionClick(suggestion)}
               className='w-full px-4 py-3 text-left hover:bg-orange-50 focus:bg-orange-50 focus:outline-none border-b border-gray-100 last:border-b-0 transition-colors duration-150'
@@ -242,10 +244,10 @@ export default function AddressAutocomplete({
                 <MdLocationOn className='w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0' />
                 <div className='flex-1 min-w-0'>
                   <div className='text-sm font-medium text-gray-900 truncate'>
-                    {suggestion.text}
+                    {suggestion.properties.address_line1 || suggestion.properties.city || suggestion.properties.formatted}
                   </div>
                   <div className='text-xs text-gray-500 truncate'>
-                    {suggestion.place_name}
+                    {suggestion.properties.formatted}
                   </div>
                 </div>
               </div>

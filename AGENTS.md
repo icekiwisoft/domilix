@@ -46,7 +46,7 @@ No test suite is configured for frontend or dashboard. Backend uses Jest.
 
 Each sub-project requires a `.env` file (copy from `.env.example`):
 
-- **Frontend**: `NEXT_PUBLIC_API_BASE_URL` (no `/api` suffix), `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN`
+- **Frontend**: `NEXT_PUBLIC_API_BASE_URL` (no `/api` suffix), `NEXT_PUBLIC_GEOAPIFY_API_KEY`
 - **Backend**: Database URL, Wasabi S3 keys, Campay credentials, JWT secret
 - **Dashboard**: `VITE_API_URL` (defaults to `https://api.domilix.com`)
 

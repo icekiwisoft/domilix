@@ -18,7 +18,7 @@ No test suite is configured.
 Copy `.env.example` to `.env`. Required variables:
 
 - `NEXT_PUBLIC_API_BASE_URL` — backend root URL (e.g. `http://localhost:8000`). **Do not include a trailing `/api`**; the service layer appends paths directly.
-- `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN` — Mapbox token for map components.
+- `NEXT_PUBLIC_GEOAPIFY_API_KEY` — Geoapify token for address search and maps.
 
 ## Architecture
 

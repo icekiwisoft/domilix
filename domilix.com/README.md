@@ -27,7 +27,7 @@ cp .env.example .env
 Main variables:
 
 - `NEXT_PUBLIC_API_BASE_URL=http://localhost:8000`
-- `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=your_mapbox_access_token_here`
+- `NEXT_PUBLIC_GEOAPIFY_API_KEY=your_geoapify_api_key_here`
 
 ## Local development
 

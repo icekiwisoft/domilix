@@ -5,50 +5,13 @@ import { SearchAddressesDto } from './dto/search-addresses.dto';
 @Injectable()
 export class AddressesService {
   private readonly logger = new Logger(AddressesService.name);
-  private readonly baseUrl =
-    'https://api.mapbox.com/geocoding/v5/mapbox.places';
+  private readonly geoapifySearchUrl =
+    'https://api.geoapify.com/v1/geocode/autocomplete';
   private readonly geoapifyReverseUrl =
     'https://api.geoapify.com/v1/geocode/reverse';
 
-  private get accessToken() {
-    return process.env.MAPBOX_ACCESS_TOKEN || '';
-  }
-
   private get geoapifyApiKey() {
     return process.env.GEOAPIFY_API_KEY || '';
-  }
-
-  private parseAddressComponents(feature: any) {
-    const components = {
-      address: feature?.place_name || '',
-      city: '',
-      state: '',
-      country: '',
-      zip: '',
-      coordinates: feature?.center || [0, 0],
-      text: feature?.text || '',
-    };
-
-    if (Array.isArray(feature?.context)) {
-      for (const item of feature.context) {
-        const id = item?.id || '';
-        const text = item?.text || '';
-        if (id.startsWith('place')) components.city = text;
-        else if (id.startsWith('region')) components.state = text;
-        else if (id.startsWith('country')) components.country = text;
-        else if (id.startsWith('postcode')) components.zip = text;
-      }
-    }
-
-    if (
-      !components.city &&
-      Array.isArray(feature?.place_type) &&
-      feature.place_type.includes('place')
-    ) {
-      components.city = feature?.text || '';
-    }
-
-    return components;
   }
 
   private parseGeoapifyReverseResult(result: any) {
@@ -98,34 +61,31 @@ export class AddressesService {
   }
 
   async search(dto: SearchAddressesDto) {
-    if (!this.accessToken) {
+    if (!this.geoapifyApiKey) {
       return { success: true, data: [] };
     }
 
     const params = new URLSearchParams({
-      access_token: this.accessToken,
+      apiKey: this.geoapifyApiKey,
+      text: dto.query,
       limit: String(dto.limit || 5),
-      types: dto.types?.join(',') || 'place,locality,neighborhood,address,poi',
-      language: dto.language || 'fr',
+      lang: dto.language || 'fr',
     });
 
-    if (dto.country) params.set('country', dto.country);
-    if (dto.bbox?.length === 4) params.set('bbox', dto.bbox.join(','));
+    if (dto.country) params.set('filter', `countrycode:${dto.country.toLowerCase()}`);
+    if (dto.bbox?.length === 4) params.set('filter', `rect:${dto.bbox.join(',')}`);
     if (dto.proximity?.length === 2)
-      params.set('proximity', dto.proximity.join(','));
-    if (dto.autocomplete !== undefined)
-      params.set('autocomplete', String(dto.autocomplete));
+      params.set('bias', `proximity:${dto.proximity.join(',')}`);
 
-    const response = await fetch(
-      `${this.baseUrl}/${encodeURIComponent(dto.query)}.json?${params.toString()}`,
-    );
+    const response = await fetch(`${this.geoapifySearchUrl}?${params.toString()}`);
     if (!response.ok) return { success: true, data: [] };
     const payload = await response.json();
     return {
       success: true,
-      data: (payload.features || []).map((feature: any) =>
-        this.parseAddressComponents(feature),
-      ),
+      data: (payload.features || []).map((feature: any) => {
+        const props = feature?.properties || {};
+        return this.parseGeoapifyReverseResult(props);
+      }),
     };
   }
 

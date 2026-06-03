@@ -31,7 +31,6 @@ pnpm start:dev
 - `PORT=8000`
 - `JWT_SECRET=change-me`
 - `JWT_REFRESH_SECRET=change-me-too`
-- `MAPBOX_ACCESS_TOKEN=`
 - `GEOAPIFY_API_KEY=`
 
 ## Swagger
@@ -71,7 +70,6 @@ The deploy stack expects these values in `deploy/.env.production`:
 - `DATABASE_URL`
 - `JWT_SECRET`
 - `JWT_REFRESH_SECRET`
-- `MAPBOX_ACCESS_TOKEN`
 - `GEOAPIFY_API_KEY`
 
 ## Notes
