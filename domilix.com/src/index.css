@@ -40,6 +40,23 @@ body {
   color: #211a12;
 }
 
+.domilix-detail-map .leaflet-pane,
+.domilix-detail-map .leaflet-map-pane,
+.domilix-detail-map .leaflet-tile-pane,
+.domilix-detail-map .leaflet-overlay-pane,
+.domilix-detail-map .leaflet-shadow-pane,
+.domilix-detail-map .leaflet-marker-pane,
+.domilix-detail-map .leaflet-tooltip-pane,
+.domilix-detail-map .leaflet-popup-pane,
+.domilix-detail-map .leaflet-top,
+.domilix-detail-map .leaflet-bottom {
+  z-index: 0 !important;
+}
+
+.domilix-detail-map .leaflet-control-container {
+  z-index: 10 !important;
+}
+
 /* Navbar */
 .navbar {
   font-family: var(--font-navbar);

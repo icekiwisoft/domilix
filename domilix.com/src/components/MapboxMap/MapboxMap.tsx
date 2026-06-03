@@ -40,14 +40,14 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
     if (!isUnlocked || !hasCoordinates || !GEOAPIFY_API_KEY || !mapElementRef.current || mapRef.current) return;
 
     const map = L.map(mapElementRef.current, {
-      zoomControl: false,
-      scrollWheelZoom: false,
-      dragging: false,
-      doubleClickZoom: false,
-      boxZoom: false,
-      keyboard: false,
-      tap: false,
-      touchZoom: false,
+      zoomControl: true,
+      scrollWheelZoom: true,
+      dragging: true,
+      doubleClickZoom: true,
+      boxZoom: true,
+      keyboard: true,
+      tap: true,
+      touchZoom: true,
     }).setView([latitude, longitude], 15);
 
     L.tileLayer(`https://maps.geoapify.com/v1/tile/osm-bright/{z}/{x}/{y}.png?apiKey=${GEOAPIFY_API_KEY}`, {
@@ -97,7 +97,7 @@ const MapboxMap: React.FC<MapboxMapProps> = ({
   }
 
   return (
-    <div className={`relative overflow-hidden bg-gray-100 ${className}`}>
+    <div className={`domilix-detail-map relative z-0 overflow-hidden bg-gray-100 ${className}`}>
       <div ref={mapElementRef} className='h-full w-full' />
       <div className='pointer-events-none absolute left-4 top-4 rounded-2xl bg-white/95 px-4 py-3 shadow-lg backdrop-blur-sm'>
         <p className='text-xs font-black uppercase tracking-wide text-[#E8921A]'>Localisation exacte</p>
