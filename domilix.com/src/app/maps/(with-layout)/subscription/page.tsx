@@ -1,12 +1,12 @@
 'use client';
 
-import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 import MapNav from '@components/MapNav/MapNav';
 import { useMaps } from '@context/MapsContext';
-import { getAuthToken } from '@stores/defineStore';
+import { getAuthToken, signinDialogActions } from '@stores/defineStore';
 import MapsPaymentDialog from '@pages/Carte/components/MapsPaymentDialog';
 
 const MAPS_PACKS = [
@@ -59,6 +59,7 @@ const BASE_FEATURES = [
 ];
 
 export default function SubscriptionPage() {
+  const router = useRouter();
   const { subscription, subscriptionActive, loading, actionLoading, error, subscribe, cancel, refresh } = useMaps();
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [paymentPack, setPaymentPack] = useState<(typeof MAPS_PACKS[number]) | null>(null);
@@ -72,6 +73,12 @@ export default function SubscriptionPage() {
 
   const handleActivatePack = (pack: typeof MAPS_PACKS[number]) => {
     if (actionLoading || subscriptionActive) return;
+
+    if (!isAuthenticated) {
+      signinDialogActions.toggle();
+      return;
+    }
+
     setSuccessMessage(null);
 
     if (pack.price === 0) {
@@ -79,6 +86,7 @@ export default function SubscriptionPage() {
         if (activated) {
           setSuccessMessage(`Pack ${pack.label} active avec succes.`);
           triggerNotifRefresh();
+          router.push('/maps');
         }
       });
     } else {
@@ -93,6 +101,7 @@ export default function SubscriptionPage() {
     }
     setPaymentPack(null);
     triggerNotifRefresh();
+    router.push('/maps');
   };
 
   if (loading) {
@@ -130,31 +139,6 @@ export default function SubscriptionPage() {
               Prix de lancement — profitez-en !
             </div>
           </div>
-
-          {subscriptionActive && subscription && (
-            <div className="mx-auto mt-8 flex w-full max-w-2xl flex-col items-center justify-between gap-4 rounded-2xl border border-emerald-200 bg-white/90 p-5 text-center shadow-sm md:flex-row md:text-left">
-              <div>
-                <p className="text-sm font-black text-emerald-700">Abonnement actif</p>
-                <p className="mt-1 text-sm text-gray-500">
-                  Pack {activePack?.label || subscription.plan}
-                  {subscription.end_date ? ` · expire le ${new Date(subscription.end_date).toLocaleDateString('fr-FR')}` : ''}
-                </p>
-              </div>
-              <div className="flex gap-3">
-                <Link href="/maps" className="rounded-xl bg-brand-500 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-brand-600">
-                  Voir la carte
-                </Link>
-                <button
-                  type="button"
-                  onClick={cancel}
-                  disabled={actionLoading === 'cancel'}
-                  className="rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-bold text-gray-600 transition hover:bg-gray-50 disabled:opacity-50"
-                >
-                  {actionLoading === 'cancel' ? 'Annulation...' : 'Resilier'}
-                </button>
-              </div>
-            </div>
-          )}
 
           {!isAuthenticated && (
             <div className="mx-auto mt-8 max-w-xl rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-center">
@@ -195,12 +179,6 @@ export default function SubscriptionPage() {
                         : 'border-gray-200 shadow-sm hover:border-gray-300 hover:shadow-lg'
                     }`}
                     >
-                    {isCurrentPack && (
-                      <div className="absolute right-4 top-4 z-10 rounded-full bg-emerald-500 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-white">
-                        Actif
-                      </div>
-                    )}
-
                       {pack.popular && (
                         <div className="bg-gradient-to-r from-[#E8921A] to-orange-500 px-4 py-2 text-center text-[11px] font-black uppercase tracking-[0.15em] text-white shadow-lg shadow-orange-200/50">
                           <svg className="-mt-0.5 mr-1.5 inline-block h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
@@ -251,36 +229,31 @@ export default function SubscriptionPage() {
                         ))}
                       </ul>
 
-                      {isAuthenticated ? (
-                        <button
-                          type="button"
-                          onClick={() => handleActivatePack(pack)}
-                          disabled={isBusy || subscriptionActive}
-                          className={`mt-auto w-full rounded-xl py-3 text-sm font-black transition disabled:opacity-50 ${
-                            isFree
+                      <button
+                        type="button"
+                        onClick={() => handleActivatePack(pack)}
+                        disabled={isBusy || subscriptionActive}
+                        className={`mt-auto w-full rounded-xl py-3 text-sm font-black transition disabled:opacity-50 ${
+                          isCurrentPack
+                            ? 'border border-emerald-200 bg-emerald-50 text-emerald-700'
+                            : isFree
                               ? 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
                               : isPro
                                 ? 'bg-gradient-to-r from-[#E8921A] to-orange-500 text-white shadow-lg shadow-orange-200 hover:from-orange-500 hover:to-orange-600'
                                 : 'bg-gray-950 text-white hover:bg-gray-800'
-                          }`}
-                        >
-                          {isLoading
-                            ? 'Activation...'
-                            : isCurrentPack
-                              ? 'Pack actif'
-                              : subscriptionActive
-                                ? 'Resiliez pour changer'
-                                : isFree
-                                  ? 'Activer gratuitement'
-                                  : `Activer ${pack.label}`}
-                        </button>
-                      ) : (
+                        }`}
+                      >
+                        {isLoading ? 'Traitement...' : isCurrentPack ? 'Pack actif' : "S'abonner"}
+                      </button>
+
+                      {isCurrentPack && (
                         <button
                           type="button"
-                          onClick={() => (window as any).__openSigninDialog?.()}
-                          className="mt-auto w-full rounded-xl border border-gray-300 bg-white py-3 text-sm font-bold text-gray-700 transition hover:bg-gray-50"
+                          onClick={cancel}
+                          disabled={actionLoading === 'cancel'}
+                          className="mt-3 w-full rounded-xl border border-red-200 bg-red-50 py-3 text-sm font-black text-red-600 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                          Se connecter
+                          {actionLoading === 'cancel' ? 'Annulation...' : 'Résilier'}
                         </button>
                       )}
                     </div>
