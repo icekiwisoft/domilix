@@ -154,4 +154,19 @@ export class NewslettersService {
 
     return { message: 'Email successfully verified!' };
   }
+
+  async unsubscribe(clientId: string) {
+    const newsletter = await this.prisma.newsletter.findFirst({
+      where: { clientId },
+    });
+    if (!newsletter) {
+      throw new NotFoundException('Abonné introuvable');
+    }
+
+    await this.prisma.newsletter.delete({
+      where: { id: newsletter.id },
+    });
+
+    return { message: 'Vous avez été désabonné avec succès.' };
+  }
 }

@@ -23,4 +23,11 @@ export class NewslettersController {
   verify(@Param('token') token: string) {
     return this.newslettersService.verify(token);
   }
+
+  @Get('newsletter/:clientId/unsubscribe')
+  @ApiOperation({ summary: 'Unsubscribe from newsletter using client ID' })
+  @ApiParam({ name: 'clientId', example: 'uuid-client-id' })
+  unsubscribe(@Param('clientId') clientId: string) {
+    return this.newslettersService.unsubscribe(clientId);
+  }
 }

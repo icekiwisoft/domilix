@@ -59,9 +59,10 @@ export class MailService {
     });
   }
 
-  buildNewsletterHtml(content: string): string {
+  buildNewsletterHtml(content: string, unsubscribeUrl?: string): string {
     const frontendUrl = process.env.FRONTEND_URL || 'https://domilix.com';
     const year = new Date().getFullYear();
+    const link = unsubscribeUrl || `${frontendUrl}/newsletter/unsubscribe`;
     return `
 <!DOCTYPE html>
 <html lang="fr">
@@ -79,8 +80,7 @@ export class MailService {
           <!-- Header -->
           <tr>
             <td style="background:linear-gradient(135deg,#E8921A,#f97316);padding:32px 40px;text-align:center;">
-              <img src="${frontendUrl}/favicon.png" alt="Domilix" width="48" height="48" style="display:block;margin:0 auto 12px;" />
-              <h1 style="margin:0;font-size:22px;font-weight:900;color:#ffffff;letter-spacing:-0.3px;">Domilix</h1>
+              <img src="${frontendUrl}/logo.png" alt="Domilix" width="120" height="auto" style="display:block;margin:0 auto;" />
             </td>
           </tr>
 
@@ -98,7 +98,7 @@ export class MailService {
                 &copy; ${year} Domilix. Tous droits reserves.
               </p>
               <p style="margin:0;font-size:11px;color:#9ca3af;">
-                Cet email a ete envoye depuis Domilix. Si vous ne souhaitez plus recevoir nos communications, <a href="${frontendUrl}/newsletter/unsubscribe" style="color:#E8921A;text-decoration:underline;">desabonnez-vous</a>.
+                Cet email a ete envoye depuis Domilix. Si vous ne souhaitez plus recevoir nos communications, <a href="${link}" style="color:#E8921A;text-decoration:underline;">desabonnez-vous</a>.
               </p>
             </td>
           </tr>

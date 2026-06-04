@@ -5,4 +5,8 @@ export const newsletterApi = {
     const response = await api.post('/newsletters', { email, website });
     return response.data;
   },
+  unsubscribe: async (clientId: string): Promise<{ message: string }> => {
+    const response = await api.get(`/newsletter/${clientId}/unsubscribe`);
+    return response.data;
+  },
 };

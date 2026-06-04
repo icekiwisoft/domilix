@@ -164,11 +164,14 @@ export class CampaignsService {
 
     for (const subscriber of subscribers) {
       try {
+        const frontendUrl = process.env.FRONTEND_URL || 'https://domilix.com';
+        const unsubscribeUrl = `${frontendUrl}/newsletter/unsubscribe?clientId=${subscriber.clientId}`;
+
         await this.mailService.send({
           to: subscriber.email,
           subject: campaign.subject,
           text: campaign.content.replace(/<[^>]*>/g, ''),
-          html: this.mailService.buildNewsletterHtml(campaign.content),
+          html: this.mailService.buildNewsletterHtml(campaign.content, unsubscribeUrl),
         });
 
         await this.prisma.campaignRecipient.create({
