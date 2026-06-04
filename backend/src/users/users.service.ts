@@ -123,6 +123,7 @@ export class UsersService {
       data: {
         name: dto.name,
         email: dto.email,
+        phoneNumber: `admin-created-${crypto.randomUUID()}`,
         password: hashedPassword,
         emailVerified: true,
         emailVerifiedAt: new Date(),
@@ -245,5 +246,23 @@ export class UsersService {
     });
 
     return { message: 'Request to become an announcer has been submitted' };
+  }
+
+  async promoteToAdmin(currentUser: any, id: string) {
+    this.ensureAdmin(currentUser);
+    const userId = BigInt(id);
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user || user.deletedAt) throw new NotFoundException('User not found');
+
+    if (user.isAdmin) {
+      throw new BadRequestException({ message: 'User is already admin' });
+    }
+
+    const updated = await this.prisma.user.update({
+      where: { id: userId },
+      data: { isAdmin: true },
+    });
+
+    return this.serializeUser(updated);
   }
 }

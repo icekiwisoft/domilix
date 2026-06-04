@@ -81,12 +81,12 @@ export class AdminUsersController {
     return this.usersService.becomeAnnouncer(user, id);
   }
 
-  @Post(':id/promote')
+  @Patch(':id/promote')
   @ApiOperation({
-    summary: 'Create a request for user to become announcer (admin)',
+    summary: 'Promote a user to admin (admin)',
   })
   @ApiParam({ name: 'id', example: '1' })
   promote(@CurrentUser() user: any, @Param('id') id: string) {
-    return this.usersService.becomeAnnouncer(user, id);
+    return this.usersService.promoteToAdmin(user, id);
   }
 }

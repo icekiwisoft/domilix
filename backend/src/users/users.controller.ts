@@ -4,7 +4,6 @@ import {
   Get,
   Param,
   Patch,
-  Post,
   Put,
   Query,
   Res,
@@ -72,10 +71,10 @@ export class UsersController {
     return this.usersService.becomeAnnouncer(user, id);
   }
 
-  @Post(':id/promote')
-  @ApiOperation({ summary: 'Create a request for user to become announcer' })
+  @Patch(':id/promote')
+  @ApiOperation({ summary: 'Promote a user to admin' })
   @ApiParam({ name: 'id', example: '1' })
   promote(@CurrentUser() user: any, @Param('id') id: string) {
-    return this.usersService.becomeAnnouncer(user, id);
+    return this.usersService.promoteToAdmin(user, id);
   }
 }
