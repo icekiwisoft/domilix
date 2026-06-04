@@ -4,9 +4,11 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import bcrypt from 'bcryptjs';
 import crypto from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { buildLaravelPagination } from '../common/http/pagination';
+import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
@@ -96,6 +98,38 @@ export class UsersService {
       created_at: user.createdAt,
       updated_at: user.updatedAt,
     };
+  }
+
+  async create(currentUser: any, dto: CreateUserDto) {
+    this.ensureAdmin(currentUser);
+
+    if (dto.password !== dto.password_confirmation) {
+      throw new BadRequestException({
+        errors: { password_confirmation: ['Les mots de passe ne correspondent pas.'] },
+      });
+    }
+
+    const existing = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    });
+    if (existing) {
+      throw new BadRequestException({
+        errors: { email: ['Cet email est déjà utilisé.'] },
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(dto.password, 10);
+    const user = await this.prisma.user.create({
+      data: {
+        name: dto.name,
+        email: dto.email,
+        password: hashedPassword,
+        emailVerified: true,
+        emailVerifiedAt: new Date(),
+      },
+    });
+
+    return this.serializeUser(user);
   }
 
   async index(currentUser: any, page = 1) {

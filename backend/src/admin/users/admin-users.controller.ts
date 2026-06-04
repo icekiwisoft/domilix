@@ -19,6 +19,7 @@ import {
 } from '@nestjs/swagger';
 import { AuthGuard } from '../../auth/auth.guard';
 import { CurrentUser } from '../../auth/current-user.decorator';
+import { CreateUserDto } from '../../users/dto/create-user.dto';
 import { UpdateUserDto } from '../../users/dto/update-user.dto';
 import { UsersService } from '../../users/users.service';
 
@@ -28,6 +29,12 @@ import { UsersService } from '../../users/users.service';
 @Controller('admin/users')
 export class AdminUsersController {
   constructor(private readonly usersService: UsersService) {}
+
+  @Post()
+  @ApiOperation({ summary: 'Create a user (admin)' })
+  create(@CurrentUser() user: any, @Body() dto: CreateUserDto) {
+    return this.usersService.create(user, dto);
+  }
 
   @Get()
   @ApiOperation({ summary: 'List users (admin)' })
