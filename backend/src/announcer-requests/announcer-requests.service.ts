@@ -11,11 +11,34 @@ import { UpdateAnnouncerRequestDto } from './dto/update-announcer-request.dto';
 export class AnnouncerRequestsService {
   constructor(private readonly prisma: PrismaService) {}
 
+  private serialize(request: any) {
+    return {
+      id: Number(request.id),
+      client_id: request.clientId,
+      user_id: Number(request.userId),
+      status: request.status,
+      created_at: request.createdAt,
+      updated_at: request.updatedAt,
+      user: request.user
+        ? {
+            id: Number(request.user.id),
+            name: request.user.name,
+            email: request.user.email,
+            phone_number: request.user.phoneNumber,
+            created_at: request.user.createdAt,
+          }
+        : undefined,
+    };
+  }
+
   async index() {
-    return this.prisma.announcerRequest.findMany({
+    const requests = await this.prisma.announcerRequest.findMany({
       where: { status: 'pending' },
       orderBy: { createdAt: 'desc' },
+      include: { user: true },
     });
+
+    return requests.map((request) => this.serialize(request));
   }
 
   async store(userId: bigint) {
@@ -46,9 +69,10 @@ export class AnnouncerRequestsService {
   async show(id: string) {
     const request = await this.prisma.announcerRequest.findUnique({
       where: { id: BigInt(id) },
+      include: { user: true },
     });
     if (!request) throw new NotFoundException('Request not found');
-    return request;
+    return this.serialize(request);
   }
 
   async update(id: string, dto: UpdateAnnouncerRequestDto) {
