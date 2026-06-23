@@ -1,6 +1,11 @@
 'use client';
 
-import { HeartIcon, MapPinIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
+import {
+  HeartIcon,
+  MapPinIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+} from '@heroicons/react/24/outline';
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from '@router';
 
@@ -40,10 +45,14 @@ export default function ProductCard(props: Ad): React.ReactElement {
   const { isAuthenticated } = useAuth();
 
   const hasMultipleImages = medias && medias.length > 1;
+  const currentMedia = medias?.[currentImageIndex] || medias?.[0];
   const currency = devise ?? 'FCFA';
-  const locationLabel = [props.neighbourhood, props.city, props.country]
-    .filter(Boolean)
-    .join(', ') || props.address || 'Adresse non spécifiée';
+  const locationLabel =
+    [props.neighbourhood, props.city, props.country]
+      .filter(Boolean)
+      .join(', ') ||
+    props.address ||
+    'Adresse non spécifiée';
   const hasAmenities = !!size || !!bedroom || !!pool || !!garage || !!garden;
 
   useEffect(() => {
@@ -83,17 +92,25 @@ export default function ProductCard(props: Ad): React.ReactElement {
   const handleMouseEnter = useCallback(() => setIsHovered(true), []);
   const handleMouseLeave = useCallback(() => setIsHovered(false), []);
 
-  const handlePrev = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setCurrentImageIndex(prev => (prev - 1 + medias!.length) % medias!.length);
-  }, [medias]);
+  const handlePrev = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setCurrentImageIndex(
+        prev => (prev - 1 + medias!.length) % medias!.length
+      );
+    },
+    [medias]
+  );
 
-  const handleNext = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setCurrentImageIndex(prev => (prev + 1) % medias!.length);
-  }, [medias]);
+  const handleNext = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setCurrentImageIndex(prev => (prev + 1) % medias!.length);
+    },
+    [medias]
+  );
 
   return (
     <article
@@ -109,8 +126,8 @@ export default function ProductCard(props: Ad): React.ReactElement {
             loading='lazy'
             className='h-full w-full object-cover transition-transform duration-500 group-hover:scale-105'
             src={
-              medias && medias.length > 0
-                ? mediaUrl(medias[currentImageIndex].file)
+              currentMedia
+                ? mediaUrl(currentMedia.thumbnail || currentMedia.file)
                 : defaultHouseImg.src
             }
           />
@@ -123,7 +140,9 @@ export default function ProductCard(props: Ad): React.ReactElement {
           disabled={isLiking}
           title={liked ? 'Retirer des favoris' : 'Ajouter aux favoris'}
           className={`absolute right-sm top-sm flex h-8 w-8 items-center justify-center rounded-full bg-surface-container-lowest/90 shadow-sm transition-colors ${
-            liked ? 'text-primary-container' : 'text-secondary hover:text-primary-container'
+            liked
+              ? 'text-primary-container'
+              : 'text-secondary hover:text-primary-container'
           } ${isLiking ? 'cursor-not-allowed opacity-50' : ''}`}
         >
           <HeartIcon className={`size-[18px] ${liked ? 'fill-current' : ''}`} />
@@ -177,7 +196,9 @@ export default function ProductCard(props: Ad): React.ReactElement {
         <Link to={`/houses/${id}`}>
           <h3 className='mb-xs text-headline-sm text-on-surface transition-colors hover:text-primary'>
             {formatPrice(price)}{' '}
-            <span className='text-body-md font-normal text-on-surface-variant'>{currency}</span>
+            <span className='text-body-md font-normal text-on-surface-variant'>
+              {currency}
+            </span>
           </h3>
         </Link>
 
@@ -197,7 +218,16 @@ export default function ProductCard(props: Ad): React.ReactElement {
           <div className='flex flex-wrap items-center gap-md border-t border-outline-variant pt-sm'>
             {size ? (
               <div className='flex items-center gap-xs text-caption text-secondary'>
-                <svg className='size-[15px] shrink-0' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.8' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
+                <svg
+                  className='size-[15px] shrink-0'
+                  viewBox='0 0 24 24'
+                  fill='none'
+                  stroke='currentColor'
+                  strokeWidth='1.8'
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  aria-hidden='true'
+                >
                   <path d='M3 3h6v6H3zM15 3h6v6h-6zM3 15h6v6H3zM15 15h6v6h-6z' />
                 </svg>
                 {size} m²
@@ -205,7 +235,16 @@ export default function ProductCard(props: Ad): React.ReactElement {
             ) : null}
             {bedroom ? (
               <div className='flex items-center gap-xs text-caption text-secondary'>
-                <svg className='size-[15px] shrink-0' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.8' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
+                <svg
+                  className='size-[15px] shrink-0'
+                  viewBox='0 0 24 24'
+                  fill='none'
+                  stroke='currentColor'
+                  strokeWidth='1.8'
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  aria-hidden='true'
+                >
                   <path d='M2 20v-6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v6' />
                   <path d='M2 14v-3a2 2 0 0 1 2-2h3' />
                   <path d='M17 9h3a2 2 0 0 1 2 2v3' />
@@ -214,9 +253,15 @@ export default function ProductCard(props: Ad): React.ReactElement {
                 {bedroom} pce.
               </div>
             ) : null}
-            {pool ? <span className='text-caption text-secondary'>Piscine</span> : null}
-            {garage ? <span className='text-caption text-secondary'>Garage</span> : null}
-            {garden ? <span className='text-caption text-secondary'>Jardin</span> : null}
+            {pool ? (
+              <span className='text-caption text-secondary'>Piscine</span>
+            ) : null}
+            {garage ? (
+              <span className='text-caption text-secondary'>Garage</span>
+            ) : null}
+            {garden ? (
+              <span className='text-caption text-secondary'>Jardin</span>
+            ) : null}
           </div>
         )}
       </div>
