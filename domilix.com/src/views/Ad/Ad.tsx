@@ -33,6 +33,7 @@ import Footer2 from '@components/Footer2/Footer2';
 import MapboxMap from '@components/MapboxMap/MapboxMap';
 import MediasDialog from '@components/MediasDialog/MediasDialog';
 import Nav2 from '@components/Nav2/Nav2';
+import ProductCard from '@components/ProductCard/ProductCard';
 import ShareModal from '@components/ShareModal/ShareModal';
 import SignalDialog from '@components/SignalDialog/SignalDialog';
 import UnlockDialog from '@components/UnlockDialog/UnlockDialog';
@@ -88,7 +89,10 @@ function AdSkeleton() {
 
           <div className='mb-10 flex flex-wrap items-stretch overflow-hidden rounded-2xl border border-gray-200 bg-gray-200'>
             {Array.from({ length: 4 }).map((_, index) => (
-              <div key={index} className='flex min-w-[130px] flex-1 items-center justify-center gap-3 border-r border-gray-300 px-6 py-4 last:border-r-0'>
+              <div
+                key={index}
+                className='flex min-w-[130px] flex-1 items-center justify-center gap-3 border-r border-gray-300 px-6 py-4 last:border-r-0'
+              >
                 <div className='h-8 w-8 animate-pulse rounded-xl bg-gray-400' />
                 <div className='space-y-2'>
                   <div className='h-4 w-10 animate-pulse rounded-full bg-gray-400' />
@@ -133,7 +137,10 @@ function AdSkeleton() {
                 <div className='mb-5 h-6 w-48 animate-pulse rounded-full bg-gray-400' />
                 <div className='flex flex-wrap gap-3'>
                   {Array.from({ length: 6 }).map((_, index) => (
-                    <div key={index} className='h-11 w-36 animate-pulse rounded-xl bg-gray-300' />
+                    <div
+                      key={index}
+                      className='h-11 w-36 animate-pulse rounded-xl bg-gray-300'
+                    />
                   ))}
                 </div>
               </div>
@@ -178,11 +185,32 @@ function AdErrorState() {
       <div className='flex min-h-screen items-center justify-center bg-white px-5 pt-20 text-center'>
         <div className='max-w-md'>
           <div className='mx-auto mb-6 flex h-28 w-28 items-center justify-center rounded-[2rem] bg-red-50 text-red-500'>
-            <svg viewBox='0 0 120 120' className='h-20 w-20' fill='none' aria-hidden='true'>
-              <path d='M24 70 60 23l36 47v28H24V70Z' fill='#FEF2F2' stroke='currentColor' strokeWidth='5' strokeLinejoin='round' />
-              <path d='M60 46v23' stroke='currentColor' strokeWidth='7' strokeLinecap='round' />
+            <svg
+              viewBox='0 0 120 120'
+              className='h-20 w-20'
+              fill='none'
+              aria-hidden='true'
+            >
+              <path
+                d='M24 70 60 23l36 47v28H24V70Z'
+                fill='#FEF2F2'
+                stroke='currentColor'
+                strokeWidth='5'
+                strokeLinejoin='round'
+              />
+              <path
+                d='M60 46v23'
+                stroke='currentColor'
+                strokeWidth='7'
+                strokeLinecap='round'
+              />
               <circle cx='60' cy='82' r='4' fill='currentColor' />
-              <path d='M30 28 20 18M93 29l10-10M15 54H4M116 54h-11' stroke='#FCA5A5' strokeWidth='5' strokeLinecap='round' />
+              <path
+                d='M30 28 20 18M93 29l10-10M15 54H4M116 54h-11'
+                stroke='#FCA5A5'
+                strokeWidth='5'
+                strokeLinecap='round'
+              />
             </svg>
           </div>
           <p className='text-xs font-black uppercase tracking-[0.24em] text-red-500'>
@@ -192,7 +220,8 @@ function AdErrorState() {
             Impossible de charger cette annonce
           </h2>
           <p className='mt-3 text-sm leading-6 text-slate-500'>
-            Une erreur interne est survenue. Veuillez réessayer dans quelques instants.
+            Une erreur interne est survenue. Veuillez réessayer dans quelques
+            instants.
           </p>
         </div>
       </div>
@@ -207,10 +236,30 @@ function AdNotFoundState() {
       <div className='flex min-h-screen items-center justify-center bg-white px-5 pt-20 text-center'>
         <div className='max-w-md'>
           <div className='mx-auto mb-6 flex h-28 w-28 items-center justify-center rounded-[2rem] bg-orange-50 text-orange-500'>
-            <svg viewBox='0 0 120 120' className='h-20 w-20' fill='none' aria-hidden='true'>
-              <path d='M28 35h64v55a6 6 0 0 1-6 6H34a6 6 0 0 1-6-6V35Z' fill='#FFF4E5' stroke='currentColor' strokeWidth='5' />
-              <path d='M43 54h34M43 68h21' stroke='currentColor' strokeWidth='5' strokeLinecap='round' />
-              <path d='M88 27 99 16M99 39h13M20 25l10 10' stroke='#FDBA74' strokeWidth='5' strokeLinecap='round' />
+            <svg
+              viewBox='0 0 120 120'
+              className='h-20 w-20'
+              fill='none'
+              aria-hidden='true'
+            >
+              <path
+                d='M28 35h64v55a6 6 0 0 1-6 6H34a6 6 0 0 1-6-6V35Z'
+                fill='#FFF4E5'
+                stroke='currentColor'
+                strokeWidth='5'
+              />
+              <path
+                d='M43 54h34M43 68h21'
+                stroke='currentColor'
+                strokeWidth='5'
+                strokeLinecap='round'
+              />
+              <path
+                d='M88 27 99 16M99 39h13M20 25l10 10'
+                stroke='#FDBA74'
+                strokeWidth='5'
+                strokeLinecap='round'
+              />
               <circle cx='29' cy='88' r='5' fill='currentColor' />
             </svg>
           </div>
@@ -273,14 +322,29 @@ function GalleryMediaPreview({
             </span>
           </>
         ) : (
-          <img src={src} alt='' className='h-full w-full object-cover' loading='lazy' />
+          <img
+            src={src}
+            alt=''
+            className='h-full w-full object-cover'
+            loading='lazy'
+          />
         )
       ) : null}
 
       {showCount ? (
         <span className='absolute bottom-3 right-3 flex items-center gap-1.5 rounded-lg border border-white/80 bg-white/90 px-3 py-2 text-xs font-semibold text-gray-800 shadow-md backdrop-blur-sm transition-colors hover:bg-white'>
-          <svg className='h-3.5 w-3.5' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
-            <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M4 6h16M4 10h16M4 14h16M4 18h16' />
+          <svg
+            className='h-3.5 w-3.5'
+            fill='none'
+            viewBox='0 0 24 24'
+            stroke='currentColor'
+          >
+            <path
+              strokeLinecap='round'
+              strokeLinejoin='round'
+              strokeWidth={2}
+              d='M4 6h16M4 10h16M4 14h16M4 18h16'
+            />
           </svg>
           {showCount} médias
         </span>
@@ -312,7 +376,8 @@ export default function Ad(): React.ReactElement {
   const mountedAt = useRef(Date.now());
   const { isAuthenticated, refreshProfile, user } = useAuth();
   const hasCredits = Number(user?.credits || 0) > 0;
-  const displayContactPhone = adInfo?.contact_phone || adInfo?.announcer?.contact;
+  const displayContactPhone =
+    adInfo?.contact_phone || adInfo?.announcer?.contact;
   const displayContactEmail = adInfo?.contact_email || adInfo?.announcer?.email;
 
   const openModalWithImage = (index: number) => {
@@ -383,7 +448,9 @@ export default function Ad(): React.ReactElement {
         return getAds({ type: ad.type });
       })
       .then(ads => {
-        const list: AdType[] = Array.isArray(ads) ? ads : (ads as any).data || [];
+        const list: AdType[] = Array.isArray(ads)
+          ? ads
+          : (ads as any).data || [];
         setSimilarAds(list.filter(a => a.id !== parseInt(adId!)).slice(0, 4));
       })
       .catch((error: any) => {
@@ -418,12 +485,20 @@ export default function Ad(): React.ReactElement {
 
   const amenities = [
     isRealestate && adInfo.wifi && { icon: <FaWifi />, label: 'WiFi inclus' },
-    isRealestate && adInfo.air_conditioning && { icon: <MdAcUnit />, label: 'Climatisation' },
-    isRealestate && adInfo.security_24h && { icon: <MdSecurity />, label: 'Sécurité 24h/24' },
-    isRealestate && adInfo.equipped_kitchen && { icon: <FaUtensils />, label: 'Cuisine équipée' },
+    isRealestate &&
+      adInfo.air_conditioning && { icon: <MdAcUnit />, label: 'Climatisation' },
+    isRealestate &&
+      adInfo.security_24h && { icon: <MdSecurity />, label: 'Sécurité 24h/24' },
+    isRealestate &&
+      adInfo.equipped_kitchen && {
+        icon: <FaUtensils />,
+        label: 'Cuisine équipée',
+      },
     isRealestate && adInfo.smart_tv && { icon: <MdTv />, label: 'Smart TV' },
-    isRealestate && adInfo.pool && { icon: <FaSwimmingPool />, label: 'Piscine' },
-    isRealestate && adInfo.gate && { icon: <FaDoorOpen />, label: 'Portail sécurisé' },
+    isRealestate &&
+      adInfo.pool && { icon: <FaSwimmingPool />, label: 'Piscine' },
+    isRealestate &&
+      adInfo.gate && { icon: <FaDoorOpen />, label: 'Portail sécurisé' },
     isRealestate && adInfo.garden && { icon: <FaTree />, label: 'Jardin' },
     ad.garage && { icon: <FaCar />, label: 'Parking / Garage' },
     isRealestate && ad.furnitured && { icon: <FaCouch />, label: 'Meublé' },
@@ -434,14 +509,15 @@ export default function Ad(): React.ReactElement {
       <Nav2 />
       <div className='min-h-screen bg-white pt-20'>
         <main className='max-w-6xl mx-auto px-4 sm:px-6 py-8'>
-
           {/* ── Breadcrumb ── */}
           <nav className='flex items-center gap-1.5 text-sm text-gray-400 mb-6'>
             <span>{adInfo.country || 'Cameroun'}</span>
             <HiChevronRight className='text-xs' />
             <span>{adInfo.city || 'Localisation'}</span>
             <HiChevronRight className='text-xs' />
-            <span className='text-gray-700 font-medium'>{adInfo.category?.name || 'Annonce'}</span>
+            <span className='text-gray-700 font-medium'>
+              {adInfo.category?.name || 'Annonce'}
+            </span>
           </nav>
 
           {/* ── Title row ── */}
@@ -454,9 +530,12 @@ export default function Ad(): React.ReactElement {
               {/* Badges */}
               <div className='flex flex-wrap items-center gap-2 mb-3'>
                 <span className='px-2.5 py-1 bg-orange-50 text-primary border border-orange-100 rounded-full text-[11px] font-semibold uppercase tracking-wide'>
-                  {adInfo.category?.name || (isRealestate ? 'Immobilier' : 'Mobilier')}
+                  {adInfo.category?.name ||
+                    (isRealestate ? 'Immobilier' : 'Mobilier')}
                 </span>
-                <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wide border ${isForRent ? 'bg-blue-50 text-blue-600 border-blue-100' : 'bg-green-50 text-green-600 border-green-100'}`}>
+                <span
+                  className={`px-2.5 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wide border ${isForRent ? 'bg-blue-50 text-blue-600 border-blue-100' : 'bg-green-50 text-green-600 border-green-100'}`}
+                >
                   {isForRent ? 'Location' : 'Vente'}
                 </span>
                 {adInfo.announcer?.verified && (
@@ -501,32 +580,45 @@ export default function Ad(): React.ReactElement {
                 type='button'
                 onClick={handleLike}
                 disabled={isLiking}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-medium transition-colors ${liked
-                  ? 'bg-red-50 border-red-200 text-red-500'
-                  : 'bg-white border-gray-200 text-gray-600 hover:border-red-200 hover:text-red-400'
-                  }`}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-medium transition-colors ${
+                  liked
+                    ? 'bg-red-50 border-red-200 text-red-500'
+                    : 'bg-white border-gray-200 text-gray-600 hover:border-red-200 hover:text-red-400'
+                }`}
               >
-                {liked ? <HiHeart className='text-base' /> : <HiOutlineHeart className='text-base' />}
+                {liked ? (
+                  <HiHeart className='text-base' />
+                ) : (
+                  <HiOutlineHeart className='text-base' />
+                )}
                 {liked ? 'Sauvegardé' : 'Sauvegarder'}
               </button>
             </div>
           </motion.div>
 
           {/* ── Gallery ── */}
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className='mb-8'>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className='mb-8'
+          >
             {adInfo.medias && adInfo.medias.length > 0 ? (
               <>
                 {/* Mobile slider */}
                 <div
                   className='relative h-[280px] overflow-hidden rounded-2xl sm:hidden'
-                  onTouchStart={e => { touchStartX.current = e.touches[0].clientX; }}
+                  onTouchStart={e => {
+                    touchStartX.current = e.touches[0].clientX;
+                  }}
                   onTouchEnd={e => {
                     if (touchStartX.current === null) return;
-                    const delta = e.changedTouches[0].clientX - touchStartX.current;
+                    const delta =
+                      e.changedTouches[0].clientX - touchStartX.current;
                     touchStartX.current = null;
                     const total = adInfo.medias.length;
                     if (delta < -40) setMobileSliderIndex(i => (i + 1) % total);
-                    else if (delta > 40) setMobileSliderIndex(i => (i - 1 + total) % total);
+                    else if (delta > 40)
+                      setMobileSliderIndex(i => (i - 1 + total) % total);
                   }}
                 >
                   <GalleryMediaPreview
@@ -537,7 +629,13 @@ export default function Ad(): React.ReactElement {
                   {adInfo.medias.length > 1 && (
                     <button
                       type='button'
-                      onClick={() => setMobileSliderIndex(i => (i - 1 + adInfo.medias.length) % adInfo.medias.length)}
+                      onClick={() =>
+                        setMobileSliderIndex(
+                          i =>
+                            (i - 1 + adInfo.medias.length) %
+                            adInfo.medias.length
+                        )
+                      }
                       className='absolute left-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm'
                       aria-label='Image précédente'
                     >
@@ -548,7 +646,11 @@ export default function Ad(): React.ReactElement {
                   {adInfo.medias.length > 1 && (
                     <button
                       type='button'
-                      onClick={() => setMobileSliderIndex(i => (i + 1) % adInfo.medias.length)}
+                      onClick={() =>
+                        setMobileSliderIndex(
+                          i => (i + 1) % adInfo.medias.length
+                        )
+                      }
                       className='absolute right-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm'
                       aria-label='Image suivante'
                     >
@@ -595,53 +697,69 @@ export default function Ad(): React.ReactElement {
           </motion.div>
 
           {/* ── Quick-stats strip ── */}
-          {isRealestate && (adInfo.bedroom || adInfo.toilet || adInfo.mainroom || adInfo.size) && (
-            <div className='flex flex-wrap items-stretch bg-gray-50 border border-gray-100 rounded-2xl divide-x divide-gray-200 mb-10 overflow-hidden'>
-              {adInfo.bedroom ? (
-                <div className='flex items-center gap-3 px-6 py-4 flex-1 justify-center min-w-[130px]'>
-                  <FaBed className='text-primary text-xl flex-shrink-0' />
-                  <div>
-                    <p className='text-lg font-bold text-gray-900 leading-none'>{adInfo.bedroom}</p>
-                    <p className='text-xs text-gray-500 mt-0.5'>Chambre{adInfo.bedroom > 1 ? 's' : ''}</p>
+          {isRealestate &&
+            (adInfo.bedroom ||
+              adInfo.toilet ||
+              adInfo.mainroom ||
+              adInfo.size) && (
+              <div className='flex flex-wrap items-stretch bg-gray-50 border border-gray-100 rounded-2xl divide-x divide-gray-200 mb-10 overflow-hidden'>
+                {adInfo.bedroom ? (
+                  <div className='flex items-center gap-3 px-6 py-4 flex-1 justify-center min-w-[130px]'>
+                    <FaBed className='text-primary text-xl flex-shrink-0' />
+                    <div>
+                      <p className='text-lg font-bold text-gray-900 leading-none'>
+                        {adInfo.bedroom}
+                      </p>
+                      <p className='text-xs text-gray-500 mt-0.5'>
+                        Chambre{adInfo.bedroom > 1 ? 's' : ''}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ) : null}
-              {adInfo.toilet ? (
-                <div className='flex items-center gap-3 px-6 py-4 flex-1 justify-center min-w-[130px]'>
-                  <FaBath className='text-primary text-xl flex-shrink-0' />
-                  <div>
-                    <p className='text-lg font-bold text-gray-900 leading-none'>{adInfo.toilet}</p>
-                    <p className='text-xs text-gray-500 mt-0.5'>Salle{adInfo.toilet > 1 ? 's' : ''} de bain</p>
+                ) : null}
+                {adInfo.toilet ? (
+                  <div className='flex items-center gap-3 px-6 py-4 flex-1 justify-center min-w-[130px]'>
+                    <FaBath className='text-primary text-xl flex-shrink-0' />
+                    <div>
+                      <p className='text-lg font-bold text-gray-900 leading-none'>
+                        {adInfo.toilet}
+                      </p>
+                      <p className='text-xs text-gray-500 mt-0.5'>
+                        Salle{adInfo.toilet > 1 ? 's' : ''} de bain
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ) : null}
-              {adInfo.mainroom ? (
-                <div className='flex items-center gap-3 px-6 py-4 flex-1 justify-center min-w-[130px]'>
-                  <FaCouch className='text-primary text-xl flex-shrink-0' />
-                  <div>
-                    <p className='text-lg font-bold text-gray-900 leading-none'>{adInfo.mainroom}</p>
-                    <p className='text-xs text-gray-500 mt-0.5'>Salon{adInfo.mainroom > 1 ? 's' : ''}</p>
+                ) : null}
+                {adInfo.mainroom ? (
+                  <div className='flex items-center gap-3 px-6 py-4 flex-1 justify-center min-w-[130px]'>
+                    <FaCouch className='text-primary text-xl flex-shrink-0' />
+                    <div>
+                      <p className='text-lg font-bold text-gray-900 leading-none'>
+                        {adInfo.mainroom}
+                      </p>
+                      <p className='text-xs text-gray-500 mt-0.5'>
+                        Salon{adInfo.mainroom > 1 ? 's' : ''}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ) : null}
-              {adInfo.size ? (
-                <div className='flex items-center gap-3 px-6 py-4 flex-1 justify-center min-w-[130px]'>
-                  <FaRulerCombined className='text-primary text-xl flex-shrink-0' />
-                  <div>
-                    <p className='text-lg font-bold text-gray-900 leading-none'>{adInfo.size} m²</p>
-                    <p className='text-xs text-gray-500 mt-0.5'>Superficie</p>
+                ) : null}
+                {adInfo.size ? (
+                  <div className='flex items-center gap-3 px-6 py-4 flex-1 justify-center min-w-[130px]'>
+                    <FaRulerCombined className='text-primary text-xl flex-shrink-0' />
+                    <div>
+                      <p className='text-lg font-bold text-gray-900 leading-none'>
+                        {adInfo.size} m²
+                      </p>
+                      <p className='text-xs text-gray-500 mt-0.5'>Superficie</p>
+                    </div>
                   </div>
-                </div>
-              ) : null}
-            </div>
-          )}
+                ) : null}
+              </div>
+            )}
 
           {/* ── Content grid ── */}
           <div className='grid grid-cols-1 lg:grid-cols-3 gap-12 relative'>
-
             {/* ── Left column ── */}
             <div className='lg:col-span-2 space-y-0'>
-
               {/* Host strip */}
               <div className='flex items-center justify-between pb-8 border-b border-gray-100'>
                 <div>
@@ -680,7 +798,9 @@ export default function Ad(): React.ReactElement {
                     <MdVerifiedUser className='text-primary text-xl' />
                   </div>
                   <div>
-                    <h4 className='font-semibold text-gray-900 text-sm mb-0.5'>Annonce vérifiée</h4>
+                    <h4 className='font-semibold text-gray-900 text-sm mb-0.5'>
+                      Annonce vérifiée
+                    </h4>
                     <p className='text-gray-400 text-sm leading-relaxed'>
                       Contrôlée et validée par l&apos;équipe Domilix.
                     </p>
@@ -692,7 +812,9 @@ export default function Ad(): React.ReactElement {
                       <HiCheckBadge className='text-primary text-xl' />
                     </div>
                     <div>
-                      <h4 className='font-semibold text-gray-900 text-sm mb-0.5'>Annonceur de confiance</h4>
+                      <h4 className='font-semibold text-gray-900 text-sm mb-0.5'>
+                        Annonceur de confiance
+                      </h4>
                       <p className='text-gray-400 text-sm leading-relaxed'>
                         Parmi les annonceurs les plus fiables de la plateforme.
                       </p>
@@ -707,31 +829,35 @@ export default function Ad(): React.ReactElement {
                   À propos de ce {isRealestate ? 'logement' : 'produit'}
                 </h3>
                 <p className='text-gray-500 leading-relaxed text-[15px]'>
-                  {adInfo.description || 'Aucune description disponible pour cette annonce.'}
+                  {adInfo.description ||
+                    'Aucune description disponible pour cette annonce.'}
                 </p>
 
                 {/* Furniture dimensions */}
-                {!isRealestate && (adInfo.height || adInfo.width || adInfo.length) && (
-                  <div className='flex flex-wrap gap-3 mt-5'>
-                    {[
-                      { label: 'Hauteur', value: adInfo.height, unit: 'cm' },
-                      { label: 'Largeur', value: adInfo.width, unit: 'cm' },
-                      { label: 'Longueur', value: adInfo.length, unit: 'cm' },
-                    ]
-                      .filter(item => item.value)
-                      .map(item => (
-                        <div
-                          key={item.label}
-                          className='flex items-center gap-2 px-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl'
-                        >
-                          <span className='text-base font-bold text-gray-900'>
-                            {item.value} {item.unit}
-                          </span>
-                          <span className='text-xs text-gray-400 font-medium'>{item.label}</span>
-                        </div>
-                      ))}
-                  </div>
-                )}
+                {!isRealestate &&
+                  (adInfo.height || adInfo.width || adInfo.length) && (
+                    <div className='flex flex-wrap gap-3 mt-5'>
+                      {[
+                        { label: 'Hauteur', value: adInfo.height, unit: 'cm' },
+                        { label: 'Largeur', value: adInfo.width, unit: 'cm' },
+                        { label: 'Longueur', value: adInfo.length, unit: 'cm' },
+                      ]
+                        .filter(item => item.value)
+                        .map(item => (
+                          <div
+                            key={item.label}
+                            className='flex items-center gap-2 px-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl'
+                          >
+                            <span className='text-base font-bold text-gray-900'>
+                              {item.value} {item.unit}
+                            </span>
+                            <span className='text-xs text-gray-400 font-medium'>
+                              {item.label}
+                            </span>
+                          </div>
+                        ))}
+                    </div>
+                  )}
               </div>
 
               {/* Amenities */}
@@ -746,7 +872,9 @@ export default function Ad(): React.ReactElement {
                         key={item.label}
                         className='flex items-center gap-2.5 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:border-orange-200 hover:bg-orange-50 transition-colors'
                       >
-                        <span className='text-primary text-base'>{item.icon}</span>
+                        <span className='text-primary text-base'>
+                          {item.icon}
+                        </span>
                         {item.label}
                       </div>
                     ))}
@@ -756,7 +884,9 @@ export default function Ad(): React.ReactElement {
 
               {/* Map */}
               <div className='py-8'>
-                <h3 className='text-lg font-semibold text-gray-900 mb-1'>Localisation</h3>
+                <h3 className='text-lg font-semibold text-gray-900 mb-1'>
+                  Localisation
+                </h3>
                 <p className='text-sm text-gray-400 mb-5'>
                   {[adInfo.city, adInfo.country].filter(Boolean).join(', ')}
                   {!adInfo.unlocked && (
@@ -815,7 +945,8 @@ export default function Ad(): React.ReactElement {
                     )}
                     {adInfo.caution ? (
                       <span className='px-3 py-1.5 bg-orange-50 border border-orange-100 rounded-lg text-xs font-medium text-orange-700'>
-                        Caution · {adInfo.caution.toLocaleString()} {adInfo.devise || 'FCFA'}
+                        Caution · {adInfo.caution.toLocaleString()}{' '}
+                        {adInfo.devise || 'FCFA'}
                       </span>
                     ) : null}
                   </div>
@@ -901,12 +1032,20 @@ export default function Ad(): React.ReactElement {
 
                   <div className='grid grid-cols-2 gap-2 mb-5'>
                     <div className='text-center py-3 bg-gray-50 rounded-xl'>
-                      <p className='text-lg font-bold text-gray-900'>{adInfo.announcer?.houses || 0}</p>
-                      <p className='text-[11px] text-gray-400 font-medium'>Immobiliers</p>
+                      <p className='text-lg font-bold text-gray-900'>
+                        {adInfo.announcer?.houses || 0}
+                      </p>
+                      <p className='text-[11px] text-gray-400 font-medium'>
+                        Immobiliers
+                      </p>
                     </div>
                     <div className='text-center py-3 bg-gray-50 rounded-xl'>
-                      <p className='text-lg font-bold text-gray-900'>{adInfo.announcer?.furnitures || 0}</p>
-                      <p className='text-[11px] text-gray-400 font-medium'>Mobiliers</p>
+                      <p className='text-lg font-bold text-gray-900'>
+                        {adInfo.announcer?.furnitures || 0}
+                      </p>
+                      <p className='text-[11px] text-gray-400 font-medium'>
+                        Mobiliers
+                      </p>
                     </div>
                   </div>
 
@@ -933,45 +1072,18 @@ export default function Ad(): React.ReactElement {
           </div>
 
           {/* ── Similar listings ── */}
-            {similarAds.length > 0 && (
-              <section className='mt-16 pt-12 border-t border-gray-100'>
-                <h2 className='text-2xl font-bold text-gray-900 mb-8'>
-                  Autres annonces
-                </h2>
-                <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5'>
-                  {similarAds.map(a => (
-                    <a key={a.id} href={`/houses/${a.id}`} className='group block'>
-                      <div className='aspect-[4/3] rounded-xl overflow-hidden mb-3 bg-gray-100 relative'>
-                        <div
-                          className='absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-500'
-                          style={{
-                            backgroundImage: a.medias?.[0]?.file
-                              ? `url('${mediaUrl(a.medias[0].file)}')`
-                              : undefined,
-                          }}
-                        />
-                        <span className='absolute top-2 left-2 bg-gray-900/70 backdrop-blur-sm text-white px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide'>
-                          {a.ad_type === 'location' ? 'Location' : 'Vente'}
-                        </span>
-                      </div>
-                      <h4 className='font-semibold text-gray-900 text-sm truncate mb-0.5'>
-                        {a.category?.name || 'Annonce'} · {a.city}
-                      </h4>
-                      <p className='text-gray-400 text-xs mb-1.5'>
-                        {a.city}{a.country && `, ${a.country}`}
-                      </p>
-                      <p className='font-bold text-base text-primary'>
-                        {a.price?.toLocaleString()}{' '}
-                        <span className='font-medium text-gray-400 text-xs'>
-                          {a.devise || 'FCFA'}
-                          {a.ad_type === 'location' && ` / ${a.period || 'mois'}`}
-                        </span>
-                      </p>
-                    </a>
-                  ))}
-                </div>
-              </section>
-            )}
+          {similarAds.length > 0 && (
+            <section className='mt-16 border-t border-gray-100 pt-12'>
+              <h2 className='mb-8 text-2xl font-bold text-gray-900'>
+                Autres annonces
+              </h2>
+              <div className='grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4'>
+                {similarAds.map(ad => (
+                  <ProductCard key={ad.id} {...ad} />
+                ))}
+              </div>
+            </section>
+          )}
         </main>
       </div>
 
