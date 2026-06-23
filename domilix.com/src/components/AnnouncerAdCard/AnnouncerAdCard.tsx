@@ -44,11 +44,11 @@ export default function AnnouncerAdCard({
   const [isHovered, setIsHovered] = useState(false);
 
   const hasMultipleImages = Boolean(ad.medias && ad.medias.length > 1);
-  const image =
-    ad.medias && ad.medias.length > 0
-      ? mediaUrl(ad.medias[currentImageIndex]?.file || ad.medias[0]?.file) ||
-        defaultHouseImg.src
-      : defaultHouseImg.src;
+  const currentMedia = ad.medias?.[currentImageIndex] || ad.medias?.[0];
+  const image = currentMedia
+    ? mediaUrl(currentMedia.thumbnail || currentMedia.file) ||
+      defaultHouseImg.src
+    : defaultHouseImg.src;
   const locationLabel =
     [ad.neighbourhood, ad.city, ad.country].filter(Boolean).join(', ') ||
     ad.address ||
