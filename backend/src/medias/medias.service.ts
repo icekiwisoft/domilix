@@ -1,5 +1,6 @@
 import {
   Injectable,
+  Logger,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -12,6 +13,8 @@ import { generateMediaThumbnailBuffer } from '../common/media/thumbnails';
 
 @Injectable()
 export class MediasService {
+  private readonly logger = new Logger(MediasService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly objectStorage: ObjectStorageService,
@@ -20,12 +23,22 @@ export class MediasService {
   private async createObjectStorageMedia(file: any, announcerId: string) {
     const uploaded = await this.objectStorage.uploadFile(file, 'medias');
     const thumbnailBuffer = await generateMediaThumbnailBuffer(file).catch(
-      () => null,
+      (error) => {
+        this.logger.warn(
+          `Thumbnail generation failed for media ${file.originalname || file.filename || 'unknown'} (${file.mimetype}, ${file.size || 'unknown'} bytes): ${error.message}`,
+        );
+        return null;
+      },
     );
     const thumbnail = thumbnailBuffer
       ? await this.objectStorage
           .uploadThumbnail(thumbnailBuffer, file)
-          .catch(() => null)
+          .catch((error) => {
+            this.logger.warn(
+              `Thumbnail upload failed for media ${file.originalname || file.filename || 'unknown'} (${file.mimetype}, ${file.size || 'unknown'} bytes): ${error.message}`,
+            );
+            return null;
+          })
       : null;
 
     return this.prisma.media.create({

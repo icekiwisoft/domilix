@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import crypto from 'node:crypto';
@@ -60,6 +61,8 @@ const AD_DEVISES = [
 
 @Injectable()
 export class AdsService {
+  private readonly logger = new Logger(AdsService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly objectStorage: ObjectStorageService,
@@ -1139,12 +1142,22 @@ export class AdsService {
       });
       const uploaded = await this.objectStorage.uploadFile(file, 'medias');
       const thumbnailBuffer = await generateMediaThumbnailBuffer(file).catch(
-        () => null,
+        (error) => {
+          this.logger.warn(
+            `Thumbnail generation failed for ad media ${file.originalname || 'unknown'} (${file.mimetype}, ${file.size} bytes): ${error.message}`,
+          );
+          return null;
+        },
       );
       const thumbnail = thumbnailBuffer
         ? await this.objectStorage
             .uploadThumbnail(thumbnailBuffer, file)
-            .catch(() => null)
+            .catch((error) => {
+              this.logger.warn(
+                `Thumbnail upload failed for ad media ${file.originalname || 'unknown'} (${file.mimetype}, ${file.size} bytes): ${error.message}`,
+              );
+              return null;
+            })
         : null;
       const media = await this.prisma.media.create({
         data: {

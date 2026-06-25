@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 import crypto from 'node:crypto';
@@ -13,7 +14,11 @@ import {
 import { validateUploadedFile } from '../common/media/validate-upload';
 import { PrismaService } from '../prisma/prisma.service';
 
-export type UploadType = 'media' | 'avatar' | 'presentation-image' | 'broadcast-image';
+export type UploadType =
+  | 'media'
+  | 'avatar'
+  | 'presentation-image'
+  | 'broadcast-image';
 const uploadPurpose: Record<UploadType, string> = {
   media: 'ad_media',
   avatar: 'avatar',
@@ -45,6 +50,8 @@ const uploadRules: Record<
 
 @Injectable()
 export class UploadsService {
+  private readonly logger = new Logger(UploadsService.name);
+
   constructor(
     private readonly objectStorage: ObjectStorageService,
     private readonly prisma: PrismaService,
@@ -75,12 +82,22 @@ export class UploadsService {
 
     if (type === 'media') {
       const thumbnailBuffer = await generateMediaThumbnailBuffer(file).catch(
-        () => null,
+        (error) => {
+          this.logger.warn(
+            `Thumbnail generation failed for upload ${file.originalname || 'unknown'} (${file.mimetype}, ${file.size} bytes): ${error.message}`,
+          );
+          return null;
+        },
       );
       thumbnail = thumbnailBuffer
         ? await this.objectStorage
             .uploadThumbnail(thumbnailBuffer, file)
-            .catch(() => null)
+            .catch((error) => {
+              this.logger.warn(
+                `Thumbnail upload failed for upload ${file.originalname || 'unknown'} (${file.mimetype}, ${file.size} bytes): ${error.message}`,
+              );
+              return null;
+            })
         : null;
     }
 

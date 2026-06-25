@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
@@ -6,6 +7,7 @@ import ffmpegStatic from 'ffmpeg-static';
 import sharp from 'sharp';
 
 const thumbnailDir = path.join(process.cwd(), 'storage', 'thumbnails');
+const logger = new Logger('MediaThumbnails');
 
 export const MAX_AD_MEDIAS = 10;
 export const ALLOWED_MEDIA_MIME_PATTERN = /^(image|video)\//;
@@ -27,6 +29,10 @@ const generateVideoThumbnailFrame = async (
   const ffmpegPath = process.env.FFMPEG_PATH || ffmpegStatic || 'ffmpeg';
 
   await new Promise<void>((resolve, reject) => {
+    logger.debug(
+      `Generating video thumbnail with ffmpeg=${ffmpegPath} input=${inputPath} output=${outputPath}`,
+    );
+
     const child = spawn(
       ffmpegPath,
       [
@@ -48,17 +54,24 @@ const generateVideoThumbnailFrame = async (
 
     const timeout = setTimeout(() => {
       child.kill('SIGKILL');
+      logger.warn(`Video thumbnail generation timed out for ${inputPath}`);
       reject(new Error('ffmpeg thumbnail generation timed out'));
     }, 30000);
 
     child.on('error', (error) => {
       clearTimeout(timeout);
+      logger.warn(`Failed to start ffmpeg for ${inputPath}: ${error.message}`);
       reject(error);
     });
     child.on('close', (code) => {
       clearTimeout(timeout);
-      if (code === 0) resolve();
-      else reject(new Error(`ffmpeg exited with code ${code}`));
+      if (code === 0) {
+        logger.debug(`Video thumbnail frame generated for ${inputPath}`);
+        resolve();
+      } else {
+        logger.warn(`ffmpeg exited with code ${code} for ${inputPath}`);
+        reject(new Error(`ffmpeg exited with code ${code}`));
+      }
     });
   });
 };
@@ -109,14 +122,20 @@ export const generateMediaThumbnailBuffer = async (file: {
   mimetype: string;
   buffer: Buffer;
 }) => {
+  const label = `${file.originalname || file.filename || 'unknown'} (${file.mimetype}, ${file.buffer.length} bytes)`;
+
   if (file.mimetype.startsWith('image/')) {
+    logger.debug(`Generating image thumbnail for ${label}`);
     return sharp(file.buffer)
       .resize({ width: 500, withoutEnlargement: true })
       .webp({ quality: 82 })
       .toBuffer();
   }
 
-  if (!file.mimetype.startsWith('video/')) return null;
+  if (!file.mimetype.startsWith('video/')) {
+    logger.debug(`Skipping thumbnail for unsupported media ${label}`);
+    return null;
+  }
 
   const extension =
     path.extname(file.originalname || file.filename || '.mp4') || '.mp4';
@@ -125,9 +144,14 @@ export const generateMediaThumbnailBuffer = async (file: {
   const outputPath = path.join(tempDir, 'thumbnail.jpg');
 
   try {
+    logger.debug(`Generating video thumbnail for ${label}`);
     await fs.writeFile(inputPath, file.buffer);
     await generateVideoThumbnailFrame(inputPath, outputPath);
-    return sharp(outputPath).webp({ quality: 82 }).toBuffer();
+    const buffer = await sharp(outputPath).webp({ quality: 82 }).toBuffer();
+    logger.debug(
+      `Generated video thumbnail for ${label} (${buffer.length} bytes)`,
+    );
+    return buffer;
   } finally {
     await fs.rm(tempDir, { recursive: true, force: true });
   }
