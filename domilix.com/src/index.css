@@ -154,8 +154,6 @@ input:focus {
   margin: 0;
   padding: 0;
   -webkit-user-drag: none;
-  -webkit-user-select: none;
-  /* user-select: none; */
   box-sizing: border-box;
   /* font-family: "Inter", "Manrope", "Plus Jakarta Sans", system-ui, sans-serif; */
 

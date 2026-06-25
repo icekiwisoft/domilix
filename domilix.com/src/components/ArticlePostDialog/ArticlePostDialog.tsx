@@ -46,9 +46,11 @@ export default function ArticlePostDialog({
     overallPercent: number;
   } | null>(null);
   const [locationError, setLocationError] = useState('');
-  const [detectedLocation, setDetectedLocation] = useState<ReverseGeocodeResult | null>(null);
+  const [detectedLocation, setDetectedLocation] =
+    useState<ReverseGeocodeResult | null>(null);
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
-  const [isGettingCurrentLocation, setIsGettingCurrentLocation] = useState(false);
+  const [isGettingCurrentLocation, setIsGettingCurrentLocation] =
+    useState(false);
   const [longitudeInput, setLongitudeInput] = useState('');
   const [latitudeInput, setLatitudeInput] = useState('');
   const [website, setWebsite] = useState('');
@@ -192,12 +194,16 @@ export default function ArticlePostDialog({
         },
         error => {
           console.error('Erreur de géolocalisation:', error);
-          setLocationError("Impossible d'obtenir votre position. Veuillez vérifier vos paramètres de géolocalisation.");
+          setLocationError(
+            "Impossible d'obtenir votre position. Veuillez vérifier vos paramètres de géolocalisation."
+          );
           setIsGettingCurrentLocation(false);
         }
       );
     } else {
-      setLocationError("La géolocalisation n'est pas supportée par ce navigateur.");
+      setLocationError(
+        "La géolocalisation n'est pas supportée par ce navigateur."
+      );
     }
   };
 
@@ -227,7 +233,12 @@ export default function ArticlePostDialog({
       setDetectedLocation(null);
       return;
     }
-    if (longitude < -180 || longitude > 180 || latitude < -90 || latitude > 90) {
+    if (
+      longitude < -180 ||
+      longitude > 180 ||
+      latitude < -90 ||
+      latitude > 90
+    ) {
       setDetectedLocation(null);
       setLocationError('Coordonnées GPS invalides.');
       return;
@@ -238,10 +249,14 @@ export default function ArticlePostDialog({
         setIsDetectingLocation(true);
         const result = await addressApi.reverseGeocode(longitude, latitude);
         setDetectedLocation(result);
-        setLocationError(result ? '' : "Impossible de détecter l'adresse pour ces coordonnées.");
+        setLocationError(
+          result ? '' : "Impossible de détecter l'adresse pour ces coordonnées."
+        );
       } catch {
         setDetectedLocation(null);
-        setLocationError("Impossible de détecter l'adresse pour ces coordonnées.");
+        setLocationError(
+          "Impossible de détecter l'adresse pour ces coordonnées."
+        );
       } finally {
         setIsDetectingLocation(false);
       }
@@ -275,14 +290,23 @@ export default function ArticlePostDialog({
   // Gestion des changements de formulaire (entrées texte et cases à cocher)
   const handleChange = (e: FormEvent) => {
     const { name, value, type, checked } = e.target as HTMLInputElement;
-    const nonNegativeFields = ['bedroom', 'mainroom', 'toilet', 'kitchen', 'size'];
+    const nonNegativeFields = [
+      'bedroom',
+      'mainroom',
+      'toilet',
+      'kitchen',
+      'size',
+    ];
     if (type === 'checkbox') {
       setFormData(prev => ({ ...prev, [name]: checked }));
     } else if (name === 'localization') {
       const [latitude, longitude] = value.split(',').map(Number);
       setFormData(prev => ({ ...prev, localization: [latitude, longitude] }));
     } else if (nonNegativeFields.includes(name)) {
-      setFormData(prev => ({ ...prev, [name]: value === '' ? 0 : Math.max(0, Number(value)) }));
+      setFormData(prev => ({
+        ...prev,
+        [name]: value === '' ? 0 : Math.max(0, Number(value)),
+      }));
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
@@ -291,8 +315,8 @@ export default function ArticlePostDialog({
   // Gestion du changement de medias avec upload multiple
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(e.target.files || []);
-    const allowedFiles = selectedFiles.filter(file =>
-      file.type.startsWith('image/') || file.type.startsWith('video/')
+    const allowedFiles = selectedFiles.filter(
+      file => file.type.startsWith('image/') || file.type.startsWith('video/')
     );
 
     if (allowedFiles.length !== selectedFiles.length) {
@@ -304,13 +328,17 @@ export default function ArticlePostDialog({
     setFormData(prev => {
       const availableSlots = MAX_ANNOUNCE_MEDIAS - prev.medias.length;
       if (availableSlots <= 0) {
-        setMediaError(`Vous pouvez ajouter ${MAX_ANNOUNCE_MEDIAS} médias maximum.`);
+        setMediaError(
+          `Vous pouvez ajouter ${MAX_ANNOUNCE_MEDIAS} médias maximum.`
+        );
         return prev;
       }
 
       const nextFiles = allowedFiles.slice(0, availableSlots);
       if (allowedFiles.length > availableSlots) {
-        setMediaError(`Vous pouvez ajouter ${MAX_ANNOUNCE_MEDIAS} médias maximum.`);
+        setMediaError(
+          `Vous pouvez ajouter ${MAX_ANNOUNCE_MEDIAS} médias maximum.`
+        );
       }
 
       return { ...prev, medias: [...prev.medias, ...nextFiles] };
@@ -339,22 +367,26 @@ export default function ArticlePostDialog({
           total: files.length,
           fileName: file.name,
           filePercent: progress.percent,
-          overallPercent: Math.round(((index + progress.percent / 100) / files.length) * 100),
+          overallPercent: Math.round(
+            ((index + progress.percent / 100) / files.length) * 100
+          ),
         });
       });
 
       uploadedMedias.push(uploaded);
     }
 
-    setUploadProgress(files.length > 0
-      ? {
-          current: files.length,
-          total: files.length,
-          fileName: files[files.length - 1].name,
-          filePercent: 100,
-          overallPercent: 100,
-        }
-      : null);
+    setUploadProgress(
+      files.length > 0
+        ? {
+            current: files.length,
+            total: files.length,
+            fileName: files[files.length - 1].name,
+            filePercent: 100,
+            overallPercent: 100,
+          }
+        : null
+    );
 
     return uploadedMedias;
   };
@@ -364,11 +396,15 @@ export default function ArticlePostDialog({
     e.preventDefault();
     if (isSubmitting) return;
     if (formData.medias.length > MAX_ANNOUNCE_MEDIAS) {
-      setMediaError(`Vous pouvez ajouter ${MAX_ANNOUNCE_MEDIAS} médias maximum.`);
+      setMediaError(
+        `Vous pouvez ajouter ${MAX_ANNOUNCE_MEDIAS} médias maximum.`
+      );
       return;
     }
     if (!formData.localization[0] || !formData.localization[1]) {
-      setLocationError('Veuillez utiliser votre position actuelle ou saisir la longitude et la latitude.');
+      setLocationError(
+        'Veuillez utiliser votre position actuelle ou saisir la longitude et la latitude.'
+      );
       setCurrentStep(3);
       return;
     }
@@ -402,7 +438,10 @@ export default function ArticlePostDialog({
         contact_phone: formData.contact_phone,
         contact_email: formData.contact_email,
         devise: formData.devise,
-        localization: [formData.localization[0].toString(), formData.localization[1].toString()],
+        localization: [
+          formData.localization[0].toString(),
+          formData.localization[1].toString(),
+        ],
         website,
         media_ids: uploadedMedias.map(media => media.id),
         media_types: uploadedMedias.map(media => media.mime_type),
@@ -523,7 +562,7 @@ export default function ArticlePostDialog({
                             key={type.key}
                             value={type}
                             className={({ active }) =>
-                              `relative cursor-pointer select-none py-3 pl-10 pr-4 ${
+                              `relative cursor-pointer py-3 pl-10 pr-4 ${
                                 active
                                   ? 'bg-orange-50 text-orange-900'
                                   : 'text-gray-900'
@@ -596,7 +635,7 @@ export default function ArticlePostDialog({
                             key={category.id}
                             value={category}
                             className={({ active }) =>
-                              `relative cursor-pointer select-none py-3 pl-10 pr-4 ${
+                              `relative cursor-pointer py-3 pl-10 pr-4 ${
                                 active
                                   ? 'bg-orange-50 text-orange-900'
                                   : 'text-gray-900'
@@ -864,12 +903,25 @@ export default function ArticlePostDialog({
                   onChange={handleChange}
                   className='peer sr-only'
                 />
-                <span className={`font-medium ${formData.furnitured ? 'text-orange-700' : 'text-gray-700'}`}>
+                <span
+                  className={`font-medium ${formData.furnitured ? 'text-orange-700' : 'text-gray-700'}`}
+                >
                   Bien meublé
                 </span>
                 <span className='ml-auto flex h-6 w-6 items-center justify-center rounded-lg border-2 border-gray-200 bg-white transition-all peer-checked:border-orange-500 peer-checked:bg-orange-500'>
-                  <svg className='h-4 w-4 scale-0 text-white transition-transform peer-checked:scale-100' viewBox='0 0 20 20' fill='none' aria-hidden='true'>
-                    <path d='M5 10.5 8.2 14 15 6' stroke='currentColor' strokeWidth='2.4' strokeLinecap='round' strokeLinejoin='round' />
+                  <svg
+                    className='h-4 w-4 scale-0 text-white transition-transform peer-checked:scale-100'
+                    viewBox='0 0 20 20'
+                    fill='none'
+                    aria-hidden='true'
+                  >
+                    <path
+                      d='M5 10.5 8.2 14 15 6'
+                      stroke='currentColor'
+                      strokeWidth='2.4'
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                    />
                   </svg>
                 </span>
               </label>
@@ -1053,8 +1105,19 @@ export default function ArticlePostDialog({
                       className='peer sr-only'
                     />
                     <span className='mr-3 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border-2 border-gray-200 bg-white transition-all peer-checked:border-orange-500 peer-checked:bg-orange-500'>
-                      <svg className='h-4 w-4 scale-0 text-white transition-transform peer-checked:scale-100' viewBox='0 0 20 20' fill='none' aria-hidden='true'>
-                        <path d='M5 10.5 8.2 14 15 6' stroke='currentColor' strokeWidth='2.4' strokeLinecap='round' strokeLinejoin='round' />
+                      <svg
+                        className='h-4 w-4 scale-0 text-white transition-transform peer-checked:scale-100'
+                        viewBox='0 0 20 20'
+                        fill='none'
+                        aria-hidden='true'
+                      >
+                        <path
+                          d='M5 10.5 8.2 14 15 6'
+                          stroke='currentColor'
+                          strokeWidth='2.4'
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                        />
                       </svg>
                     </span>
                     <span
@@ -1091,9 +1154,12 @@ export default function ArticlePostDialog({
               <div className='rounded-xl border border-gray-200 bg-gray-50 p-4'>
                 <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
                   <div>
-                    <h4 className='text-sm font-semibold text-gray-800'>Position exacte du bien</h4>
+                    <h4 className='text-sm font-semibold text-gray-800'>
+                      Position exacte du bien
+                    </h4>
                     <p className='mt-1 text-xs text-gray-500'>
-                      Utilisez votre position actuelle ou entrez longitude puis latitude. Domilix remplira l'adresse automatiquement.
+                      Utilisez votre position actuelle ou entrez longitude puis
+                      latitude. Domilix remplira l'adresse automatiquement.
                     </p>
                   </div>
                   <div className='flex flex-wrap gap-2'>
@@ -1103,8 +1169,12 @@ export default function ArticlePostDialog({
                       disabled={isGettingCurrentLocation}
                       className='inline-flex items-center gap-1.5 rounded-lg bg-orange-500 px-3 py-2 text-xs font-bold text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:bg-gray-400'
                     >
-                      <MdMyLocation className={`h-4 w-4 ${isGettingCurrentLocation ? 'animate-pulse' : ''}`} />
-                      {isGettingCurrentLocation ? 'Récupération...' : 'Position actuelle'}
+                      <MdMyLocation
+                        className={`h-4 w-4 ${isGettingCurrentLocation ? 'animate-pulse' : ''}`}
+                      />
+                      {isGettingCurrentLocation
+                        ? 'Récupération...'
+                        : 'Position actuelle'}
                     </button>
                     <button
                       type='button'
@@ -1116,7 +1186,9 @@ export default function ArticlePostDialog({
                   </div>
                 </div>
 
-                {(useManualCoordinates || (formData.localization[0] !== 0 && formData.localization[1] !== 0)) && (
+                {(useManualCoordinates ||
+                  (formData.localization[0] !== 0 &&
+                    formData.localization[1] !== 0)) && (
                   <div className='mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2'>
                     <div className='space-y-1.5'>
                       <label className='block text-sm font-medium text-gray-600'>
@@ -1125,7 +1197,12 @@ export default function ArticlePostDialog({
                       <input
                         type='text'
                         inputMode='decimal'
-                        value={longitudeInput || (formData.localization[0] ? String(formData.localization[0]) : '')}
+                        value={
+                          longitudeInput ||
+                          (formData.localization[0]
+                            ? String(formData.localization[0])
+                            : '')
+                        }
                         onChange={event => handleLocalizationChange(event, 0)}
                         readOnly={!useManualCoordinates}
                         className={`w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100 ${useManualCoordinates ? 'bg-white' : 'bg-gray-100'}`}
@@ -1139,7 +1216,12 @@ export default function ArticlePostDialog({
                       <input
                         type='text'
                         inputMode='decimal'
-                        value={latitudeInput || (formData.localization[1] ? String(formData.localization[1]) : '')}
+                        value={
+                          latitudeInput ||
+                          (formData.localization[1]
+                            ? String(formData.localization[1])
+                            : '')
+                        }
                         onChange={event => handleLocalizationChange(event, 1)}
                         readOnly={!useManualCoordinates}
                         className={`w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100 ${useManualCoordinates ? 'bg-white' : 'bg-gray-100'}`}
@@ -1151,27 +1233,64 @@ export default function ArticlePostDialog({
               </div>
 
               <div className='rounded-lg border border-orange-100 bg-orange-50 p-4 text-sm leading-6 text-orange-800'>
-                Après publication, le backend utilisera ces coordonnées pour détecter automatiquement l'adresse, la ville, la région et le pays.
+                Après publication, le backend utilisera ces coordonnées pour
+                détecter automatiquement l'adresse, la ville, la région et le
+                pays.
               </div>
               {(isDetectingLocation || detectedLocation) && (
                 <div className='rounded-lg border border-gray-200 bg-white p-4'>
-                  <h4 className='text-sm font-semibold text-gray-800'>Lieu détecté</h4>
+                  <h4 className='text-sm font-semibold text-gray-800'>
+                    Lieu détecté
+                  </h4>
                   {isDetectingLocation ? (
-                    <p className='mt-2 text-sm text-gray-500'>Détection en cours...</p>
-                  ) : detectedLocation && (
-                    <div className='mt-2 space-y-1 text-sm text-gray-700'>
-                      {detectedLocation.address && <p><strong>Adresse :</strong> {detectedLocation.address}</p>}
-                      {detectedLocation.neighbourhood && <p><strong>Quartier :</strong> {detectedLocation.neighbourhood}</p>}
-                      {detectedLocation.city && <p><strong>Ville :</strong> {detectedLocation.city}</p>}
-                      {detectedLocation.state && <p><strong>Région :</strong> {detectedLocation.state}</p>}
-                      {detectedLocation.country && <p><strong>Pays :</strong> {detectedLocation.country}</p>}
-                      {detectedLocation.zip && <p><strong>Code postal :</strong> {detectedLocation.zip}</p>}
-                    </div>
+                    <p className='mt-2 text-sm text-gray-500'>
+                      Détection en cours...
+                    </p>
+                  ) : (
+                    detectedLocation && (
+                      <div className='mt-2 space-y-1 text-sm text-gray-700'>
+                        {detectedLocation.address && (
+                          <p>
+                            <strong>Adresse :</strong>{' '}
+                            {detectedLocation.address}
+                          </p>
+                        )}
+                        {detectedLocation.neighbourhood && (
+                          <p>
+                            <strong>Quartier :</strong>{' '}
+                            {detectedLocation.neighbourhood}
+                          </p>
+                        )}
+                        {detectedLocation.city && (
+                          <p>
+                            <strong>Ville :</strong> {detectedLocation.city}
+                          </p>
+                        )}
+                        {detectedLocation.state && (
+                          <p>
+                            <strong>Région :</strong> {detectedLocation.state}
+                          </p>
+                        )}
+                        {detectedLocation.country && (
+                          <p>
+                            <strong>Pays :</strong> {detectedLocation.country}
+                          </p>
+                        )}
+                        {detectedLocation.zip && (
+                          <p>
+                            <strong>Code postal :</strong>{' '}
+                            {detectedLocation.zip}
+                          </p>
+                        )}
+                      </div>
+                    )
                   )}
                 </div>
               )}
               {locationError && (
-                <p className='text-sm font-semibold text-red-600'>{locationError}</p>
+                <p className='text-sm font-semibold text-red-600'>
+                  {locationError}
+                </p>
               )}
             </div>
 
@@ -1219,13 +1338,16 @@ export default function ArticlePostDialog({
                 </label>
               </div>
               {mediaError && (
-                <p className='text-sm font-semibold text-red-600'>{mediaError}</p>
+                <p className='text-sm font-semibold text-red-600'>
+                  {mediaError}
+                </p>
               )}
               {uploadProgress && (
                 <div className='rounded-xl border border-orange-100 bg-orange-50 p-3 text-left'>
                   <div className='mb-2 flex items-center justify-between gap-3 text-xs font-bold text-orange-800'>
                     <span className='line-clamp-1'>
-                      Upload {uploadProgress.current}/{uploadProgress.total} · {uploadProgress.fileName}
+                      Upload {uploadProgress.current}/{uploadProgress.total} ·{' '}
+                      {uploadProgress.fileName}
                     </span>
                     <span>{uploadProgress.overallPercent}%</span>
                   </div>
@@ -1245,7 +1367,8 @@ export default function ArticlePostDialog({
               {formData.medias.length > 0 && (
                 <div className='space-y-2'>
                   <p className='text-sm text-gray-500'>
-                    Cliquez sur le média principal ({formData.medias.length}/{MAX_ANNOUNCE_MEDIAS})
+                    Cliquez sur le média principal ({formData.medias.length}/
+                    {MAX_ANNOUNCE_MEDIAS})
                   </p>
                   <div className='grid grid-cols-6 gap-2'>
                     {formData.medias.map((media, index) => (
@@ -1407,7 +1530,7 @@ export default function ArticlePostDialog({
                                 key={currency.key}
                                 value={currency}
                                 className={({ active }) =>
-                                  `relative cursor-pointer select-none py-2 px-4 ${
+                                  `relative cursor-pointer py-2 px-4 ${
                                     active
                                       ? 'bg-orange-50 text-orange-900'
                                       : 'text-gray-900'
@@ -1453,7 +1576,7 @@ export default function ArticlePostDialog({
                               key={period.key}
                               value={period}
                               className={({ active }) =>
-                                `relative cursor-pointer select-none py-3 pl-4 pr-4 ${
+                                `relative cursor-pointer py-3 pl-4 pr-4 ${
                                   active
                                     ? 'bg-orange-50 text-orange-900'
                                     : 'text-gray-900'
@@ -1525,7 +1648,9 @@ export default function ArticlePostDialog({
                 {/* Contenu principal à droite */}
                 <div className='min-h-0 flex-1'>
                   <div className='h-full overflow-y-auto px-1 pb-2 pr-1'>
-                    <div className='space-y-5 sm:space-y-6'>{renderStepContent()}</div>
+                    <div className='space-y-5 sm:space-y-6'>
+                      {renderStepContent()}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1558,7 +1683,9 @@ export default function ArticlePostDialog({
                         return;
                       }
                       if (currentStep === 3 && formData.medias.length === 0) {
-                        setMediaError('Veuillez ajouter au moins une photo ou une vidéo.');
+                        setMediaError(
+                          'Veuillez ajouter au moins une photo ou une vidéo.'
+                        );
                         return;
                       }
                       setCurrentStep(step => step + 1);
@@ -1582,7 +1709,9 @@ export default function ArticlePostDialog({
                     {isSubmitting ? (
                       <span className='flex items-center justify-center gap-2'>
                         <span className='h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white' />
-                        {uploadProgress ? `${uploadProgress.overallPercent}%` : 'Publication...'}
+                        {uploadProgress
+                          ? `${uploadProgress.overallPercent}%`
+                          : 'Publication...'}
                       </span>
                     ) : (
                       <span className='flex items-center justify-center gap-2'>
