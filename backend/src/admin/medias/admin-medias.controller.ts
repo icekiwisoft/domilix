@@ -37,14 +37,16 @@ export class AdminMediasController {
   @ApiQuery({ name: 'AnnounceId', required: false })
   @ApiQuery({ name: 'AnnouncerId', required: false })
   @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'per_page', required: false })
   index(
     @CurrentUser() user: any,
     @Query('AnnounceId') AnnounceId?: string,
     @Query('AnnouncerId') AnnouncerId?: string,
     @Query('page') page?: string,
+    @Query('per_page') per_page?: string,
   ) {
     this.ensureAdmin(user);
-    return this.mediasService.index({ AnnounceId, AnnouncerId, page });
+    return this.mediasService.index({ AnnounceId, AnnouncerId, page, per_page });
   }
 
   @Get(':id')

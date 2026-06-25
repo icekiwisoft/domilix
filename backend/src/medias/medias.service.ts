@@ -140,9 +140,13 @@ export class MediasService {
     AnnounceId?: string;
     AnnouncerId?: string;
     page?: string;
+    per_page?: string;
   }) {
     const page = Number(query.page || 1);
-    const perPage = 15;
+    const perPage = Math.min(
+      100,
+      Math.max(1, Number(query.per_page || 15) || 15),
+    );
 
     if (query.AnnounceId) {
       const ad = await this.prisma.ad.findUnique({
