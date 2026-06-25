@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   Logger,
   NotFoundException,
@@ -202,6 +203,64 @@ export class MediasService {
     const media = await this.prisma.media.findUnique({ where: { id } });
     if (!media) throw new NotFoundException('Media not found');
     return this.serializeMedia(media);
+  }
+
+  async regenerateThumbnail(id: string) {
+    const media = await this.prisma.media.findUnique({ where: { id } });
+    if (!media) throw new NotFoundException('Media not found');
+    if (!media.bucket || !media.originalPath) {
+      throw new BadRequestException(
+        'Le fichier original du media est introuvable dans le stockage.',
+      );
+    }
+
+    const originalBuffer = await this.objectStorage.getObjectBuffer(
+      media.bucket,
+      media.originalPath,
+    );
+    if (!originalBuffer?.length) {
+      throw new BadRequestException('Le fichier original du media est vide.');
+    }
+
+    const file = {
+      originalname: media.originalName || media.originalPath || media.id,
+      filename: media.originalName || media.originalPath || media.id,
+      mimetype: media.type || 'application/octet-stream',
+      buffer: originalBuffer,
+    };
+    const thumbnailBuffer = await generateMediaThumbnailBuffer(file).catch(
+      (error) => {
+        this.logger.warn(
+          `Admin thumbnail regeneration failed for media ${media.id} (${file.mimetype}, ${originalBuffer.length} bytes): ${error.message}`,
+        );
+        return null;
+      },
+    );
+
+    if (!thumbnailBuffer) {
+      throw new BadRequestException(
+        'Ce type de media ne permet pas de generer une miniature.',
+      );
+    }
+
+    const thumbnail = await this.objectStorage.uploadThumbnail(
+      thumbnailBuffer,
+      file,
+    );
+
+    await this.prisma.media.update({
+      where: { id },
+      data: {
+        thumbnail: thumbnail.url,
+        thumbnailPath: thumbnail.path,
+      },
+    });
+
+    this.logger.log(
+      `Admin regenerated thumbnail for media ${media.id}: ${thumbnail.path}`,
+    );
+
+    return this.show(id);
   }
 
   async indexByAnnouncer(announcerId: string, page = 1) {

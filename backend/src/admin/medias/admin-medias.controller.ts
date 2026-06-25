@@ -4,6 +4,7 @@ import {
   ForbiddenException,
   Get,
   Param,
+  Post,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -52,6 +53,14 @@ export class AdminMediasController {
   show(@CurrentUser() user: any, @Param('id') id: string) {
     this.ensureAdmin(user);
     return this.mediasService.show(id);
+  }
+
+  @Post(':id/regenerate-thumbnail')
+  @ApiOperation({ summary: 'Regenerate media thumbnail from original file' })
+  @ApiParam({ name: 'id', example: 'media-uuid' })
+  regenerateThumbnail(@CurrentUser() user: any, @Param('id') id: string) {
+    this.ensureAdmin(user);
+    return this.mediasService.regenerateThumbnail(id);
   }
 
   @Delete(':id')

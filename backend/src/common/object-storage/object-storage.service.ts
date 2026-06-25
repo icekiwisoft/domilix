@@ -7,6 +7,7 @@ import {
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import crypto from 'node:crypto';
 import path from 'node:path';
+import { Readable } from 'node:stream';
 
 type UploadableFile = {
   originalname?: string;
@@ -120,6 +121,49 @@ export class ObjectStorageService {
       }),
       { expiresIn: this.signedUrlTtlSeconds },
     );
+  }
+
+  private async bodyToBuffer(body: unknown) {
+    if (!body) return Buffer.alloc(0);
+    if (body instanceof Uint8Array) return Buffer.from(body);
+    if (body instanceof Readable) {
+      const chunks: Buffer[] = [];
+      for await (const chunk of body) {
+        chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+      }
+      return Buffer.concat(chunks);
+    }
+
+    if (
+      typeof body === 'object' &&
+      body !== null &&
+      'transformToByteArray' in body &&
+      typeof (body as { transformToByteArray: unknown }).transformToByteArray ===
+        'function'
+    ) {
+      const bytes = await (
+        body as { transformToByteArray: () => Promise<Uint8Array> }
+      ).transformToByteArray();
+      return Buffer.from(bytes);
+    }
+
+    throw new InternalServerErrorException('Unsupported storage response body.');
+  }
+
+  async getObjectBuffer(
+    bucket: string | null | undefined,
+    objectPath: string | null | undefined,
+  ) {
+    if (!bucket || !objectPath) return null;
+
+    const response = await this.storageClient.send(
+      new GetObjectCommand({
+        Bucket: bucket,
+        Key: objectPath,
+      }),
+    );
+
+    return this.bodyToBuffer(response.Body);
   }
 
   storagePathFromUrl(value: string | null | undefined) {
