@@ -38,15 +38,26 @@ export class AdminMediasController {
   @ApiQuery({ name: 'AnnouncerId', required: false })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'per_page', required: false })
+  @ApiQuery({ name: 'kind', required: false, enum: ['image', 'video', 'document'] })
+  @ApiQuery({ name: 'search', required: false })
   index(
     @CurrentUser() user: any,
     @Query('AnnounceId') AnnounceId?: string,
     @Query('AnnouncerId') AnnouncerId?: string,
     @Query('page') page?: string,
     @Query('per_page') per_page?: string,
+    @Query('kind') kind?: 'image' | 'video' | 'document',
+    @Query('search') search?: string,
   ) {
     this.ensureAdmin(user);
-    return this.mediasService.index({ AnnounceId, AnnouncerId, page, per_page });
+    return this.mediasService.index({
+      AnnounceId,
+      AnnouncerId,
+      page,
+      per_page,
+      kind,
+      search,
+    });
   }
 
   @Get(':id')

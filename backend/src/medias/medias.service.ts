@@ -136,11 +136,68 @@ export class MediasService {
     };
   }
 
+  private buildMediaWhere(query: {
+    AnnouncerId?: string;
+    kind?: 'image' | 'video' | 'document';
+    search?: string;
+  }) {
+    const and: any[] = [];
+
+    if (query.AnnouncerId) {
+      and.push({ announcerId: query.AnnouncerId });
+    }
+
+    if (query.kind === 'image') {
+      and.push({
+        OR: [{ type: { startsWith: 'image/' } }, { type: 'image' }],
+      });
+    }
+
+    if (query.kind === 'video') {
+      and.push({
+        OR: [{ type: { startsWith: 'video/' } }, { type: 'video' }],
+      });
+    }
+
+    if (query.kind === 'document') {
+      and.push({
+        AND: [
+          {
+            NOT: {
+              OR: [{ type: { startsWith: 'image/' } }, { type: 'image' }],
+            },
+          },
+          {
+            NOT: {
+              OR: [{ type: { startsWith: 'video/' } }, { type: 'video' }],
+            },
+          },
+        ],
+      });
+    }
+
+    const search = query.search?.trim();
+    if (search) {
+      and.push({
+        OR: [
+          { id: { contains: search } },
+          { file: { contains: search } },
+          { originalName: { contains: search } },
+          { type: { contains: search } },
+        ],
+      });
+    }
+
+    return and.length ? { AND: and } : {};
+  }
+
   async index(query: {
     AnnounceId?: string;
     AnnouncerId?: string;
     page?: string;
     per_page?: string;
+    kind?: 'image' | 'video' | 'document';
+    search?: string;
   }) {
     const page = Number(query.page || 1);
     const perPage = Math.min(
@@ -154,25 +211,30 @@ export class MediasService {
       });
       if (!ad) throw new NotFoundException('Ad not found');
 
-      const [links, total] = await Promise.all([
-        this.prisma.adMedia.findMany({
-          where: { adId: query.AnnounceId },
-          orderBy: [{ isPresentation: 'desc' }, { id: 'asc' }],
-          skip: (page - 1) * perPage,
-          take: perPage,
-        }),
-        this.prisma.adMedia.count({ where: { adId: query.AnnounceId } }),
-      ]);
+      const links = await this.prisma.adMedia.findMany({
+        where: { adId: query.AnnounceId },
+        orderBy: [{ isPresentation: 'desc' }, { id: 'asc' }],
+      });
 
+      const mediaWhere = this.buildMediaWhere({
+        AnnouncerId: query.AnnouncerId,
+        kind: query.kind,
+        search: query.search,
+      });
       const medias = await this.prisma.media.findMany({
-        where: { id: { in: links.map((item) => item.mediaId) } },
+        where: { AND: [{ id: { in: links.map((item) => item.mediaId) } }, mediaWhere] },
       });
       const byId = new Map(medias.map((item) => [item.id, item] as const));
+      const filteredLinks = links.filter((link) => byId.has(link.mediaId));
+      const paginatedLinks = filteredLinks.slice(
+        (page - 1) * perPage,
+        page * perPage,
+      );
       const data = await Promise.all(
-        links.map((link) => this.serializeMedia(byId.get(link.mediaId))),
+        paginatedLinks.map((link) => this.serializeMedia(byId.get(link.mediaId))),
       );
       return buildLaravelPagination(data, {
-        total,
+        total: filteredLinks.length,
         page,
         perPage,
         path: '/medias',
@@ -180,7 +242,7 @@ export class MediasService {
       });
     }
 
-    const where = query.AnnouncerId ? { announcerId: query.AnnouncerId } : {};
+    const where = this.buildMediaWhere(query);
     const [medias, total] = await Promise.all([
       this.prisma.media.findMany({
         where,
