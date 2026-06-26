@@ -19,6 +19,7 @@ import { MediasModule } from './medias/medias.module';
 import { NewslettersModule } from './newsletters/newsletters.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { PublicationsModule } from './publications/publications.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { UploadsModule } from './uploads/uploads.module';
 import { UsersModule } from './users/users.module';
@@ -52,6 +53,7 @@ import { UsersModule } from './users/users.module';
     MediasModule,
     NewslettersModule,
     NotificationsModule,
+    PublicationsModule,
     SubscriptionsModule,
     UploadsModule,
   ],

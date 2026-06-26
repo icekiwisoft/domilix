@@ -452,3 +452,21 @@ model Broadcast {
 
   @@map("broadcasts")
 }
+
+model FacebookPublication {
+  id             BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  adId           String    @map("ad_id") @db.VarChar(255)
+  status         String    @default("draft") @db.VarChar(50)
+  message        String    @db.Text
+  mediaIds       Json?     @map("media_ids")
+  includeVideos  Boolean   @default(false) @map("include_videos")
+  facebookPostId String?   @map("facebook_post_id") @db.VarChar(255)
+  facebookUrl    String?   @map("facebook_url") @db.VarChar(1024)
+  error          String?   @db.Text
+  publishedAt    DateTime? @map("published_at") @db.Timestamp(0)
+  createdAt      DateTime? @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt      DateTime? @default(now()) @map("updated_at") @db.Timestamp(0)
+
+  @@index([adId], map: "facebook_publications_ad_id_idx")
+  @@map("facebook_publications")
+}
