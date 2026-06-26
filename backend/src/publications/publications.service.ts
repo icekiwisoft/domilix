@@ -2,11 +2,13 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { AdsService } from '../ads/ads.service';
 import { buildLaravelPagination } from '../common/http/pagination';
+import { ObjectStorageService } from '../common/object-storage/object-storage.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePublicationDto } from './dto/create-publication.dto';
 import { QueryPublicationsDto } from './dto/query-publications.dto';
@@ -21,9 +23,12 @@ const PUBLICATION_STATUSES = [
 
 @Injectable()
 export class PublicationsService {
+  private readonly logger = new Logger(PublicationsService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly adsService: AdsService,
+    private readonly objectStorage: ObjectStorageService,
   ) {}
 
   private ensureAdmin(user: any) {
@@ -75,6 +80,165 @@ export class PublicationsService {
     ]
       .filter(Boolean)
       .join('\n\n');
+  }
+
+  private facebookApiUrl(path: string) {
+    const version = process.env.FACEBOOK_GRAPH_API_VERSION || 'v21.0';
+    return `https://graph.facebook.com/${version}/${path.replace(/^\/+/, '')}`;
+  }
+
+  private facebookPostUrl(postId: string) {
+    return `https://www.facebook.com/${postId}`;
+  }
+
+  private async callFacebook(path: string, params: URLSearchParams) {
+    const response = await fetch(this.facebookApiUrl(path), {
+      method: 'POST',
+      body: params,
+    });
+    const payload = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      const message =
+        payload?.error?.message ||
+        payload?.error?.error_user_msg ||
+        `Facebook API error ${response.status}`;
+      throw new Error(message);
+    }
+
+    return payload;
+  }
+
+  private async mediaPublicUrl(media: any) {
+    if (media.bucket && media.originalPath) {
+      const signedUrl = await this.objectStorage.getSignedUrl(
+        media.bucket,
+        media.originalPath,
+      );
+      if (signedUrl) return signedUrl;
+    }
+
+    return media.file || null;
+  }
+
+  private async selectedMediaItems(item: any) {
+    const mediaIds = Array.isArray(item.mediaIds)
+      ? item.mediaIds.filter((mediaId) => typeof mediaId === 'string')
+      : [];
+    if (!mediaIds.length) return [];
+
+    const medias = await this.prisma.media.findMany({
+      where: { id: { in: mediaIds } },
+    });
+    const byId = new Map(medias.map((media) => [media.id, media]));
+
+    return mediaIds
+      .map((mediaId) => byId.get(mediaId))
+      .filter((media): media is NonNullable<typeof media> => Boolean(media));
+  }
+
+  private async publishPhotoPost(
+    item: any,
+    medias: any[],
+    accessToken: string,
+    pageId: string,
+  ) {
+    const images = medias.filter(
+      (media) => !String(media.type || '').toLowerCase().startsWith('video/'),
+    );
+
+    if (!images.length) {
+      const params = new URLSearchParams({
+        access_token: accessToken,
+        message: item.message,
+      });
+      const payload = await this.callFacebook(`${pageId}/feed`, params);
+      return String(payload.id);
+    }
+
+    const uploadedPhotoIds: string[] = [];
+    for (const media of images) {
+      const url = await this.mediaPublicUrl(media);
+      if (!url) continue;
+
+      const params = new URLSearchParams({
+        access_token: accessToken,
+        url,
+        published: 'false',
+      });
+      const payload = await this.callFacebook(`${pageId}/photos`, params);
+      uploadedPhotoIds.push(String(payload.id));
+    }
+
+    if (!uploadedPhotoIds.length) {
+      throw new Error('Aucune image selectionnee ne contient une URL publiable.');
+    }
+
+    const params = new URLSearchParams({
+      access_token: accessToken,
+      message: item.message,
+    });
+    uploadedPhotoIds.forEach((photoId, index) => {
+      params.append(
+        `attached_media[${index}]`,
+        JSON.stringify({ media_fbid: photoId }),
+      );
+    });
+
+    const payload = await this.callFacebook(`${pageId}/feed`, params);
+    return String(payload.id);
+  }
+
+  private async publishVideoPosts(
+    item: any,
+    medias: any[],
+    accessToken: string,
+    pageId: string,
+  ) {
+    const videos = medias.filter((media) =>
+      String(media.type || '').toLowerCase().startsWith('video/'),
+    );
+    const postIds: string[] = [];
+
+    for (const media of videos) {
+      const fileUrl = await this.mediaPublicUrl(media);
+      if (!fileUrl) continue;
+
+      const params = new URLSearchParams({
+        access_token: accessToken,
+        file_url: fileUrl,
+        description: item.message,
+      });
+      const payload = await this.callFacebook(`${pageId}/videos`, params);
+      postIds.push(String(payload.id));
+    }
+
+    if (!postIds.length) {
+      throw new Error('Aucune video selectionnee ne contient une URL publiable.');
+    }
+
+    return postIds[0];
+  }
+
+  private async publishToFacebook(item: any) {
+    const pageId = process.env.FACEBOOK_PAGE_ID;
+    const accessToken = process.env.FACEBOOK_PAGE_ACCESS_TOKEN;
+    if (!pageId || !accessToken) {
+      throw new Error(
+        'Integration Meta non configuree: FACEBOOK_PAGE_ID et FACEBOOK_PAGE_ACCESS_TOKEN sont requis.',
+      );
+    }
+
+    const medias = await this.selectedMediaItems(item);
+    const hasVideos =
+      item.includeVideos &&
+      medias.some((media) =>
+        String(media.type || '').toLowerCase().startsWith('video/'),
+      );
+
+    return hasVideos
+      ? this.publishVideoPosts(item, medias, accessToken, pageId)
+      : this.publishPhotoPost(item, medias, accessToken, pageId);
   }
 
   async index(user: any, query: QueryPublicationsDto) {
@@ -187,27 +351,43 @@ export class PublicationsService {
     if (!existing) throw new NotFoundException('Publication not found');
     if (existing.status === 'published') return this.serialize(existing);
 
-    const isConfigured =
-      process.env.FACEBOOK_PAGE_ID && process.env.FACEBOOK_PAGE_ACCESS_TOKEN;
-    if (!isConfigured) {
+    const publishing = await this.prisma.facebookPublication.update({
+      where: { id: existing.id },
+      data: {
+        status: 'publishing',
+        error: null,
+      },
+    });
+
+    try {
+      const facebookPostId = await this.publishToFacebook(publishing);
+      const item = await this.prisma.facebookPublication.update({
+        where: { id: existing.id },
+        data: {
+          status: 'published',
+          facebookPostId,
+          facebookUrl: this.facebookPostUrl(facebookPostId),
+          publishedAt: new Date(),
+          error: null,
+        },
+      });
+
+      return this.serialize(item);
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Erreur inconnue pendant la publication Facebook.';
+      this.logger.error(`Facebook publication ${existing.id} failed: ${message}`);
+
       const item = await this.prisma.facebookPublication.update({
         where: { id: existing.id },
         data: {
           status: 'failed',
-          error:
-            'Integration Meta non configuree: FACEBOOK_PAGE_ID et FACEBOOK_PAGE_ACCESS_TOKEN sont requis.',
+          error: message,
         },
       });
       return this.serialize(item);
     }
-
-    const item = await this.prisma.facebookPublication.update({
-      where: { id: existing.id },
-      data: {
-        status: 'pending',
-        error: null,
-      },
-    });
-    return this.serialize(item);
   }
 }
