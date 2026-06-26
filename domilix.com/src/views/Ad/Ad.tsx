@@ -386,6 +386,14 @@ export default function Ad(): React.ReactElement {
     setShowModal(true);
   };
 
+  const openUnlockFlow = () => {
+    if (!isAuthenticated) {
+      signinDialogActions.toggle();
+      return;
+    }
+    setShowUnlockDialog(true);
+  };
+
   const handleUnlock = async () => {
     if (!adInfo || isUnlocking) return;
     if (!isAuthenticated) {
@@ -983,7 +991,7 @@ export default function Ad(): React.ReactElement {
                   ) : (
                     <>
                       <button
-                        onClick={() => setShowUnlockDialog(true)}
+                        onClick={openUnlockFlow}
                         className='w-full text-white py-5 rounded-2xl font-black text-lg shadow-xl hover:-translate-y-1 active:translate-y-0 transition-all mb-4 uppercase tracking-tight bg-primary-gradient'
                       >
                         Débloquer l'annonce
