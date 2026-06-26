@@ -18,7 +18,7 @@ const fadeUp = {
   }),
 };
 
-const heroImage = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1800';
+const heroImage = '/images/about-hero.png';
 const teamImage = 'https://images.unsplash.com/photo-1551434678-e076c223a692?w=1200';
 const ctaImage = 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1200';
 
@@ -100,11 +100,12 @@ export default function About(): React.ReactElement {
       <main className='min-h-screen bg-[#f7f9fb] text-[#191c1e]'>
         <section className='relative flex min-h-[70vh] items-center justify-center overflow-hidden pt-20'>
           <div className='absolute inset-0'>
-            <img src={heroImage} alt='Architecture moderne' className='h-full w-full object-cover' />
-            <div className='absolute inset-0 bg-black/80' />
+            <img src={heroImage} alt='Visite immobiliere Domilix' className='h-full w-full object-cover object-center' />
+            <div className='absolute inset-0 bg-gradient-to-r from-black/80 via-black/45 to-black/10' />
+            <div className='absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#f7f9fb] to-transparent' />
           </div>
 
-          <div className='relative z-10 mx-auto max-w-5xl px-gutter py-xl text-center'>
+          <div className='relative z-10 mx-auto max-w-5xl px-gutter py-xl text-left'>
             <motion.span
               variants={fadeUp}
               initial='hidden'
@@ -119,7 +120,7 @@ export default function About(): React.ReactElement {
               initial='hidden'
               animate='show'
               custom={0.2}
-              className='mx-auto max-w-4xl text-4xl font-black leading-tight tracking-tight text-white sm:text-6xl lg:text-7xl'
+              className='max-w-4xl text-4xl font-black leading-tight tracking-tight text-white sm:text-6xl lg:text-7xl'
             >
               Votre partenaire immobilier de confiance
             </motion.h1>
@@ -128,7 +129,7 @@ export default function About(): React.ReactElement {
               initial='hidden'
               animate='show'
               custom={0.3}
-              className='mx-auto mt-md max-w-2xl text-base leading-8 text-white/75 sm:text-xl'
+              className='mt-md max-w-2xl text-base leading-8 text-white/80 sm:text-xl'
             >
               Domilix redéfinit l'expérience immobilière en reliant les besoins réels du marché camerounais à une plateforme simple, claire et fiable.
             </motion.p>
