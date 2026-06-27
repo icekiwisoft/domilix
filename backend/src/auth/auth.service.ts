@@ -10,6 +10,8 @@ import { User } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import crypto from 'node:crypto';
+import fs from 'node:fs';
+import path from 'node:path';
 import { PrismaService } from '../prisma/prisma.service';
 import { ObjectStorageService } from '../common/object-storage/object-storage.service';
 import { assertHoneypotClear } from '../common/honeypot';
@@ -186,10 +188,26 @@ export class AuthService {
   }
 
   private firebaseProjectId() {
-    return (
-      process.env.FIREBASE_PROJECT_ID ||
-      process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID
-    );
+    if (process.env.FIREBASE_PROJECT_ID) return process.env.FIREBASE_PROJECT_ID;
+    if (process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID) {
+      return process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+    }
+
+    const serviceAccountPath =
+      process.env.FIREBASE_SERVICE_ACCOUNT_PATH ||
+      path.join(
+        process.cwd(),
+        'domilix-firebase-adminsdk-fbsvc-39ea17bee0.json',
+      );
+
+    try {
+      const serviceAccount = JSON.parse(
+        fs.readFileSync(serviceAccountPath, 'utf8'),
+      ) as { project_id?: string };
+      return serviceAccount.project_id;
+    } catch {
+      return undefined;
+    }
   }
 
   private async firebaseCertificates() {
