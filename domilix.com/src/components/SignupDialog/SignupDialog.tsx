@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { FaCheckCircle, FaEye, FaEyeSlash, FaFacebook, FaGoogle, FaTimesCircle } from 'react-icons/fa';
 
-import AuthImage from '@assets/bg_img/cover_annonceur.jpg';
+import AuthImage from '@assets/bg_img/signup_realestate_couple.png';
 import HoneypotInput from '@components/HoneypotInput/HoneypotInput';
 import BlockInputs from '@components/OTP/BlockInputs';
 import { signupDialogActions, signinDialogActions } from '@stores/defineStore';
@@ -329,13 +329,8 @@ export default function SignupDialog() {
         </div>
 
         <aside className='relative hidden min-h-[620px] overflow-hidden bg-orange-950 lg:block'>
-          <img src={authImageSrc} alt='' className='h-full w-full object-cover opacity-85' />
-          <div className='absolute inset-0 bg-gradient-to-br from-orange-600/85 via-slate-950/20 to-slate-950/75' />
-          <div className='absolute inset-x-0 bottom-0 p-8 text-white'>
-            <p className='mb-3 w-fit rounded-full bg-white/15 px-3 py-1 text-xs font-black uppercase tracking-[0.22em] backdrop-blur'>Nouveau départ</p>
-            <h3 className='text-3xl font-black leading-tight'>Publiez, cherchez et débloquez vos contacts au même endroit.</h3>
-            <p className='mt-3 text-sm leading-6 text-white/80'>Créez votre compte Domilix pour accéder aux annonces et gérer vos opportunités immobilières.</p>
-          </div>
+          <img src={authImageSrc} alt='' className='h-full w-full object-cover' />
+          <div className='absolute inset-0 bg-gradient-to-br from-orange-950/10 via-transparent to-slate-950/10' />
         </aside>
       </div>
     </div>
