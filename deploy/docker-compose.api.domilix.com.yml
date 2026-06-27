@@ -7,9 +7,12 @@ services:
       - ./.env.production
     volumes:
       - domilix_backend_storage:/app/storage
+      - ${FIREBASE_SERVICE_ACCOUNT_HOST_PATH:-./secrets/firebase-admin.json}:/run/secrets/firebase-admin.json:ro
     environment:
       PORT: 8000
       HTTP_REQUEST_TIMEOUT_MS: ${HTTP_REQUEST_TIMEOUT_MS:-900000}
+      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID:-}
+      FIREBASE_SERVICE_ACCOUNT_PATH: /run/secrets/firebase-admin.json
       DATABASE_URL: ${DATABASE_URL}
       JWT_SECRET: ${JWT_SECRET:-change-me}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change-me-too}
