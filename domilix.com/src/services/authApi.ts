@@ -20,6 +20,7 @@ export interface AuthResponse {
   user: any;
   authorisation: {
     token: string;
+    refresh_token?: string;
     type: string;
   };
 }
@@ -59,6 +60,11 @@ export const authApi = {
 
   register: async (data: RegisterData): Promise<AuthResponse> => {
     const response = await api.post('/auth/register', data);
+    return response.data;
+  },
+
+  firebaseLogin: async (idToken: string): Promise<AuthResponse> => {
+    const response = await api.post('/auth/firebase', { id_token: idToken });
     return response.data;
   },
 

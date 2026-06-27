@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { User } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 import crypto from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { ObjectStorageService } from '../common/object-storage/object-storage.service';
@@ -16,6 +17,7 @@ import { MailService } from '../mail/mail.service';
 import { AuthTokenService } from './auth-token.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { DeleteAccountDto } from './dto/delete-account.dto';
+import { FirebaseAuthDto } from './dto/firebase-auth.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
@@ -27,6 +29,10 @@ import { VerificationCodeService } from './verification-code.service';
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
+  private firebaseCertsCache: {
+    expiresAt: number;
+    certs: Record<string, string>;
+  } | null = null;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -71,6 +77,24 @@ export class AuthService {
 
     return this.prisma.subscriptionPlan.create({
       data: { name: 'Signup Gift' },
+    });
+  }
+
+  private async grantSignupGift(userId: bigint) {
+    const signupGiftPlan = await this.ensureSignupGiftPlan();
+
+    await this.prisma.subscription.create({
+      data: {
+        userId,
+        subscriptionPlanId: String(signupGiftPlan.id),
+        initialCredits: 2,
+        credits: 2,
+        price: 0,
+        duration: 0,
+        startDate: new Date(),
+        endDate: null,
+        expireAt: null,
+      },
     });
   }
 
@@ -161,6 +185,87 @@ export class AuthService {
     }));
   }
 
+  private firebaseProjectId() {
+    return (
+      process.env.FIREBASE_PROJECT_ID ||
+      process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    );
+  }
+
+  private async firebaseCertificates() {
+    const now = Date.now();
+    if (this.firebaseCertsCache && this.firebaseCertsCache.expiresAt > now) {
+      return this.firebaseCertsCache.certs;
+    }
+
+    const response = await fetch(
+      'https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com',
+    );
+    if (!response.ok) {
+      throw new UnauthorizedException(
+        'Impossible de verifier le token Firebase.',
+      );
+    }
+
+    const cacheControl = response.headers.get('cache-control') || '';
+    const maxAge = Number(cacheControl.match(/max-age=(\d+)/)?.[1] || 3600);
+    const certs = (await response.json()) as Record<string, string>;
+    this.firebaseCertsCache = {
+      certs,
+      expiresAt: now + maxAge * 1000,
+    };
+
+    return certs;
+  }
+
+  private async verifyFirebaseIdToken(idToken: string) {
+    const projectId = this.firebaseProjectId();
+    if (!projectId) {
+      throw new BadRequestException('FIREBASE_PROJECT_ID est requis.');
+    }
+
+    const decodedHeader = jwt.decode(idToken, { complete: true });
+    const kid = decodedHeader?.header?.kid;
+    if (!kid) {
+      throw new UnauthorizedException('Token Firebase invalide.');
+    }
+
+    const certs = await this.firebaseCertificates();
+    const cert = certs[kid];
+    if (!cert) {
+      throw new UnauthorizedException('Certificat Firebase introuvable.');
+    }
+
+    const payload = jwt.verify(idToken, cert, {
+      algorithms: ['RS256'],
+      audience: projectId,
+      issuer: `https://securetoken.google.com/${projectId}`,
+    }) as JwtPayload & {
+      sub: string;
+      email?: string;
+      email_verified?: boolean;
+      name?: string;
+      picture?: string;
+      firebase?: { sign_in_provider?: string };
+    };
+
+    if (!payload.sub || !payload.email || !payload.email_verified) {
+      throw new UnauthorizedException(
+        'Le compte Firebase doit fournir un email verifie.',
+      );
+    }
+
+    if (payload.firebase?.sign_in_provider !== 'google.com') {
+      throw new UnauthorizedException('Connexion Google requise.');
+    }
+
+    return {
+      uid: payload.sub,
+      email: payload.email.toLowerCase(),
+      name: payload.name || payload.email.split('@')[0],
+    };
+  }
+
   async sendEmailVerification(user: User) {
     if (user.emailVerified) {
       return { message: 'Email deja verifie.' };
@@ -246,7 +351,6 @@ export class AuthService {
     }
 
     const password = await bcrypt.hash(dto.password, 10);
-    const signupGiftPlan = await this.ensureSignupGiftPlan();
     const user = await this.prisma.$transaction(async (tx) => {
       const created = await tx.user.create({
         data: {
@@ -262,6 +366,13 @@ export class AuthService {
         },
       });
 
+      const signupGiftPlan =
+        (await tx.subscriptionPlan.findFirst({
+          where: { name: 'Signup Gift' },
+        })) ||
+        (await tx.subscriptionPlan.create({
+          data: { name: 'Signup Gift' },
+        }));
       await tx.subscription.create({
         data: {
           userId: created.id,
@@ -354,6 +465,69 @@ export class AuthService {
     });
 
     return this.authResponse(user);
+  }
+
+  async firebaseLogin(dto: FirebaseAuthDto) {
+    const firebaseUser = await this.verifyFirebaseIdToken(dto.id_token);
+    const existing = await this.prisma.user.findUnique({
+      where: { email: firebaseUser.email },
+    });
+
+    if (existing) {
+      if (existing.deletedAt) {
+        throw new UnauthorizedException('Ce compte a ete supprime.');
+      }
+
+      const updated = existing.emailVerified
+        ? existing
+        : await this.prisma.user.update({
+            where: { id: existing.id },
+            data: { emailVerified: true, emailVerifiedAt: new Date() },
+          });
+
+      await this.createUserNotification(updated.id, {
+        type: 'new_login',
+        title: 'Nouvelle connexion',
+        message:
+          'Une nouvelle connexion Google a votre compte Domilix vient d etre effectuee.',
+        link: '/settings',
+      });
+
+      return this.authResponse(updated);
+    }
+
+    const password = await bcrypt.hash(crypto.randomUUID(), 10);
+    const user = await this.prisma.user.create({
+      data: {
+        name: firebaseUser.name,
+        email: firebaseUser.email,
+        phoneNumber: `firebase_${crypto.randomUUID().replace(/-/g, '').slice(0, 18)}`,
+        password,
+        phoneVerified: false,
+        emailVerified: true,
+        emailVerifiedAt: new Date(),
+      },
+    });
+
+    await this.grantSignupGift(user.id);
+
+    await this.createUserNotification(user.id, {
+      type: 'welcome',
+      title: 'Bienvenue sur Domilix',
+      message:
+        'Votre compte a ete cree avec Google. Vous pouvez maintenant rechercher des annonces, sauvegarder vos favoris et configurer votre profil.',
+      link: '/settings',
+    });
+
+    await this.createUserNotification(user.id, {
+      type: 'signup_gift_received',
+      title: '2 Domicoins offerts',
+      message:
+        'Bienvenue sur Domilix ! Vous recevez 2 Domicoins valables sans date d expiration pour debloquer vos premiers contacts.',
+      link: '/settings?tab=packs',
+    });
+
+    return this.authResponse(user, 'Connexion Google reussie.');
   }
 
   async refresh(refreshTokenOrAccessToken?: string, isAccessToken = false) {

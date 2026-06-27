@@ -7,6 +7,7 @@ import {
   RegisterData,
   User,
 } from '../services/authApi';
+import { signInWithGoogleFirebase } from '../services/firebaseAuth';
 import {
   clearAuthState,
   getAuthToken,
@@ -61,6 +62,31 @@ export const useAuth = () => {
       return {
         success: false,
         error: error.response?.data?.message || 'Registration failed',
+      };
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const loginWithGoogle = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const idToken = await signInWithGoogleFirebase();
+      const response = await authApi.firebaseLogin(idToken);
+
+      setAuthPersistence(true);
+      setAuthToken(response.authorisation.token);
+      setAuthUser(response.user);
+      setAuthChecked(true);
+
+      return { success: true, data: response };
+    } catch (error: any) {
+      return {
+        success: false,
+        error:
+          error.response?.data?.message ||
+          error.message ||
+          'Connexion Google impossible',
       };
     } finally {
       setIsLoading(false);
@@ -162,6 +188,7 @@ export const useAuth = () => {
     isAuthenticated,
     isLoading,
     login,
+    loginWithGoogle,
     register,
     logout,
     authenticate,

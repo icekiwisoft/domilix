@@ -33,6 +33,7 @@ import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { DeleteAccountDto } from './dto/delete-account.dto';
+import { FirebaseAuthDto } from './dto/firebase-auth.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
@@ -87,6 +88,14 @@ export class AuthController {
   @ApiOkResponse({ description: 'Authentication successful' })
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
+  }
+
+  @Post('firebase')
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @ApiOperation({ summary: 'Authenticate a user with Firebase Auth' })
+  @ApiOkResponse({ description: 'Authentication successful' })
+  firebaseLogin(@Body() dto: FirebaseAuthDto) {
+    return this.authService.firebaseLogin(dto);
   }
 
   @Post('refresh')

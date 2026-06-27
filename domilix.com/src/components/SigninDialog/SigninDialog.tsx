@@ -16,7 +16,7 @@ const inputCls =
 export default function SigninDialog() {
   const authImageSrc =
     typeof AuthImage === 'string' ? AuthImage : AuthImage.src;
-  const { login, verifyPhone, resendVerificationCode, isLoading, user } =
+  const { login, loginWithGoogle, verifyPhone, resendVerificationCode, isLoading, user } =
     useAuth();
 
   const [isForgotPassword, setIsForgotPassword] = useState(false);
@@ -93,6 +93,18 @@ export default function SigninDialog() {
       );
     } finally {
       setResetEmailLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setError('');
+    setSuccess('');
+    const result = await loginWithGoogle();
+    if (result.success) {
+      setSuccess('Connexion Google reussie !');
+      signinDialogActions.toggle();
+    } else {
+      setError(result.error || 'Connexion Google impossible');
     }
   };
 
@@ -263,14 +275,12 @@ export default function SigninDialog() {
               <div className='grid grid-cols-2 gap-3'>
                 <button
                   type='button'
-                  disabled
-                  className='flex cursor-not-allowed items-center justify-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-sm font-semibold text-gray-400'
+                  onClick={handleGoogleLogin}
+                  disabled={isLoading}
+                  className='flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-3 text-sm font-semibold text-gray-700 transition hover:border-orange-200 hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-60'
                 >
                   <FaGoogle className='h-4 w-4' />
-                  Google
-                  <span className='rounded-full bg-gray-200 px-1.5 py-0.5 text-[9px] font-black text-gray-500'>
-                    Coming soon
-                  </span>
+                  {isLoading ? 'Connexion...' : 'Google'}
                 </button>
                 <button
                   type='button'

@@ -18,7 +18,7 @@ const inputCls = 'w-full p-2.5 rounded-lg bg-white border border-gray-200 focus:
 
 export default function SignupDialog() {
   const authImageSrc = typeof AuthImage === 'string' ? AuthImage : AuthImage.src;
-  const { register, verifyPhone, resendVerificationCode, isLoading, user } = useAuth();
+  const { register, loginWithGoogle, verifyPhone, resendVerificationCode, isLoading, user } = useAuth();
 
   const [step, setStep] = useState<Step>('method');
   const [registrationType, setRegistrationType] = useState<RegistrationType>('email');
@@ -100,6 +100,17 @@ export default function SignupDialog() {
     else setError(result.error || 'Erreur lors du renvoi du code');
   };
 
+  const handleGoogleSignup = async () => {
+    setError('');
+    setSuccess('');
+    const result = await loginWithGoogle();
+    if (result.success) {
+      setSuccess('Compte Google connecte !');
+      signupDialogActions.toggle();
+    } else {
+      setError(result.error || 'Connexion Google impossible');
+    }
+  };
   const switchToSignin = () => {
     signupDialogActions.toggle();
     signinDialogActions.toggle();
@@ -168,10 +179,14 @@ export default function SignupDialog() {
 
               {/* Réseaux sociaux */}
               <div className='grid grid-cols-2 gap-3'>
-                <button type='button' disabled className='flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-sm font-semibold text-gray-400 cursor-not-allowed'>
+                <button
+                  type='button'
+                  onClick={handleGoogleSignup}
+                  disabled={isLoading}
+                  className='flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-3 text-sm font-semibold text-gray-700 transition hover:border-orange-200 hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-60'
+                >
                   <FaGoogle className='h-4 w-4' />
-                  Google
-                  <span className='rounded-full bg-gray-200 px-1.5 py-0.5 text-[9px] font-black text-gray-500'>bientôt</span>
+                  {isLoading ? 'Connexion...' : 'Google'}
                 </button>
                 <button type='button' disabled className='flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-sm font-semibold text-gray-400 cursor-not-allowed'>
                   <FaFacebook className='h-4 w-4' />
