@@ -681,12 +681,8 @@ export default function Search(): React.ReactElement {
           <div className='mt-8 px-5 text-center sm:px-8 lg:px-12'>
             <h2 className='text-2xl font-bold leading-tight text-on-surface sm:text-3xl lg:text-4xl'>
               Résultats pour{' '}
-              <span className='relative inline-block pb-3 font-bold text-primary'>
+              <span className='font-bold text-primary'>
                 {searchLabel}
-                <span
-                  className='absolute inset-x-0 bottom-0 h-4 bg-[url(/filter-double-underline.svg)] bg-contain bg-center bg-no-repeat'
-                  aria-hidden='true'
-                />
               </span>
             </h2>
           </div>
