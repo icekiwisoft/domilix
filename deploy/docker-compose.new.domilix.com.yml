@@ -3,6 +3,8 @@ services:
     image: ${FRONTEND_IMAGE}
     container_name: domilix-frontend-dev
     restart: unless-stopped
+    env_file:
+      - ./.env.frontend
     networks:
       - traefik
     labels:
